@@ -99,6 +99,41 @@
             font-weight: 700;
         }
 
+        .transaction-tools {
+            display: flex;
+            gap: 10px;
+            padding: 18px 24px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .transaction-search {
+            flex: 1;
+            min-width: 220px;
+            padding: 11px 13px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .transaction-filter {
+            padding: 11px 13px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .refresh-button {
+            padding: 11px 15px;
+            border: 0;
+            border-radius: 10px;
+            background: #171717;
+            color: white;
+            cursor: pointer;
+        }
+
         .table-wrap {
             overflow-x: auto;
         }
@@ -223,6 +258,36 @@
             Transaksi terbaru
         </div>
 
+        <div class="transaction-tools">
+
+            <input
+                type="search"
+                id="transactionSearch"
+                class="transaction-search"
+                placeholder="Cari ID, nomor tujuan, produk..."
+                autocomplete="off"
+            >
+
+            <select
+                id="transactionFilter"
+                class="transaction-filter"
+            >
+                <option value="ALL">Semua status</option>
+                <option value="PENDING">Pending</option>
+                <option value="SUCCESS">Berhasil</option>
+                <option value="FAILED">Gagal</option>
+            </select>
+
+            <button
+                type="button"
+                class="refresh-button"
+                onclick="loadTransactions()"
+            >
+                ↻ Refresh
+            </button>
+
+        </div>
+
         <div class="table-wrap">
 
             <table>
@@ -282,37 +347,26 @@
             const data =
                 await response.json();
 
-
             if (!data.success) {
-                throw new Error(
-                    "Gagal mengambil transaksi"
-                );
+                throw new Error("Gagal mengambil transaksi");
             }
-
 
             const transactions =
                 data.transactions || [];
 
-
             document.getElementById(
                 "totalTransactions"
-            ).textContent =
-                transactions.length;
-
+            ).textContent = transactions.length;
 
             const pending =
                 transactions.filter(
-                    item =>
-                        item.status === "PENDING"
+                    item => item.status === "PENDING"
                 ).length;
-
 
             const success =
                 transactions.filter(
-                    item =>
-                        item.status === "SUCCESS"
+                    item => item.status === "SUCCESS"
                 ).length;
-
 
             const total =
                 transactions.reduce(
@@ -321,56 +375,81 @@
                     0
                 );
 
-
             document.getElementById(
                 "pendingTransactions"
-            ).textContent =
-                pending;
-
+            ).textContent = pending;
 
             document.getElementById(
                 "successTransactions"
-            ).textContent =
-                success;
-
+            ).textContent = success;
 
             document.getElementById(
                 "totalAmount"
-            ).textContent =
-                rupiah.format(total);
+            ).textContent = rupiah.format(total);
 
+            const searchInput =
+                document.getElementById("transactionSearch");
+
+            const filterInput =
+                document.getElementById("transactionFilter");
+
+            const search =
+                (searchInput?.value || "")
+                    .trim()
+                    .toLowerCase();
+
+            const statusFilter =
+                filterInput?.value || "ALL";
+
+            const filtered =
+                transactions.filter(item => {
+
+                    const text = [
+                        item.transactionId,
+                        item.reference,
+                        item.service,
+                        item.target,
+                        item.productName,
+                        item.paymentMethod,
+                        item.status
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+                    const matchesSearch =
+                        !search || text.includes(search);
+
+                    const matchesStatus =
+                        statusFilter === "ALL" ||
+                        item.status === statusFilter;
+
+                    return matchesSearch && matchesStatus;
+                });
 
             const tbody =
-                document.getElementById(
-                    "transactionTable"
-                );
+                document.getElementById("transactionTable");
 
-
-            if (!transactions.length) {
+            if (!filtered.length) {
 
                 tbody.innerHTML = `
-
                     <tr>
-
-                        <td
-                            colspan="7"
-                            class="empty"
-                        >
-                            Belum ada transaksi.
+                        <td colspan="7" class="empty">
+                            ${
+                                transactions.length
+                                    ? "Tidak ada transaksi yang cocok."
+                                    : "Belum ada transaksi."
+                            }
                         </td>
-
                     </tr>
-
                 `;
 
                 return;
             }
 
-
             tbody.innerHTML =
-                transactions.map(
+                filtered.map(
                     item => `
-
                     <tr>
 
                         <td>
@@ -399,61 +478,59 @@
 
                         <td>
 
-    <span class="status">
-        ${item.status}
-    </span>
+                            <span class="status">
+                                ${item.status}
+                            </span>
 
-    ${
-        item.status === "PENDING"
-        ? `
-            <div style="
-                display:flex;
-                gap:6px;
-                margin-top:8px;
-            ">
+                            ${
+                                item.status === "PENDING"
+                                    ? `
+                                    <div style="
+                                        display:flex;
+                                        gap:6px;
+                                        margin-top:8px;
+                                    ">
 
-                <button
-                    onclick="updateStatus('${item.transactionId}', 'SUCCESS')"
-                    style="
-                        border:0;
-                        border-radius:8px;
-                        padding:6px 9px;
-                        cursor:pointer;
-                        background:#171717;
-                        color:white;
-                        font-size:11px;
-                    "
-                >
-                    Berhasil
-                </button>
+                                        <button
+                                            onclick="updateStatus('${item.transactionId}', 'SUCCESS')"
+                                            style="
+                                                border:0;
+                                                border-radius:8px;
+                                                padding:6px 9px;
+                                                cursor:pointer;
+                                                background:#171717;
+                                                color:white;
+                                                font-size:11px;
+                                            "
+                                        >
+                                            Berhasil
+                                        </button>
 
-                <button
-                    onclick="updateStatus('${item.transactionId}', 'FAILED')"
-                    style="
-                        border:1px solid #ddd;
-                        border-radius:8px;
-                        padding:6px 9px;
-                        cursor:pointer;
-                        background:white;
-                        color:#171717;
-                        font-size:11px;
-                    "
-                >
-                    Gagal
-                </button>
+                                        <button
+                                            onclick="updateStatus('${item.transactionId}', 'FAILED')"
+                                            style="
+                                                border:1px solid #ddd;
+                                                border-radius:8px;
+                                                padding:6px 9px;
+                                                cursor:pointer;
+                                                background:white;
+                                                color:#171717;
+                                                font-size:11px;
+                                            "
+                                        >
+                                            Gagal
+                                        </button>
 
-            </div>
-        `
-        : ""
-    }
+                                    </div>
+                                    `
+                                    : ""
+                            }
 
-</td>
+                        </td>
 
                     </tr>
-
-                `
+                    `
                 ).join("");
-
 
         } catch (error) {
 
@@ -462,18 +539,11 @@
             document.getElementById(
                 "transactionTable"
             ).innerHTML = `
-
                 <tr>
-
-                    <td
-                        colspan="7"
-                        class="empty"
-                    >
+                    <td colspan="7" class="empty">
                         Gagal memuat transaksi.
                     </td>
-
                 </tr>
-
             `;
 
         }

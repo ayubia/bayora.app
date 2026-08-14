@@ -12,12 +12,9 @@ const PORT = process.env.PORT || 3000;
    DATABASE
 ========================= */
 
-const dbPath = path.join(
-    __dirname,
-    "..",
-    "database",
-    "ppobku.db"
-);
+const dbPath = process.env.NODE_ENV === "production"
+    ? "/data/ppobku.db"
+    : path.join(__dirname, "..", "database", "ppobku.db");
 
 const db = new Database(dbPath);
 

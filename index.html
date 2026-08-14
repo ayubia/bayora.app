@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PPOBKU — Layanan Digital</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="navbar">
+
+    <a
+        href="#"
+        class="logo"
+        onclick="showHome()"
+    >
+        PPOBKU
+    </a>
+
+
+    <nav>
+
+        <a
+            href="#"
+            onclick="showHome()"
+        >
+            Beranda
+        </a>
+
+        <a href="#layanan">
+            Layanan
+        </a>
+
+        <a href="#transaksi">
+            Transaksi
+        </a>
+
+    </nav>
+
+</header>
+
+
+
+<main>
+
+
+<!-- ==================================================
+     HOME
+================================================== -->
+
+<section
+    id="homePage"
+    class="page"
+>
+
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <p class="eyebrow">
+                PPOB DIGITAL
+            </p>
+
+
+            <h1>
+
+                Semua kebutuhan digital,
+                <span>lebih mudah.</span>
+
+            </h1>
+
+
+            <p class="hero-description">
+
+                Pulsa, paket data, token listrik,
+                e-wallet, dan pembayaran tagihan
+                dalam satu tempat.
+
+            </p>
+
+
+            <a
+                href="#layanan"
+                class="hero-button"
+            >
+
+                Mulai Transaksi
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- SERVICES -->
+
+    <section
+        class="services"
+        id="layanan"
+    >
+
+
+        <div class="section-heading">
+
+            <p class="eyebrow">
+                LAYANAN
+            </p>
+
+
+            <h2>
+                Mau transaksi apa?
+            </h2>
+
+        </div>
+
+
+
+        <div class="service-grid">
+
+
+            <button
+                class="service-card"
+                onclick="openService('pulsa')"
+            >
+
+                <div class="service-icon">
+                    📱
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Pulsa
+                    </h3>
+
+                    <p>
+                        Semua operator
+                    </p>
+
+                </div>
+
+            </button>
+
+
+
+            <button
+                class="service-card"
+                onclick="openService('data')"
+            >
+
+                <div class="service-icon">
+                    🌐
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Paket Data
+                    </h3>
+
+                    <p>
+                        Internet semua operator
+                    </p>
+
+                </div>
+
+            </button>
+
+
+
+            <button
+                class="service-card"
+                onclick="openService('pln-token')"
+            >
+
+                <div class="service-icon">
+                    ⚡
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Token PLN
+                    </h3>
+
+                    <p>
+                        Listrik prabayar
+                    </p>
+
+                </div>
+
+            </button>
+
+
+
+            <button
+                class="service-card"
+                onclick="openService('pln-bill')"
+            >
+
+                <div class="service-icon">
+                    💡
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Tagihan PLN
+                    </h3>
+
+                    <p>
+                        Listrik pascabayar
+                    </p>
+
+                </div>
+
+            </button>
+
+
+
+            <button
+                class="service-card"
+                onclick="openService('ewallet')"
+            >
+
+                <div class="service-icon">
+                    💰
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        E-Wallet
+                    </h3>
+
+                    <p>
+                        Top up saldo
+                    </p>
+
+                </div>
+
+            </button>
+
+
+
+            <button
+                class="service-card"
+                onclick="openService('bpjs')"
+            >
+
+                <div class="service-icon">
+                    🏥
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        BPJS
+                    </h3>
+
+                    <p>
+                        Bayar tagihan BPJS
+                    </p>
+
+                </div>
+
+            </button>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- WHY PPOBKU -->
+
+    <section class="benefits">
+
+
+        <div class="section-heading">
+
+            <p class="eyebrow">
+                PPOBKU
+            </p>
+
+            <h2>
+                Praktis setiap hari.
+            </h2>
+
+        </div>
+
+
+        <div class="benefit-grid">
+
+
+            <div class="benefit-card">
+
+                <span>
+                    01
+                </span>
+
+                <h3>
+                    Mudah
+                </h3>
+
+                <p>
+                    Pilih layanan dan produk
+                    tanpa proses yang rumit.
+                </p>
+
+            </div>
+
+
+            <div class="benefit-card">
+
+                <span>
+                    02
+                </span>
+
+                <h3>
+                    Cepat
+                </h3>
+
+                <p>
+                    Transaksi dirancang agar
+                    selesai dalam beberapa langkah.
+                </p>
+
+            </div>
+
+
+            <div class="benefit-card">
+
+                <span>
+                    03
+                </span>
+
+                <h3>
+                    Aman
+                </h3>
+
+                <p>
+                    Sistem pembayaran dan API
+                    nantinya diproses melalui backend.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+</section>
+
+
+
+<!-- ==================================================
+     SERVICE PAGE
+================================================== -->
+
+<section
+    id="servicePage"
+    class="service-page page-hidden"
+>
+
+
+    <div class="form-container">
+
+
+        <button
+            class="back-button"
+            onclick="showHome()"
+        >
+
+            ← Kembali
+
+        </button>
+
+
+
+        <div class="form-header">
+
+
+            <div
+                id="formIcon"
+                class="large-icon"
+            >
+                📱
+            </div>
+
+
+            <p class="eyebrow">
+                TRANSAKSI
+            </p>
+
+
+            <h2 id="formTitle">
+                Pulsa
+            </h2>
+
+
+            <p id="formDescription">
+                Isi pulsa ke nomor tujuan.
+            </p>
+
+
+        </div>
+
+
+
+        <form
+            id="transactionForm"
+            onsubmit="goToCheckout(event)"
+        >
+
+
+            <!-- TARGET -->
+
+            <div class="input-group">
+
+
+                <label id="numberLabel">
+                    Nomor HP
+                </label>
+
+
+                <input
+                    type="text"
+                    id="targetNumber"
+                    placeholder="08xxxxxxxxxx"
+                    autocomplete="off"
+                    required
+                >
+
+
+            </div>
+
+
+
+            <!-- OPERATOR -->
+
+            <div
+                id="operatorGroup"
+                class="input-group"
+            >
+
+
+                <label>
+                    Operator
+                </label>
+
+
+                <select id="operator">
+
+                    <option value="">
+                        Pilih operator
+                    </option>
+
+                    <option>
+                        Telkomsel
+                    </option>
+
+                    <option>
+                        Indosat
+                    </option>
+
+                    <option>
+                        XL
+                    </option>
+
+                    <option>
+                        Tri
+                    </option>
+
+                    <option>
+                        Smartfren
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+
+            <!-- PRODUCTS -->
+
+            <div class="input-group">
+
+
+                <div class="product-heading">
+
+                    <label>
+                        Pilih produk
+                    </label>
+
+
+                    <span id="productCount">
+                        0 produk
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="productGrid"
+                    class="product-grid"
+                >
+                </div>
+
+
+                <input
+                    type="hidden"
+                    id="selectedProduct"
+                >
+
+
+            </div>
+
+
+
+            <!-- PRICE -->
+
+            <div class="summary">
+
+
+                <div>
+
+                    <span>
+                        Harga produk
+                    </span>
+
+
+                    <strong id="price">
+                        Rp0
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+            <button
+                type="submit"
+                class="submit-button"
+            >
+
+                Review Pesanan
+
+            </button>
+
+
+        </form>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     CHECKOUT
+================================================== -->
+
+<section
+    id="checkoutPage"
+    class="checkout-page page-hidden"
+>
+
+
+    <div class="checkout-container">
+
+
+        <button
+            class="back-button"
+            onclick="backToService()"
+        >
+
+            ← Kembali
+
+        </button>
+
+
+        <p class="eyebrow">
+            CHECKOUT
+        </p>
+
+
+        <h2>
+            Review pesanan
+        </h2>
+
+
+        <p class="checkout-description">
+
+            Pastikan data transaksi sudah benar
+            sebelum melanjutkan.
+
+        </p>
+
+
+
+        <div
+            id="checkoutSummary"
+            class="checkout-card"
+        >
+        </div>
+
+
+
+        <!-- PAYMENT -->
+
+        <div class="payment-section">
+
+
+            <h3>
+                Metode pembayaran
+            </h3>
+
+
+            <label class="payment-option">
+
+
+                <input
+                    type="radio"
+                    name="payment"
+                    value="qris"
+                    checked
+                >
+
+
+                <span>
+
+                    <strong>
+                        QRIS
+                    </strong>
+
+                    <small>
+                        Scan QR untuk membayar
+                    </small>
+
+                </span>
+
+
+            </label>
+
+
+
+            <label class="payment-option">
+
+
+                <input
+                    type="radio"
+                    name="payment"
+                    value="ewallet"
+                >
+
+
+                <span>
+
+                    <strong>
+                        E-Wallet
+                    </strong>
+
+                    <small>
+                        DANA / OVO / GoPay
+                    </small>
+
+                </span>
+
+
+            </label>
+
+
+
+            <label class="payment-option">
+
+
+                <input
+                    type="radio"
+                    name="payment"
+                    value="bank"
+                >
+
+
+                <span>
+
+                    <strong>
+                        Virtual Account
+                    </strong>
+
+                    <small>
+                        Transfer melalui bank
+                    </small>
+
+                </span>
+
+
+            </label>
+
+
+        </div>
+
+
+
+        <button
+            class="submit-button"
+            onclick="processPayment()"
+        >
+
+            Lanjutkan Pembayaran
+
+        </button>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ==================================================
+     SUCCESS
+================================================== -->
+
+<section
+    id="successPage"
+    class="success-page page-hidden"
+>
+
+
+    <div class="success-box">
+
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+
+        <p class="eyebrow">
+            DEMO
+        </p>
+
+
+        <h2>
+            Pesanan diterima
+        </h2>
+
+
+        <p>
+
+            Ini masih mode simulasi.
+            Belum ada pembayaran atau
+            transaksi sungguhan.
+
+        </p>
+
+
+        <div
+            id="orderSummary"
+            class="order-summary"
+        >
+        </div>
+
+
+        <button
+            class="primary-button"
+            onclick="showHome()"
+        >
+
+            Kembali ke Beranda
+
+        </button>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+
+<footer>
+
+
+    <p>
+        © 2026 PPOBKU
+    </p>
+
+
+    <p>
+        Layanan pembayaran digital
+    </p>
+
+
+</footer>
+
+
+
+<script src="app.js"></script>
+
+
+</body>
+
+</html>

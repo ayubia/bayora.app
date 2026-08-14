@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PPOBKU — Admin</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f7f6f2;
+            color: #171717;
+        }
+
+        header {
+            height: 72px;
+            background: white;
+            border-bottom: 1px solid #e8e6e0;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 6%;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .admin-label {
+            color: #777;
+            font-size: 14px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 50px 24px;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #888;
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 8px 0 35px;
+            font-size: 42px;
+            letter-spacing: -1.5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 35px;
+        }
+
+        .stat {
+            background: white;
+            border: 1px solid #e7e4dd;
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .stat span {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .stat strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 28px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e7e4dd;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 22px 24px;
+            border-bottom: 1px solid #eee;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 17px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f0eee9;
+            white-space: nowrap;
+        }
+
+        th {
+            font-size: 12px;
+            color: #888;
+            font-weight: 600;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f1eee7;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+
+        @media (max-width: 800px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<header>
+
+    <div class="logo">
+        PPOBKU
+    </div>
+
+    <div class="admin-label">
+        Admin Dashboard
+    </div>
+
+</header>
+
+
+<main>
+
+    <div class="eyebrow">
+        ADMIN
+    </div>
+
+    <h1>
+        Ringkasan transaksi
+    </h1>
+
+
+    <section class="stats">
+
+        <div class="stat">
+            <span>Total transaksi</span>
+            <strong id="totalTransactions">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Pending</span>
+            <strong id="pendingTransactions">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Berhasil</span>
+            <strong id="successTransactions">0</strong>
+        </div>
+
+        <div class="stat">
+            <span>Total nominal</span>
+            <strong id="totalAmount">Rp0</strong>
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <div class="panel-header">
+            Transaksi terbaru
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Transaksi</th>
+                        <th>Layanan</th>
+                        <th>Tujuan</th>
+                        <th>Produk</th>
+                        <th>Harga</th>
+                        <th>Pembayaran</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="transactionTable">
+
+                    <tr>
+                        <td colspan="7" class="empty">
+                            Memuat transaksi...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+    const rupiah = new Intl.NumberFormat(
+        "id-ID",
+        {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0
+        }
+    );
+
+
+    async function loadTransactions() {
+
+        try {
+
+            const response =
+                await fetch("/api/transactions");
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+                throw new Error(
+                    "Gagal mengambil transaksi"
+                );
+            }
+
+
+            const transactions =
+                data.transactions || [];
+
+
+            document.getElementById(
+                "totalTransactions"
+            ).textContent =
+                transactions.length;
+
+
+            const pending =
+                transactions.filter(
+                    item =>
+                        item.status === "PENDING"
+                ).length;
+
+
+            const success =
+                transactions.filter(
+                    item =>
+                        item.status === "SUCCESS"
+                ).length;
+
+
+            const total =
+                transactions.reduce(
+                    (sum, item) =>
+                        sum + Number(item.price || 0),
+                    0
+                );
+
+
+            document.getElementById(
+                "pendingTransactions"
+            ).textContent =
+                pending;
+
+
+            document.getElementById(
+                "successTransactions"
+            ).textContent =
+                success;
+
+
+            document.getElementById(
+                "totalAmount"
+            ).textContent =
+                rupiah.format(total);
+
+
+            const tbody =
+                document.getElementById(
+                    "transactionTable"
+                );
+
+
+            if (!transactions.length) {
+
+                tbody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty"
+                        >
+                            Belum ada transaksi.
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+            }
+
+
+            tbody.innerHTML =
+                transactions.map(
+                    item => `
+
+                    <tr>
+
+                        <td>
+                            ${item.transactionId}
+                        </td>
+
+                        <td>
+                            ${item.service}
+                        </td>
+
+                        <td>
+                            ${item.target}
+                        </td>
+
+                        <td>
+                            ${item.productName}
+                        </td>
+
+                        <td>
+                            ${rupiah.format(item.price)}
+                        </td>
+
+                        <td>
+                            ${item.paymentMethod}
+                        </td>
+
+                        <td>
+
+    <span class="status">
+        ${item.status}
+    </span>
+
+    ${
+        item.status === "PENDING"
+        ? `
+            <div style="
+                display:flex;
+                gap:6px;
+                margin-top:8px;
+            ">
+
+                <button
+                    onclick="updateStatus('${item.transactionId}', 'SUCCESS')"
+                    style="
+                        border:0;
+                        border-radius:8px;
+                        padding:6px 9px;
+                        cursor:pointer;
+                        background:#171717;
+                        color:white;
+                        font-size:11px;
+                    "
+                >
+                    Berhasil
+                </button>
+
+                <button
+                    onclick="updateStatus('${item.transactionId}', 'FAILED')"
+                    style="
+                        border:1px solid #ddd;
+                        border-radius:8px;
+                        padding:6px 9px;
+                        cursor:pointer;
+                        background:white;
+                        color:#171717;
+                        font-size:11px;
+                    "
+                >
+                    Gagal
+                </button>
+
+            </div>
+        `
+        : ""
+    }
+
+</td>
+
+                    </tr>
+
+                `
+                ).join("");
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                "transactionTable"
+            ).innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="empty"
+                    >
+                        Gagal memuat transaksi.
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+    }
+
+
+    loadTransactions();
+
+async function updateStatus(transactionId, status) {
+
+    const response = await fetch(
+        `/api/transactions/${transactionId}/status`,
+        {
+            method: "PATCH",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                status: status
+            })
+        }
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+
+        alert(
+            data.error || "Gagal mengubah status."
+        );
+
+        return;
+    }
+
+    loadTransactions();
+
+}
+
+
+
+</script>
+
+</body>
+
+</html>

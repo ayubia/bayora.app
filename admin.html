@@ -453,7 +453,23 @@
                     <tr>
 
                         <td>
-                            ${item.transactionId}
+                            <button
+                                type="button"
+                                onclick="showTransactionDetail('${item.transactionId}')"
+                                style="
+                                    border:0;
+                                    background:none;
+                                    padding:0;
+                                    margin:0;
+                                    color:#171717;
+                                    font-weight:700;
+                                    cursor:pointer;
+                                    text-decoration:underline;
+                                    text-underline-offset:3px;
+                                "
+                            >
+                                ${item.transactionId}
+                            </button>
                         </td>
 
                         <td>
@@ -587,7 +603,197 @@ async function updateStatus(transactionId, status) {
 
 
 
+
+    async function showTransactionDetail(transactionId) {
+
+        const modal =
+            document.getElementById("transactionModal");
+
+        const content =
+            document.getElementById(
+                "transactionDetailContent"
+            );
+
+        modal.style.display = "flex";
+
+        content.innerHTML = `
+            <div style="
+                padding:30px 10px;
+                text-align:center;
+                color:#888;
+            ">
+                Memuat detail transaksi...
+            </div>
+        `;
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/transactions/${encodeURIComponent(transactionId)}`
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error ||
+                    "Gagal mengambil detail transaksi."
+                );
+            }
+
+            const item =
+                data.transaction ||
+                data.data ||
+                data;
+
+            const rows = [
+                ["Transaction ID", item.transactionId],
+                ["Reference", item.reference],
+                ["Layanan", item.service],
+                ["Tujuan", item.target],
+                ["Operator", item.operator],
+                ["Produk", item.productName],
+                ["Harga", rupiah.format(Number(item.price || 0))],
+                ["Pembayaran", item.paymentMethod],
+                ["Status", item.status],
+                ["Waktu", item.createdAt]
+            ];
+
+            content.innerHTML = rows
+                .map(([label, value]) => `
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        gap:20px;
+                        padding:13px 0;
+                        border-bottom:1px solid #eee;
+                    ">
+                        <span style="
+                            color:#888;
+                            font-size:13px;
+                        ">
+                            ${label}
+                        </span>
+
+                        <strong style="
+                            text-align:right;
+                            font-size:13px;
+                            word-break:break-word;
+                        ">
+                            ${value ?? "-"}
+                        </strong>
+                    </div>
+                `)
+                .join("");
+
+        } catch (error) {
+
+            console.error(error);
+
+            content.innerHTML = `
+                <div style="
+                    padding:30px 10px;
+                    text-align:center;
+                    color:#888;
+                ">
+                    Gagal memuat detail transaksi.
+                </div>
+            `;
+        }
+    }
+
+
+    function closeTransactionDetail() {
+
+        document.getElementById(
+            "transactionModal"
+        ).style.display = "none";
+
+    }
+
+
+    document.getElementById(
+        "transactionModal"
+    ).addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id ===
+                "transactionModal"
+            ) {
+                closeTransactionDetail();
+            }
+
+        }
+    );
+
 </script>
+
+
+<div
+    id="transactionModal"
+    style="
+        display:none;
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        background:rgba(0,0,0,.35);
+        padding:24px;
+        align-items:center;
+        justify-content:center;
+    "
+>
+    <div
+        style="
+            width:min(520px,100%);
+            max-height:90vh;
+            overflow:auto;
+            background:white;
+            border-radius:20px;
+            padding:24px;
+            box-shadow:0 20px 60px rgba(0,0,0,.18);
+        "
+    >
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:16px;
+                margin-bottom:20px;
+            "
+        >
+            <strong style="font-size:20px;">
+                Detail transaksi
+            </strong>
+
+            <button
+                type="button"
+                onclick="closeTransactionDetail()"
+                style="
+                    border:0;
+                    background:#f3f1ec;
+                    width:34px;
+                    height:34px;
+                    border-radius:50%;
+                    cursor:pointer;
+                    font-size:18px;
+                "
+            >
+                ×
+            </button>
+        </div>
+
+        <div id="transactionDetailContent">
+            Memuat detail...
+        </div>
+
+    </div>
+</div>
 
 </body>
 

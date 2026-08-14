@@ -20,6 +20,23 @@ const db = new Database(dbPath);
 
 db.pragma("journal_mode = WAL");
 
+db.exec(`
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id TEXT UNIQUE NOT NULL,
+        reference TEXT NOT NULL,
+        service TEXT NOT NULL,
+        target TEXT NOT NULL,
+        operator TEXT,
+        product_id TEXT,
+        product_name TEXT NOT NULL,
+        price INTEGER NOT NULL,
+        payment_method TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT "PENDING",
+        created_at TEXT NOT NULL
+    );
+`);
+
 
 /* =========================
    MIDDLEWARE

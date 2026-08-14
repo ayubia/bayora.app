@@ -652,6 +652,8 @@ async function updateStatus(transactionId, status) {
                 data.data ||
                 data;
 
+            window.currentTransactionForReceipt = item;
+
             const rows = [
                 ["Transaction ID", item.transactionId],
                 ["Reference", item.reference],
@@ -708,6 +710,64 @@ async function updateStatus(transactionId, status) {
         }
     }
 
+
+
+    function printTransactionReceipt() {
+        const item = window.currentTransactionForReceipt;
+        if (!item) {
+            alert("Detail transaksi belum tersedia.");
+            return;
+        }
+
+        const w = window.open("", "_blank", "width=800,height=900");
+        if (!w) {
+            alert("Popup diblokir browser. Izinkan popup untuk halaman admin.");
+            return;
+        }
+
+        const price = rupiah.format(Number(item.price || 0));
+
+        w.document.write(`
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Bukti Transaksi ${item.transactionId || ""}</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;padding:40px 20px}
+.receipt{width:min(520px,100%);margin:auto;border:1px solid #e5e2da;border-radius:20px;padding:30px}
+.brand{font-size:24px;font-weight:800}.sub{color:#888;font-size:13px;margin-bottom:25px}
+h1{font-size:20px}.row{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid #eee;font-size:13px}
+.label{color:#888}.value{text-align:right;font-weight:700;word-break:break-word}
+.total{margin-top:20px;padding-top:18px;border-top:2px solid #171717;display:flex;justify-content:space-between;font-weight:800}
+.footer{text-align:center;color:#999;font-size:11px;margin-top:28px}
+@media print{body{padding:0}.receipt{border:0;width:100%;padding:0}}
+</style>
+</head>
+<body>
+<div class="receipt">
+<div class="brand">PPOBKU</div>
+<div class="sub">Bukti transaksi</div>
+<h1>Detail Transaksi</h1>
+<div class="row"><span class="label">Transaction ID</span><span class="value">${item.transactionId ?? "-"}</span></div>
+<div class="row"><span class="label">Reference</span><span class="value">${item.reference ?? "-"}</span></div>
+<div class="row"><span class="label">Layanan</span><span class="value">${item.service ?? "-"}</span></div>
+<div class="row"><span class="label">Tujuan</span><span class="value">${item.target ?? "-"}</span></div>
+<div class="row"><span class="label">Operator</span><span class="value">${item.operator ?? "-"}</span></div>
+<div class="row"><span class="label">Produk</span><span class="value">${item.productName ?? "-"}</span></div>
+<div class="row"><span class="label">Pembayaran</span><span class="value">${item.paymentMethod ?? "-"}</span></div>
+<div class="row"><span class="label">Status</span><span class="value">${item.status ?? "-"}</span></div>
+<div class="row"><span class="label">Waktu</span><span class="value">${item.createdAt ?? "-"}</span></div>
+<div class="total"><span>Total</span><span>${price}</span></div>
+<div class="footer">Simpan dokumen ini sebagai bukti transaksi.</div>
+</div>
+</body>
+</html>
+        `);
+        w.document.close();
+        w.focus();
+        setTimeout(() => w.print(), 300);
+    }
 
     function closeTransactionDetail() {
 
@@ -794,6 +854,16 @@ async function updateStatus(transactionId, status) {
 
         <div id="transactionDetailContent">
             Memuat detail...
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+            <button
+                type="button"
+                onclick="printTransactionReceipt()"
+                style="border:0;border-radius:10px;padding:11px 16px;cursor:pointer;background:#171717;color:white;font-size:13px;font-weight:700;"
+            >
+                🧾 Cetak Bukti
+            </button>
         </div>
 
     </div>

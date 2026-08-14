@@ -569,6 +569,10 @@
 
     loadTransactions();
 
+    setInterval(() => {
+        loadTransactions();
+    }, 10000);
+
 async function updateStatus(transactionId, status) {
 
     const response = await fetch(

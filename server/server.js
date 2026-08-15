@@ -75,6 +75,30 @@ db.exec(`
 
 
 /* =========================
+   DATABASE MIGRATION
+========================= */
+
+// Tambahkan kolom cost_price ke database lama
+// tanpa menghapus atau mengubah data yang sudah ada.
+const productColumns = db
+    .prepare("PRAGMA table_info(products)")
+    .all();
+
+const hasCostPrice = productColumns.some(
+    column => column.name === "cost_price"
+);
+
+if (!hasCostPrice) {
+    db.prepare(
+        "ALTER TABLE products ADD COLUMN cost_price INTEGER NOT NULL DEFAULT 0"
+    ).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom products.cost_price berhasil ditambahkan."
+    );
+}
+
+/* =========================
    MIDDLEWARE
 ========================= */
 

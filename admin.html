@@ -516,6 +516,105 @@
 
 </style>
 
+
+<style id="admin-preview-slide-style">
+
+.preview-footer {
+    display:flex;
+    justify-content:center;
+    padding:14px 0 2px;
+}
+
+.preview-more-button {
+    border:1px solid #ddd;
+    background:#fff;
+    color:#171717;
+    border-radius:10px;
+    padding:10px 16px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.preview-more-button:hover {
+    background:#f7f7f7;
+}
+
+.admin-drawer-overlay {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.28);
+    z-index:10000;
+}
+
+.admin-drawer-overlay.open {
+    display:block;
+}
+
+.admin-drawer {
+    position:absolute;
+    top:0;
+    right:0;
+    width:min(920px,94vw);
+    height:100%;
+    background:#fff;
+    box-shadow:-10px 0 35px rgba(0,0,0,.12);
+    display:flex;
+    flex-direction:column;
+}
+
+.admin-drawer-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 22px;
+    border-bottom:1px solid #eee;
+}
+
+.admin-drawer-title {
+    font-size:17px;
+    font-weight:700;
+}
+
+.admin-drawer-close {
+    border:0;
+    background:#f5f5f5;
+    width:36px;
+    height:36px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.admin-drawer-body {
+    flex:1;
+    overflow:auto;
+    padding:20px;
+}
+
+/* halaman utama hanya menampilkan beberapa data */
+#transactionTable > tr:nth-child(n+6) {
+    display:none;
+}
+
+/* drawer menampilkan seluruh transaksi */
+#transactionDrawerBody #transactionDrawerTable > tr {
+    display:table-row !important;
+}
+
+@media (max-width:700px) {
+    .admin-drawer {
+        width:100%;
+    }
+
+    .admin-drawer-body {
+        padding:14px;
+    }
+}
+
+</style>
+
 </head>
 
 
@@ -571,40 +670,7 @@
 
 
 
-<section class="panel catalog-panel">
 
-    <div class="catalog-header">
-
-        <div>
-            <div class="catalog-header-title">
-                Kelola Layanan & Produk
-            </div>
-
-            <div style="margin-top:4px;color:#888;font-size:12px;">
-                Tambahkan dan atur layanan yang tersedia di PPOBKU.
-            </div>
-        </div>
-
-        <button
-            type="button"
-            class="catalog-add-button"
-            onclick="openServiceModal()"
-        >
-            + Tambah Layanan
-        </button>
-
-    </div>
-
-    <div
-        id="catalogServices"
-        class="catalog-services"
-    >
-        <div class="catalog-empty">
-            Memuat layanan...
-        </div>
-    </div>
-
-</section>
 
 
 <!-- SERVICE MODAL -->
@@ -991,7 +1057,124 @@
 
         </div>
 
-    </section>
+
+        <div class="preview-footer">
+            <button
+                type="button"
+                class="preview-more-button"
+                onclick="openTransactionDrawer()"
+            >
+                Lihat semua transaksi →
+            </button>
+        </div>
+
+</section>
+
+<section class="panel catalog-panel">
+
+    <div class="catalog-header">
+
+        <div>
+            <div class="catalog-header-title">
+                Kelola Layanan & Produk
+            </div>
+
+            <div style="margin-top:4px;color:#888;font-size:12px;">
+                Tambahkan dan atur layanan yang tersedia di PPOBKU.
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="catalog-add-button"
+            onclick="openServiceModal()"
+        >
+            + Tambah Layanan
+        </button>
+
+    </div>
+
+    <div
+        id="catalogServices"
+        class="catalog-services"
+    >
+        <div class="catalog-empty">
+            Memuat layanan...
+        </div>
+    </div>
+
+
+        <div class="preview-footer">
+            <button
+                type="button"
+                class="preview-more-button"
+                onclick="openCatalogDrawer()"
+            >
+                Lihat semua layanan & produk →
+            </button>
+        </div>
+
+</section>
+
+
+<div id="transactionPreviewDrawer" class="admin-drawer-overlay">
+
+    <div class="admin-drawer">
+
+        <div class="admin-drawer-header">
+
+            <div class="admin-drawer-title">
+                Semua Transaksi
+            </div>
+
+            <button
+                type="button"
+                class="admin-drawer-close"
+                onclick="closeAdminDrawer('transactionPreviewDrawer')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="transactionDrawerBody"
+            class="admin-drawer-body"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<div id="catalogPreviewDrawer" class="admin-drawer-overlay">
+
+    <div class="admin-drawer">
+
+        <div class="admin-drawer-header">
+
+            <div class="admin-drawer-title">
+                Semua Layanan & Produk
+            </div>
+
+            <button
+                type="button"
+                class="admin-drawer-close"
+                onclick="closeAdminDrawer('catalogPreviewDrawer')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="catalogDrawerBody"
+            class="admin-drawer-body"
+        ></div>
+
+    </div>
+
+</div>
 
 </main>
 
@@ -1691,6 +1874,244 @@ h1{font-size:20px}.row{display:flex;justify-content:space-between;gap:20px;paddi
 <div class="total"><span>Total</span><span>${price}</span></div>
 <div class="footer">Simpan dokumen ini sebagai bukti transaksi.</div>
 </div>
+
+<script id="admin-preview-slide-script">
+
+function closeAdminDrawer(id) {
+
+    const drawer =
+        document.getElementById(id);
+
+    if (drawer) {
+        drawer.classList.remove("open");
+    }
+
+}
+
+
+async function openTransactionDrawer() {
+
+    const drawer =
+        document.getElementById(
+            "transactionPreviewDrawer"
+        );
+
+    const body =
+        document.getElementById(
+            "transactionDrawerBody"
+        );
+
+    if (!drawer || !body) return;
+
+    body.innerHTML = `
+        <div style="
+            padding:30px;
+            text-align:center;
+            color:#888;
+        ">
+            Memuat transaksi...
+        </div>
+    `;
+
+    drawer.classList.add("open");
+
+    try {
+
+        const monthSelect =
+            document.getElementById(
+                "transactionMonth"
+            );
+
+        const month =
+            monthSelect
+                ? monthSelect.value
+                : "";
+
+        const url =
+            month
+                ? `/api/transactions?month=${encodeURIComponent(month)}`
+                : "/api/transactions";
+
+        const response =
+            await fetch(url);
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+            throw new Error(
+                "Gagal mengambil transaksi."
+            );
+        }
+
+        const transactions =
+            data.transactions || [];
+
+        if (!transactions.length) {
+
+            body.innerHTML = `
+                <div style="
+                    padding:30px;
+                    text-align:center;
+                    color:#888;
+                ">
+                    Belum ada transaksi.
+                </div>
+            `;
+
+            return;
+        }
+
+        body.innerHTML = `
+            <div class="table-wrap">
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Transaksi</th>
+                            <th>Layanan</th>
+                            <th>Tujuan</th>
+                            <th>Produk</th>
+                            <th>Harga</th>
+                            <th>Pembayaran</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        ${
+                            transactions.map(item => `
+                                <tr>
+
+                                    <td>
+                                        ${item.transactionId || "-"}
+                                    </td>
+
+                                    <td>
+                                        ${item.service || "-"}
+                                    </td>
+
+                                    <td>
+                                        ${item.target || "-"}
+                                    </td>
+
+                                    <td>
+                                        ${item.productName || "-"}
+                                    </td>
+
+                                    <td>
+                                        ${rupiah.format(
+                                            Number(item.price || 0)
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${item.paymentMethod || "-"}
+                                    </td>
+
+                                    <td>
+                                        ${item.status || "-"}
+                                    </td>
+
+                                </tr>
+                            `).join("")
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+
+        body.innerHTML = `
+            <div style="
+                padding:30px;
+                text-align:center;
+                color:#b00020;
+            ">
+                Gagal memuat transaksi.
+            </div>
+        `;
+
+    }
+
+}
+
+
+function openCatalogDrawer() {
+
+    const drawer =
+        document.getElementById(
+            "catalogPreviewDrawer"
+        );
+
+    const body =
+        document.getElementById(
+            "catalogDrawerBody"
+        );
+
+    if (!drawer || !body) return;
+
+    const source =
+        document.getElementById(
+            "catalogServices"
+        );
+
+    if (!source) return;
+
+    body.innerHTML =
+        source.innerHTML;
+
+    drawer.classList.add("open");
+
+}
+
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target.classList &&
+            event.target.classList.contains(
+                "admin-drawer-overlay"
+            )
+        ) {
+            event.target.classList.remove(
+                "open"
+            );
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+
+            document
+                .querySelectorAll(
+                    ".admin-drawer-overlay.open"
+                )
+                .forEach(drawer => {
+                    drawer.classList.remove(
+                        "open"
+                    );
+                });
+
+        }
+
+    }
+);
+
+</script>
+
 </body>
 </html>
         `);
@@ -1887,11 +2308,25 @@ async function syncDigiflazzFromAdmin() {
                 data.price_list_refresh?.count || 0
             );
 
+        const refreshSuccess =
+            data.price_list_refresh?.success === true;
+
         if (status) {
 
-            status.textContent =
-                `Berhasil: ${priceList} Price List → ${active} produk aktif. ` +
-                `${inserted} baru, ${updated} diperbarui.`;
+            if (refreshSuccess) {
+
+                status.textContent =
+                    `Berhasil: ${priceList} Price List → ${active} produk aktif. ` +
+                    `${inserted} baru, ${updated} diperbarui.`;
+
+            } else {
+
+                status.textContent =
+                    `Berhasil menggunakan cache terakhir: ` +
+                    `${source} produk → ${active} produk aktif. ` +
+                    `${inserted} baru, ${updated} diperbarui.`;
+
+            }
 
             status.style.color = "#287a45";
         }

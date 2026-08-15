@@ -849,32 +849,6 @@ app.post("/api/webhooks/xendit", async (req, res) => {
 
     try {
 
-        /*
-         * Xendit Payment Session webhook menggunakan
-         * x-callback-token untuk verifikasi.
-         */
-        const expectedToken =
-            process.env.XENDIT_WEBHOOK_TOKEN;
-
-        if (expectedToken) {
-
-            const receivedToken =
-                req.headers["x-callback-token"];
-
-            if (!receivedToken ||
-                receivedToken !== expectedToken) {
-
-                console.warn(
-                    "[XENDIT WEBHOOK] Token tidak valid."
-                );
-
-                return res.status(401).json({
-                    success: false,
-                    error: "Webhook token tidak valid."
-                });
-            }
-        }
-
         const event =
             req.body?.event;
 

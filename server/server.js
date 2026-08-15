@@ -98,6 +98,22 @@ if (!hasCostPrice) {
     );
 }
 
+// Tambahkan kolom margin ke database lama
+// tanpa menghapus atau mengubah data yang sudah ada.
+const hasMargin = productColumns.some(
+    column => column.name === "margin"
+);
+
+if (!hasMargin) {
+    db.prepare(
+        "ALTER TABLE products ADD COLUMN margin INTEGER NOT NULL DEFAULT 0"
+    ).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom products.margin berhasil ditambahkan."
+    );
+}
+
 /* =========================
    MIDDLEWARE
 ========================= */
@@ -2170,14 +2186,68 @@ app.post("/api/digiflazz/sync-price-list", async (req, res) => {
             JSON.stringify(response.data, null, 2)
         );
 
-        const products = Array.isArray(response.data?.data)
-            ? response.data.data
-            : [];
+        /*
+         * Digiflazz normal:
+         * response.data.data = array produk.
+         *
+         * Jika terkena rate limit, Digiflazz mengembalikan:
+         * {
+         *   data: {
+         *     rc: "83",
+         *     message: "Anda telah mencapai limitasi pengecekan pricelist..."
+         *   }
+         * }
+         *
+         * RC 83 bukan berarti cache rusak.
+         * Gunakan cache lokal terakhir dan jangan menimpanya.
+         */
+        const apiData = response.data?.data;
+
+        if (!Array.isArray(apiData)) {
+
+            const rc = String(apiData?.rc || "");
+
+            if (rc === "83") {
+
+                const cacheCount = db.prepare(`
+                    SELECT COUNT(*) AS total
+                    FROM digiflazz_price_list
+                `).get().total;
+
+                console.warn(
+                    "[DIGIFLAZZ] RC 83 - Price List terkena rate limit. Cache lokal tetap digunakan.",
+                    "cache_count:",
+                    cacheCount
+                );
+
+                return res.json({
+                    success: true,
+                    synced: false,
+                    mode: "RATE_LIMIT_CACHE",
+                    count: 0,
+                    cache_count: cacheCount,
+                    rc: "83",
+                    message:
+                        "Digiflazz sedang membatasi pengecekan Price List. Cache lokal terakhir tetap digunakan."
+                });
+            }
+
+            return res.status(502).json({
+                success: false,
+                synced: false,
+                count: 0,
+                message:
+                    "Digiflazz mengembalikan Price List kosong/tidak valid. Cache lokal tidak diubah."
+            });
+
+        }
+
+        const products = apiData;
 
         /*
          * SAFETY:
          * Jangan pernah menghapus cache jika API
-         * mengembalikan data kosong.
+         * mengembalikan array kosong.
          */
         if (products.length === 0) {
 

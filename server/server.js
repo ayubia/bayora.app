@@ -114,6 +114,22 @@ if (!hasMargin) {
     );
 }
 
+// Tambahkan kolom digiflazz_sku ke database lama
+// tanpa menghapus atau mengubah data yang sudah ada.
+const hasDigiflazzSku = productColumns.some(
+    column => column.name === "digiflazz_sku"
+);
+
+if (!hasDigiflazzSku) {
+    db.prepare(
+        "ALTER TABLE products ADD COLUMN digiflazz_sku TEXT"
+    ).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom products.digiflazz_sku berhasil ditambahkan."
+    );
+}
+
 /* =========================
    MIDDLEWARE
 ========================= */

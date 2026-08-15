@@ -1732,12 +1732,14 @@ async function updateStatus(transactionId, status) {
 
     function printTransactionReceipt() {
         const item = window.currentTransactionForReceipt;
+
         if (!item) {
             alert("Detail transaksi belum tersedia.");
             return;
         }
 
         const w = window.open("", "_blank", "width=800,height=900");
+
         if (!w) {
             alert("Popup diblokir browser. Izinkan popup untuk halaman admin.");
             return;
@@ -1752,371 +1754,150 @@ async function updateStatus(transactionId, status) {
 <meta charset="UTF-8">
 <title>Bukti Transaksi ${item.transactionId || ""}</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;padding:40px 20px}
-.receipt{width:min(520px,100%);margin:auto;border:1px solid #e5e2da;border-radius:20px;padding:30px}
-.brand{font-size:24px;font-weight:800}.sub{color:#888;font-size:13px;margin-bottom:25px}
-h1{font-size:20px}.row{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid #eee;font-size:13px}
-.label{color:#888}.value{text-align:right;font-weight:700;word-break:break-word}
-.total{margin-top:20px;padding-top:18px;border-top:2px solid #171717;display:flex;justify-content:space-between;font-weight:800}
-.footer{text-align:center;color:#999;font-size:11px;margin-top:28px}
-@media print{body{padding:0}.receipt{border:0;width:100%;padding:0}}
+body {
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:#171717;
+    padding:40px 20px;
+}
+
+.receipt {
+    width:min(520px,100%);
+    margin:auto;
+    border:1px solid #e5e2da;
+    border-radius:20px;
+    padding:30px;
+}
+
+.brand {
+    font-size:24px;
+    font-weight:800;
+}
+
+.sub {
+    color:#888;
+    font-size:13px;
+    margin-bottom:25px;
+}
+
+h1 {
+    font-size:20px;
+}
+
+.row {
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:12px 0;
+    border-bottom:1px solid #eee;
+    font-size:13px;
+}
+
+.label {
+    color:#888;
+}
+
+.value {
+    text-align:right;
+    font-weight:700;
+    word-break:break-word;
+}
+
+.total {
+    margin-top:20px;
+    padding-top:18px;
+    border-top:2px solid #171717;
+    display:flex;
+    justify-content:space-between;
+    font-weight:800;
+}
+
+.footer {
+    text-align:center;
+    color:#999;
+    font-size:11px;
+    margin-top:28px;
+}
+
+@media print {
+    body {
+        padding:0;
+    }
+
+    .receipt {
+        border:0;
+        width:100%;
+        padding:0;
+    }
+}
 </style>
-
-<style id="monthly-transaction-style">
-
-/* =========================
-   MONTHLY TRANSACTION TOOLS
-========================= */
-
-.transaction-period-tools {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px 14px;
-    border-bottom: 1px solid #eeeeee;
-    background: #fff;
-}
-
-.transaction-period-tools > div {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.transaction-period-tools label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-}
-
-#transactionMonth {
-    width: 190px;
-    min-width: 190px;
-    height: 42px;
-    padding: 0 38px 0 13px;
-    border: 1px solid #dcdcdc;
-    border-radius: 9px;
-    background: #fff;
-    color: #222;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    outline: none;
-    appearance: auto;
-}
-
-#transactionMonth:focus {
-    border-color: #222;
-}
-
-.reset-transactions-button {
-    height: 42px;
-    padding: 0 17px;
-    border: 1px solid #e0e0e0;
-    border-radius: 9px;
-    background: #fff;
-    color: #222;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s ease;
-}
-
-.reset-transactions-button:hover {
-    background: #f7f7f7;
-    border-color: #cfcfcf;
-}
-
-.reset-transactions-button:active {
-    transform: translateY(1px);
-}
-
-/* MOBILE */
-
-@media (max-width: 700px) {
-
-    .transaction-period-tools {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 12px;
-        padding: 16px;
-    }
-
-    #transactionMonth {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .reset-transactions-button {
-        width: 100%;
-    }
-
-}
-
-</style>
-
 </head>
 <body>
 <div class="receipt">
 <div class="brand">PPOBKU</div>
 <div class="sub">Bukti transaksi</div>
 <h1>Detail Transaksi</h1>
-<div class="row"><span class="label">Transaction ID</span><span class="value">${item.transactionId ?? "-"}</span></div>
-<div class="row"><span class="label">Reference</span><span class="value">${item.reference ?? "-"}</span></div>
-<div class="row"><span class="label">Layanan</span><span class="value">${item.service ?? "-"}</span></div>
-<div class="row"><span class="label">Tujuan</span><span class="value">${item.target ?? "-"}</span></div>
-<div class="row"><span class="label">Operator</span><span class="value">${item.operator ?? "-"}</span></div>
-<div class="row"><span class="label">Produk</span><span class="value">${item.productName ?? "-"}</span></div>
-<div class="row"><span class="label">Pembayaran</span><span class="value">${item.paymentMethod ?? "-"}</span></div>
-<div class="row"><span class="label">Status</span><span class="value">${item.status ?? "-"}</span></div>
-<div class="row"><span class="label">Waktu</span><span class="value">${item.createdAt ?? "-"}</span></div>
-<div class="total"><span>Total</span><span>${price}</span></div>
-<div class="footer">Simpan dokumen ini sebagai bukti transaksi.</div>
+
+<div class="row">
+    <span class="label">Transaction ID</span>
+    <span class="value">${item.transactionId ?? "-"}</span>
 </div>
 
-<script id="admin-preview-slide-script">
+<div class="row">
+    <span class="label">Reference</span>
+    <span class="value">${item.reference ?? "-"}</span>
+</div>
 
-function closeAdminDrawer(id) {
+<div class="row">
+    <span class="label">Layanan</span>
+    <span class="value">${item.service ?? "-"}</span>
+</div>
 
-    const drawer =
-        document.getElementById(id);
+<div class="row">
+    <span class="label">Tujuan</span>
+    <span class="value">${item.target ?? "-"}</span>
+</div>
 
-    if (drawer) {
-        drawer.classList.remove("open");
-    }
+<div class="row">
+    <span class="label">Operator</span>
+    <span class="value">${item.operator ?? "-"}</span>
+</div>
 
-}
+<div class="row">
+    <span class="label">Produk</span>
+    <span class="value">${item.productName ?? "-"}</span>
+</div>
 
+<div class="row">
+    <span class="label">Pembayaran</span>
+    <span class="value">${item.paymentMethod ?? "-"}</span>
+</div>
 
-async function openTransactionDrawer() {
+<div class="row">
+    <span class="label">Status</span>
+    <span class="value">${item.status ?? "-"}</span>
+</div>
 
-    const drawer =
-        document.getElementById(
-            "transactionPreviewDrawer"
-        );
+<div class="row">
+    <span class="label">Waktu</span>
+    <span class="value">${item.createdAt ?? "-"}</span>
+</div>
 
-    const body =
-        document.getElementById(
-            "transactionDrawerBody"
-        );
+<div class="total">
+    <span>Total</span>
+    <span>${price}</span>
+</div>
 
-    if (!drawer || !body) return;
-
-    body.innerHTML = `
-        <div style="
-            padding:30px;
-            text-align:center;
-            color:#888;
-        ">
-            Memuat transaksi...
-        </div>
-    `;
-
-    drawer.classList.add("open");
-
-    try {
-
-        const monthSelect =
-            document.getElementById(
-                "transactionMonth"
-            );
-
-        const month =
-            monthSelect
-                ? monthSelect.value
-                : "";
-
-        const url =
-            month
-                ? `/api/transactions?month=${encodeURIComponent(month)}`
-                : "/api/transactions";
-
-        const response =
-            await fetch(url);
-
-        const data =
-            await response.json();
-
-        if (!data.success) {
-            throw new Error(
-                "Gagal mengambil transaksi."
-            );
-        }
-
-        const transactions =
-            data.transactions || [];
-
-        if (!transactions.length) {
-
-            body.innerHTML = `
-                <div style="
-                    padding:30px;
-                    text-align:center;
-                    color:#888;
-                ">
-                    Belum ada transaksi.
-                </div>
-            `;
-
-            return;
-        }
-
-        body.innerHTML = `
-            <div class="table-wrap">
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th>Transaksi</th>
-                            <th>Layanan</th>
-                            <th>Tujuan</th>
-                            <th>Produk</th>
-                            <th>Harga</th>
-                            <th>Pembayaran</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        ${
-                            transactions.map(item => `
-                                <tr>
-
-                                    <td>
-                                        ${item.transactionId || "-"}
-                                    </td>
-
-                                    <td>
-                                        ${item.service || "-"}
-                                    </td>
-
-                                    <td>
-                                        ${item.target || "-"}
-                                    </td>
-
-                                    <td>
-                                        ${item.productName || "-"}
-                                    </td>
-
-                                    <td>
-                                        ${rupiah.format(
-                                            Number(item.price || 0)
-                                        )}
-                                    </td>
-
-                                    <td>
-                                        ${item.paymentMethod || "-"}
-                                    </td>
-
-                                    <td>
-                                        ${item.status || "-"}
-                                    </td>
-
-                                </tr>
-                            `).join("")
-                        }
-                    </tbody>
-
-                </table>
-            </div>
-        `;
-
-    } catch (error) {
-
-        console.error(error);
-
-        body.innerHTML = `
-            <div style="
-                padding:30px;
-                text-align:center;
-                color:#b00020;
-            ">
-                Gagal memuat transaksi.
-            </div>
-        `;
-
-    }
-
-}
+<div class="footer">
+    Simpan dokumen ini sebagai bukti transaksi.
+</div>
+</div>
 
 
-function openCatalogDrawer() {
-
-    const drawer =
-        document.getElementById(
-            "catalogPreviewDrawer"
-        );
-
-    const body =
-        document.getElementById(
-            "catalogDrawerBody"
-        );
-
-    if (!drawer || !body) return;
-
-    const source =
-        document.getElementById(
-            "catalogServices"
-        );
-
-    if (!source) return;
-
-    body.innerHTML =
-        source.innerHTML;
-
-    drawer.classList.add("open");
-
-}
-
-
-document.addEventListener(
-    "click",
-    event => {
-
-        if (
-            event.target.classList &&
-            event.target.classList.contains(
-                "admin-drawer-overlay"
-            )
-        ) {
-            event.target.classList.remove(
-                "open"
-            );
-        }
-
-    }
-);
-
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Escape") {
-
-            document
-                .querySelectorAll(
-                    ".admin-drawer-overlay.open"
-                )
-                .forEach(drawer => {
-                    drawer.classList.remove(
-                        "open"
-                    );
-                });
-
-        }
-
-    }
-);
-
-</script>
-
-</body>
-</html>
         `);
+
         w.document.close();
         w.focus();
+
         setTimeout(() => w.print(), 300);
     }
 
@@ -3356,7 +3137,5 @@ document.addEventListener(
 
     </div>
 </div>
-
 </body>
-
 </html>

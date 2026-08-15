@@ -39,6 +39,41 @@ db.exec(`
 `);
 
 
+
+    /* =========================
+       CATALOG: SERVICES & PRODUCTS
+    ========================= */
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS services (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL,
+            icon TEXT NOT NULL DEFAULT "📦",
+            description TEXT NOT NULL DEFAULT "",
+            label TEXT NOT NULL DEFAULT "Nomor Tujuan",
+            placeholder TEXT NOT NULL DEFAULT "",
+            active INTEGER NOT NULL DEFAULT 1,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS products (
+            id TEXT PRIMARY KEY,
+            service_id TEXT NOT NULL,
+            operator TEXT,
+            name TEXT NOT NULL,
+            price INTEGER NOT NULL DEFAULT 0,
+            info TEXT NOT NULL DEFAULT "",
+            active INTEGER NOT NULL DEFAULT 1,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (service_id)
+                REFERENCES services(id)
+                ON DELETE CASCADE
+        );
+    `);
+
+
 /* =========================
    MIDDLEWARE
 ========================= */
@@ -543,6 +578,643 @@ app.post("/api/payments/xendit", async (req, res) => {
             error: "Gagal membuat pembayaran Xendit."
         });
     }
+});
+
+
+/* =========================
+   CATALOG API
+========================= */
+
+function catalogNow() {
+    return new Date().toISOString();
+}
+
+
+/* =========================
+   GET CATALOG
+========================= */
+
+app.get("/api/catalog", (req, res) => {
+
+    try {
+
+        const services = db.prepare(`
+            SELECT
+                id,
+                title,
+                icon,
+                description,
+                label,
+                placeholder,
+                active,
+                sort_order,
+                created_at
+            FROM services
+            ORDER BY sort_order ASC, title ASC
+        `).all();
+
+        const products = db.prepare(`
+            SELECT
+                id,
+                service_id,
+                operator,
+                name,
+                price,
+                info,
+                active,
+                sort_order,
+                created_at
+            FROM products
+            ORDER BY sort_order ASC, name ASC
+        `).all();
+
+        return res.json({
+            success: true,
+            services,
+            products
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengambil katalog."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   CREATE SERVICE
+========================= */
+
+app.post("/api/services", (req, res) => {
+
+    try {
+
+        const {
+            id,
+            title,
+            icon,
+            description,
+            label,
+            placeholder,
+            active,
+            sort_order
+        } = req.body;
+
+        if (!id || !title) {
+
+            return res.status(400).json({
+                success: false,
+                error: "ID dan nama layanan wajib diisi."
+            });
+
+        }
+
+        const serviceId =
+            String(id).trim().toLowerCase();
+
+        const exists =
+            db.prepare(`
+                SELECT id
+                FROM services
+                WHERE id = ?
+            `).get(serviceId);
+
+        if (exists) {
+
+            return res.status(409).json({
+                success: false,
+                error: "ID layanan sudah digunakan."
+            });
+
+        }
+
+        db.prepare(`
+            INSERT INTO services (
+                id,
+                title,
+                icon,
+                description,
+                label,
+                placeholder,
+                active,
+                sort_order,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            serviceId,
+            String(title).trim(),
+            icon || "📦",
+            description || "",
+            label || "Nomor Tujuan",
+            placeholder || "",
+            active === false ? 0 : 1,
+            Number.isFinite(Number(sort_order))
+                ? Number(sort_order)
+                : 0,
+            catalogNow()
+        );
+
+        const service =
+            db.prepare(`
+                SELECT *
+                FROM services
+                WHERE id = ?
+            `).get(serviceId);
+
+        return res.status(201).json({
+            success: true,
+            service
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menambahkan layanan."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   UPDATE SERVICE
+========================= */
+
+app.put("/api/services/:id", (req, res) => {
+
+    try {
+
+        const serviceId =
+            req.params.id;
+
+        const existing =
+            db.prepare(`
+                SELECT *
+                FROM services
+                WHERE id = ?
+            `).get(serviceId);
+
+        if (!existing) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Layanan tidak ditemukan."
+            });
+
+        }
+
+        const {
+            title,
+            icon,
+            description,
+            label,
+            placeholder,
+            active,
+            sort_order
+        } = req.body;
+
+        db.prepare(`
+            UPDATE services
+            SET
+                title = ?,
+                icon = ?,
+                description = ?,
+                label = ?,
+                placeholder = ?,
+                active = ?,
+                sort_order = ?
+            WHERE id = ?
+        `).run(
+            title !== undefined
+                ? String(title).trim()
+                : existing.title,
+
+            icon !== undefined
+                ? icon
+                : existing.icon,
+
+            description !== undefined
+                ? description
+                : existing.description,
+
+            label !== undefined
+                ? label
+                : existing.label,
+
+            placeholder !== undefined
+                ? placeholder
+                : existing.placeholder,
+
+            active === undefined
+                ? existing.active
+                : active ? 1 : 0,
+
+            sort_order === undefined
+                ? existing.sort_order
+                : Number(sort_order),
+
+            serviceId
+        );
+
+        const service =
+            db.prepare(`
+                SELECT *
+                FROM services
+                WHERE id = ?
+            `).get(serviceId);
+
+        return res.json({
+            success: true,
+            service
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengubah layanan."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   DELETE SERVICE
+========================= */
+
+app.delete("/api/services/:id", (req, res) => {
+
+    try {
+
+        const serviceId =
+            req.params.id;
+
+        const result =
+            db.prepare(`
+                DELETE FROM services
+                WHERE id = ?
+            `).run(serviceId);
+
+        if (result.changes === 0) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Layanan tidak ditemukan."
+            });
+
+        }
+
+        db.prepare(`
+            DELETE FROM products
+            WHERE service_id = ?
+        `).run(serviceId);
+
+        return res.json({
+            success: true,
+            message: "Layanan berhasil dihapus."
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menghapus layanan."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   CREATE PRODUCT
+========================= */
+
+app.post("/api/products", (req, res) => {
+
+    try {
+
+        const {
+            id,
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            active,
+            sort_order
+        } = req.body;
+
+        if (!id || !service_id || !name) {
+
+            return res.status(400).json({
+                success: false,
+                error: "ID, layanan, dan nama produk wajib diisi."
+            });
+
+        }
+
+        const productId =
+            String(id).trim().toLowerCase();
+
+        const service =
+            db.prepare(`
+                SELECT id
+                FROM services
+                WHERE id = ?
+            `).get(service_id);
+
+        if (!service) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Layanan tidak ditemukan."
+            });
+
+        }
+
+        const exists =
+            db.prepare(`
+                SELECT id
+                FROM products
+                WHERE id = ?
+            `).get(productId);
+
+        if (exists) {
+
+            return res.status(409).json({
+                success: false,
+                error: "ID produk sudah digunakan."
+            });
+
+        }
+
+        const numericPrice =
+            Number(price);
+
+        if (
+            !Number.isFinite(numericPrice) ||
+            numericPrice < 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Harga produk tidak valid."
+            });
+
+        }
+
+        db.prepare(`
+            INSERT INTO products (
+                id,
+                service_id,
+                operator,
+                name,
+                price,
+                info,
+                active,
+                sort_order,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            productId,
+            service_id,
+            operator || null,
+            String(name).trim(),
+            numericPrice,
+            info || "",
+            active === false ? 0 : 1,
+            Number.isFinite(Number(sort_order))
+                ? Number(sort_order)
+                : 0,
+            catalogNow()
+        );
+
+        const product =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+            `).get(productId);
+
+        return res.status(201).json({
+            success: true,
+            product
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menambahkan produk."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   UPDATE PRODUCT
+========================= */
+
+app.put("/api/products/:id", (req, res) => {
+
+    try {
+
+        const productId =
+            req.params.id;
+
+        const existing =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+            `).get(productId);
+
+        if (!existing) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Produk tidak ditemukan."
+            });
+
+        }
+
+        const {
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            active,
+            sort_order
+        } = req.body;
+
+        const targetService =
+            service_id || existing.service_id;
+
+        const service =
+            db.prepare(`
+                SELECT id
+                FROM services
+                WHERE id = ?
+            `).get(targetService);
+
+        if (!service) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Layanan tidak ditemukan."
+            });
+
+        }
+
+        const targetPrice =
+            price === undefined
+                ? existing.price
+                : Number(price);
+
+        if (
+            !Number.isFinite(targetPrice) ||
+            targetPrice < 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Harga produk tidak valid."
+            });
+
+        }
+
+        db.prepare(`
+            UPDATE products
+            SET
+                service_id = ?,
+                operator = ?,
+                name = ?,
+                price = ?,
+                info = ?,
+                active = ?,
+                sort_order = ?
+            WHERE id = ?
+        `).run(
+            targetService,
+
+            operator === undefined
+                ? existing.operator
+                : operator,
+
+            name === undefined
+                ? existing.name
+                : String(name).trim(),
+
+            targetPrice,
+
+            info === undefined
+                ? existing.info
+                : info,
+
+            active === undefined
+                ? existing.active
+                : active ? 1 : 0,
+
+            sort_order === undefined
+                ? existing.sort_order
+                : Number(sort_order),
+
+            productId
+        );
+
+        const product =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+            `).get(productId);
+
+        return res.json({
+            success: true,
+            product
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengubah produk."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+app.delete("/api/products/:id", (req, res) => {
+
+    try {
+
+        const productId =
+            req.params.id;
+
+        const result =
+            db.prepare(`
+                DELETE FROM products
+                WHERE id = ?
+            `).run(productId);
+
+        if (result.changes === 0) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Produk tidak ditemukan."
+            });
+
+        }
+
+        return res.json({
+            success: true,
+            message: "Produk berhasil dihapus."
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menghapus produk."
+        });
+
+    }
+
 });
 
 

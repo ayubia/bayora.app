@@ -196,7 +196,325 @@
 
         }
 
-    </style>
+
+
+/* =========================
+   CATALOG MANAGEMENT
+========================= */
+
+.catalog-panel {
+    margin-bottom: 35px;
+}
+
+.catalog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.catalog-header-title {
+    font-weight: 700;
+}
+
+.catalog-add-button,
+.catalog-action-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.catalog-add-button {
+    background: #171717;
+    color: white;
+}
+
+.catalog-action-button {
+    background: #f3f1ec;
+    color: #222;
+}
+
+.catalog-action-button.danger {
+    background: #fff0f0;
+    color: #b42318;
+}
+
+.catalog-services {
+    padding: 20px;
+    display: grid;
+    gap: 14px;
+}
+
+.catalog-service-card {
+    border: 1px solid #e7e4dd;
+    border-radius: 16px;
+    padding: 18px;
+    background: white;
+}
+
+.catalog-service-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.catalog-service-info {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.catalog-service-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f5f3ee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.catalog-service-name {
+    font-weight: 750;
+    font-size: 16px;
+}
+
+.catalog-service-description {
+    margin-top: 4px;
+    color: #888;
+    font-size: 12px;
+}
+
+.catalog-service-status {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #eef8f0;
+    color: #26733b;
+}
+
+.catalog-service-status.off {
+    background: #f3f1ee;
+    color: #888;
+}
+
+.catalog-service-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 16px;
+}
+
+.catalog-products {
+    margin-top: 16px;
+    border-top: 1px solid #f0eee9;
+    padding-top: 14px;
+}
+
+.catalog-product-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f4f2ed;
+}
+
+.catalog-product-row:last-child {
+    border-bottom: 0;
+}
+
+.catalog-product-name {
+    font-weight: 650;
+    font-size: 13px;
+}
+
+.catalog-product-info {
+    margin-top: 3px;
+    color: #999;
+    font-size: 11px;
+}
+
+.catalog-product-price {
+    font-weight: 750;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.catalog-product-status {
+    font-size: 11px;
+    color: #888;
+}
+
+.catalog-empty {
+    text-align: center;
+    padding: 35px 20px;
+    color: #888;
+    font-size: 13px;
+}
+
+.catalog-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,.35);
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.catalog-modal.open {
+    display: flex;
+}
+
+.catalog-modal-card {
+    width: min(560px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+.catalog-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.catalog-modal-header strong {
+    font-size: 20px;
+}
+
+.catalog-close {
+    border: 0;
+    background: #f3f1ec;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.catalog-form {
+    display: grid;
+    gap: 14px;
+}
+
+.catalog-form-group {
+    display: grid;
+    gap: 7px;
+}
+
+.catalog-form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+}
+
+.catalog-form-group input,
+.catalog-form-group select,
+.catalog-form-group textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+    background: white;
+}
+
+.catalog-form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.catalog-form-group input:focus,
+.catalog-form-group select:focus,
+.catalog-form-group textarea:focus {
+    border-color: #222;
+}
+
+.catalog-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+}
+
+.catalog-checkbox input {
+    width: auto;
+}
+
+.catalog-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 8px;
+}
+
+.catalog-cancel {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 16px;
+    background: #f3f1ec;
+    cursor: pointer;
+    font-weight: 650;
+}
+
+.catalog-save {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 17px;
+    background: #171717;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+
+    .catalog-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .catalog-add-button {
+        width: 100%;
+    }
+
+    .catalog-product-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .catalog-product-row .catalog-product-status {
+        grid-column: 1;
+    }
+
+    .catalog-product-row .catalog-action-button {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -252,7 +570,336 @@
     </section>
 
 
-    <section class="panel">
+
+<section class="panel catalog-panel">
+
+    <div class="catalog-header">
+
+        <div>
+            <div class="catalog-header-title">
+                Kelola Layanan & Produk
+            </div>
+
+            <div style="margin-top:4px;color:#888;font-size:12px;">
+                Tambahkan dan atur layanan yang tersedia di PPOBKU.
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="catalog-add-button"
+            onclick="openServiceModal()"
+        >
+            + Tambah Layanan
+        </button>
+
+    </div>
+
+    <div
+        id="catalogServices"
+        class="catalog-services"
+    >
+        <div class="catalog-empty">
+            Memuat layanan...
+        </div>
+    </div>
+
+</section>
+
+
+<!-- SERVICE MODAL -->
+
+<div
+    id="serviceModal"
+    class="catalog-modal"
+>
+
+    <div class="catalog-modal-card">
+
+        <div class="catalog-modal-header">
+
+            <strong id="serviceModalTitle">
+                Tambah Layanan
+            </strong>
+
+            <button
+                type="button"
+                class="catalog-close"
+                onclick="closeCatalogModal('serviceModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form
+            id="serviceForm"
+            class="catalog-form"
+            onsubmit="saveService(event)"
+        >
+
+            <input
+                type="hidden"
+                id="serviceOriginalId"
+            >
+
+            <div class="catalog-form-group">
+                <label>ID Layanan</label>
+
+                <input
+                    type="text"
+                    id="serviceId"
+                    required
+                    placeholder="contoh: pulsa"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Nama Layanan</label>
+
+                <input
+                    type="text"
+                    id="serviceTitle"
+                    required
+                    placeholder="contoh: Pulsa"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Ikon</label>
+
+                <input
+                    type="text"
+                    id="serviceIcon"
+                    placeholder="📱"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Deskripsi</label>
+
+                <textarea
+                    id="serviceDescription"
+                    placeholder="Deskripsi layanan"
+                ></textarea>
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Label Nomor Tujuan</label>
+
+                <input
+                    type="text"
+                    id="serviceLabel"
+                    placeholder="Nomor HP"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Placeholder</label>
+
+                <input
+                    type="text"
+                    id="servicePlaceholder"
+                    placeholder="08xxxxxxxxxx"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Urutan</label>
+
+                <input
+                    type="number"
+                    id="serviceSort"
+                    value="0"
+                >
+            </div>
+
+            <label class="catalog-checkbox">
+
+                <input
+                    type="checkbox"
+                    id="serviceActive"
+                    checked
+                >
+
+                Layanan aktif
+
+            </label>
+
+            <div class="catalog-form-actions">
+
+                <button
+                    type="button"
+                    class="catalog-cancel"
+                    onclick="closeCatalogModal('serviceModal')"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="catalog-save"
+                >
+                    Simpan Layanan
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- PRODUCT MODAL -->
+
+<div
+    id="productModal"
+    class="catalog-modal"
+>
+
+    <div class="catalog-modal-card">
+
+        <div class="catalog-modal-header">
+
+            <strong id="productModalTitle">
+                Tambah Produk
+            </strong>
+
+            <button
+                type="button"
+                class="catalog-close"
+                onclick="closeCatalogModal('productModal')"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form
+            id="productForm"
+            class="catalog-form"
+            onsubmit="saveProduct(event)"
+        >
+
+            <input
+                type="hidden"
+                id="productOriginalId"
+            >
+
+            <div class="catalog-form-group">
+                <label>ID Produk</label>
+
+                <input
+                    type="text"
+                    id="productId"
+                    required
+                    placeholder="contoh: tsel10"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Layanan</label>
+
+                <select
+                    id="productService"
+                    required
+                ></select>
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Operator</label>
+
+                <input
+                    type="text"
+                    id="productOperator"
+                    placeholder="Telkomsel"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Nama Produk</label>
+
+                <input
+                    type="text"
+                    id="productName"
+                    required
+                    placeholder="Telkomsel 10K"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Harga Jual</label>
+
+                <input
+                    type="number"
+                    id="productPrice"
+                    required
+                    min="0"
+                    step="1"
+                    placeholder="12500"
+                >
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Keterangan</label>
+
+                <textarea
+                    id="productInfo"
+                    placeholder="Pulsa Rp10.000"
+                ></textarea>
+            </div>
+
+            <div class="catalog-form-group">
+                <label>Urutan</label>
+
+                <input
+                    type="number"
+                    id="productSort"
+                    value="0"
+                >
+            </div>
+
+            <label class="catalog-checkbox">
+
+                <input
+                    type="checkbox"
+                    id="productActive"
+                    checked
+                >
+
+                Produk aktif
+
+            </label>
+
+            <div class="catalog-form-actions">
+
+                <button
+                    type="button"
+                    class="catalog-cancel"
+                    onclick="closeCatalogModal('productModal')"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="catalog-save"
+                >
+                    Simpan Produk
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<section class="panel">
 
         <div class="panel-header">
             Transaksi terbaru
@@ -1061,21 +1708,947 @@ h1{font-size:20px}.row{display:flex;justify-content:space-between;gap:20px;paddi
     }
 
 
-    document.getElementById(
-        "transactionModal"
-    ).addEventListener(
-        "click",
-        event => {
+    const transactionModal =
+        document.getElementById("transactionModal");
 
-            if (
-                event.target.id ===
-                "transactionModal"
-            ) {
-                closeTransactionDetail();
+    if (transactionModal) {
+        transactionModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target.id ===
+                    "transactionModal"
+                ) {
+                    closeTransactionDetail();
+                }
+
             }
+        );
+    }
+
+
+
+/* =========================
+   CATALOG MANAGEMENT
+========================= */
+
+let catalogData = {
+    services: [],
+    products: []
+};
+
+
+async function loadCatalog() {
+
+    const container =
+        document.getElementById("catalogServices");
+
+    if (!container) return;
+
+    try {
+
+        const response =
+            await fetch("/api/catalog");
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal mengambil katalog."
+            );
+        }
+
+        catalogData = {
+            services: data.services || [],
+            products: data.products || []
+        };
+
+        renderCatalog();
+        populateProductServiceOptions();
+
+    } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML = `
+            <div class="catalog-empty">
+                Gagal memuat layanan.
+            </div>
+        `;
+
+    }
+
+}
+
+
+function escapeCatalog(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function formatCatalogPrice(value) {
+
+    return new Intl.NumberFormat(
+        "id-ID",
+        {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0
+        }
+    ).format(Number(value) || 0);
+
+}
+
+
+function renderCatalog() {
+
+    const container =
+        document.getElementById("catalogServices");
+
+    if (!container) return;
+
+    if (!catalogData.services.length) {
+
+        container.innerHTML = `
+            <div class="catalog-empty">
+                Belum ada layanan.
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        catalogData.services
+            .map(service => {
+
+                const products =
+                    catalogData.products
+                        .filter(
+                            product =>
+                                product.service_id ===
+                                service.id
+                        );
+
+                const statusClass =
+                    Number(service.active)
+                        ? ""
+                        : "off";
+
+                const statusText =
+                    Number(service.active)
+                        ? "Aktif"
+                        : "Nonaktif";
+
+                const productHtml =
+                    products.length
+                        ? products.map(product => `
+
+                            <div class="catalog-product-row">
+
+                                <div>
+                                    <div class="catalog-product-name">
+                                        ${escapeCatalog(product.name)}
+                                    </div>
+
+                                    <div class="catalog-product-info">
+                                        ${escapeCatalog(product.operator || "")}
+                                        ${product.info ? " · " + escapeCatalog(product.info) : ""}
+                                    </div>
+                                </div>
+
+                                <div class="catalog-product-price">
+                                    ${formatCatalogPrice(product.price)}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="catalog-action-button"
+                                    onclick="editProduct('${escapeCatalog(product.id)}')"
+                                >
+                                    Edit
+                                </button>
+
+                            </div>
+
+                        `).join("")
+                        : `
+                            <div class="catalog-empty">
+                                Belum ada produk.
+                            </div>
+                        `;
+
+                return `
+
+                    <div class="catalog-service-card">
+
+                        <div class="catalog-service-top">
+
+                            <div class="catalog-service-info">
+
+                                <div class="catalog-service-icon">
+                                    ${escapeCatalog(service.icon || "📦")}
+                                </div>
+
+                                <div>
+
+                                    <div class="catalog-service-name">
+                                        ${escapeCatalog(service.title)}
+                                    </div>
+
+                                    <div class="catalog-service-description">
+                                        ${escapeCatalog(service.description || "")}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <span class="catalog-service-status ${statusClass}">
+                                ${statusText}
+                            </span>
+
+                        </div>
+
+                        <div class="catalog-service-actions">
+
+                            <button
+                                type="button"
+                                class="catalog-action-button"
+                                onclick="openProductModal('${escapeCatalog(service.id)}')"
+                            >
+                                + Produk
+                            </button>
+
+                            <button
+                                type="button"
+                                class="catalog-action-button"
+                                onclick="editService('${escapeCatalog(service.id)}')"
+                            >
+                                Edit Layanan
+                            </button>
+
+                            <button
+                                type="button"
+                                class="catalog-action-button"
+                                onclick="toggleService('${escapeCatalog(service.id)}')"
+                            >
+                                ${Number(service.active) ? "Nonaktifkan" : "Aktifkan"}
+                            </button>
+
+                            <button
+                                type="button"
+                                class="catalog-action-button danger"
+                                onclick="deleteService('${escapeCatalog(service.id)}')"
+                            >
+                                Hapus
+                            </button>
+
+                        </div>
+
+                        <div class="catalog-products">
+
+                            ${productHtml}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+
+}
+
+
+function populateProductServiceOptions() {
+
+    const select =
+        document.getElementById("productService");
+
+    if (!select) return;
+
+    select.innerHTML =
+        catalogData.services
+            .map(service => `
+                <option value="${escapeCatalog(service.id)}">
+                    ${escapeCatalog(service.title)}
+                </option>
+            `)
+            .join("");
+
+}
+
+
+function openCatalogModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+    if (modal) {
+        modal.classList.add("open");
+    }
+
+}
+
+
+function closeCatalogModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+    if (modal) {
+        modal.classList.remove("open");
+    }
+
+}
+
+
+function openServiceModal(serviceId = "") {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === serviceId
+        );
+
+    document.getElementById(
+        "serviceModalTitle"
+    ).textContent =
+        service
+            ? "Edit Layanan"
+            : "Tambah Layanan";
+
+    document.getElementById(
+        "serviceOriginalId"
+    ).value =
+        service
+            ? service.id
+            : "";
+
+    document.getElementById(
+        "serviceId"
+    ).value =
+        service
+            ? service.id
+            : "";
+
+    document.getElementById(
+        "serviceTitle"
+    ).value =
+        service
+            ? service.title
+            : "";
+
+    document.getElementById(
+        "serviceIcon"
+    ).value =
+        service
+            ? service.icon
+            : "📦";
+
+    document.getElementById(
+        "serviceDescription"
+    ).value =
+        service
+            ? service.description
+            : "";
+
+    document.getElementById(
+        "serviceLabel"
+    ).value =
+        service
+            ? service.label
+            : "Nomor Tujuan";
+
+    document.getElementById(
+        "servicePlaceholder"
+    ).value =
+        service
+            ? service.placeholder
+            : "";
+
+    document.getElementById(
+        "serviceSort"
+    ).value =
+        service
+            ? service.sort_order
+            : 0;
+
+    document.getElementById(
+        "serviceActive"
+    ).checked =
+        service
+            ? Boolean(Number(service.active))
+            : true;
+
+    openCatalogModal("serviceModal");
+
+}
+
+
+function editService(id) {
+
+    openServiceModal(id);
+
+}
+
+
+async function saveService(event) {
+
+    event.preventDefault();
+
+    const originalId =
+        document.getElementById(
+            "serviceOriginalId"
+        ).value;
+
+    const id =
+        document.getElementById(
+            "serviceId"
+        ).value.trim();
+
+    const payload = {
+
+        id,
+
+        title:
+            document.getElementById(
+                "serviceTitle"
+            ).value.trim(),
+
+        icon:
+            document.getElementById(
+                "serviceIcon"
+            ).value.trim() || "📦",
+
+        description:
+            document.getElementById(
+                "serviceDescription"
+            ).value.trim(),
+
+        label:
+            document.getElementById(
+                "serviceLabel"
+            ).value.trim() || "Nomor Tujuan",
+
+        placeholder:
+            document.getElementById(
+                "servicePlaceholder"
+            ).value.trim(),
+
+        active:
+            document.getElementById(
+                "serviceActive"
+            ).checked,
+
+        sort_order:
+            Number(
+                document.getElementById(
+                    "serviceSort"
+                ).value
+            ) || 0
+
+    };
+
+    try {
+
+        const isEdit =
+            Boolean(originalId);
+
+        const url =
+            isEdit
+                ? `/api/services/${encodeURIComponent(originalId)}`
+                : "/api/services";
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method:
+                        isEdit
+                            ? "PUT"
+                            : "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(payload)
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error ||
+                "Gagal menyimpan layanan."
+            );
 
         }
-    );
+
+        closeCatalogModal("serviceModal");
+
+        await loadCatalog();
+
+        alert(
+            isEdit
+                ? "Layanan berhasil diubah."
+                : "Layanan berhasil ditambahkan."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            error.message ||
+            "Gagal menyimpan layanan."
+        );
+
+    }
+
+}
+
+
+async function toggleService(id) {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === id
+        );
+
+    if (!service) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/services/${encodeURIComponent(id)}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            active:
+                                !Boolean(
+                                    Number(
+                                        service.active
+                                    )
+                                )
+                        })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal mengubah status layanan."
+            );
+        }
+
+        await loadCatalog();
+
+    } catch (error) {
+
+        alert(
+            error.message ||
+            "Gagal mengubah status layanan."
+        );
+
+    }
+
+}
+
+
+async function deleteService(id) {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === id
+        );
+
+    if (!service) return;
+
+    const confirmed =
+        confirm(
+            `Hapus layanan "${service.title}"?\\n\\n` +
+            "Semua produk di dalam layanan ini juga akan dihapus."
+        );
+
+    if (!confirmed) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/services/${encodeURIComponent(id)}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal menghapus layanan."
+            );
+        }
+
+        await loadCatalog();
+
+        alert("Layanan berhasil dihapus.");
+
+    } catch (error) {
+
+        alert(
+            error.message ||
+            "Gagal menghapus layanan."
+        );
+
+    }
+
+}
+
+
+function openProductModal(serviceId = "") {
+
+    document.getElementById(
+        "productModalTitle"
+    ).textContent =
+        "Tambah Produk";
+
+    document.getElementById(
+        "productOriginalId"
+    ).value = "";
+
+    document.getElementById(
+        "productId"
+    ).value = "";
+
+    document.getElementById(
+        "productOperator"
+    ).value = "";
+
+    document.getElementById(
+        "productName"
+    ).value = "";
+
+    document.getElementById(
+        "productPrice"
+    ).value = "";
+
+    document.getElementById(
+        "productInfo"
+    ).value = "";
+
+    document.getElementById(
+        "productSort"
+    ).value = 0;
+
+    document.getElementById(
+        "productActive"
+    ).checked = true;
+
+    populateProductServiceOptions();
+
+    if (serviceId) {
+
+        document.getElementById(
+            "productService"
+        ).value = serviceId;
+
+    }
+
+    openCatalogModal("productModal");
+
+}
+
+
+function editProduct(id) {
+
+    const product =
+        catalogData.products.find(
+            item => item.id === id
+        );
+
+    if (!product) return;
+
+    document.getElementById(
+        "productModalTitle"
+    ).textContent =
+        "Edit Produk";
+
+    document.getElementById(
+        "productOriginalId"
+    ).value =
+        product.id;
+
+    document.getElementById(
+        "productId"
+    ).value =
+        product.id;
+
+    document.getElementById(
+        "productOperator"
+    ).value =
+        product.operator || "";
+
+    document.getElementById(
+        "productName"
+    ).value =
+        product.name;
+
+    document.getElementById(
+        "productPrice"
+    ).value =
+        product.price;
+
+    document.getElementById(
+        "productInfo"
+    ).value =
+        product.info || "";
+
+    document.getElementById(
+        "productSort"
+    ).value =
+        product.sort_order;
+
+    document.getElementById(
+        "productActive"
+    ).checked =
+        Boolean(Number(product.active));
+
+    populateProductServiceOptions();
+
+    document.getElementById(
+        "productService"
+    ).value =
+        product.service_id;
+
+    openCatalogModal("productModal");
+
+}
+
+
+async function saveProduct(event) {
+
+    event.preventDefault();
+
+    const originalId =
+        document.getElementById(
+            "productOriginalId"
+        ).value;
+
+    const id =
+        document.getElementById(
+            "productId"
+        ).value.trim();
+
+    const payload = {
+
+        id,
+
+        service_id:
+            document.getElementById(
+                "productService"
+            ).value,
+
+        operator:
+            document.getElementById(
+                "productOperator"
+            ).value.trim(),
+
+        name:
+            document.getElementById(
+                "productName"
+            ).value.trim(),
+
+        price:
+            Number(
+                document.getElementById(
+                    "productPrice"
+                ).value
+            ),
+
+        info:
+            document.getElementById(
+                "productInfo"
+            ).value.trim(),
+
+        active:
+            document.getElementById(
+                "productActive"
+            ).checked,
+
+        sort_order:
+            Number(
+                document.getElementById(
+                    "productSort"
+                ).value
+            ) || 0
+
+    };
+
+    try {
+
+        const isEdit =
+            Boolean(originalId);
+
+        const url =
+            isEdit
+                ? `/api/products/${encodeURIComponent(originalId)}`
+                : "/api/products";
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method:
+                        isEdit
+                            ? "PUT"
+                            : "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(payload)
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error ||
+                "Gagal menyimpan produk."
+            );
+
+        }
+
+        closeCatalogModal("productModal");
+
+        await loadCatalog();
+
+        alert(
+            isEdit
+                ? "Produk berhasil diubah."
+                : "Produk berhasil ditambahkan."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            error.message ||
+            "Gagal menyimpan produk."
+        );
+
+    }
+
+}
+
+
+async function deleteProduct(id) {
+
+    const product =
+        catalogData.products.find(
+            item => item.id === id
+        );
+
+    if (!product) return;
+
+    const confirmed =
+        confirm(
+            `Hapus produk "${product.name}"?`
+        );
+
+    if (!confirmed) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/products/${encodeURIComponent(id)}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal menghapus produk."
+            );
+        }
+
+        await loadCatalog();
+
+        alert("Produk berhasil dihapus.");
+
+    } catch (error) {
+
+        alert(
+            error.message ||
+            "Gagal menghapus produk."
+        );
+
+    }
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        console.log("PPOBKU: DOMContentLoaded");
+        console.log("PPOBKU: loadCatalog tersedia =", typeof loadCatalog);
+
+        loadCatalog()
+            .then(() => {
+                console.log("PPOBKU: katalog berhasil dimuat");
+            })
+            .catch((error) => {
+                console.error("PPOBKU: loadCatalog error:", error);
+            });
+    }
+);
+
 
 </script>
 

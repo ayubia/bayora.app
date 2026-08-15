@@ -1,4 +1,4 @@
-const products = {
+let products = {
 
     pulsa: [
         {
@@ -123,7 +123,7 @@ const products = {
 };
 
 
-const services = {
+let services = {
 
     pulsa: {
         title: "Pulsa",
@@ -178,6 +178,209 @@ const services = {
 
 let currentService = null;
 let currentProduct = null;
+
+
+/* =========================
+   DYNAMIC CATALOG
+========================= */
+
+async function loadCustomerCatalog() {
+
+    try {
+
+        const response =
+            await fetch("/api/catalog");
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal mengambil katalog."
+            );
+        }
+
+
+        /*
+         * SERVICES
+         * API:
+         * [
+         *   { id, title, icon, description,
+         *     label, placeholder, active }
+         * ]
+         */
+
+        const apiServices = {};
+
+        (data.services || []).forEach(service => {
+
+            if (!Number(service.active)) {
+                return;
+            }
+
+            apiServices[service.id] = {
+                title: service.title,
+                icon: service.icon,
+                description: service.description,
+                label: service.label,
+                placeholder: service.placeholder
+            };
+
+        });
+
+
+        /*
+         * PRODUCTS
+         * API:
+         * [
+         *   { id, service_id, operator,
+         *     name, price, info, active }
+         * ]
+         */
+
+        const apiProducts = {};
+
+        (data.products || []).forEach(product => {
+
+            if (!Number(product.active)) {
+                return;
+            }
+
+            if (!apiProducts[product.service_id]) {
+                apiProducts[product.service_id] = [];
+            }
+
+            apiProducts[product.service_id].push({
+                id: product.id,
+                name: product.name,
+                price: Number(product.price) || 0,
+                info: product.info || "",
+                operator: product.operator || ""
+            });
+
+        });
+
+
+        /*
+         * Hanya mengganti data kalau API
+         * benar-benar mengembalikan katalog.
+         */
+
+        services = apiServices;
+        products = apiProducts;
+
+        renderCustomerServices();
+
+        console.log(
+            "Katalog customer berhasil dimuat dari database.",
+            {
+                services: Object.keys(services),
+                products
+            }
+        );
+
+
+    } catch (error) {
+
+        /*
+         * Jangan merusak website kalau API gagal.
+         * Data hardcoded lama tetap digunakan.
+         */
+
+        console.warn(
+            "Katalog database gagal dimuat. Menggunakan katalog fallback.",
+            error
+        );
+
+    }
+
+}
+
+
+/*
+ * Mulai mengambil katalog dari database.
+ * Fungsi ini tidak mengubah tampilan lama
+ * kalau request gagal.
+ */
+
+loadCustomerCatalog();
+
+
+function renderCustomerServices() {
+
+    const grid =
+        document.getElementById("customerServiceGrid");
+
+    if (!grid) {
+        console.warn(
+            "customerServiceGrid tidak ditemukan."
+        );
+        return;
+    }
+
+    const entries =
+        Object.entries(services || {});
+
+    if (!entries.length) {
+
+        grid.innerHTML = `
+            <div
+                style="
+                    grid-column:1/-1;
+                    text-align:center;
+                    padding:30px 10px;
+                    color:#888;
+                "
+            >
+                Belum ada layanan tersedia.
+            </div>
+        `;
+
+        return;
+    }
+
+    grid.innerHTML =
+        entries.map(([id, service]) => {
+
+            const safeId =
+                String(id)
+                    .replace(/\\/g, "\\\\")
+                    .replace(/'/g, "\\'");
+
+            const icon =
+                service.icon || "📦";
+
+            const title =
+                service.title || "Layanan";
+
+            const description =
+                service.description || "";
+
+            return `
+                <div
+                    class="service-card"
+                    onclick="openService('${safeId}')"
+                >
+
+                    <div class="service-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="service-title">
+                        ${title}
+                    </div>
+
+                    <div class="service-description">
+                        ${description}
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+}
+
 let currentTarget = "";
 let currentOperator = "";
 

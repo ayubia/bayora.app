@@ -1733,10 +1733,205 @@ h1{font-size:20px}.row{display:flex;justify-content:space-between;gap:20px;paddi
    CATALOG MANAGEMENT
 ========================= */
 
+
 let catalogData = {
     services: [],
     products: []
 };
+
+
+/* ============================================================
+   DIGIFLAZZ ADMIN CATALOG SYNC
+============================================================ */
+
+let digiflazzSyncRunning = false;
+
+function ensureDigiflazzSyncButton() {
+
+    const container = document.getElementById("catalogServices");
+
+    if (!container) return;
+
+    if (document.getElementById("digiflazzAdminSyncBar")) {
+        return;
+    }
+
+    const bar = document.createElement("div");
+
+    bar.id = "digiflazzAdminSyncBar";
+
+    bar.style.cssText = `
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:14px 16px;
+        margin-bottom:16px;
+        border:1px solid #e8e2dc;
+        border-radius:14px;
+        background:#fffaf6;
+        flex-wrap:wrap;
+    `;
+
+    bar.innerHTML = `
+        <div>
+            <strong style="display:block;font-size:14px;">
+                Katalog Digiflazz
+            </strong>
+
+            <span
+                id="digiflazzSyncStatus"
+                style="
+                    display:block;
+                    margin-top:4px;
+                    font-size:12px;
+                    color:#777;
+                "
+            >
+                Sinkronisasi produk dan harga dari Digiflazz.
+            </span>
+        </div>
+
+        <button
+            id="digiflazzSyncButton"
+            type="button"
+            onclick="syncDigiflazzFromAdmin()"
+            style="
+                border:0;
+                border-radius:10px;
+                padding:10px 16px;
+                cursor:pointer;
+                font-weight:600;
+                background:#332019;
+                color:white;
+            "
+        >
+            ↻ Sinkronkan Digiflazz
+        </button>
+    `;
+
+    container.parentNode.insertBefore(bar, container);
+}
+
+
+async function syncDigiflazzFromAdmin() {
+
+    if (digiflazzSyncRunning) {
+        return;
+    }
+
+    const button =
+        document.getElementById("digiflazzSyncButton");
+
+    const status =
+        document.getElementById("digiflazzSyncStatus");
+
+    digiflazzSyncRunning = true;
+
+    if (button) {
+        button.disabled = true;
+        button.style.opacity = "0.6";
+        button.style.cursor = "wait";
+        button.textContent = "⏳ Menyinkronkan...";
+    }
+
+    if (status) {
+        status.textContent =
+            "Mengambil Price List terbaru dari Digiflazz...";
+        status.style.color = "#777";
+    }
+
+    try {
+
+        const response = await fetch(
+            "/api/digiflazz/sync-catalog",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Sinkronisasi Digiflazz gagal."
+            );
+        }
+
+        /*
+         * Setelah backend selesai sync:
+         * ambil ulang catalog terbaru.
+         */
+        await loadCatalog();
+
+        const source =
+            Number(data.source_products || 0);
+
+        const inserted =
+            Number(data.inserted || 0);
+
+        const updated =
+            Number(data.updated || 0);
+
+        const active =
+            Number(data.active_products || 0);
+
+        const priceList =
+            Number(
+                data.price_list_refresh?.count || 0
+            );
+
+        if (status) {
+
+            status.textContent =
+                `Berhasil: ${priceList} Price List → ${active} produk aktif. ` +
+                `${inserted} baru, ${updated} diperbarui.`;
+
+            status.style.color = "#287a45";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "PPOBKU: Digiflazz admin sync error:",
+            error
+        );
+
+        if (status) {
+
+            status.textContent =
+                error.message ||
+                "Sinkronisasi Digiflazz gagal.";
+
+            status.style.color = "#b42318";
+        }
+
+        alert(
+            error.message ||
+            "Sinkronisasi Digiflazz gagal."
+        );
+
+    } finally {
+
+        digiflazzSyncRunning = false;
+
+        if (button) {
+
+            button.disabled = false;
+            button.style.opacity = "1";
+            button.style.cursor = "pointer";
+            button.textContent =
+                "↻ Sinkronkan Digiflazz";
+        }
+    }
+}
+
 
 
 async function loadCatalog() {
@@ -2638,6 +2833,8 @@ document.addEventListener(
     () => {
         console.log("PPOBKU: DOMContentLoaded");
         console.log("PPOBKU: loadCatalog tersedia =", typeof loadCatalog);
+
+        ensureDigiflazzSyncButton();
 
         loadCatalog()
             .then(() => {

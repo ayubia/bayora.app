@@ -1182,7 +1182,7 @@ app.post("/api/payments/xendit", async (req, res) => {
                 country: "ID",
                 locale: "id",
                 customer: {
-                    reference_id: "CUST" + transaction.reference,
+                    reference_id: "CUST-" + crypto.randomUUID(),
                     type: "INDIVIDUAL",
                     email: customerEmail || "test@example.com",
                     individual_detail: {

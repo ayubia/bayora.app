@@ -636,25 +636,8 @@ function backToService() {
 
 async function processPayment() {
 
-    const paymentElement =
-        document.querySelector(
-            'input[name="payment"]:checked'
-        );
-
-
-    if (!paymentElement) {
-
-        alert(
-            "Silakan pilih metode pembayaran."
-        );
-
-        return;
-
-    }
-
-
-    const payment =
-        paymentElement.value;
+    // Pembayaran menggunakan Xendit secara otomatis.
+    const payment = "xendit";
 
 
     const service =
@@ -766,6 +749,54 @@ async function processPayment() {
 
         const transaction =
             data.transaction;
+
+
+        // Semua metode pembayaran diarahkan ke checkout Xendit
+        button.textContent =
+            "Membuka pembayaran...";
+
+        const xenditResponse =
+            await fetch(
+                "/api/payments/xendit",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        transactionId:
+                            transaction.transactionId,
+
+                        customerEmail:
+                            "customer@example.com",
+
+                        customerName:
+                            "Pelanggan PPOBKU"
+                    })
+                }
+            );
+
+        const xenditData =
+            await xenditResponse.json();
+
+        if (!xenditResponse.ok ||
+            !xenditData.success ||
+            !xenditData.paymentUrl) {
+
+            throw new Error(
+                xenditData.error ||
+                "Gagal membuat pembayaran Xendit."
+            );
+
+        }
+
+        window.location.href =
+            xenditData.paymentUrl;
+
+        return;
 
 
         document

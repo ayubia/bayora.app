@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
 const Database = require("better-sqlite3");
+const axios = require("axios");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -404,6 +405,99 @@ app.patch(
 
     }
 );
+
+
+/* =========================
+   XENDIT PAYMENT
+========================= */
+
+app.post("/api/payments/xendit", async (req, res) => {
+    try {
+        const {
+            transactionId,
+            customerEmail,
+            customerName
+        } = req.body;
+
+        if (!transactionId) {
+            return res.status(400).json({
+                success: false,
+                error: "transactionId wajib diisi."
+            });
+        }
+
+        const transaction = db.prepare(`
+            SELECT
+                transaction_id AS transactionId,
+                reference,
+                product_name AS productName,
+                price
+            FROM transactions
+            WHERE transaction_id = ?
+        `).get(transactionId);
+
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                error: "Transaksi tidak ditemukan."
+            });
+        }
+
+        if (!process.env.XENDIT_SECRET_KEY) {
+            return res.status(500).json({
+                success: false,
+                error: "XENDIT_SECRET_KEY belum tersedia."
+            });
+        }
+
+        const response = await axios.post(
+            "https://api.xendit.co/sessions",
+            {
+                reference_id: transaction.reference,
+                session_type: "PAY",
+                mode: "PAYMENT_LINK",
+                amount: transaction.price,
+                currency: "IDR",
+                country: "ID",
+                locale: "id",
+                customer: {
+                    reference_id: "CUST" + transaction.reference,
+                    type: "INDIVIDUAL",
+                    email: customerEmail || "test@example.com",
+                    individual_detail: {
+                        given_names: customerName || "Pelanggan"
+                    }
+                }
+            },
+            {
+                auth: {
+                    username: process.env.XENDIT_SECRET_KEY,
+                    password: ""
+                },
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        return res.json({
+            success: true,
+            paymentSessionId: response.data.payment_session_id,
+            paymentUrl: response.data.payment_link_url
+        });
+
+    } catch (error) {
+        console.error(
+            "Xendit error:",
+            error.response?.data || error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal membuat pembayaran Xendit."
+        });
+    }
+});
 
 
 /* =========================

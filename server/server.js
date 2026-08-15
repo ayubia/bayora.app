@@ -34,6 +34,12 @@ db.exec(`
         price INTEGER NOT NULL,
         payment_method TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT "PENDING",
+        payment_status TEXT NOT NULL DEFAULT "PENDING",
+        digiflazz_status TEXT NOT NULL DEFAULT "PENDING",
+        digiflazz_ref TEXT,
+        digiflazz_message TEXT,
+        paid_at TEXT,
+        processed_at TEXT,
         created_at TEXT NOT NULL
     );
 `);
@@ -129,6 +135,40 @@ if (!hasDigiflazzSku) {
         "[DB MIGRATION] Kolom products.digiflazz_sku berhasil ditambahkan."
     );
 }
+
+/* =========================
+   PAYMENT / DIGIFLAZZ MIGRATION
+========================= */
+
+const transactionColumns =
+    db.prepare("PRAGMA table_info(transactions)").all();
+
+const transactionColumnNames =
+    transactionColumns.map(column => column.name);
+
+const transactionMigrations = [
+    ["payment_status", 'TEXT NOT NULL DEFAULT "PENDING"'],
+    ["digiflazz_status", 'TEXT NOT NULL DEFAULT "PENDING"'],
+    ["digiflazz_ref", "TEXT"],
+    ["digiflazz_message", "TEXT"],
+    ["paid_at", "TEXT"],
+    ["processed_at", "TEXT"]
+];
+
+for (const [columnName, columnDefinition] of transactionMigrations) {
+
+    if (!transactionColumnNames.includes(columnName)) {
+
+        db.prepare(
+            `ALTER TABLE transactions ADD COLUMN ${columnName} ${columnDefinition}`
+        ).run();
+
+        console.log(
+            `[DB MIGRATION] Kolom transactions.${columnName} berhasil ditambahkan.`
+        );
+    }
+}
+
 
 /* =========================
    MIDDLEWARE
@@ -542,6 +582,576 @@ app.patch(
 
     }
 );
+
+
+
+/* ============================================================
+   XENDIT → DIGIFLAZZ AUTOMATION
+   Pembayaran Xendit berhasil → kirim transaksi ke Digiflazz.
+   ============================================================ */
+
+function digiflazzSign(refId) {
+    const username = process.env.DIGIFLAZZ_USERNAME;
+    const apiKey = process.env.DIGIFLAZZ_API_KEY;
+
+    if (!username || !apiKey) {
+        throw new Error("Credential Digiflazz belum dikonfigurasi.");
+    }
+
+    return crypto
+        .createHash("md5")
+        .update(username + apiKey + refId)
+        .digest("hex");
+}
+
+
+async function sendTransactionToDigiflazz(transactionId) {
+
+    const transaction = db.prepare(`
+        SELECT
+            t.id,
+            t.transaction_id,
+            t.reference,
+            t.target,
+            t.product_id,
+            t.product_name,
+            t.price,
+            t.payment_status,
+            t.digiflazz_status,
+            t.digiflazz_ref,
+            p.digiflazz_sku,
+            p.cost_price
+        FROM transactions t
+        LEFT JOIN products p
+            ON p.id = t.product_id
+        WHERE t.transaction_id = ?
+    `).get(transactionId);
+
+    if (!transaction) {
+        throw new Error("Transaksi tidak ditemukan.");
+    }
+
+    if (transaction.payment_status !== "PAID") {
+        throw new Error("Pembayaran belum berstatus PAID.");
+    }
+
+    /*
+     * Anti-double-order:
+     * hanya transaksi dengan status PENDING yang boleh di-claim.
+     *
+     * Setelah berhasil di-claim menjadi PROCESSING,
+     * webhook kedua tidak akan mengirim order kedua.
+     */
+    const claim = db.prepare(`
+        UPDATE transactions
+        SET
+            digiflazz_status = 'PROCESSING',
+            processed_at = ?
+        WHERE transaction_id = ?
+          AND payment_status = 'PAID'
+          AND digiflazz_status = 'PENDING'
+    `).run(
+        new Date().toISOString(),
+        transactionId
+    );
+
+    if (claim.changes === 0) {
+
+        const current = db.prepare(`
+            SELECT
+                transaction_id,
+                payment_status,
+                digiflazz_status,
+                digiflazz_ref,
+                digiflazz_message
+            FROM transactions
+            WHERE transaction_id = ?
+        `).get(transactionId);
+
+        return {
+            skipped: true,
+            reason: "TRANSAKSI_SUDAH_DIPROSES_ATAU_SEDANG_DIPROSES",
+            transaction: current
+        };
+    }
+
+    const username = process.env.DIGIFLAZZ_USERNAME;
+    const apiKey = process.env.DIGIFLAZZ_API_KEY;
+
+    if (!username || !apiKey) {
+        db.prepare(`
+            UPDATE transactions
+            SET
+                digiflazz_status = 'FAILED',
+                digiflazz_message = ?,
+                processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            "Credential Digiflazz belum dikonfigurasi.",
+            new Date().toISOString(),
+            transactionId
+        );
+
+        throw new Error("Credential Digiflazz belum dikonfigurasi.");
+    }
+
+    if (!transaction.digiflazz_sku) {
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                digiflazz_status = 'FAILED',
+                digiflazz_message = ?,
+                processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            "Produk tidak memiliki digiflazz_sku.",
+            new Date().toISOString(),
+            transactionId
+        );
+
+        throw new Error(
+            "Produk tidak memiliki digiflazz_sku."
+        );
+    }
+
+    /*
+     * ref_id harus stabil dan unik.
+     * Kita gunakan reference transaksi PPOBKU.
+     * Jika request perlu diulang karena Pending,
+     * ref_id yang sama dipakai lagi.
+     */
+    const refId = "PPOBKU-" + transaction.reference;
+
+    const sign = digiflazzSign(refId);
+
+    const payload = {
+        username,
+        buyer_sku_code: transaction.digiflazz_sku,
+        customer_no: String(transaction.target),
+        ref_id: refId,
+        sign
+    };
+
+    /*
+     * cb_url opsional.
+     * Jika PUBLIC_BASE_URL tersedia, Digiflazz bisa
+     * mengirim callback ketika transaksi Pending berubah.
+     */
+    if (process.env.PUBLIC_BASE_URL) {
+        payload.cb_url =
+            process.env.PUBLIC_BASE_URL.replace(/\/$/, "") +
+            "/api/webhooks/digiflazz";
+    }
+
+    let response;
+
+    try {
+
+        response = await axios.post(
+            "https://api.digiflazz.com/v1/transaction",
+            payload,
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                timeout: 30000
+            }
+        );
+
+    } catch (error) {
+
+        const errorData =
+            error.response?.data || {};
+
+        const errorMessage =
+            errorData?.data?.message ||
+            errorData?.message ||
+            error.message ||
+            "Request ke Digiflazz gagal.";
+
+        /*
+         * Tetap simpan PROCESSING jika request tidak mendapat
+         * jawaban yang dapat dipercaya.
+         *
+         * Jangan langsung mengirim ulang dengan ref_id baru.
+         * ref_id yang sama harus digunakan untuk pengecekan.
+         */
+        db.prepare(`
+            UPDATE transactions
+            SET
+                digiflazz_message = ?,
+                processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            String(errorMessage),
+            new Date().toISOString(),
+            transactionId
+        );
+
+        throw error;
+    }
+
+    const result =
+        response.data?.data || {};
+
+    const status =
+        String(result.status || "").toLowerCase();
+
+    const message =
+        result.message ||
+        "Tidak ada pesan dari Digiflazz.";
+
+    const digiflazzRef =
+        result.ref_id ||
+        refId;
+
+    let finalStatus = "PROCESSING";
+
+    if (status === "sukses") {
+        finalStatus = "SUCCESS";
+    } else if (status === "gagal") {
+        finalStatus = "FAILED";
+    } else if (status === "pending") {
+        finalStatus = "PENDING";
+    }
+
+    db.prepare(`
+        UPDATE transactions
+        SET
+            digiflazz_status = ?,
+            digiflazz_ref = ?,
+            digiflazz_message = ?,
+            processed_at = ?
+        WHERE transaction_id = ?
+    `).run(
+        finalStatus,
+        String(digiflazzRef),
+        String(message),
+        new Date().toISOString(),
+        transactionId
+    );
+
+    return {
+        skipped: false,
+        status: finalStatus,
+        ref_id: digiflazzRef,
+        message
+    };
+}
+
+
+/* =========================
+   XENDIT PAYMENT SESSION WEBHOOK
+========================= */
+
+app.post("/api/webhooks/xendit", async (req, res) => {
+
+    try {
+
+        /*
+         * Xendit Payment Session webhook menggunakan
+         * x-callback-token untuk verifikasi.
+         */
+        const expectedToken =
+            process.env.XENDIT_WEBHOOK_TOKEN;
+
+        if (expectedToken) {
+
+            const receivedToken =
+                req.headers["x-callback-token"];
+
+            if (!receivedToken ||
+                receivedToken !== expectedToken) {
+
+                console.warn(
+                    "[XENDIT WEBHOOK] Token tidak valid."
+                );
+
+                return res.status(401).json({
+                    success: false,
+                    error: "Webhook token tidak valid."
+                });
+            }
+        }
+
+        const event =
+            req.body?.event;
+
+        const data =
+            req.body?.data || {};
+
+        console.log(
+            "[XENDIT WEBHOOK]",
+            JSON.stringify(req.body, null, 2)
+        );
+
+        /*
+         * Kita hanya memproses Payment Session yang selesai.
+         */
+        if (event === "payment_session.completed") {
+
+            if (String(data.status).toUpperCase() !== "COMPLETED") {
+
+                return res.json({
+                    success: true,
+                    ignored: true,
+                    message:
+                        "Payment Session belum COMPLETED."
+                });
+            }
+
+            const reference =
+                data.reference_id;
+
+            if (!reference) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "reference_id tidak ditemukan."
+                });
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        transaction_id,
+                        reference,
+                        payment_status,
+                        digiflazz_status
+                    FROM transactions
+                    WHERE reference = ?
+                `).get(reference);
+
+            if (!transaction) {
+
+                console.warn(
+                    "[XENDIT WEBHOOK] Transaksi tidak ditemukan:",
+                    reference
+                );
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Transaksi tidak ditemukan."
+                });
+            }
+
+            /*
+             * Tandai pembayaran PAID.
+             */
+            db.prepare(`
+                UPDATE transactions
+                SET
+                    payment_status = 'PAID',
+                    paid_at = COALESCE(
+                        paid_at,
+                        ?
+                    )
+                WHERE transaction_id = ?
+            `).run(
+                new Date().toISOString(),
+                transaction.transaction_id
+            );
+
+            /*
+             * Kirim ke Digiflazz.
+             *
+             * Fungsi di dalamnya mempunyai claim atomik
+             * untuk mencegah double-order.
+             */
+            const result =
+                await sendTransactionToDigiflazz(
+                    transaction.transaction_id
+                );
+
+            return res.json({
+                success: true,
+                event,
+                transaction_id:
+                    transaction.transaction_id,
+                digiflazz: result
+            });
+        }
+
+        /*
+         * Event expired tidak boleh dikirim ke Digiflazz.
+         */
+        if (event === "payment_session.expired") {
+
+            const reference =
+                data.reference_id;
+
+            if (reference) {
+
+                db.prepare(`
+                    UPDATE transactions
+                    SET payment_status = 'EXPIRED'
+                    WHERE reference = ?
+                      AND payment_status = 'PENDING'
+                `).run(reference);
+            }
+
+            return res.json({
+                success: true,
+                ignored: true,
+                message: "Payment Session expired."
+            });
+        }
+
+        return res.json({
+            success: true,
+            ignored: true,
+            event
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[XENDIT WEBHOOK ERROR]",
+            error.response?.data ||
+            error.message ||
+            error
+        );
+
+        /*
+         * Kembalikan 500 supaya Xendit mengetahui bahwa
+         * webhook belum berhasil diproses.
+         */
+        return res.status(500).json({
+            success: false,
+            error:
+                "Webhook Xendit gagal diproses."
+        });
+    }
+});
+
+
+/* =========================
+   DIGIFLAZZ CALLBACK WEBHOOK
+========================= */
+
+app.post("/api/webhooks/digiflazz", (req, res) => {
+
+    try {
+
+        const data =
+            req.body?.data ||
+            req.body ||
+            {};
+
+        const refId =
+            data.ref_id;
+
+        if (!refId) {
+
+            return res.status(400).json({
+                success: false,
+                error: "ref_id tidak ditemukan."
+            });
+        }
+
+        /*
+         * Kita membuat ref_id:
+         * PPOBKU-XXXXXXXX
+         *
+         * sehingga reference asli adalah bagian setelah
+         * prefix tersebut.
+         */
+        const reference =
+            String(refId).replace(
+                /^PPOBKU-/i,
+                ""
+            );
+
+        const transaction =
+            db.prepare(`
+                SELECT
+                    transaction_id,
+                    reference,
+                    payment_status
+                FROM transactions
+                WHERE reference = ?
+            `).get(reference);
+
+        if (!transaction) {
+
+            console.warn(
+                "[DIGIFLAZZ CALLBACK] Transaksi tidak ditemukan:",
+                refId
+            );
+
+            /*
+             * Tetap 200 agar callback tidak terus diulang
+             * untuk transaksi yang memang bukan milik kita.
+             */
+            return res.json({
+                success: true,
+                ignored: true
+            });
+        }
+
+        const status =
+            String(data.status || "").toLowerCase();
+
+        let finalStatus =
+            "PROCESSING";
+
+        if (status === "sukses") {
+            finalStatus = "SUCCESS";
+        } else if (status === "gagal") {
+            finalStatus = "FAILED";
+        } else if (status === "pending") {
+            finalStatus = "PENDING";
+        }
+
+        const message =
+            data.message ||
+            "Update status dari Digiflazz.";
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                digiflazz_status = ?,
+                digiflazz_ref = COALESCE(
+                    ?,
+                    digiflazz_ref
+                ),
+                digiflazz_message = ?,
+                processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            finalStatus,
+            data.ref_id || null,
+            String(message),
+            new Date().toISOString(),
+            transaction.transaction_id
+        );
+
+        console.log(
+            "[DIGIFLAZZ CALLBACK]",
+            transaction.transaction_id,
+            finalStatus,
+            message
+        );
+
+        return res.json({
+            success: true
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[DIGIFLAZZ CALLBACK ERROR]",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Callback Digiflazz gagal diproses."
+        });
+    }
+});
 
 
 /* =========================

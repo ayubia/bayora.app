@@ -486,9 +486,26 @@ function openService(serviceId) {
             ? "block"
             : "none";
 
-    document
-        .getElementById("operator")
-        .value = "";
+    const operatorSelect =
+        document.getElementById("operator");
+
+    operatorSelect.value = "";
+
+    // Saat operator berubah, tampilkan produk operator tersebut
+    operatorSelect.onchange = function () {
+        currentOperator = this.value.trim();
+        currentProduct = null;
+
+        document
+            .getElementById("selectedProduct")
+            .value = "";
+
+        document
+            .getElementById("price")
+            .textContent = "Rp0";
+
+        renderProducts();
+    };
 
     document
         .getElementById("price")
@@ -518,8 +535,16 @@ function renderProducts() {
 
     grid.innerHTML = "";
 
-    const list =
+    let list =
         products[currentService] || [];
+
+    // Filter produk berdasarkan operator yang dipilih
+    if (currentOperator) {
+        list = list.filter(product =>
+            String(product.operator || "").toUpperCase() ===
+            String(currentOperator || "").toUpperCase()
+        );
+    }
 
     count.textContent =
         `${list.length} produk`;

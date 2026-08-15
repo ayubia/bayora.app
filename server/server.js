@@ -1268,6 +1268,1155 @@ app.post(
 );
 
 
+
+/* =========================
+   DIGIFLAZZ LOCAL PRICE CACHE
+   better-sqlite3
+========================= */
+
+/*
+ * Cache Price List Digiflazz.
+ *
+ * PENTING:
+ * - Tidak mengubah tabel products.
+ * - Tidak mengubah harga jual.
+ * - Tidak melakukan transaksi.
+ * - Hanya menyimpan Price List Digiflazz.
+ */
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS digiflazz_price_list (
+        buyer_sku_code TEXT PRIMARY KEY,
+        product_name TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT '',
+        brand TEXT NOT NULL DEFAULT '',
+        type TEXT NOT NULL DEFAULT '',
+        seller_name TEXT NOT NULL DEFAULT '',
+        price INTEGER NOT NULL DEFAULT 0,
+        buyer_product_status INTEGER NOT NULL DEFAULT 0,
+        seller_product_status INTEGER NOT NULL DEFAULT 0,
+        unlimited_stock INTEGER NOT NULL DEFAULT 0,
+        stock INTEGER NOT NULL DEFAULT 0,
+        multi INTEGER NOT NULL DEFAULT 0,
+        start_cut_off TEXT NOT NULL DEFAULT '',
+        end_cut_off TEXT NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        synced_at TEXT NOT NULL DEFAULT ''
+    )
+`);
+
+console.log("Tabel digiflazz_price_list siap.");
+
+
+/*
+ * SYNC PRICE LIST
+ *
+ * Hanya menyimpan ke cache lokal.
+ * Tabel products TIDAK disentuh.
+ */
+
+/* ============================================================
+   DIGIFLAZZ → PPOBKU AUTO CATALOG SYNC
+   Harga jual mengikuti harga modal Digiflazz.
+   TRANSAKSI LIVE TIDAK DIUBAH.
+   ============================================================ */
+
+function calculateDynamicPrice(cost) {
+    cost = Number(cost) || 0;
+
+    let targetMargin;
+
+    if (cost <= 50000) {
+        targetMargin = 2500;
+    } else if (cost <= 100000) {
+        targetMargin = 3000;
+    } else {
+        targetMargin = 3500;
+    }
+
+    const price = Math.ceil(
+        (cost + targetMargin) / 500
+    ) * 500;
+
+    const actualMargin = price - cost;
+
+    return {
+        price,
+        margin: actualMargin
+    };
+}
+
+function syncDigiflazzCatalogFromCache() {
+
+    /*
+     * Semua kategori Digiflazz yang dianggap sebagai produk
+     * katalog PPOBKU.
+     *
+     * danacek sengaja tidak dijual sebagai produk karena
+     * merupakan layanan cek nama DANA, bukan top-up.
+     */
+    const serviceConfig = {
+        "Pulsa": {
+            id: "pulsa",
+            title: "Pulsa",
+            icon: "📱",
+            description: "Isi pulsa semua operator",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 1
+        },
+
+        "Data": {
+            id: "data",
+            title: "Paket Data",
+            icon: "🌐",
+            description: "Paket internet semua operator",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 2
+        },
+
+        "PLN": {
+            id: "pln-token",
+            title: "Token PLN",
+            icon: "⚡",
+            description: "Beli token listrik prabayar",
+            label: "Nomor Meter / ID Pelanggan",
+            placeholder: "Masukkan nomor meter",
+            sort_order: 3
+        },
+
+        "E-Money": {
+            id: "ewallet",
+            title: "E-Wallet",
+            icon: "💳",
+            description: "Top up saldo e-wallet",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 4
+        },
+
+        "Games": {
+            id: "games",
+            title: "Games",
+            icon: "🎮",
+            description: "Top up game",
+            label: "User ID",
+            placeholder: "Masukkan User ID",
+            sort_order: 5
+        },
+
+        "Aktivasi Voucher": {
+            id: "aktivasi-voucher",
+            title: "Aktivasi Voucher",
+            icon: "🎟️",
+            description: "Aktivasi voucher digital",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 6
+        },
+
+        "Paket SMS & Telpon": {
+            id: "paket-sms-telpon",
+            title: "Paket SMS & Telpon",
+            icon: "☎️",
+            description: "Paket SMS dan telepon",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 7
+        },
+
+        "TV": {
+            id: "tv",
+            title: "TV",
+            icon: "📺",
+            description: "Bayar atau isi layanan TV",
+            label: "ID Pelanggan",
+            placeholder: "Masukkan ID pelanggan",
+            sort_order: 8
+        },
+
+        "Masa Aktif": {
+            id: "masa-aktif",
+            title: "Masa Aktif",
+            icon: "📅",
+            description: "Tambah masa aktif kartu",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 9
+        },
+
+        "Aktivasi Perdana": {
+            id: "aktivasi-perdana",
+            title: "Aktivasi Perdana",
+            icon: "📲",
+            description: "Aktivasi kartu perdana",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 10
+        },
+
+        "Voucher": {
+            id: "voucher",
+            title: "Voucher",
+            icon: "🎫",
+            description: "Pembelian voucher",
+            label: "Nomor HP",
+            placeholder: "08xxxxxxxxxx",
+            sort_order: 11
+        },
+
+        "Gas": {
+            id: "gas",
+            title: "Gas",
+            icon: "🔥",
+            description: "Pembayaran layanan gas",
+            label: "Nomor Pelanggan",
+            placeholder: "Masukkan nomor pelanggan",
+            sort_order: 12
+        }
+    };
+
+    const rows = db.prepare(`
+        SELECT *
+        FROM digiflazz_price_list
+        WHERE buyer_sku_code IS NOT NULL
+          AND buyer_sku_code != ''
+          AND buyer_sku_code != 'danacek'
+        ORDER BY category, brand, price, buyer_sku_code
+    `).all();
+
+    if (!rows.length) {
+        throw new Error("Cache Digiflazz kosong.");
+    }
+
+    /*
+     * Pastikan semua service Digiflazz tersedia di PPOBKU.
+     */
+    const upsertService = db.prepare(`
+        INSERT INTO services (
+            id,
+            title,
+            icon,
+            description,
+            label,
+            placeholder,
+            active,
+            sort_order,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+        ON CONFLICT(id)
+        DO UPDATE SET
+            title = excluded.title,
+            icon = excluded.icon,
+            description = excluded.description,
+            label = excluded.label,
+            placeholder = excluded.placeholder,
+            active = 1,
+            sort_order = excluded.sort_order
+    `);
+
+    /*
+     * Produk yang sudah ada tetap di-update.
+     * Produk baru otomatis INSERT.
+     */
+    const existing = db.prepare(`
+        SELECT id
+        FROM products
+    `).all();
+
+    const existingIds = new Set(
+        existing.map(row => row.id)
+    );
+
+    const updateProduct = db.prepare(`
+        UPDATE products
+        SET
+            service_id = ?,
+            operator = ?,
+            name = ?,
+            price = ?,
+            info = ?,
+            active = 1,
+            sort_order = ?,
+            cost_price = ?,
+            margin = ?,
+            digiflazz_sku = ?
+        WHERE id = ?
+    `);
+
+    const insertProduct = db.prepare(`
+        INSERT INTO products (
+            id,
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            active,
+            sort_order,
+            created_at,
+            cost_price,
+            margin,
+            digiflazz_sku
+        )
+        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+    `);
+
+    /*
+     * Semua SKU Digiflazz yang sedang ada di cache.
+     * Produk PPOBKU yang sebelumnya berasal dari Digiflazz
+     * tetapi sudah tidak ada di cache akan dinonaktifkan.
+     */
+    const cachedSkus = new Set(
+        rows.map(p => p.buyer_sku_code)
+    );
+
+    const deactivateOld = db.prepare(`
+        UPDATE products
+        SET active = 0
+        WHERE digiflazz_sku IS NOT NULL
+          AND digiflazz_sku != ''
+    `);
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    const counters = {};
+
+    const transaction = db.transaction(() => {
+
+        /*
+         * Pastikan service yang digunakan oleh cache aktif.
+         */
+        for (const config of Object.values(serviceConfig)) {
+            upsertService.run(
+                config.id,
+                config.title,
+                config.icon,
+                config.description,
+                config.label,
+                config.placeholder,
+                config.sort_order,
+                new Date().toISOString()
+            );
+        }
+
+        /*
+         * Nonaktifkan dulu produk Digiflazz lama.
+         * Produk yang masih tersedia akan diaktifkan kembali
+         * ketika loop di bawah berjalan.
+         */
+        deactivateOld.run();
+
+        for (const p of rows) {
+
+            const config = serviceConfig[p.category];
+
+            /*
+             * Kalau suatu saat Digiflazz menambah kategori baru
+             * yang belum kita kenal, jangan memasukkannya secara
+             * sembarangan ke service yang salah.
+             */
+            if (!config) {
+                skipped++;
+                continue;
+            }
+
+            const serviceId = config.id;
+
+            counters[serviceId] =
+                (counters[serviceId] || 0) + 1;
+
+            const cost = Number(p.price) || 0;
+
+            const dynamic =
+                calculateDynamicPrice(cost);
+
+            const sku =
+                p.buyer_sku_code;
+
+            const operator =
+                p.brand || "";
+
+            const name =
+                p.product_name ||
+                sku;
+
+            const info =
+                p.product_name ||
+                "";
+
+            const createdAt =
+                p.created_at ||
+                new Date().toISOString();
+
+            if (existingIds.has(sku)) {
+
+                updateProduct.run(
+                    serviceId,
+                    operator,
+                    name,
+                    dynamic.price,
+                    info,
+                    counters[serviceId],
+                    cost,
+                    dynamic.margin,
+                    sku,
+                    sku
+                );
+
+                updated++;
+
+            } else {
+
+                insertProduct.run(
+                    sku,
+                    serviceId,
+                    operator,
+                    name,
+                    dynamic.price,
+                    info,
+                    counters[serviceId],
+                    createdAt,
+                    cost,
+                    dynamic.margin,
+                    sku
+                );
+
+                inserted++;
+            }
+        }
+    });
+
+    transaction();
+
+    const active = db.prepare(`
+        SELECT COUNT(*) AS total
+        FROM products
+        WHERE active = 1
+    `).get().total;
+
+    const serviceCounts = db.prepare(`
+        SELECT
+            service_id,
+            COUNT(*) AS total
+        FROM products
+        WHERE active = 1
+        GROUP BY service_id
+        ORDER BY service_id
+    `).all();
+
+    return {
+        source_products: rows.length,
+        inserted,
+        updated,
+        skipped,
+        active_products: active,
+        service_counts: serviceCounts
+    };
+}
+
+/*
+ * Endpoint khusus sinkronisasi:
+ *
+ * 1. Refresh price list Digiflazz menggunakan endpoint lama.
+ * 2. Baca cache terbaru.
+ * 3. Update catalog PPOBKU.
+ *
+ * Tidak melakukan transaksi pembelian.
+ */
+app.post("/api/digiflazz/sync-catalog", async (req, res) => {
+
+    try {
+
+        let refresh = {
+            success: false,
+            synced: false,
+            count: 0
+        };
+
+        /*
+         * Coba refresh Price List Digiflazz.
+         * Kalau Digiflazz sedang gagal/502, JANGAN
+         * langsung menggagalkan katalog.
+         */
+        try {
+
+            const response = await axios.post(
+                `http://127.0.0.1:${PORT}/api/digiflazz/sync-price-list`,
+                {},
+                {
+                    timeout: 60000
+                }
+            );
+
+            refresh = response.data || {};
+
+        } catch (refreshError) {
+
+            console.warn(
+                "[DIGIFLAZZ] Refresh Price List gagal:",
+                refreshError.message
+            );
+
+            /*
+             * Cache lokal tetap dipakai sebagai fallback.
+             */
+        }
+
+        /*
+         * Pastikan cache lokal masih mempunyai data.
+         */
+        const cacheCount = db.prepare(`
+            SELECT COUNT(*) AS total
+            FROM digiflazz_price_list
+        `).get().total;
+
+        if (cacheCount === 0) {
+
+            return res.status(502).json({
+                success: false,
+                mode: "AUTO_CATALOG_SYNC",
+                message:
+                    "Price List Digiflazz gagal diperbarui dan cache lokal kosong."
+            });
+
+        }
+
+        /*
+         * Gunakan cache terakhir yang tersedia.
+         */
+        const result =
+            syncDigiflazzCatalogFromCache();
+
+        res.json({
+            success: true,
+            mode: "AUTO_CATALOG_SYNC",
+            price_list_refresh: {
+                success: !!refresh.success,
+                synced: !!refresh.synced,
+                count: Number(refresh.count || 0),
+                cache_count: cacheCount
+            },
+            ...result,
+            message:
+                refresh.success
+                    ? "Price List Digiflazz berhasil diperbarui dan katalog PPOBKU ikut disinkronkan."
+                    : "Refresh Digiflazz gagal sementara, tetapi katalog PPOBKU berhasil disinkronkan menggunakan cache lokal terakhir."
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[DIGIFLAZZ SYNC CATALOG]",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message:
+                "Sinkronisasi katalog gagal.",
+            error: error.message
+        });
+    }
+});
+
+
+
+/* ============================================================
+   PPOBKU_DIGIFLAZZ_AUTO_SYNC_V1
+
+   AUTO SYNC:
+   - setiap 1 jam
+   - tidak menyentuh transaksi live
+   - cache lama dipertahankan jika Digiflazz gagal
+   ============================================================ */
+
+const DIGIFLAZZ_AUTO_SYNC_INTERVAL =
+    60 * 60 * 1000; // 1 jam
+
+let digiflazzAutoSyncRunning = false;
+
+let digiflazzAutoSyncStatus = {
+    running: false,
+    last_attempt: null,
+    last_success: null,
+    last_failure: null,
+    last_result: null,
+    last_error: null
+};
+
+
+/*
+ * Jalankan satu kali proses auto-sync.
+ */
+async function runDigiflazzAutoSync() {
+
+    if (digiflazzAutoSyncRunning) {
+
+        console.log(
+            "[DIGIFLAZZ AUTO SYNC] Sync sebelumnya masih berjalan. Dilewati."
+        );
+
+        return;
+    }
+
+    digiflazzAutoSyncRunning = true;
+
+    digiflazzAutoSyncStatus.running = true;
+    digiflazzAutoSyncStatus.last_attempt =
+        new Date().toISOString();
+
+    console.log(
+        "[DIGIFLAZZ AUTO SYNC] Memulai sinkronisasi otomatis..."
+    );
+
+    try {
+
+        const response = await axios.post(
+            `http://127.0.0.1:${PORT}/api/digiflazz/sync-catalog`,
+            {},
+            {
+                timeout: 120000
+            }
+        );
+
+        const result = response.data || {};
+
+        digiflazzAutoSyncStatus.last_result = result;
+        digiflazzAutoSyncStatus.last_error = null;
+
+        /*
+         * success utama berarti katalog berhasil diproses.
+         * Bisa saja refresh Digiflazz gagal tetapi fallback
+         * cache berhasil digunakan.
+         */
+        if (result.success) {
+
+            digiflazzAutoSyncStatus.last_success =
+                new Date().toISOString();
+
+            console.log(
+                "[DIGIFLAZZ AUTO SYNC] Berhasil.",
+                JSON.stringify(result)
+            );
+
+        } else {
+
+            digiflazzAutoSyncStatus.last_failure =
+                new Date().toISOString();
+
+            console.warn(
+                "[DIGIFLAZZ AUTO SYNC] Gagal.",
+                JSON.stringify(result)
+            );
+        }
+
+    } catch (error) {
+
+        digiflazzAutoSyncStatus.last_failure =
+            new Date().toISOString();
+
+        digiflazzAutoSyncStatus.last_error =
+            error.message;
+
+        console.error(
+            "[DIGIFLAZZ AUTO SYNC] Error:",
+            error.message
+        );
+
+    } finally {
+
+        digiflazzAutoSyncRunning = false;
+        digiflazzAutoSyncStatus.running = false;
+    }
+}
+
+
+/*
+ * Status auto-sync.
+ *
+ * Endpoint:
+ * GET /api/digiflazz/auto-sync/status
+ */
+
+/*
+ * Manual trigger untuk testing satu siklus Auto Sync.
+ *
+ * Tidak mengubah interval scheduler.
+ * Tidak melakukan transaksi live.
+ */
+app.post("/api/digiflazz/auto-sync/run", async (req, res) => {
+
+    try {
+
+        if (digiflazzAutoSyncRunning) {
+
+            return res.status(409).json({
+                success: false,
+                message:
+                    "Auto Sync sedang berjalan."
+            });
+        }
+
+        await runDigiflazzAutoSync();
+
+        res.json({
+            success: true,
+            mode: "MANUAL_AUTO_SYNC_TEST",
+            status: digiflazzAutoSyncStatus
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+
+app.get("/api/digiflazz/auto-sync/status", (req, res) => {
+
+    try {
+
+        const cache = db.prepare(`
+            SELECT
+                COUNT(*) AS total,
+                MAX(synced_at) AS last_cache_sync
+            FROM digiflazz_price_list
+        `).get();
+
+        const products = db.prepare(`
+            SELECT
+                COUNT(*) AS total,
+                SUM(
+                    CASE
+                        WHEN active = 1 THEN 1
+                        ELSE 0
+                    END
+                ) AS active
+            FROM products
+        `).get();
+
+        res.json({
+            success: true,
+
+            scheduler: {
+                enabled: true,
+                interval_minutes: 60,
+                running:
+                    digiflazzAutoSyncStatus.running
+            },
+
+            last_attempt:
+                digiflazzAutoSyncStatus.last_attempt,
+
+            last_success:
+                digiflazzAutoSyncStatus.last_success,
+
+            last_failure:
+                digiflazzAutoSyncStatus.last_failure,
+
+            last_error:
+                digiflazzAutoSyncStatus.last_error,
+
+            last_result:
+                digiflazzAutoSyncStatus.last_result,
+
+            cache: {
+                total: Number(cache.total || 0),
+                last_sync:
+                    cache.last_cache_sync || null
+            },
+
+            catalog: {
+                total: Number(products.total || 0),
+                active: Number(products.active || 0)
+            }
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+
+/*
+ * Scheduler 1 jam.
+ *
+ * Tidak melakukan sync langsung ketika server baru
+ * dinyalakan. Sync pertama dilakukan setelah 1 jam.
+ *
+ * Ini sengaja agar startup PPOBKU tidak bergantung
+ * kepada availability Digiflazz.
+ */
+setInterval(
+    runDigiflazzAutoSync,
+    DIGIFLAZZ_AUTO_SYNC_INTERVAL
+);
+
+console.log(
+    "[DIGIFLAZZ AUTO SYNC] Scheduler aktif: setiap 60 menit."
+);
+
+
+app.get("/api/digiflazz/catalog-preview", (req, res) => {
+
+    try {
+
+        const rows = db.prepare(`
+            SELECT
+                id,
+                service_id,
+                operator,
+                name,
+                cost_price,
+                price,
+                margin,
+                digiflazz_sku,
+                active
+            FROM products
+            WHERE active = 1
+            ORDER BY service_id, sort_order
+        `).all();
+
+        res.json({
+            success: true,
+            count: rows.length,
+            products: rows
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+
+app.post("/api/digiflazz/sync-price-list", async (req, res) => {
+
+    try {
+
+        const username = process.env.DIGIFLAZZ_USERNAME;
+        const apiKey = process.env.DIGIFLAZZ_API_KEY;
+
+        if (!username || !apiKey) {
+
+            return res.status(500).json({
+                success: false,
+                error: "Credential Digiflazz belum dikonfigurasi."
+            });
+
+        }
+
+        const sign = crypto
+            .createHash("md5")
+            .update(username + apiKey + "pricelist")
+            .digest("hex");
+
+        const response = await axios.post(
+            "https://api.digiflazz.com/v1/price-list",
+            {
+                cmd: "prepaid",
+                username,
+                sign
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                timeout: 30000
+            }
+        );
+
+        console.log(
+            "[DIGIFLAZZ PRICE LIST RESPONSE]",
+            JSON.stringify(response.data, null, 2)
+        );
+
+        const products = Array.isArray(response.data?.data)
+            ? response.data.data
+            : [];
+
+        /*
+         * SAFETY:
+         * Jangan pernah menghapus cache jika API
+         * mengembalikan data kosong.
+         */
+        if (products.length === 0) {
+
+            return res.status(502).json({
+                success: false,
+                synced: false,
+                count: 0,
+                message:
+                    "Digiflazz mengembalikan Price List kosong. Cache lokal tidak diubah."
+            });
+
+        }
+
+        const now = new Date().toISOString();
+
+        const insert = db.prepare(`
+            INSERT INTO digiflazz_price_list (
+                buyer_sku_code,
+                product_name,
+                category,
+                brand,
+                type,
+                seller_name,
+                price,
+                buyer_product_status,
+                seller_product_status,
+                unlimited_stock,
+                stock,
+                multi,
+                start_cut_off,
+                end_cut_off,
+                description,
+                synced_at
+            )
+            VALUES (
+                @buyer_sku_code,
+                @product_name,
+                @category,
+                @brand,
+                @type,
+                @seller_name,
+                @price,
+                @buyer_product_status,
+                @seller_product_status,
+                @unlimited_stock,
+                @stock,
+                @multi,
+                @start_cut_off,
+                @end_cut_off,
+                @description,
+                @synced_at
+            )
+            ON CONFLICT(buyer_sku_code)
+            DO UPDATE SET
+                product_name = excluded.product_name,
+                category = excluded.category,
+                brand = excluded.brand,
+                type = excluded.type,
+                seller_name = excluded.seller_name,
+                price = excluded.price,
+                buyer_product_status =
+                    excluded.buyer_product_status,
+                seller_product_status =
+                    excluded.seller_product_status,
+                unlimited_stock =
+                    excluded.unlimited_stock,
+                stock = excluded.stock,
+                multi = excluded.multi,
+                start_cut_off =
+                    excluded.start_cut_off,
+                end_cut_off =
+                    excluded.end_cut_off,
+                description =
+                    excluded.description,
+                synced_at =
+                    excluded.synced_at
+        `);
+
+        const sync = db.transaction((items) => {
+
+            for (const item of items) {
+
+                insert.run({
+                    buyer_sku_code:
+                        item.buyer_sku_code || "",
+
+                    product_name:
+                        item.product_name || "",
+
+                    category:
+                        item.category || "",
+
+                    brand:
+                        item.brand || "",
+
+                    type:
+                        item.type || "",
+
+                    seller_name:
+                        item.seller_name || "",
+
+                    price:
+                        Number(item.price) || 0,
+
+                    buyer_product_status:
+                        item.buyer_product_status ? 1 : 0,
+
+                    seller_product_status:
+                        item.seller_product_status ? 1 : 0,
+
+                    unlimited_stock:
+                        item.unlimited_stock ? 1 : 0,
+
+                    stock:
+                        Number(item.stock) || 0,
+
+                    multi:
+                        item.multi ? 1 : 0,
+
+                    start_cut_off:
+                        item.start_cut_off || "",
+
+                    end_cut_off:
+                        item.end_cut_off || "",
+
+                    description:
+                        item.desc || "",
+
+                    synced_at: now
+                });
+
+            }
+
+        });
+
+        sync(products);
+
+        return res.json({
+            success: true,
+            synced: true,
+            mode: "CACHE_ONLY",
+            count: products.length,
+            message:
+                "Price List berhasil disimpan ke cache lokal. Tabel products PPOBKU tidak diubah."
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Digiflazz sync error:",
+            error.response?.data || error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            synced: false,
+            error:
+                error.response?.data?.message ||
+                error.message ||
+                "Gagal sinkronisasi Price List."
+        });
+
+    }
+
+});
+
+
+/*
+ * CACHE SUMMARY
+ *
+ * READ-ONLY.
+ * Tidak memanggil Digiflazz.
+ */
+app.get("/api/digiflazz/cache/summary", (req, res) => {
+
+    try {
+
+        const total = db.prepare(`
+            SELECT
+                COUNT(*) AS total,
+                MAX(synced_at) AS last_sync
+            FROM digiflazz_price_list
+        `).get();
+
+        const categories = db.prepare(`
+            SELECT
+                category,
+                COUNT(*) AS count
+            FROM digiflazz_price_list
+            GROUP BY category
+            ORDER BY count DESC
+        `).all();
+
+        return res.json({
+            success: true,
+            source: "LOCAL_CACHE",
+            total: total?.total || 0,
+            last_sync: total?.last_sync || null,
+            categories
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+
+    }
+
+});
+
+
+/*
+ * CACHE PRODUCTS
+ *
+ * READ-ONLY.
+ */
+app.get("/api/digiflazz/cache", (req, res) => {
+
+    try {
+
+        const products = db.prepare(`
+            SELECT
+                buyer_sku_code,
+                product_name,
+                category,
+                brand,
+                type,
+                seller_name,
+                price,
+                buyer_product_status,
+                seller_product_status,
+                unlimited_stock,
+                stock,
+                multi,
+                start_cut_off,
+                end_cut_off,
+                description,
+                synced_at
+            FROM digiflazz_price_list
+            ORDER BY category, brand, price
+        `).all();
+
+        return res.json({
+            success: true,
+            source: "LOCAL_CACHE",
+            count: products.length,
+            products
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+
+    }
+
+});
+
+
 /* =========================
    START SERVER
 ========================= */

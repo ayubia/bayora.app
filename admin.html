@@ -258,6 +258,30 @@
             Transaksi terbaru
         </div>
 
+        <div class="transaction-period-tools">
+
+            <div>
+                <label for="transactionMonth">
+                    Periode transaksi
+                </label>
+
+                <select
+                    id="transactionMonth"
+                    onchange="loadTransactions()"
+                ></select>
+            </div>
+
+            <button
+                type="button"
+                class="reset-transactions-button"
+                onclick="resetCurrentMonth()"
+            >
+                Reset Bulan Ini
+            </button>
+
+        </div>
+
+
         <div class="transaction-tools">
 
             <input
@@ -337,12 +361,170 @@
     );
 
 
+    function formatMonth(month) {
+
+        if (!month) return "";
+
+        const [year, monthNumber] = month.split("-");
+
+        const date =
+            new Date(
+                Number(year),
+                Number(monthNumber) - 1,
+                1
+            );
+
+        return date.toLocaleDateString(
+            "id-ID",
+            {
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    function setupTransactionMonths() {
+
+        const select =
+            document.getElementById("transactionMonth");
+
+        if (!select) return;
+
+        const now = new Date();
+
+        const currentYear =
+            now.getFullYear();
+
+        const currentMonth =
+            now.getMonth();
+
+        select.innerHTML = "";
+
+        for (let i = 0; i < 12; i++) {
+
+            const date =
+                new Date(
+                    currentYear,
+                    currentMonth - i,
+                    1
+                );
+
+            const year =
+                date.getFullYear();
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, "0");
+
+            const value =
+                `${year}-${month}`;
+
+            const option =
+                document.createElement("option");
+
+            option.value = value;
+            option.textContent =
+                formatMonth(value);
+
+            select.appendChild(option);
+
+        }
+
+    }
+
+
+    async function resetCurrentMonth() {
+
+        const select =
+            document.getElementById("transactionMonth");
+
+        const month =
+            select
+                ? select.value
+                : new Date()
+                    .toISOString()
+                    .slice(0, 7);
+
+        const monthName =
+            formatMonth(month);
+
+        const confirmed =
+            confirm(
+                `Reset semua transaksi bulan ${monthName}?\n\n` +
+                `Semua transaksi pada periode ini akan dihapus permanen.\n` +
+                `Transaksi bulan lainnya tidak akan terhapus.`
+            );
+
+        if (!confirmed) return;
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/transactions",
+                    {
+                        method: "DELETE",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            month
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal mereset transaksi."
+                );
+
+            }
+
+            alert(
+                `Berhasil mereset ${data.deleted} transaksi bulan ${monthName}.`
+            );
+
+            await loadTransactions();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                error.message ||
+                "Gagal mereset transaksi."
+            );
+
+        }
+
+    }
+
+
     async function loadTransactions() {
 
         try {
 
             const response =
-                await fetch("/api/transactions");
+                const month =
+                    document.getElementById("transactionMonth").value;
+
+                const url =
+                    month
+                        ? `/api/transactions?month=${encodeURIComponent(month)}`
+                        : "/api/transactions";
+
+                await fetch(url);
 
             const data =
                 await response.json();
@@ -567,6 +749,7 @@
     }
 
 
+    setupTransactionMonths();
     loadTransactions();
 
     setInterval(() => {

@@ -231,6 +231,11 @@ app.get("/api/transactions", (req, res) => {
 
     try {
 
+        const month =
+            /^\d{4}-\d{2}$/.test(req.query.month || "")
+                ? req.query.month
+                : new Date().toISOString().slice(0, 7);
+
         const transactions = db.prepare(`
             SELECT
                 id,
@@ -246,11 +251,13 @@ app.get("/api/transactions", (req, res) => {
                 status,
                 created_at AS createdAt
             FROM transactions
+            WHERE substr(created_at, 1, 7) = ?
             ORDER BY id DESC
-        `).all();
+        `).all(month);
 
         return res.json({
             success: true,
+            month,
             count: transactions.length,
             transactions
         });
@@ -262,6 +269,45 @@ app.get("/api/transactions", (req, res) => {
         return res.status(500).json({
             success: false,
             error: "Gagal mengambil transaksi."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   RESET TRANSACTIONS BY MONTH
+========================= */
+
+app.delete("/api/transactions", (req, res) => {
+
+    try {
+
+        const month =
+            /^\d{4}-\d{2}$/.test(req.body?.month || "")
+                ? req.body.month
+                : new Date().toISOString().slice(0, 7);
+
+        const result = db.prepare(`
+            DELETE FROM transactions
+            WHERE substr(created_at, 1, 7) = ?
+        `).run(month);
+
+        return res.json({
+            success: true,
+            message: `Transaksi bulan ${month} berhasil direset.`,
+            deleted: result.changes,
+            month
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mereset transaksi."
         });
 
     }

@@ -1392,3 +1392,446 @@ body {
         border-radius: 16px;
     }
 }
+
+/* =========================================================
+   BAYORA — FULL VISUAL REDESIGN
+   ========================================================= */
+
+:root {
+    --bayora-primary: #1769ff;
+    --bayora-primary-dark: #0b4ed8;
+    --bayora-cyan: #16c7ff;
+    --bayora-navy: #0b1730;
+    --bayora-text: #162033;
+    --bayora-muted: #667085;
+    --bayora-bg: #f5f9ff;
+    --bayora-white: #ffffff;
+    --bayora-border: #e2ebf8;
+    --bayora-shadow: 0 18px 45px rgba(22, 76, 150, .09);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background:
+        radial-gradient(circle at 90% 0%, rgba(22,199,255,.08), transparent 28%),
+        var(--bayora-bg);
+    color: var(--bayora-text);
+}
+
+/* HEADER */
+.navbar {
+    height: 76px;
+    padding: 0 6%;
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(226,235,248,.9);
+    box-shadow: 0 5px 25px rgba(23,105,255,.06);
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--bayora-primary);
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -.8px;
+}
+
+.logo::before {
+    content: "B";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    color: white;
+    background: linear-gradient(135deg,var(--bayora-primary),var(--bayora-cyan));
+    box-shadow: 0 8px 20px rgba(23,105,255,.25);
+    font-size: 19px;
+    font-weight: 900;
+}
+
+.navbar nav {
+    gap: 32px;
+}
+
+.navbar nav a {
+    color: #596579;
+    font-weight: 650;
+    transition: .2s ease;
+}
+
+.navbar nav a:hover {
+    color: var(--bayora-primary);
+}
+
+/* HERO */
+.hero {
+    min-height: 650px;
+    padding: 100px 7%;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 85% 20%, rgba(22,199,255,.20), transparent 30%),
+        radial-gradient(circle at 70% 80%, rgba(23,105,255,.13), transparent 36%),
+        linear-gradient(135deg,#f9fcff 0%,#edf6ff 100%);
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    right: -170px;
+    top: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,rgba(23,105,255,.10),rgba(22,199,255,.06));
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 780px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    padding: 7px 13px;
+    margin-bottom: 18px;
+    border-radius: 999px;
+    color: var(--bayora-primary);
+    background: rgba(23,105,255,.08);
+    border: 1px solid rgba(23,105,255,.12);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.hero h1 {
+    font-size: clamp(42px,6vw,72px);
+    line-height: 1.05;
+    letter-spacing: -2.8px;
+    color: var(--bayora-navy);
+    margin-bottom: 22px;
+}
+
+.hero h1 span {
+    color: transparent;
+    background: linear-gradient(135deg,var(--bayora-primary),var(--bayora-cyan));
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
+.hero-description {
+    max-width: 650px;
+    color: var(--bayora-muted);
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+.hero-button,
+.primary-button,
+.submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 14px;
+    color: white;
+    background: linear-gradient(135deg,var(--bayora-primary),var(--bayora-cyan));
+    box-shadow: 0 12px 28px rgba(23,105,255,.23);
+    font-weight: 800;
+    cursor: pointer;
+    transition: .22s ease;
+}
+
+.hero-button:hover,
+.primary-button:hover,
+.submit-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(23,105,255,.30);
+}
+
+/* SECTIONS */
+.services,
+.benefits {
+    padding-top: 90px;
+    padding-bottom: 90px;
+}
+
+.section-heading {
+    margin-bottom: 38px;
+}
+
+.section-heading h2 {
+    color: var(--bayora-navy);
+    font-size: clamp(28px,4vw,42px);
+    letter-spacing: -1.2px;
+}
+
+.section-heading p {
+    color: var(--bayora-muted);
+}
+
+/* SERVICE CARDS */
+.service-grid,
+.benefit-grid {
+    gap: 20px;
+}
+
+.service-card,
+.benefit-card,
+.product-card,
+.form-container,
+.checkout-card,
+.success-box {
+    background: rgba(255,255,255,.96);
+    border: 1px solid var(--bayora-border);
+    border-radius: 20px;
+    box-shadow: var(--bayora-shadow);
+    transition: .22s ease;
+}
+
+.service-card {
+    padding: 28px;
+}
+
+.service-card:hover,
+.benefit-card:hover,
+.product-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(23,105,255,.25);
+    box-shadow: 0 22px 48px rgba(23,105,255,.13);
+}
+
+.service-icon,
+.large-icon {
+    border-radius: 15px;
+    background: linear-gradient(135deg,rgba(23,105,255,.11),rgba(22,199,255,.14));
+    color: var(--bayora-primary);
+}
+
+/* BENEFITS */
+.benefit-card {
+    padding: 26px;
+}
+
+.benefit-card h3,
+.service-card h3 {
+    color: var(--bayora-navy);
+}
+
+.benefit-card p,
+.service-card p {
+    color: var(--bayora-muted);
+}
+
+/* TRANSACTION */
+.service-page {
+    background: transparent;
+}
+
+.form-container {
+    padding: 34px;
+}
+
+.form-header h2,
+.checkout-container h2 {
+    color: var(--bayora-navy);
+}
+
+.form-header p:last-child,
+.checkout-description {
+    color: var(--bayora-muted);
+}
+
+.back-button {
+    color: var(--bayora-primary);
+    font-weight: 700;
+}
+
+.input-group label {
+    color: var(--bayora-text);
+    font-weight: 700;
+}
+
+.input-group input,
+.input-group select {
+    min-height: 48px;
+    border: 1px solid var(--bayora-border);
+    border-radius: 12px;
+    background: #fbfdff;
+    transition: .2s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--bayora-primary);
+    box-shadow: 0 0 0 4px rgba(23,105,255,.09);
+    outline: none;
+}
+
+/* PRODUCT */
+.product-grid {
+    gap: 14px;
+}
+
+.product-card {
+    padding: 20px;
+}
+
+.product-card.selected {
+    border-color: var(--bayora-primary);
+    box-shadow: 0 0 0 3px rgba(23,105,255,.10), var(--bayora-shadow);
+}
+
+.product-card-name {
+    color: var(--bayora-navy);
+    font-weight: 800;
+}
+
+.product-card-price {
+    color: var(--bayora-primary);
+    font-weight: 900;
+}
+
+/* SUMMARY */
+.summary {
+    background: #f7faff;
+    border: 1px solid var(--bayora-border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+/* CHECKOUT */
+.checkout-page {
+    background: transparent;
+}
+
+.checkout-card {
+    padding: 30px;
+}
+
+.checkout-row {
+    border-color: var(--bayora-border);
+}
+
+.checkout-total {
+    margin-top: 18px;
+    border: 1px solid #d5e8ff;
+    border-radius: 16px;
+    background: linear-gradient(135deg,#eef6ff,#e8fbff);
+}
+
+.checkout-total strong {
+    color: var(--bayora-primary);
+}
+
+.payment-option {
+    border: 1px solid var(--bayora-border);
+    border-radius: 14px;
+    transition: .2s ease;
+}
+
+.payment-option:hover {
+    border-color: rgba(23,105,255,.28);
+}
+
+.payment-option:has(input:checked) {
+    border-color: var(--bayora-primary);
+    background: #f2f7ff;
+    box-shadow: 0 0 0 3px rgba(23,105,255,.08);
+}
+
+/* SUCCESS */
+.success-box {
+    padding: 38px;
+}
+
+.success-icon {
+    background: linear-gradient(135deg,var(--bayora-primary),var(--bayora-cyan));
+    color: white;
+    box-shadow: 0 12px 28px rgba(23,105,255,.22);
+}
+
+/* FOOTER */
+footer {
+    background: var(--bayora-navy);
+    color: #dbe7ff;
+    border-top: 0;
+}
+
+footer a {
+    color: #bcd1f5;
+}
+
+footer a:hover {
+    color: white;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+    .navbar {
+        height: 66px;
+        padding: 0 5%;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .logo::before {
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+        font-size: 16px;
+    }
+
+    .navbar nav {
+        gap: 14px;
+    }
+
+    .navbar nav a {
+        font-size: 12px;
+    }
+
+    .hero {
+        min-height: 570px;
+        padding: 72px 5%;
+    }
+
+    .hero h1 {
+        font-size: 42px;
+        letter-spacing: -1.8px;
+    }
+
+    .hero-description {
+        font-size: 15px;
+    }
+
+    .services,
+    .benefits {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+
+    .service-card,
+    .benefit-card,
+    .product-card,
+    .form-container,
+    .checkout-card {
+        border-radius: 17px;
+    }
+
+    .form-container,
+    .checkout-card {
+        padding: 22px;
+    }
+}

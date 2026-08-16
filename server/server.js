@@ -194,6 +194,47 @@ app.use(
 );
 
 
+
+/* =========================
+   TEMP TRANSACTION DEBUG
+========================= */
+
+app.get("/api/debug/transaction/:id", (req, res) => {
+    try {
+        const transaction = db.prepare(`
+            SELECT
+                transaction_id,
+                reference,
+                payment_status,
+                digiflazz_status,
+                digiflazz_ref,
+                digiflazz_message
+            FROM transactions
+            WHERE transaction_id = ?
+        `).get(req.params.id);
+
+        if (!transaction) {
+            return res.status(404).json({
+                success: false,
+                error: "Transaksi tidak ditemukan."
+            });
+        }
+
+        return res.json({
+            success: true,
+            transaction
+        });
+
+    } catch (error) {
+        console.error("[DEBUG TRANSACTION]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 /* =========================
    HEALTH CHECK
 ========================= */

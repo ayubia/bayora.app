@@ -1252,3 +1252,143 @@ footer {
     }
 
 }
+/* =========================================================
+   BAYORA — MODERN BLUE/CYAN THEME
+   ========================================================= */
+
+:root {
+    --bayora-blue: #1769ff;
+    --bayora-cyan: #16c7ff;
+    --bayora-dark: #0b1730;
+    --bayora-text: #172033;
+    --bayora-muted: #667085;
+    --bayora-bg: #f5f9ff;
+    --bayora-card: #ffffff;
+}
+
+body {
+    background: var(--bayora-bg);
+    color: var(--bayora-text);
+}
+
+.navbar {
+    background: rgba(255, 255, 255, .96);
+    border-bottom: 1px solid #e5edfa;
+    box-shadow: 0 4px 20px rgba(23, 105, 255, .06);
+}
+
+.logo {
+    color: var(--bayora-blue);
+}
+
+.navbar nav a:hover {
+    color: var(--bayora-blue);
+}
+
+.hero {
+    background:
+        radial-gradient(circle at 85% 15%, rgba(22, 199, 255, .18), transparent 32%),
+        radial-gradient(circle at 70% 80%, rgba(23, 105, 255, .12), transparent 38%),
+        linear-gradient(135deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+.eyebrow {
+    color: var(--bayora-blue);
+}
+
+.hero h1 span {
+    color: var(--bayora-blue);
+}
+
+.hero-button,
+.primary-button,
+.submit-button {
+    background: linear-gradient(135deg, var(--bayora-blue), var(--bayora-cyan));
+    color: #fff;
+    border: none;
+    box-shadow: 0 10px 25px rgba(23, 105, 255, .22);
+}
+
+.hero-button:hover,
+.primary-button:hover,
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(23, 105, 255, .28);
+}
+
+.service-card,
+.benefit-card,
+.product-card,
+.form-container,
+.checkout-card,
+.success-box {
+    background: var(--bayora-card);
+    border: 1px solid #e5edfa;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(18, 61, 120, .07);
+}
+
+.service-card:hover,
+.product-card:hover {
+    border-color: rgba(23, 105, 255, .28);
+    box-shadow: 0 16px 35px rgba(23, 105, 255, .12);
+    transform: translateY(-3px);
+}
+
+.service-icon,
+.large-icon {
+    background: linear-gradient(135deg, rgba(23, 105, 255, .12), rgba(22, 199, 255, .16));
+    color: var(--bayora-blue);
+}
+
+.product-card.selected {
+    border-color: var(--bayora-blue);
+    box-shadow: 0 0 0 2px rgba(23, 105, 255, .12);
+}
+
+.product-card-price,
+.product-card-name {
+    color: var(--bayora-blue);
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--bayora-blue);
+    box-shadow: 0 0 0 3px rgba(23, 105, 255, .10);
+}
+
+.payment-option:has(input:checked) {
+    border-color: var(--bayora-blue);
+    background: #f2f7ff;
+}
+
+.checkout-total {
+    background: linear-gradient(135deg, #eef6ff, #e8fbff);
+    border-color: #d6e8ff;
+}
+
+.success-icon {
+    background: linear-gradient(135deg, var(--bayora-blue), var(--bayora-cyan));
+    color: #fff;
+}
+
+/* BAYORA mobile */
+@media (max-width: 700px) {
+    .navbar {
+        padding: 0 5%;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .hero {
+        padding: 60px 5%;
+    }
+
+    .service-card,
+    .benefit-card,
+    .product-card {
+        border-radius: 16px;
+    }
+}

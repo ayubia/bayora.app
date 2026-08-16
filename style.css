@@ -3127,3 +3127,247 @@ footer{
 }
 
 
+
+
+/* ============================================================
+   BAYORA — SERVICE GRID FINAL
+   Tampilan mobile:
+   2 kolom
+   icon tengah atas
+   judul tengah
+   deskripsi tengah
+   ============================================================ */
+
+#customerServiceGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+
+/* CARD */
+
+#customerServiceGrid .service-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 225px !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    text-align: center !important;
+
+    padding: 28px 16px 22px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #dce7f5 !important;
+    border-radius: 24px !important;
+
+    overflow: hidden !important;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* ICON */
+
+#customerServiceGrid .service-card .service-icon {
+    width: 78px !important;
+    height: 78px !important;
+
+    min-width: 78px !important;
+    min-height: 78px !important;
+
+    margin: 0 auto 20px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    flex-shrink: 0 !important;
+
+    background: #eef9ff !important;
+
+    border-radius: 20px !important;
+
+    font-size: 34px !important;
+
+    line-height: 1 !important;
+
+    text-align: center !important;
+}
+
+
+/* JUDUL */
+
+#customerServiceGrid .service-card .service-title {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: block !important;
+
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
+
+    color: #0b214d !important;
+
+    text-align: center !important;
+
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+}
+
+
+/* DESKRIPSI */
+
+#customerServiceGrid .service-card .service-description {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 8px 0 0 !important;
+    padding: 0 !important;
+
+    display: block !important;
+
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+    font-weight: 400 !important;
+
+    color: #7b879c !important;
+
+    text-align: center !important;
+
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+}
+
+
+/* HOVER / TAP */
+
+#customerServiceGrid .service-card:hover {
+    transform: translateY(-2px) !important;
+
+    box-shadow:
+        0 12px 30px rgba(15, 55, 110, 0.08) !important;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    #customerServiceGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+
+    #customerServiceGrid .service-card {
+        min-height: 215px !important;
+        padding: 24px 12px 18px !important;
+        border-radius: 22px !important;
+    }
+
+    #customerServiceGrid .service-card .service-icon {
+        width: 68px !important;
+        height: 68px !important;
+
+        min-width: 68px !important;
+        min-height: 68px !important;
+
+        margin-bottom: 16px !important;
+
+        border-radius: 18px !important;
+
+        font-size: 30px !important;
+    }
+
+    #customerServiceGrid .service-card .service-title {
+        font-size: 17px !important;
+        line-height: 1.3 !important;
+    }
+
+    #customerServiceGrid .service-card .service-description {
+        margin-top: 6px !important;
+
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+    }
+}
+
+
+/* ============================================================
+   IPHONE LAYAR KECIL
+   ============================================================ */
+
+@media (max-width: 390px) {
+
+    #customerServiceGrid {
+        gap: 12px !important;
+    }
+
+    #customerServiceGrid .service-card {
+        min-height: 205px !important;
+        padding: 22px 10px 16px !important;
+    }
+
+    #customerServiceGrid .service-card .service-icon {
+        width: 62px !important;
+        height: 62px !important;
+
+        min-width: 62px !important;
+        min-height: 62px !important;
+
+        margin-bottom: 14px !important;
+
+        border-radius: 17px !important;
+
+        font-size: 28px !important;
+    }
+
+    #customerServiceGrid .service-card .service-title {
+        font-size: 16px !important;
+    }
+
+    #customerServiceGrid .service-card .service-description {
+        font-size: 12.5px !important;
+    }
+}
+
+
+/* ============================================================
+   PAGE VISIBILITY
+   ============================================================ */
+
+.page-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+#homePage.page-hidden,
+#servicePage.page-hidden,
+#checkoutPage.page-hidden,
+#successPage.page-hidden {
+    display: none !important;
+}
+
+

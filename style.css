@@ -2803,3 +2803,77 @@ footer{
 
 }
 
+
+
+/* ============================================================
+   BAYORA — PAGE VISIBILITY FIX
+   Memastikan halaman yang memiliki .page-hidden
+   benar-benar tidak ikut tampil di homepage.
+   ============================================================ */
+
+.page-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* Halaman aktif */
+#homePage:not(.page-hidden),
+#servicePage:not(.page-hidden),
+#checkoutPage:not(.page-hidden),
+#successPage:not(.page-hidden) {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+
+/* Jangan biarkan page tersembunyi mengambil ruang layout */
+#homePage.page-hidden,
+#servicePage.page-hidden,
+#checkoutPage.page-hidden,
+#successPage.page-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* ============================================================
+   PASTIKAN CONTAINER PAGE TIDAK SALING MENUMPUK
+   ============================================================ */
+
+#homePage,
+#servicePage,
+#checkoutPage,
+#successPage {
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   SERVICE PAGE HANYA MUNCUL SAAT AKTIF
+   ============================================================ */
+
+#servicePage.page-hidden {
+    display: none !important;
+}
+
+
+/* ============================================================
+   CHECKOUT PAGE HANYA MUNCUL SAAT AKTIF
+   ============================================================ */
+
+#checkoutPage.page-hidden {
+    display: none !important;
+}
+
+
+/* ============================================================
+   SUCCESS PAGE HANYA MUNCUL SAAT AKTIF
+   ============================================================ */
+
+#successPage.page-hidden {
+    display: none !important;
+}
+

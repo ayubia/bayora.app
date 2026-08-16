@@ -196,22 +196,43 @@ app.use(
 
 
 /* =========================
-   TEMP TRANSACTION DEBUG
+   TEMP SAFE DIGIFLAZZ RETRY
 ========================= */
 
-app.get("/api/debug/transaction/:id", (req, res) => {
+app.post("/api/debug/retry-transaction/:id", async (req, res) => {
     try {
+
+        const adminPassword = req.headers["x-admin-password"];
+
+        if (
+            !adminPassword ||
+            adminPassword !== process.env.ADMIN_PASSWORD
+        ) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthorized."
+            });
+        }
+
+        const transactionId = req.params.id;
+
+        if (transactionId !== "PPOB-1786893730544") {
+            return res.status(400).json({
+                success: false,
+                error: "Endpoint ini hanya untuk transaksi yang sedang diperbaiki."
+            });
+        }
+
         const transaction = db.prepare(`
             SELECT
                 transaction_id,
-                reference,
                 payment_status,
                 digiflazz_status,
                 digiflazz_ref,
                 digiflazz_message
             FROM transactions
             WHERE transaction_id = ?
-        `).get(req.params.id);
+        `).get(transactionId);
 
         if (!transaction) {
             return res.status(404).json({
@@ -220,17 +241,59 @@ app.get("/api/debug/transaction/:id", (req, res) => {
             });
         }
 
+        if (transaction.payment_status !== "PAID") {
+            return res.status(400).json({
+                success: false,
+                error: "Transaksi belum PAID.",
+                transaction
+            });
+        }
+
+        if (transaction.digiflazz_status === "SUCCESS") {
+            return res.status(400).json({
+                success: false,
+                error: "Transaksi sudah SUCCESS. Tidak diulang.",
+                transaction
+            });
+        }
+
+        if (transaction.digiflazz_ref) {
+            return res.status(400).json({
+                success: false,
+                error: "Transaksi sudah memiliki digiflazz_ref. Tidak diulang.",
+                transaction
+            });
+        }
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                digiflazz_status = 'PENDING',
+                digiflazz_message = NULL,
+                processed_at = NULL
+            WHERE transaction_id = ?
+              AND payment_status = 'PAID'
+              AND digiflazz_ref IS NULL
+        `).run(transactionId);
+
+        const result = await sendTransactionToDigiflazz(transactionId);
+
         return res.json({
             success: true,
-            transaction
+            retry: true,
+            result
         });
 
     } catch (error) {
-        console.error("[DEBUG TRANSACTION]", error);
+
+        console.error("[SAFE DIGIFLAZZ RETRY]", error);
 
         return res.status(500).json({
             success: false,
-            error: error.message
+            error:
+                error.response?.data ||
+                error.message ||
+                "Retry Digiflazz gagal."
         });
     }
 });

@@ -2227,3 +2227,102 @@ footer{
     grid-template-columns:repeat(2,1fr);
   }
 }
+
+
+/* =========================================================
+   BAYORA — MOBILE SERVICE GRID COMPACT
+   Tetap 2 kolom di mobile.
+   Desktop tidak diubah.
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  /* SERVICE GRID */
+  .bayora-service-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  /* SERVICE CARD */
+  .bayora-service-card {
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 128px !important;
+    height: auto !important;
+    padding: 15px !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* ICON */
+  .bayora-service-card > div:first-child {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    border-radius: 13px !important;
+    font-size: 20px !important;
+  }
+
+  /* TITLE */
+  .bayora-service-card strong {
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    display: block !important;
+  }
+
+  /* DESCRIPTION */
+  .bayora-service-card span,
+  .bayora-service-card p {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* JAGA TEXT AGAR TIDAK MEMBUAT CARD MELEBAR */
+  .bayora-service-card * {
+    min-width: 0;
+  }
+
+  /* SECTION SPACING */
+  .bayora-service-grid {
+    margin-top: 14px !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+
+/* iPhone kecil */
+@media (max-width: 390px) {
+
+  .bayora-service-grid {
+    gap: 8px !important;
+  }
+
+  .bayora-service-card {
+    min-height: 120px !important;
+    padding: 13px !important;
+    border-radius: 16px !important;
+  }
+
+  .bayora-service-card > div:first-child {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    font-size: 18px !important;
+  }
+
+  .bayora-service-card strong {
+    font-size: 14px !important;
+  }
+
+  .bayora-service-card span,
+  .bayora-service-card p {
+    font-size: 11.5px !important;
+  }
+
+}
+

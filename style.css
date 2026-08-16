@@ -1835,3 +1835,395 @@ footer a:hover {
         padding: 22px;
     }
 }
+
+/* =========================================================
+   BAYORA MOCKUP V2 — VISUAL MATCH
+   ========================================================= */
+
+:root{
+  --bayora-navy:#061a45;
+  --bayora-navy-2:#0b2c68;
+  --bayora-blue:#1268ff;
+  --bayora-cyan:#14c9f4;
+  --bayora-yellow:#ffd21c;
+  --bayora-bg:#f5f9ff;
+  --bayora-text:#10244d;
+  --bayora-muted:#64748b;
+}
+
+body{
+  background:#f5f9ff;
+  color:var(--bayora-text);
+  overflow-x:hidden;
+}
+
+.navbar{
+  height:76px;
+  padding:0 clamp(20px,6vw,90px);
+  background:linear-gradient(100deg,#061a45,#0a3374);
+  border:0;
+  box-shadow:0 10px 30px rgba(4,28,75,.16);
+}
+
+.logo{
+  color:#fff!important;
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-1px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo::before{
+  content:"B";
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  color:#fff;
+  font-size:20px;
+  font-weight:900;
+  background:linear-gradient(145deg,#10d5f7,#1268ff);
+  box-shadow:0 7px 18px rgba(0,190,255,.3);
+}
+
+.navbar nav{
+  gap:30px;
+}
+
+.navbar nav a{
+  color:#dce9ff!important;
+  font-weight:600;
+}
+
+.navbar nav a:hover{
+  color:#fff!important;
+}
+
+/* HERO */
+.hero{
+  min-height:auto;
+  padding:26px clamp(18px,6vw,90px) 34px;
+  background:#f5f9ff;
+  display:block;
+}
+
+.hero-content{
+  max-width:none;
+  min-height:280px;
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  padding:48px clamp(28px,5vw,64px);
+  background:
+    radial-gradient(circle at 80% 30%,rgba(20,201,244,.22),transparent 27%),
+    linear-gradient(120deg,#f1f8ff,#e4f5ff);
+  border:1px solid #dcecff;
+  box-shadow:0 20px 55px rgba(22,73,137,.10);
+}
+
+.eyebrow{
+  color:var(--bayora-blue)!important;
+  letter-spacing:1.4px;
+  font-weight:800;
+}
+
+.hero h1{
+  max-width:570px;
+  font-size:clamp(38px,5vw,58px);
+  line-height:1.06;
+  letter-spacing:-2px;
+  color:#10234a;
+}
+
+.hero-description{
+  max-width:520px;
+  color:#526783;
+  font-size:16px;
+  line-height:1.7;
+}
+
+.hero-button{
+  margin-top:18px;
+  padding:0 28px;
+  min-height:50px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#1268ff,#12c7f4);
+}
+
+/* CSS PHONE / HERO ART */
+.hero-content::after{
+  content:"";
+  position:absolute;
+  right:9%;
+  top:35px;
+  width:145px;
+  height:245px;
+  border:9px solid #082b63;
+  border-radius:30px;
+  background:
+    linear-gradient(160deg,#0d76ff 0 15%,#f6fbff 15% 100%);
+  box-shadow:
+    0 25px 45px rgba(4,35,87,.22),
+    inset 0 0 0 3px rgba(255,255,255,.35);
+}
+
+.hero-content::before{
+  content:"⚡     ☎\A\A     Wi-Fi\A\A  🎮     🪙";
+  white-space:pre;
+  position:absolute;
+  right:2%;
+  top:30px;
+  z-index:3;
+  width:280px;
+  height:250px;
+  color:#1268ff;
+  font-size:24px;
+  line-height:1.5;
+  text-align:center;
+  pointer-events:none;
+}
+
+/* SERVICES / CATEGORY */
+.services{
+  padding:35px clamp(18px,6vw,90px) 50px;
+  background:#f5f9ff;
+}
+
+.section-heading{
+  margin-bottom:24px;
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+}
+
+.section-heading h2{
+  font-size:30px;
+  color:#10244d;
+}
+
+.section-heading p{
+  color:#64748b;
+}
+
+.service-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+
+.service-card{
+  min-height:150px;
+  padding:22px 18px;
+  border-radius:17px;
+  background:#fff;
+  border:1px solid #e3ecf8;
+  box-shadow:0 9px 25px rgba(30,70,120,.07);
+  text-align:center;
+}
+
+.service-icon{
+  width:54px;
+  height:54px;
+  margin:0 auto 12px;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:linear-gradient(135deg,#eef6ff,#e7fbff);
+  color:#1268ff;
+  font-size:25px;
+}
+
+.service-card h3{
+  color:#15264b;
+  font-size:15px;
+}
+
+.service-card p{
+  color:#7a899e;
+  font-size:12px;
+}
+
+/* TRUST BANNER */
+.services::after{
+  content:"🛡  Aman  •  Cepat  •  Terpercaya     Transaksi kamu selalu terlindungi dengan sistem terbaik.";
+  display:block;
+  margin:28px 0 0;
+  padding:24px 30px;
+  border-radius:17px;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  background:linear-gradient(100deg,#0b397f,#1268ff,#10bde8);
+  box-shadow:0 15px 35px rgba(18,104,255,.20);
+}
+
+/* BENEFITS */
+.benefits{
+  padding:30px clamp(18px,6vw,90px) 75px;
+  background:#f5f9ff;
+}
+
+.benefit-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:25px;
+}
+
+.benefit-card{
+  padding:25px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  text-align:center;
+}
+
+.benefit-card span{
+  width:58px;
+  height:58px;
+  margin:0 auto 13px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  color:#1268ff;
+  background:#eaf4ff;
+  font-size:27px;
+}
+
+.benefit-card h3{
+  color:#14264b;
+  font-size:17px;
+}
+
+.benefit-card p{
+  color:#728198;
+  font-size:13px;
+}
+
+/* TRANSACTION PAGE */
+.service-page,
+.checkout-page,
+.success-page{
+  background:#f5f9ff;
+}
+
+.form-container,
+.checkout-card,
+.success-box{
+  border-radius:22px;
+  border:1px solid #e1ebf7;
+  box-shadow:0 18px 45px rgba(23,70,130,.08);
+}
+
+/* PRODUCTS */
+.product-grid{
+  grid-template-columns:repeat(3,1fr);
+  gap:13px;
+}
+
+.product-card{
+  border-radius:15px;
+  background:#fff;
+  border:1px solid #e1eaf5;
+  padding:18px;
+  text-align:left;
+}
+
+.product-card-name{
+  color:#16264b!important;
+  font-size:14px;
+  font-weight:800;
+}
+
+.product-card-price{
+  color:#1268ff!important;
+  font-size:17px;
+  font-weight:900;
+}
+
+/* FOOTER */
+footer{
+  background:#061a45!important;
+  color:#cbdcff!important;
+  padding:35px 6%;
+}
+
+/* MOBILE */
+@media(max-width:800px){
+  .navbar{
+    height:65px;
+    padding:0 18px;
+  }
+
+  .navbar nav{
+    display:none;
+  }
+
+  .logo{
+    font-size:21px;
+  }
+
+  .hero{
+    padding:16px;
+  }
+
+  .hero-content{
+    min-height:420px;
+    padding:34px 25px;
+  }
+
+  .hero h1{
+    max-width:72%;
+    font-size:35px;
+  }
+
+  .hero-description{
+    max-width:70%;
+    font-size:13px;
+  }
+
+  .hero-content::after{
+    right:-25px;
+    top:155px;
+    transform:scale(.72);
+  }
+
+  .hero-content::before{
+    right:-75px;
+    top:145px;
+    transform:scale(.65);
+  }
+
+  .service-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .benefit-grid{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+
+  .section-heading{
+    display:block;
+  }
+
+  .section-heading h2{
+    font-size:25px;
+  }
+
+  .services{
+    padding-left:16px;
+    padding-right:16px;
+  }
+
+  .benefits{
+    padding-left:16px;
+    padding-right:16px;
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}

@@ -184,6 +184,430 @@ app.use(
 
 
 /* =========================
+   USER AUTHENTICATION
+========================= */
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS user_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        token_hash TEXT NOT NULL UNIQUE,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_user_sessions_token
+        ON user_sessions(token_hash);
+
+    CREATE INDEX IF NOT EXISTS idx_user_sessions_user
+        ON user_sessions(user_id);
+`);
+
+function hashPassword(password) {
+    const salt = crypto.randomBytes(16).toString("hex");
+
+    const hash = crypto
+        .scryptSync(password, salt, 64)
+        .toString("hex");
+
+    return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedPassword) {
+    const parts = String(storedPassword).split(":");
+
+    if (parts.length !== 2) {
+        return false;
+    }
+
+    const [salt, storedHash] = parts;
+
+    const calculatedHash = crypto
+        .scryptSync(password, salt, 64)
+        .toString("hex");
+
+    const storedBuffer = Buffer.from(storedHash, "hex");
+    const calculatedBuffer = Buffer.from(calculatedHash, "hex");
+
+    if (storedBuffer.length !== calculatedBuffer.length) {
+        return false;
+    }
+
+    return crypto.timingSafeEqual(
+        storedBuffer,
+        calculatedBuffer
+    );
+}
+
+function hashSessionToken(token) {
+    return crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+}
+
+function getSessionToken(req) {
+    const cookieHeader = req.headers.cookie || "";
+    const cookies = {};
+
+    cookieHeader.split(";").forEach(part => {
+        const index = part.indexOf("=");
+
+        if (index === -1) {
+            return;
+        }
+
+        const name = part.slice(0, index).trim();
+        const value = part.slice(index + 1).trim();
+
+        try {
+            cookies[name] = decodeURIComponent(value);
+        } catch {
+            cookies[name] = value;
+        }
+    });
+
+    return cookies.bayora_session || null;
+}
+
+function createUserSession(userId) {
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashSessionToken(token);
+
+    const now = new Date();
+
+    const expires = new Date(
+        now.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+
+    db.prepare(`
+        INSERT INTO user_sessions (
+            user_id,
+            token_hash,
+            expires_at,
+            created_at
+        )
+        VALUES (?, ?, ?, ?)
+    `).run(
+        userId,
+        tokenHash,
+        expires.toISOString(),
+        now.toISOString()
+    );
+
+    return token;
+}
+
+function getCurrentUser(req) {
+    const token = getSessionToken(req);
+
+    if (!token) {
+        return null;
+    }
+
+    const tokenHash = hashSessionToken(token);
+
+    const session = db.prepare(`
+        SELECT
+            s.id AS session_id,
+            s.expires_at,
+            u.id,
+            u.name,
+            u.phone,
+            u.email,
+            u.created_at
+        FROM user_sessions s
+        JOIN users u
+            ON u.id = s.user_id
+        WHERE s.token_hash = ?
+        LIMIT 1
+    `).get(tokenHash);
+
+    if (!session) {
+        return null;
+    }
+
+    if (
+        new Date(session.expires_at).getTime() <=
+        Date.now()
+    ) {
+        db.prepare(`
+            DELETE FROM user_sessions
+            WHERE id = ?
+        `).run(session.session_id);
+
+        return null;
+    }
+
+    return {
+        id: session.id,
+        name: session.name,
+        phone: session.phone,
+        email: session.email,
+        created_at: session.created_at
+    };
+}
+
+/* =========================
+   AUTH: REGISTER
+========================= */
+
+app.post("/api/auth/register", (req, res) => {
+    try {
+        const name = String(req.body.name || "").trim();
+        const phone = String(req.body.phone || "").trim();
+        const email = String(req.body.email || "").trim().toLowerCase();
+        const password = String(req.body.password || "");
+
+        if (!name || !phone || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: "Semua field wajib diisi."
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                error: "Password minimal 8 karakter."
+            });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Format email tidak valid."
+            });
+        }
+
+        const existing = db.prepare(`
+            SELECT id
+            FROM users
+            WHERE email = ? OR phone = ?
+            LIMIT 1
+        `).get(email, phone);
+
+        if (existing) {
+            return res.status(409).json({
+                success: false,
+                error: "Email atau nomor HP sudah terdaftar."
+            });
+        }
+
+        const now = new Date().toISOString();
+        const passwordHash = hashPassword(password);
+
+        const result = db.prepare(`
+            INSERT INTO users (
+                name,
+                phone,
+                email,
+                password_hash,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        `).run(
+            name,
+            phone,
+            email,
+            passwordHash,
+            now,
+            now
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: "Registrasi berhasil.",
+            user: {
+                id: result.lastInsertRowid,
+                name,
+                phone,
+                email
+            }
+        });
+
+    } catch (error) {
+        console.error("[AUTH REGISTER]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal melakukan registrasi."
+        });
+    }
+});
+
+/* =========================
+   AUTH: LOGIN
+========================= */
+
+app.post("/api/auth/login", (req, res) => {
+    try {
+        const identifier = String(
+            req.body.identifier || ""
+        ).trim();
+
+        const password = String(
+            req.body.password || ""
+        );
+
+        if (!identifier || !password) {
+            return res.status(400).json({
+                success: false,
+                error: "Email/nomor HP dan password wajib diisi."
+            });
+        }
+
+        const normalizedEmail = identifier.toLowerCase();
+
+        const user = db.prepare(`
+            SELECT
+                id,
+                name,
+                phone,
+                email,
+                password_hash,
+                created_at
+            FROM users
+            WHERE email = ? OR phone = ?
+            LIMIT 1
+        `).get(
+            normalizedEmail,
+            identifier
+        );
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: "Email/nomor HP atau password salah."
+            });
+        }
+
+        const passwordValid = verifyPassword(
+            password,
+            user.password_hash
+        );
+
+        if (!passwordValid) {
+            return res.status(401).json({
+                success: false,
+                error: "Email/nomor HP atau password salah."
+            });
+        }
+
+        const token = createUserSession(user.id);
+
+        res.setHeader(
+            "Set-Cookie",
+            `bayora_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
+        );
+
+        return res.json({
+            success: true,
+            message: "Login berhasil.",
+            user: {
+                id: user.id,
+                name: user.name,
+                phone: user.phone,
+                email: user.email,
+                created_at: user.created_at
+            }
+        });
+
+    } catch (error) {
+        console.error("[AUTH LOGIN]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal melakukan login."
+        });
+    }
+});
+
+/* =========================
+   AUTH: LOGOUT
+========================= */
+
+app.post("/api/auth/logout", (req, res) => {
+    try {
+        const token = getSessionToken(req);
+
+        if (token) {
+            const tokenHash = hashSessionToken(token);
+
+            db.prepare(`
+                DELETE FROM user_sessions
+                WHERE token_hash = ?
+            `).run(tokenHash);
+        }
+
+        res.setHeader(
+            "Set-Cookie",
+            "bayora_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"
+        );
+
+        return res.json({
+            success: true,
+            message: "Logout berhasil."
+        });
+
+    } catch (error) {
+        console.error("[AUTH LOGOUT]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal melakukan logout."
+        });
+    }
+});
+
+/* =========================
+   AUTH: CURRENT USER
+========================= */
+
+app.get("/api/auth/me", (req, res) => {
+    try {
+        const user = getCurrentUser(req);
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                authenticated: false,
+                error: "Belum login."
+            });
+        }
+
+        return res.json({
+            success: true,
+            authenticated: true,
+            user
+        });
+
+    } catch (error) {
+        console.error("[AUTH ME]", error);
+
+        return res.status(500).json({
+            success: false,
+            authenticated: false,
+            error: "Gagal mengecek session."
+        });
+    }
+});
+
+/* =========================
    FRONTEND
 ========================= */
 

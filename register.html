@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Daftar — BAYORA</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .auth-page {
+            min-height: calc(100vh - 72px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            background:
+                radial-gradient(
+                    circle at 20% 15%,
+                    rgba(18, 199, 244, .12),
+                    transparent 32%
+                ),
+                #f5f9ff;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 470px;
+            padding: 38px;
+            background: rgba(255,255,255,.96);
+            border: 1px solid #e3eaf4;
+            border-radius: 20px;
+            box-shadow: 0 18px 50px rgba(20,65,120,.08);
+        }
+
+        .auth-icon {
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            background: linear-gradient(
+                135deg,
+                rgba(23,105,255,.10),
+                rgba(22,199,255,.15)
+            );
+            font-size: 25px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-header h1 {
+            color: #102957;
+            font-size: 28px;
+            line-height: 1.2;
+            letter-spacing: -.7px;
+            margin-bottom: 9px;
+        }
+
+        .auth-header p {
+            color: #7b899d;
+            font-size: 14px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .auth-field label {
+            color: #102957;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .auth-input-wrap {
+            position: relative;
+        }
+
+        .auth-input {
+            width: 100%;
+            height: 49px;
+            padding: 0 15px;
+            border: 1px solid #dfe7f1;
+            border-radius: 12px;
+            outline: none;
+            background: #fbfdff;
+            color: #102957;
+            font-family: inherit;
+            font-size: 14px;
+            transition: .2s ease;
+        }
+
+        .auth-input:focus {
+            border-color: #1677ff;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(22,119,255,.08);
+        }
+
+        .password-input {
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #7b899d;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .password-hint {
+            margin-top: 1px;
+            color: #8996a8;
+            font-size: 11.5px;
+        }
+
+        .auth-button {
+            width: 100%;
+            height: 50px;
+            margin-top: 7px;
+            border: 0;
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                #1268ff,
+                #12c7f4
+            );
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 9px 22px rgba(18,105,255,.18);
+            transition: .2s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 13px 27px rgba(18,105,255,.24);
+        }
+
+        .auth-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-message {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .auth-message.error {
+            display: block;
+            color: #b42318;
+            background: #fff1f0;
+            border: 1px solid #ffd5d2;
+        }
+
+        .auth-message.success {
+            display: block;
+            color: #087443;
+            background: #ecfdf3;
+            border: 1px solid #b7ebca;
+        }
+
+        .auth-switch {
+            margin-top: 23px;
+            padding-top: 21px;
+            border-top: 1px solid #edf1f6;
+            text-align: center;
+            color: #7b899d;
+            font-size: 13px;
+        }
+
+        .auth-switch a {
+            color: #1268ff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .terms {
+            color: #8996a8;
+            font-size: 11.5px;
+            line-height: 1.5;
+            text-align: center;
+            margin-top: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .auth-page {
+                min-height: calc(100vh - 64px);
+                padding: 40px 16px;
+            }
+
+            .auth-card {
+                padding: 28px 22px;
+                border-radius: 18px;
+            }
+
+            .auth-header h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="/" class="logo">BAYORA</a>
+
+    <nav>
+        <a href="/">Beranda</a>
+    </nav>
+</header>
+
+<main class="auth-page">
+
+    <section class="auth-card">
+
+        <div class="auth-icon">✨</div>
+
+        <div class="auth-header">
+            <h1>Buat akun BAYORA</h1>
+            <p>Daftar untuk mulai menggunakan layanan BAYORA</p>
+        </div>
+
+        <form id="registerForm" class="auth-form">
+
+            <div class="auth-field">
+                <label for="registerName">
+                    Nama lengkap
+                </label>
+
+                <input
+                    id="registerName"
+                    class="auth-input"
+                    type="text"
+                    autocomplete="name"
+                    placeholder="Masukkan nama lengkap"
+                    required
+                >
+            </div>
+
+            <div class="auth-field">
+                <label for="registerPhone">
+                    Nomor HP
+                </label>
+
+                <input
+                    id="registerPhone"
+                    class="auth-input"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="08xxxxxxxxxx"
+                    required
+                >
+            </div>
+
+            <div class="auth-field">
+                <label for="registerEmail">
+                    Email
+                </label>
+
+                <input
+                    id="registerEmail"
+                    class="auth-input"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="nama@email.com"
+                    required
+                >
+            </div>
+
+            <div class="auth-field">
+                <label for="registerPassword">
+                    Password
+                </label>
+
+                <div class="auth-input-wrap">
+                    <input
+                        id="registerPassword"
+                        class="auth-input password-input"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="Buat password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword('registerPassword', this)"
+                    >
+                        👁
+                    </button>
+                </div>
+
+                <span class="password-hint">
+                    Minimal 8 karakter
+                </span>
+            </div>
+
+            <div class="auth-field">
+                <label for="registerPasswordConfirm">
+                    Konfirmasi password
+                </label>
+
+                <div class="auth-input-wrap">
+                    <input
+                        id="registerPasswordConfirm"
+                        class="auth-input password-input"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="Ulangi password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword('registerPasswordConfirm', this)"
+                    >
+                        👁
+                    </button>
+                </div>
+            </div>
+
+            <div id="registerMessage" class="auth-message"></div>
+
+            <button
+                id="registerButton"
+                class="auth-button"
+                type="submit"
+            >
+                Daftar
+            </button>
+
+            <p class="terms">
+                Dengan membuat akun, kamu menyetujui penggunaan
+                layanan BAYORA.
+            </p>
+
+        </form>
+
+        <div class="auth-switch">
+            Sudah punya akun?
+            <a href="/login.html">Masuk</a>
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        button.textContent = "🙈";
+    } else {
+        input.type = "password";
+        button.textContent = "👁";
+    }
+}
+
+document
+    .getElementById("registerForm")
+    .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const name =
+            document.getElementById("registerName").value.trim();
+
+        const phone =
+            document.getElementById("registerPhone").value.trim();
+
+        const email =
+            document.getElementById("registerEmail").value.trim();
+
+        const password =
+            document.getElementById("registerPassword").value;
+
+        const confirmPassword =
+            document.getElementById("registerPasswordConfirm").value;
+
+        const button =
+            document.getElementById("registerButton");
+
+        const message =
+            document.getElementById("registerMessage");
+
+        message.className = "auth-message";
+        message.textContent = "";
+
+        if (password !== confirmPassword) {
+
+            message.className =
+                "auth-message error";
+
+            message.textContent =
+                "Konfirmasi password tidak sama.";
+
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Membuat akun...";
+
+        try {
+
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    name,
+                    phone,
+                    email,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error || "Pendaftaran gagal."
+                );
+            }
+
+            message.className =
+                "auth-message success";
+
+            message.textContent =
+                "Akun berhasil dibuat. Mengarahkan ke login...";
+
+            setTimeout(() => {
+                window.location.href = "/login.html";
+            }, 900);
+
+        } catch (error) {
+
+            message.className =
+                "auth-message error";
+
+            message.textContent =
+                error.message;
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Daftar";
+
+        }
+    });
+</script>
+
+
+<script>
+/* BAYORA_AUTH_REGISTER_CONNECTED */
+
+(function () {
+    const form = document.getElementById("registerForm");
+
+    if (!form) return;
+
+    const message =
+        document.getElementById("registerMessage") ||
+        document.createElement("div");
+
+    if (!message.id) {
+        message.id = "registerMessage";
+        message.className = "auth-message";
+        form.prepend(message);
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const button = form.querySelector(".auth-button");
+
+        const name =
+            document.getElementById("registerName").value.trim();
+
+        const phone =
+            document.getElementById("registerPhone").value.trim();
+
+        const email =
+            document.getElementById("registerEmail").value.trim();
+
+        const password =
+            document.getElementById("registerPassword").value;
+
+        message.className = "auth-message";
+        message.textContent = "";
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Membuat akun...";
+        }
+
+        try {
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    name,
+                    phone,
+                    email,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error || "Registrasi gagal."
+                );
+            }
+
+            message.className = "auth-message success";
+            message.textContent =
+                "Akun berhasil dibuat. Mengarahkan ke halaman login...";
+
+            setTimeout(function () {
+                window.location.href = "/login.html";
+            }, 700);
+
+        } catch (error) {
+            message.className = "auth-message error";
+            message.textContent = error.message;
+
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Daftar";
+            }
+        }
+    });
+})();
+</script>
+
+</body>
+</html>

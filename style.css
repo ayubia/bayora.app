@@ -1142,7 +1142,9 @@ footer {
 
     .navbar nav {
 
-        display: none;
+        display: flex !important;
+
+        align-items: center !important;
 
     }
 
@@ -2158,7 +2160,18 @@ footer{
   }
 
   .navbar nav{
-    display:none;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    gap:0 !important;
+  }
+
+  .navbar nav > a:not(#authMenuDesktop){
+    display:none !important;
+  }
+
+  .navbar nav a#authMenuDesktop{
+    display:block !important;
   }
 
   .logo{
@@ -3732,3 +3745,202 @@ footer{
     }
 
 }
+
+/* ==========================================================
+   BAYORA — MOBILE ACCOUNT NAVIGATION
+========================================================== */
+
+/* Desktop: menu tambahan mobile tidak terlihat */
+.mobile-account-links {
+    display: none;
+}
+
+@media (max-width: 700px) {
+
+    .mobile-account-links {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+
+    .mobile-account-link {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 12px 14px !important;
+        margin: 0 !important;
+
+        color: #17213a !important;
+        background: transparent !important;
+
+        font-family: inherit !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        line-height: 1.4 !important;
+
+        text-align: left !important;
+        text-decoration: none !important;
+
+        border: 0 !important;
+        border-radius: 9px !important;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .mobile-account-link:hover,
+    .mobile-account-link:active {
+        background: #f1f6ff !important;
+        color: #1769e0 !important;
+    }
+
+}
+
+/* ==========================================================
+   BAYORA — PROFILE + RIWAYAT MOBILE
+========================================================== */
+
+@media (max-width: 700px) {
+
+    #accountDropdown .mobile-account-links {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    #accountDropdown .mobile-account-link {
+        display: flex !important;
+        width: 100% !important;
+        min-height: 44px !important;
+        padding: 11px 14px !important;
+        box-sizing: border-box !important;
+        color: #142b52 !important;
+        background: transparent !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        line-height: 1.4 !important;
+        text-decoration: none !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    #accountDropdown .mobile-account-divider {
+        display: block !important;
+        width: calc(100% - 16px) !important;
+        height: 1px !important;
+        margin: 8px auto !important;
+        background: #e5eaf1 !important;
+    }
+
+}
+
+
+/* ==========================================================
+   BAYORA — MOBILE ACCOUNT CLICK FIX
+   Pastikan seluruh isi dropdown benar-benar bisa diklik
+========================================================== */
+
+@media (max-width: 700px) {
+
+    #accountDropdown {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+    }
+
+    #accountDropdown,
+    #accountDropdown * {
+        pointer-events: auto !important;
+    }
+
+    #accountDropdown a,
+    #accountDropdown button {
+        position: relative !important;
+        z-index: 1000001 !important;
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+        cursor: pointer !important;
+    }
+
+    #accountDropdown .mobile-account-links,
+    #accountDropdown .mobile-account-link {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+    }
+
+    #accountLogout,
+    #accountDelete {
+        pointer-events: auto !important;
+        touch-action: manipulation !important;
+    }
+}
+
+/* ==========================================================
+   BAYORA — FINAL FIX MOBILE ACCOUNT LINKS
+   Jangan sembunyikan link yang berada di dalam dropdown akun
+========================================================== */
+
+@media (max-width: 850px) {
+
+    .navbar nav #accountDropdown a.account-dropdown-link,
+    .navbar nav #accountDropdown a.mobile-account-link {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .navbar nav #accountDropdown .mobile-account-links {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+}
+
+
+/* ==========================================================
+   BAYORA — ACCOUNT DROPDOWN TEXT CONTRAST
+========================================================== */
+
+#accountDropdown .account-dropdown-link {
+    color: #17213a !important;
+    font-weight: 600 !important;
+}
+
+#accountDropdown .account-dropdown-link:hover {
+    color: #1264d8 !important;
+    background: #f1f7ff !important;
+}
+
+#accountDropdown .account-dropdown-link .icon {
+    color: #2478e8 !important;
+}
+
+@media (max-width: 700px) {
+
+    #accountDropdown .account-dropdown-link {
+        color: #17213a !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    #accountDropdown .account-dropdown-link:hover,
+    #accountDropdown .account-dropdown-link:active {
+        color: #1264d8 !important;
+        background: #f1f7ff !important;
+    }
+
+}
+

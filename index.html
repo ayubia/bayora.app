@@ -600,7 +600,7 @@ footer a{
 <style id="BAYORA_ACCOUNT_NAV_STYLE">
 
 /* ==========================================================
-   AKUN DI NAVBAR
+   AKUN DESKTOP
 ========================================================== */
 
 .navbar nav a#authMenuDesktop {
@@ -615,7 +615,7 @@ footer a{
 
 
 /* ==========================================================
-   ACCOUNT DROPDOWN
+   DROPDOWN AKUN
 ========================================================== */
 
 #accountDropdown {
@@ -625,23 +625,21 @@ footer a{
     top: calc(100% + 12px);
     right: 0;
 
-    width: 220px;
-
-    box-sizing: border-box;
+    width: 230px;
 
     display: flex;
     flex-direction: column;
 
-    padding: 8px;
+    padding: 10px;
 
     background: #ffffff;
 
-    border: 1px solid #e7e9ee;
+    border: 1px solid #e8edf5;
 
     border-radius: 16px;
 
     box-shadow:
-        0 14px 35px rgba(15, 23, 42, .12);
+        0 18px 45px rgba(15, 42, 80, .14);
 
     opacity: 0;
     visibility: hidden;
@@ -656,9 +654,13 @@ footer a{
     z-index: 99999;
 }
 
+
+/* OPEN */
+
 #accountDropdown.is-open {
 
     opacity: 1;
+
     visibility: visible;
 
     transform: translateY(0);
@@ -669,79 +671,106 @@ footer a{
    LINK PROFIL + RIWAYAT
 ========================================================== */
 
-/*
- * !important sengaja dipakai agar tidak kalah
- * oleh .navbar nav a atau CSS lain.
- */
+#accountDropdown .account-dropdown-link {
 
-#accountDropdown
-.account-dropdown-link {
+    display: flex;
 
-    display: block !important;
+    align-items: center;
 
-    width: 100% !important;
+    gap: 11px;
 
-    box-sizing: border-box !important;
+    width: 100%;
 
-    padding: 12px 14px !important;
+    min-height: 46px;
 
-    margin: 0 !important;
+    box-sizing: border-box;
 
-    background: transparent !important;
+    padding: 10px 12px;
 
-    color: #17213a !important;
+    margin: 0;
 
-    font-family: inherit !important;
+    border: 0;
 
-    font-size: 14px !important;
+    border-radius: 10px;
 
-    font-weight: 600 !important;
+    background: transparent;
 
-    line-height: 1.4 !important;
+    color: #142b52;
 
-    text-align: left !important;
+    font-family: inherit;
 
-    text-decoration: none !important;
+    font-size: 14px;
 
-    border: 0 !important;
+    font-weight: 500;
 
-    border-radius: 9px !important;
+    line-height: 1.4;
 
-    opacity: 1 !important;
+    text-align: left;
 
-    visibility: visible !important;
+    text-decoration: none;
 
     cursor: pointer;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
 }
 
 
-/*
- * Hover biru muda yang masih cocok dengan BAYORA.
- */
+/* ICON */
 
-#accountDropdown
-.account-dropdown-link:hover {
+#accountDropdown .account-dropdown-link .icon {
 
-    background: #f1f6ff !important;
+    display: inline-flex;
 
-    color: #1769e0 !important;
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+    height: 20px;
+
+    flex: 0 0 20px;
+
+    color: #2478e8;
+}
+
+
+/* SVG ICON */
+
+#accountDropdown .account-dropdown-link .icon svg {
+
+    width: 20px;
+    height: 20px;
+
+    display: block;
+
+    stroke: currentColor;
+}
+
+
+/* HOVER */
+
+#accountDropdown .account-dropdown-link:hover {
+
+    background: #f1f7ff;
+
+    color: #1264d8;
 }
 
 
 /* ==========================================================
-   GARIS PEMISAH
+   PEMBATAS
 ========================================================== */
 
-#accountDropdown
-.account-dropdown-divider {
+#accountDropdown .account-dropdown-divider {
 
-    width: calc(100% - 20px);
+    width: calc(100% - 16px);
 
     height: 1px;
 
-    margin: 6px auto;
+    margin: 8px auto;
 
-    background: #e5e7eb;
+    background: #e5eaf1;
 }
 
 
@@ -749,51 +778,86 @@ footer a{
    LOGOUT + HAPUS AKUN
 ========================================================== */
 
-#accountDropdown
-.account-dropdown-danger {
+#accountDropdown .account-dropdown-danger {
 
-    display: block !important;
+    display: flex;
 
-    width: 100% !important;
+    align-items: center;
 
-    box-sizing: border-box !important;
+    gap: 11px;
 
-    padding: 12px 14px !important;
+    width: 100%;
 
-    margin: 0 !important;
+    min-height: 46px;
 
-    background: transparent !important;
+    box-sizing: border-box;
 
-    color: #c62828 !important;
+    padding: 10px 12px;
 
-    font-family: inherit !important;
+    margin: 0;
 
-    font-size: 14px !important;
+    border: 0;
 
-    font-weight: 600 !important;
+    border-radius: 10px;
 
-    line-height: 1.4 !important;
+    background: transparent;
 
-    text-align: left !important;
+    color: #c62828;
 
-    border: 0 !important;
+    font-family: inherit;
 
-    border-radius: 9px !important;
+    font-size: 14px;
 
-    opacity: 1 !important;
+    font-weight: 500;
 
-    visibility: visible !important;
+    line-height: 1.4;
+
+    text-align: left;
+
+    text-decoration: none;
 
     cursor: pointer;
+
+    transition:
+        background .15s ease,
+        color .15s ease;
 }
 
 
-#accountDropdown
-.account-dropdown-danger:hover {
+#accountDropdown .account-dropdown-danger .icon {
 
-    background: #fff3f3 !important;
+    display: inline-flex;
 
-    color: #b71c1c !important;
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+    height: 20px;
+
+    flex: 0 0 20px;
+
+    color: currentColor;
+}
+
+
+#accountDropdown .account-dropdown-danger .icon svg {
+
+    width: 20px;
+    height: 20px;
+
+    display: block;
+
+    stroke: currentColor;
+}
+
+
+/* HOVER DANGER */
+
+#accountDropdown .account-dropdown-danger:hover {
+
+    background: #fff1f1;
+
+    color: #b71c1c;
 }
 
 
@@ -810,11 +874,9 @@ footer a{
         display: inline-flex;
 
         width: 20px;
-
         height: 20px;
 
         align-items: center;
-
         justify-content: center;
 
         font-size: 0;
@@ -828,16 +890,12 @@ footer a{
         position: absolute;
 
         width: 18px;
-
         height: 12px;
 
         box-sizing: border-box;
 
-        border-top:
-            1.5px solid currentColor;
-
-        border-bottom:
-            1.5px solid currentColor;
+        border-top: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
     }
 
 
@@ -848,7 +906,6 @@ footer a{
         position: absolute;
 
         width: 18px;
-
         height: 1.5px;
 
         background: currentColor;
@@ -870,6 +927,7 @@ footer a{
             calc(100vw - 14%)
         );
     }
+
 }
 
 </style>
@@ -940,11 +998,41 @@ footer a{
                 Riwayat Transaksi
             </a>
 
+            <div class="mobile-account-links">
+
+                <div class="mobile-account-divider"></div>
+
+                <a
+                    href="#"
+                    onclick="showHome(); return false;"
+                    class="mobile-account-link"
+                >
+                    Beranda
+                </a>
+
+                <a
+                    href="#layanan"
+                    class="mobile-account-link"
+                >
+                    Layanan
+                </a>
+
+                <a
+                    href="#"
+                    class="mobile-account-link"
+                    id="mobileTransactionLink"
+                    
+                >
+                    Transaksi
+                </a>
+
+            </div>
+
             <div class="account-dropdown-divider"></div>
 
             <button
                 type="button"
-                id="accountLogout"
+                id="accountLogout" 
                 class="account-dropdown-danger"
                 role="menuitem"
             >
@@ -1583,233 +1671,112 @@ footer a{
 
 
 <script id="BAYORA_ACCOUNT_SYSTEM">
-
 (function () {
 
-    const button =
-        document.getElementById(
-            "authMenuDesktop"
-        );
+    const accountButton =
+        document.getElementById("authMenuDesktop");
 
-    const dropdown =
-        document.getElementById(
-            "accountDropdown"
-        );
+    const accountDropdown =
+        document.getElementById("accountDropdown");
 
-    if (!button || !dropdown) {
-
+    if (!accountButton || !accountDropdown) {
         console.warn(
             "[BAYORA AUTH] Account menu tidak ditemukan."
         );
-
         return;
     }
 
 
     /* ======================================================
-       BUKA / TUTUP DROPDOWN
+       BUKA / TUTUP MENU
     ====================================================== */
 
-    function openMenu() {
+    function closeAccountMenu() {
 
-        dropdown.classList.add(
+        accountDropdown.classList.remove(
             "is-open"
         );
 
-        dropdown.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-        button.setAttribute(
-            "aria-expanded",
-            "true"
-        );
-    }
-
-
-    function closeMenu() {
-
-        dropdown.classList.remove(
-            "is-open"
-        );
-
-        dropdown.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-        button.setAttribute(
+        accountButton.setAttribute(
             "aria-expanded",
             "false"
         );
     }
 
 
-    button.addEventListener(
+    accountButton.addEventListener(
         "click",
         function (event) {
 
             event.preventDefault();
-
             event.stopPropagation();
 
-            if (
-                dropdown.classList.contains(
+            const isOpen =
+                accountDropdown.classList.toggle(
                     "is-open"
-                )
-            ) {
+                );
 
-                closeMenu();
-
-            } else {
-
-                openMenu();
-            }
+            accountButton.setAttribute(
+                "aria-expanded",
+                isOpen ? "true" : "false"
+            );
         }
     );
 
+
+    /* ======================================================
+       KLIK DI LUAR MENU
+    ====================================================== */
 
     document.addEventListener(
         "click",
         function (event) {
 
             if (
-                !dropdown.contains(
+                !accountDropdown.contains(
                     event.target
                 ) &&
-                event.target !== button
+                event.target !== accountButton
             ) {
 
-                closeMenu();
+                closeAccountMenu();
             }
         }
     );
 
 
     /* ======================================================
-       CEK LOGIN
+       ESC UNTUK MENUTUP
     ====================================================== */
 
-    fetch(
-        "/api/auth/me",
-        {
-            credentials: "include"
-        }
-    )
-    .then(
-        function (response) {
+    document.addEventListener(
+        "keydown",
+        function (event) {
 
-            if (!response.ok) {
-                return null;
-            }
+            if (event.key === "Escape") {
 
-            return response.json();
-        }
-    )
-    .then(
-        function (data) {
-
-            if (
-                data &&
-                data.success &&
-                data.authenticated &&
-                data.user
-            ) {
-
-                button.classList.add(
-                    "is-authenticated"
-                );
+                closeAccountMenu();
             }
         }
-    )
-    .catch(
-        function () {}
     );
-
 
 
     /* ======================================================
-   LOGOUT
-====================================================== */
+       LOGOUT
+    ====================================================== */
 
-const logoutButton =
-    document.getElementById("accountLogout");
+    /*
+       Logout sekarang ditangani langsung oleh
+       onclick pada tombol #accountLogout.
+    */
 
-if (logoutButton) {
 
-    logoutButton.addEventListener(
-        "click",
-        async function () {
-
-            const confirmed = window.confirm(
-                "Yakin ingin logout dari akun BAYORA?"
-            );
-
-            if (!confirmed) {
-                return;
-            }
-
-            logoutButton.disabled = true;
-
-            try {
-
-                const response = await fetch(
-                    "/api/auth/logout",
-                    {
-                        method: "POST",
-                        credentials: "include",
-                        cache: "no-store"
-                    }
-                );
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(
-                        data.error || "Logout gagal."
-                    );
-                }
-
-                /*
-                 * Paksa browser menghapus state halaman
-                 * sebelum kembali ke halaman utama.
-                 */
-                try {
-                    sessionStorage.clear();
-                } catch (e) {}
-
-                try {
-                    localStorage.removeItem("bayora_user");
-                    localStorage.removeItem("user");
-                    localStorage.removeItem("currentUser");
-                } catch (e) {}
-
-                alert("Logout berhasil.");
-
-                window.location.replace("/");
-
-            } catch (error) {
-
-                logoutButton.disabled = false;
-
-                alert(
-                    error.message ||
-                    "Logout gagal. Silakan coba lagi."
-                );
-            }
-        }
-    );
-}
-
-/* ======================================================
+    /* ======================================================
        HAPUS AKUN
     ====================================================== */
 
     const deleteButton =
-        document.getElementById(
-            "accountDelete"
-        );
+        document.getElementById("accountDelete");
 
     if (deleteButton) {
 
@@ -1819,16 +1786,12 @@ if (logoutButton) {
 
                 const confirmed =
                     window.confirm(
-                        "Hapus akun BAYORA secara permanen?\n\n" +
-                        "Data akun dan session akan dihapus.\n" +
-                        "Tindakan ini tidak dapat dibatalkan."
+                        "Apakah kamu yakin ingin menghapus akun secara permanen?"
                     );
 
                 if (!confirmed) {
                     return;
                 }
-
-                deleteButton.disabled = true;
 
                 try {
 
@@ -1855,15 +1818,17 @@ if (logoutButton) {
                         );
                     }
 
+                    alert(
+                        "Akun berhasil dihapus."
+                    );
+
                     window.location.href = "/";
 
                 } catch (error) {
 
-                    deleteButton.disabled = false;
-
                     alert(
                         error.message ||
-                        "Gagal menghapus akun."
+                        "Fitur hapus akun belum tersedia di server."
                     );
                 }
             }
@@ -1871,10 +1836,346 @@ if (logoutButton) {
     }
 
 })();
-
 </script>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="BAYORA_MOBILE_ACCOUNT_FINAL">
+(function () {
+
+    /*
+       Gunakan CAPTURE PHASE.
+       Ini sengaja dibuat supaya klik mobile
+       ditangkap sebelum event lain menutup dropdown.
+    */
+
+    document.addEventListener("click", function (event) {
+
+        const transaction =
+            event.target.closest("#mobileTransactionLink");
+
+        const logout =
+            event.target.closest("#accountLogout");
+
+
+        /* ==================================================
+           TRANSAKSI
+        ================================================== */
+
+        if (transaction) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            const dropdown =
+                document.getElementById("accountDropdown");
+
+            if (dropdown) {
+                dropdown.classList.remove("is-open");
+                dropdown.setAttribute("aria-hidden", "true");
+            }
+
+
+            if (typeof showHome === "function") {
+                showHome();
+            }
+
+
+            const servicePage =
+                document.getElementById("servicePage");
+
+            if (servicePage) {
+
+                servicePage.classList.remove("page-hidden");
+
+                servicePage.style.display = "";
+
+                setTimeout(function () {
+
+                    servicePage.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+
+                }, 100);
+            }
+
+            console.log("[BAYORA] Transaksi mobile diklik.");
+
+            return;
+        }
+
+
+        /* ==================================================
+           LOGOUT
+        ================================================== */
+
+        if (logout) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            const dropdown =
+                document.getElementById("accountDropdown");
+
+            if (dropdown) {
+                dropdown.classList.remove("is-open");
+                dropdown.setAttribute("aria-hidden", "true");
+            }
+
+
+            console.log("[BAYORA] Logout mobile diklik.");
+
+
+            fetch("/api/auth/logout", {
+                method: "POST",
+                credentials: "include"
+            })
+
+            .then(function (response) {
+
+                return response.json().then(function (data) {
+
+                    if (!response.ok || !data.success) {
+
+                        throw new Error(
+                            data.error || "Logout gagal."
+                        );
+                    }
+
+                    return data;
+                });
+
+            })
+
+            .then(function () {
+
+                window.location.href = "/";
+
+            })
+
+            .catch(function (error) {
+
+                console.error(
+                    "[BAYORA LOGOUT]",
+                    error
+                );
+
+                alert(
+                    error.message || "Logout gagal."
+                );
+
+            });
+
+            return;
+        }
+
+    }, true);
+
+})();
+</script>
+
+
+
+
+
+<script id="BAYORA_LOGOUT_DIRECT">
+async function bayoraLogoutNow(event) {
+
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    console.log("[BAYORA] Logout diklik.");
+
+    try {
+
+        const response = await fetch(
+            "/api/auth/logout",
+            {
+                method: "POST",
+                credentials: "include"
+            }
+        );
+
+        const data = await response.json();
+
+        console.log("[BAYORA] Logout response:", data);
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error || "Logout gagal."
+            );
+        }
+
+        // Logout berhasil.
+        // Langsung masuk halaman login.
+        window.location.href = "/login.html";
+
+    } catch (error) {
+
+        console.error(
+            "[BAYORA] Logout error:",
+            error
+        );
+
+        alert(
+            error.message || "Logout gagal."
+        );
+    }
+}
+</script>
 
 </body>
 
 </html>
+
+<style id="BAYORA_MOBILE_ACCOUNT_VISIBILITY_FINAL">
+
+/* ==========================================================
+   BAYORA — MOBILE ACCOUNT NAV FINAL
+   Menampilkan hanya hamburger Akun di mobile
+========================================================== */
+
+@media (max-width: 850px) {
+
+    /* NAV tetap tampil di mobile */
+
+    .navbar nav {
+
+        display: flex !important;
+
+        align-items: center !important;
+
+        justify-content: flex-end !important;
+
+        margin-left: auto !important;
+
+        gap: 0 !important;
+    }
+
+
+    /* Sembunyikan menu desktop */
+
+    .navbar nav a:not(#authMenuDesktop) {
+
+        display: none !important;
+    }
+
+
+    /* Tampilkan tombol Akun */
+
+    .navbar nav a#authMenuDesktop {
+
+        display: block !important;
+
+        position: relative !important;
+
+        width: 18px !important;
+
+        height: 18px !important;
+
+        min-width: 18px !important;
+
+        min-height: 18px !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        box-sizing: border-box !important;
+
+        font-size: 0 !important;
+
+        line-height: 0 !important;
+
+        color: #dce9ff !important;
+
+        opacity: 1 !important;
+
+        overflow: visible !important;
+
+        flex-shrink: 0 !important;
+
+        cursor: pointer !important;
+    }
+
+
+    /* 3 garis hamburger */
+
+    .navbar nav a#authMenuDesktop::before {
+
+        content: "" !important;
+
+        position: absolute !important;
+
+        top: 2px !important;
+
+        left: 0 !important;
+
+        width: 18px !important;
+
+        height: 1.5px !important;
+
+        background: currentColor !important;
+
+        border-radius: 999px !important;
+
+        box-shadow:
+            0 6px 0 currentColor,
+            0 12px 0 currentColor !important;
+    }
+
+
+    /* Jangan gunakan garis tambahan */
+
+    .navbar nav a#authMenuDesktop::after {
+
+        content: none !important;
+
+        display: none !important;
+    }
+
+
+    /* Dropdown akun */
+
+    #accountDropdown {
+
+        position: fixed !important;
+
+        top: 77px !important;
+
+        right: 17px !important;
+
+        left: auto !important;
+
+        width: min(
+            230px,
+            calc(100vw - 34px)
+        ) !important;
+
+        z-index: 999999 !important;
+    }
+
+}
+
+</style>

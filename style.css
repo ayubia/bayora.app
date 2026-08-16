@@ -3622,3 +3622,114 @@ footer{
     pointer-events: none !important;
 }
 
+
+
+/* ============================================================
+   BAYORA — PRODUCT CARD SELECTED FIX
+   Produk yang dipilih tetap jelas terbaca.
+   Tidak menggunakan background hitam.
+   ============================================================ */
+
+.product-card.selected {
+
+    background: #eef6ff !important;
+
+    border: 2px solid #1677ff !important;
+
+    box-shadow:
+        0 0 0 3px rgba(22, 119, 255, 0.14) !important;
+
+    color: #102b57 !important;
+
+    outline: none !important;
+}
+
+
+/* NAMA PRODUK */
+
+.product-card.selected .product-card-name {
+
+    color: #102b57 !important;
+
+    font-weight: 700 !important;
+}
+
+
+/* HARGA */
+
+.product-card.selected .product-card-price {
+
+    color: #1677ff !important;
+
+    font-weight: 800 !important;
+}
+
+
+/* INFO / KETERANGAN */
+
+.product-card.selected .product-card-info {
+
+    color: #71809a !important;
+}
+
+
+/* ============================================================
+   HILANGKAN EFEK HITAM DARI FOCUS / ACTIVE BROWSER
+   ============================================================ */
+
+.product-card:focus,
+.product-card:focus-visible {
+
+    outline: none !important;
+}
+
+
+/* Selected + focus tetap biru */
+
+.product-card.selected:focus,
+.product-card.selected:focus-visible {
+
+    background: #eef6ff !important;
+
+    color: #102b57 !important;
+
+    border-color: #1677ff !important;
+
+    outline: none !important;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+    .product-card.selected {
+
+        background: #eef6ff !important;
+
+        border: 2px solid #1677ff !important;
+
+        box-shadow:
+            0 0 0 3px rgba(22, 119, 255, 0.14) !important;
+
+    }
+
+    .product-card.selected .product-card-name {
+
+        color: #102b57 !important;
+    }
+
+    .product-card.selected .product-card-price {
+
+        color: #1677ff !important;
+    }
+
+    .product-card.selected .product-card-info {
+
+        color: #71809a !important;
+    }
+
+}
+

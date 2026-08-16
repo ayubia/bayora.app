@@ -1961,27 +1961,101 @@ console.log("Tabel digiflazz_price_list siap.");
    TRANSAKSI LIVE TIDAK DIUBAH.
    ============================================================ */
 
-function calculateDynamicPrice(cost) {
+function calculateDynamicPrice(cost, productName = "", serviceId = "") {
     cost = Number(cost) || 0;
 
-    let targetMargin;
+    /*
+     * BAYORA PRICING RULE
+     * -------------------
+     * Harga jual dibuat stabil berdasarkan nominal produk,
+     * bukan margin tetap dari Digiflazz.
+     *
+     * Untuk pulsa:
+     * 5K   -> 7K
+     * 10K  -> 12K
+     * 15K  -> 17K
+     * 20K  -> 22K
+     * 25K  -> 27K
+     * 30K  -> 32K
+     * 50K  -> 52K
+     * 100K -> 102K
+     *
+     * Jika harga target <= modal, otomatis dinaikkan
+     * agar transaksi tetap menghasilkan keuntungan.
+     */
 
-    if (cost <= 50000) {
-        targetMargin = 2500;
-    } else if (cost <= 100000) {
-        targetMargin = 3000;
-    } else {
-        targetMargin = 3500;
+    const name = String(productName || "").toLowerCase();
+    const service = String(serviceId || "").toLowerCase();
+
+    let targetPrice = 0;
+
+    if (service === "pulsa" || /pulsa|telkomsel|axis|indosat|tri|smartfren|xl/.test(name)) {
+        const nominalMatch = name.match(/(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(?:k|rb|000)?\b/);
+
+        if (nominalMatch) {
+            let nominal = Number(
+                nominalMatch[1].replace(",", ".")
+            );
+
+            const suffix = nominalMatch[0].toLowerCase();
+
+            if (suffix.includes("k") || suffix.includes("rb")) {
+                nominal *= 1000;
+            } else if (nominal < 1000) {
+                nominal *= 1000;
+            }
+
+            const pulsaPrices = {
+                5000: 7000,
+                10000: 12000,
+                15000: 17000,
+                20000: 22000,
+                25000: 27000,
+                30000: 32000,
+                50000: 52000,
+                100000: 102000
+            };
+
+            targetPrice = pulsaPrices[Math.round(nominal)] || 0;
+        }
     }
 
-    const price = Math.ceil(
-        (cost + targetMargin) / 500
-    ) * 500;
+    /*
+     * Untuk produk non-pulsa, pertahankan harga berbasis modal
+     * yang wajar sampai aturan nominal spesifik ditetapkan.
+     */
+    if (!targetPrice) {
+        let targetMargin;
 
-    const actualMargin = price - cost;
+        if (cost <= 20000) {
+            targetMargin = 2000;
+        } else if (cost <= 50000) {
+            targetMargin = 2500;
+        } else if (cost <= 100000) {
+            targetMargin = 3000;
+        } else {
+            targetMargin = 3500;
+        }
+
+        targetPrice = Math.ceil(
+            (cost + targetMargin) / 500
+        ) * 500;
+    }
+
+    /*
+     * JANGAN PERNAH MENJUAL DI BAWAH MODAL.
+     * Minimum profit Rp500.
+     */
+    const minimumPrice = cost + 500;
+
+    if (targetPrice < minimumPrice) {
+        targetPrice = Math.ceil(minimumPrice / 500) * 500;
+    }
+
+    const actualMargin = targetPrice - cost;
 
     return {
-        price,
+        price: targetPrice,
         margin: actualMargin
     };
 }
@@ -2273,7 +2347,11 @@ function syncDigiflazzCatalogFromCache() {
             const cost = Number(p.price) || 0;
 
             const dynamic =
-                calculateDynamicPrice(cost);
+                calculateDynamicPrice(
+                    cost,
+                    p.product_name || sku,
+                    serviceId
+                );
 
             const sku =
                 p.buyer_sku_code;

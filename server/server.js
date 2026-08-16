@@ -147,6 +147,7 @@ const transactionColumnNames =
     transactionColumns.map(column => column.name);
 
 const transactionMigrations = [
+    ["user_id", "INTEGER"],
     ["payment_status", 'TEXT NOT NULL DEFAULT "PENDING"'],
     ["digiflazz_status", 'TEXT NOT NULL DEFAULT "PENDING"'],
     ["digiflazz_ref", "TEXT"],
@@ -556,10 +557,16 @@ app.post("/api/auth/logout", (req, res) => {
 
         res.setHeader(
             "Set-Cookie",
-            "bayora_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"
+            [
+                "bayora_session=",
+                "Path=/",
+                "HttpOnly",
+                "SameSite=Lax",
+                "Max-Age=0"
+            ].join("; ")
         );
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: "Logout berhasil."
         });
@@ -610,6 +617,183 @@ app.get("/api/auth/me", (req, res) => {
 /* =========================
    FRONTEND
 ========================= */
+
+
+/* ==========================================================
+   ACCOUNT PROFILE
+========================================================== */
+
+app.get("/api/auth/profile", (req, res) => {
+
+    try {
+
+        const user = getCurrentUser(req);
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                authenticated: false,
+                error: "Belum login."
+            });
+        }
+
+        return res.json({
+            success: true,
+            user
+        });
+
+    } catch (error) {
+
+        console.error("[AUTH PROFILE]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengambil profil."
+        });
+    }
+});
+
+
+/* ==========================================================
+   ACCOUNT TRANSACTION HISTORY
+========================================================== */
+
+app.get("/api/auth/history", (req, res) => {
+
+    try {
+
+        const user = getCurrentUser(req);
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                authenticated: false,
+                error: "Belum login."
+            });
+        }
+
+        const transactions = db.prepare(`
+            SELECT
+                id,
+                transaction_id AS transactionId,
+                reference,
+                service,
+                target,
+                operator,
+                product_id AS productId,
+                product_name AS productName,
+                price,
+                payment_method AS paymentMethod,
+                status,
+                payment_status AS paymentStatus,
+                digiflazz_status AS digiflazzStatus,
+                digiflazz_ref AS digiflazzRef,
+                digiflazz_message AS digiflazzMessage,
+                paid_at AS paidAt,
+                processed_at AS processedAt,
+                created_at AS createdAt
+            FROM transactions
+            WHERE user_id = ?
+            ORDER BY id DESC
+        `).all(user.id);
+
+        return res.json({
+            success: true,
+            count: transactions.length,
+            transactions
+        });
+
+    } catch (error) {
+
+        console.error("[AUTH HISTORY]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengambil riwayat transaksi."
+        });
+    }
+});
+
+
+/* ==========================================================
+   DELETE ACCOUNT
+========================================================== */
+
+app.delete("/api/auth/delete-account", (req, res) => {
+
+    try {
+
+        const user = getCurrentUser(req);
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                authenticated: false,
+                error: "Belum login."
+            });
+        }
+
+        const deleteAccount = db.transaction(() => {
+
+            /*
+             * Transaksi bisnis tidak dihapus.
+             * Pemilik transaksi dilepas agar histori tetap aman.
+             */
+            db.prepare(`
+                UPDATE transactions
+                SET user_id = NULL
+                WHERE user_id = ?
+            `).run(user.id);
+
+            /*
+             * Hapus seluruh session akun.
+             */
+            db.prepare(`
+                DELETE FROM user_sessions
+                WHERE user_id = ?
+            `).run(user.id);
+
+            /*
+             * Hapus akun.
+             */
+            const result = db.prepare(`
+                DELETE FROM users
+                WHERE id = ?
+            `).run(user.id);
+
+            return result.changes;
+        });
+
+        const deleted = deleteAccount();
+
+        if (deleted !== 1) {
+            return res.status(404).json({
+                success: false,
+                error: "Akun tidak ditemukan."
+            });
+        }
+
+        res.setHeader(
+            "Set-Cookie",
+            "bayora_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"
+        );
+
+        return res.json({
+            success: true,
+            message: "Akun berhasil dihapus."
+        });
+
+    } catch (error) {
+
+        console.error("[AUTH DELETE ACCOUNT]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menghapus akun."
+        });
+    }
+});
+
 
 app.use(
     express.static(
@@ -745,6 +929,8 @@ app.post("/api/transactions", (req, res) => {
 
     try {
 
+        const currentUser = getCurrentUser(req);
+
         const {
             service,
             target,
@@ -754,6 +940,13 @@ app.post("/api/transactions", (req, res) => {
             price,
             paymentMethod
         } = req.body;
+
+        if (!currentUser) {
+            return res.status(401).json({
+                success: false,
+                error: "Silakan login terlebih dahulu."
+            });
+        }
 
         if (
             !service ||
@@ -797,6 +990,7 @@ app.post("/api/transactions", (req, res) => {
 
         const insert = db.prepare(`
             INSERT INTO transactions (
+                user_id,
                 transaction_id,
                 reference,
                 service,
@@ -810,6 +1004,7 @@ app.post("/api/transactions", (req, res) => {
                 created_at
             )
             VALUES (
+                @userId,
                 @transactionId,
                 @reference,
                 @service,
@@ -825,6 +1020,7 @@ app.post("/api/transactions", (req, res) => {
         `);
 
         insert.run({
+            userId: currentUser.id,
             transactionId,
             reference,
             service,

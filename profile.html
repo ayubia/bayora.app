@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil — BAYORA</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f7f9fc;
+    color: #142b52;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.profile-page {
+    width: min(680px, 92%);
+    margin: 0 auto;
+    padding: 70px 0;
+}
+
+.back {
+    display: inline-block;
+    margin-bottom: 28px;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.back:hover {
+    color: #1264d8;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: #2478e8;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+
+h1 {
+    margin: 0 0 30px;
+    color: #142b52;
+    font-size: 34px;
+    line-height: 1.15;
+}
+
+.profile-card {
+    padding: 28px;
+    background: #fff;
+    border: 1px solid #e8edf5;
+    border-radius: 18px;
+    box-shadow: 0 14px 40px rgba(15,42,80,.08);
+}
+
+.field {
+    padding: 16px 0;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.field:first-child {
+    padding-top: 0;
+}
+
+.field:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.label {
+    margin-bottom: 6px;
+    color: #7b8798;
+    font-size: 12px;
+}
+
+.value {
+    color: #142b52;
+    font-size: 15px;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.error {
+    color: #c62828;
+}
+
+@media (max-width: 700px) {
+    .profile-page {
+        padding: 45px 0;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .profile-card {
+        padding: 22px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="profile-page">
+
+    <a class="back" href="/">
+        ← Kembali ke Beranda
+    </a>
+
+    <p class="eyebrow">AKUN</p>
+
+    <h1>Profil</h1>
+
+    <section id="profileCard" class="profile-card">
+        Memuat profil...
+    </section>
+
+</main>
+
+<script>
+async function loadProfile() {
+
+    const card = document.getElementById("profileCard");
+
+    try {
+
+        const response = await fetch(
+            "/api/auth/profile",
+            {
+                credentials: "include"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            window.location.href = "/login.html";
+            return;
+        }
+
+        const user = data.user;
+
+        const date = user.created_at
+            ? new Date(user.created_at).toLocaleDateString(
+                "id-ID",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            )
+            : "-";
+
+        card.innerHTML = `
+            <div class="field">
+                <div class="label">Nama</div>
+                <div class="value">${escapeHtml(user.name)}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Nomor HP</div>
+                <div class="value">${escapeHtml(user.phone)}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Email</div>
+                <div class="value">${escapeHtml(user.email)}</div>
+            </div>
+
+            <div class="field">
+                <div class="label">Terdaftar sejak</div>
+                <div class="value">${escapeHtml(date)}</div>
+            </div>
+        `;
+
+    } catch (error) {
+
+        card.innerHTML = `
+            <div class="error">
+                Gagal memuat profil.
+            </div>
+        `;
+    }
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>

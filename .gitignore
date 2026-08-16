@@ -5,3 +5,15 @@ database/*.db-wal
 .env
 *.backup
 .DS_Store
+
+# Local backups / temporary files
+*.backup-*
+*.bak
+*.before-*
+*.broken-*
+*.stable-*
+
+# Local server database
+server/*.db
+server/*.db-shm
+server/*.db-wal

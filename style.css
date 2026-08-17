@@ -4801,3 +4801,48 @@ footer{
         max-height: 48px !important;
     }
 }
+
+/* =========================================================
+   BAYORA BRAND LOGO — ALL PAGES
+   ========================================================= */
+
+.bayora-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.bayora-brand .bayora-logo-image {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+.bayora-brand .bayora-logo-text {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    color: inherit !important;
+    line-height: 1 !important;
+}
+
+@media (max-width: 600px) {
+    .bayora-brand .bayora-logo-image {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+    }
+
+    .bayora-brand .bayora-logo-text {
+        font-size: 19px !important;
+    }
+}
+

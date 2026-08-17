@@ -655,7 +655,7 @@
 
     <a href="/" class="logo bayora-brand">
     <img src="/logo-bayora.png" class="bayora-logo-image" alt="Bayora">
-    <span class="bayora-logo-text">BAYORA</span>
+    <strong class="bayora-logo-text">BAYORA</strong>
 </a>
 
     <div class="admin-label">
@@ -4186,6 +4186,69 @@ header .logo.bayora-brand .bayora-logo-text {
 
     position: static !important;
     transform: none !important;
+}
+
+
+
+/* BAYORA BRAND — DEFINITIVE */
+header a.logo.bayora-brand {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 9px !important;
+
+    width: max-content !important;
+    height: 48px !important;
+    min-width: max-content !important;
+    max-width: none !important;
+
+    overflow: visible !important;
+    text-decoration: none !important;
+}
+
+header a.logo.bayora-brand::before,
+header a.logo.bayora-brand::after {
+    content: none !important;
+    display: none !important;
+}
+
+header a.logo.bayora-brand .bayora-logo-image {
+    display: block !important;
+    flex: 0 0 48px !important;
+
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+
+    object-fit: contain !important;
+}
+
+header a.logo.bayora-brand .bayora-logo-text {
+    display: block !important;
+    flex: 0 0 auto !important;
+
+    width: auto !important;
+    height: auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #142b52 !important;
+    background: transparent !important;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+    white-space: nowrap !important;
 }
 
 </style>

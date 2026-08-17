@@ -1615,6 +1615,22 @@ async function sendTransactionToDigiflazz(transactionId) {
     const result =
         response.data?.data || {};
 
+    /*
+     * Simpan informasi penting dari respons Digiflazz
+     * ke log tanpa pernah mencetak credential.
+     */
+    console.log(
+        "[DIGIFLAZZ RESPONSE]",
+        JSON.stringify({
+            transaction_id: transaction.transaction_id,
+            ref_id: result.ref_id || refId,
+            status: result.status || null,
+            rc: result.rc || null,
+            sn: result.sn || null,
+            message: result.message || null
+        })
+    );
+
     const status =
         String(result.status || "").toLowerCase();
 
@@ -2545,6 +2561,14 @@ app.post("/api/webhooks/digiflazz", (req, res) => {
                     digiflazz_ref
                 ),
                 digiflazz_message = ?,
+                digiflazz_rc = COALESCE(
+                    ?,
+                    digiflazz_rc
+                ),
+                digiflazz_sn = COALESCE(
+                    ?,
+                    digiflazz_sn
+                ),
                 processed_at = ?
             WHERE transaction_id = ?
         `).run(
@@ -2552,6 +2576,8 @@ app.post("/api/webhooks/digiflazz", (req, res) => {
             finalStatus,
             data.ref_id || null,
             String(message),
+            data.rc || null,
+            data.sn || null,
             new Date().toISOString(),
             transaction.transaction_id
         );

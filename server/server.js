@@ -189,6 +189,8 @@ const transactionMigrations = [
     ["digiflazz_message", "TEXT"],
     ["digiflazz_rc", "TEXT"],
     ["digiflazz_sn", "TEXT"],
+    ["payment_session_id", "TEXT"],
+    ["payment_request_id", "TEXT"],
     ["paid_at", "TEXT"],
     ["processed_at", "TEXT"]
 ];
@@ -1905,7 +1907,9 @@ app.post("/api/webhooks/xendit", async (req, res) => {
                         transaction_id,
                         reference,
                         payment_status,
-                        digiflazz_status
+                        digiflazz_status,
+                        payment_session_id,
+                        payment_request_id
                     FROM transactions
                     WHERE reference = ?
                 `).get(reference);
@@ -1930,12 +1934,22 @@ app.post("/api/webhooks/xendit", async (req, res) => {
                 UPDATE transactions
                 SET
                     payment_status = 'PAID',
+                    payment_session_id = COALESCE(
+                        ?,
+                        payment_session_id
+                    ),
+                    payment_request_id = COALESCE(
+                        ?,
+                        payment_request_id
+                    ),
                     paid_at = COALESCE(
                         paid_at,
                         ?
                     )
                 WHERE transaction_id = ?
             `).run(
+                data.payment_session_id || null,
+                data.payment_request_id || null,
                 new Date().toISOString(),
                 transaction.transaction_id
             );
@@ -2213,6 +2227,15 @@ app.post("/api/payments/xendit", async (req, res) => {
                     "Content-Type": "application/json"
                 }
             }
+        );
+
+        db.prepare(`
+            UPDATE transactions
+            SET payment_session_id = ?
+            WHERE transaction_id = ?
+        `).run(
+            response.data.payment_session_id,
+            transactionId
         );
 
         return res.json({

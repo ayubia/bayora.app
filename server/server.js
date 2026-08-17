@@ -2109,6 +2109,48 @@ app.post("/api/webhooks/xendit", async (req, res) => {
 
     try {
 
+        /*
+         * Verifikasi webhook Xendit menggunakan
+         * x-callback-token.
+         *
+         * Token disimpan di environment variable agar
+         * tidak pernah ditulis langsung di source code.
+         */
+        const callbackToken =
+            process.env.XENDIT_WEBHOOK_TOKEN;
+
+        if (!callbackToken) {
+
+            console.error(
+                "[XENDIT WEBHOOK] XENDIT_WEBHOOK_TOKEN belum dikonfigurasi."
+            );
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "XENDIT_WEBHOOK_TOKEN belum dikonfigurasi."
+            });
+        }
+
+        const receivedToken =
+            req.headers["x-callback-token"];
+
+        if (
+            !receivedToken ||
+            receivedToken !== callbackToken
+        ) {
+
+            console.warn(
+                "[XENDIT WEBHOOK] Callback token tidak valid."
+            );
+
+            return res.status(401).json({
+                success: false,
+                error:
+                    "Webhook token tidak valid."
+            });
+        }
+
         const event =
             req.body?.event;
 

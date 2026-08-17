@@ -944,113 +944,56 @@ footer a{
     <a
         href="#"
         class="logo"
-        onclick="showHome()"
+        onclick="showHome(); return false;"
     >
         BAYORA
     </a>
 
+    <button
+        type="button"
+        class="navbar-toggle"
+        id="navbarToggle"
+        aria-label="Buka menu"
+        aria-expanded="false"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
-    <nav>
+    <nav id="mainNavbarNav">
 
         <a
             href="#"
-            onclick="showHome()"
+            class="main-nav-link"
+            onclick="showHome(); closeMobileNavbar(); return false;"
         >
             Beranda
         </a>
 
-        <a href="#layanan">
+        <a
+            href="#layanan"
+            class="main-nav-link"
+            onclick="closeMobileNavbar();"
+        >
             Layanan
         </a>
 
-        <a href="#transaksi">
+        <a
+            href="/riwayat.html"
+            class="main-nav-link"
+            onclick="closeMobileNavbar();"
+        >
             Transaksi
         </a>
 
         <a
-            href="#"
-            id="authMenuDesktop"
-            aria-haspopup="true"
-            aria-expanded="false"
-        >Akun</a>
-
-
-        <div
-            id="accountDropdown"
-            class="account-dropdown"
-            role="menu"
-            aria-hidden="true"
+            href="/profile.html"
+            class="main-nav-link"
+            onclick="closeMobileNavbar();"
         >
-
-            <a
-                href="/profile.html"
-                role="menuitem"
-                class="account-dropdown-link"
-            >
-                Profil
-            </a>
-
-            <a
-                href="/riwayat.html"
-                role="menuitem"
-                class="account-dropdown-link"
-            >
-                Riwayat Transaksi
-            </a>
-
-            <div class="mobile-account-links">
-
-                <div class="mobile-account-divider"></div>
-
-                <a
-                    href="#"
-                    onclick="showHome(); return false;"
-                    class="mobile-account-link"
-                >
-                    Beranda
-                </a>
-
-                <a
-                    href="#layanan"
-                    class="mobile-account-link"
-                >
-                    Layanan
-                </a>
-
-                <a
-                    href="#"
-                    class="mobile-account-link"
-                    id="mobileTransactionLink"
-                    
-                >
-                    Transaksi
-                </a>
-
-            </div>
-
-            <div class="account-dropdown-divider"></div>
-
-            <button
-                type="button"
-                id="accountLogout" 
-                class="account-dropdown-danger"
-                role="menuitem"
-            >
-                Logout
-            </button>
-
-            <button
-                type="button"
-                id="accountDelete"
-                class="account-dropdown-danger"
-                role="menuitem"
-            >
-                Hapus Akun
-            </button>
-
-        </div>
-
-
+            Akun
+        </a>
 
     </nav>
 
@@ -2043,6 +1986,80 @@ async function bayoraLogoutNow(event) {
         );
     }
 }
+</script>
+
+
+<script id="BAYORA_FINAL_NAVBAR_SCRIPT">
+(function () {
+
+    const navbar =
+        document.querySelector(".navbar");
+
+    const toggle =
+        document.getElementById("navbarToggle");
+
+    if (!navbar || !toggle) {
+        return;
+    }
+
+
+    function closeMobileNavbar() {
+
+        navbar.classList.remove("nav-open");
+
+        toggle.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+
+    window.closeMobileNavbar =
+        closeMobileNavbar;
+
+
+    toggle.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isOpen =
+                navbar.classList.toggle("nav-open");
+
+            toggle.setAttribute(
+                "aria-expanded",
+                isOpen ? "true" : "false"
+            );
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (!navbar.contains(event.target)) {
+                closeMobileNavbar();
+            }
+
+        }
+    );
+
+
+    window.addEventListener(
+        "resize",
+        function () {
+
+            if (window.innerWidth > 700) {
+                closeMobileNavbar();
+            }
+
+        }
+    );
+
+})();
 </script>
 
 </body>

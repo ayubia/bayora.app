@@ -3944,3 +3944,680 @@ footer{
 
 }
 
+
+/* ==========================================================
+   BAYORA — HAMBURGER MOBILE FINAL
+   Hamburger selalu terlihat di kanan pada HP
+========================================================== */
+
+@media (max-width: 700px) {
+
+    .navbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+    }
+
+    .navbar .logo {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    .navbar nav {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 24px !important;
+        margin-left: auto !important;
+        overflow: visible !important;
+    }
+
+    .navbar nav a#authMenuDesktop {
+        display: block !important;
+        position: relative !important;
+
+        width: 20px !important;
+        min-width: 20px !important;
+
+        height: 18px !important;
+        min-height: 18px !important;
+
+        padding: 0 !important;
+        margin: 0 !important;
+
+        font-size: 0 !important;
+        line-height: 0 !important;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+
+        flex: 0 0 20px !important;
+
+        color: #dce9ff !important;
+
+        cursor: pointer !important;
+    }
+
+    .navbar nav a#authMenuDesktop::before {
+        content: "" !important;
+
+        position: absolute !important;
+
+        top: 1px !important;
+        left: 0 !important;
+
+        width: 20px !important;
+        height: 2px !important;
+
+        background: currentColor !important;
+        border-radius: 999px !important;
+
+        box-shadow:
+            0 7px 0 currentColor,
+            0 14px 0 currentColor !important;
+    }
+
+    .navbar nav a#authMenuDesktop::after {
+        display: none !important;
+        content: none !important;
+    }
+
+}
+
+
+
+/* ==========================================================
+   BAYORA FINAL NAVBAR
+   DESKTOP + MOBILE RESPONSIVE
+========================================================== */
+
+.navbar {
+    width: 100%;
+    min-height: 76px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 clamp(20px, 6vw, 90px);
+
+    position: sticky;
+    top: 0;
+
+    z-index: 999999;
+
+    background: linear-gradient(
+        100deg,
+        #061a45,
+        #0a3374
+    );
+
+    border: 0;
+
+    box-shadow:
+        0 10px 30px rgba(4, 28, 75, .16);
+}
+
+
+/* LOGO */
+
+.navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #fff !important;
+
+    text-decoration: none;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    letter-spacing: -1px;
+
+    flex-shrink: 0;
+}
+
+.navbar .logo::before {
+    content: "B";
+
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    color: #fff;
+
+    font-size: 20px;
+    font-weight: 900;
+
+    background:
+        linear-gradient(
+            145deg,
+            #10d5f7,
+            #1268ff
+        );
+
+    box-shadow:
+        0 7px 18px rgba(0,190,255,.3);
+}
+
+
+/* DESKTOP NAV */
+
+.navbar nav {
+    display: flex;
+
+    align-items: center;
+
+    gap: 30px;
+
+    margin-left: auto;
+}
+
+.navbar nav .main-nav-link {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 44px;
+
+    color: #dce9ff !important;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        color .18s ease,
+        opacity .18s ease;
+}
+
+.navbar nav .main-nav-link:hover {
+    color: #fff !important;
+}
+
+
+/* HAMBURGER DESKTOP = HIDDEN */
+
+.navbar-toggle {
+    display: none;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.navbar-toggle span {
+    display: block;
+
+    width: 22px;
+    height: 2px;
+
+    border-radius: 99px;
+
+    background: #fff;
+
+    transition:
+        transform .2s ease,
+        opacity .2s ease;
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 700px) {
+
+    .navbar {
+        min-height: 68px;
+
+        padding:
+            0 18px;
+    }
+
+
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+
+    .navbar .logo::before {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 10px;
+
+        font-size: 18px;
+    }
+
+
+    /* HAMBURGER */
+
+    .navbar-toggle {
+        display: flex;
+
+        position: relative;
+
+        z-index: 1000001;
+    }
+
+
+    /* NAV CLOSED */
+
+    .navbar nav {
+        position: absolute;
+
+        top: calc(100% + 1px);
+        left: 0;
+        right: 0;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 0;
+
+        margin: 0;
+
+        padding: 10px 18px 14px;
+
+        background:
+            linear-gradient(
+                100deg,
+                #061a45,
+                #0a3374
+            );
+
+        border-top:
+            1px solid rgba(255,255,255,.08);
+
+        box-shadow:
+            0 15px 30px rgba(4,28,75,.22);
+
+        opacity: 0;
+        visibility: hidden;
+
+        transform:
+            translateY(-8px);
+
+        pointer-events: none;
+
+        transition:
+            opacity .18s ease,
+            visibility .18s ease,
+            transform .18s ease;
+    }
+
+
+    /* NAV OPEN */
+
+    .navbar.nav-open nav {
+        opacity: 1;
+
+        visibility: visible;
+
+        transform:
+            translateY(0);
+
+        pointer-events: auto;
+    }
+
+
+    /* MOBILE LINKS */
+
+    .navbar nav .main-nav-link {
+        width: 100%;
+
+        min-height: 48px;
+
+        box-sizing: border-box;
+
+        padding:
+            0 4px;
+
+        color: #dce9ff !important;
+
+        font-size: 15px;
+
+        border-bottom:
+            1px solid rgba(255,255,255,.08);
+    }
+
+    .navbar nav .main-nav-link:last-child {
+        border-bottom: 0;
+    }
+
+    .navbar nav .main-nav-link:hover,
+    .navbar nav .main-nav-link:active {
+        color: #fff !important;
+    }
+
+
+    /* HAMBURGER -> X */
+
+    .navbar.nav-open
+    .navbar-toggle span:nth-child(1) {
+        transform:
+            translateY(7px)
+            rotate(45deg);
+    }
+
+    .navbar.nav-open
+    .navbar-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .navbar.nav-open
+    .navbar-toggle span:nth-child(3) {
+        transform:
+            translateY(-7px)
+            rotate(-45deg);
+    }
+
+}
+
+
+/* VERY SMALL PHONES */
+
+@media (max-width: 360px) {
+
+    .navbar {
+        padding: 0 14px;
+    }
+
+    .navbar .logo {
+        font-size: 18px;
+    }
+
+    .navbar-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+}
+
+
+/* ==========================================================
+   BAYORA — FINAL MOBILE NAV FIX
+   OVERRIDE SEMUA CSS NAVBAR LAMA
+========================================================== */
+
+@media (max-width: 700px) {
+
+    /* Header */
+    header.navbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 999999 !important;
+        overflow: visible !important;
+    }
+
+
+    /* Hamburger */
+    header.navbar .navbar-toggle {
+        display: flex !important;
+
+        position: relative !important;
+        z-index: 1000001 !important;
+
+        width: 44px !important;
+        height: 44px !important;
+
+        flex-shrink: 0 !important;
+
+        cursor: pointer !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+
+    header.navbar .navbar-toggle span {
+        display: block !important;
+
+        width: 23px !important;
+        height: 2px !important;
+
+        background: #ffffff !important;
+
+        opacity: 1 !important;
+
+        visibility: visible !important;
+    }
+
+
+    /* NAV MENU */
+    header.navbar nav#mainNavbarNav {
+
+        position: absolute !important;
+
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+
+        width: 100% !important;
+
+        height: auto !important;
+        min-height: 0 !important;
+
+        box-sizing: border-box !important;
+
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        align-items: stretch !important;
+
+        gap: 0 !important;
+
+        margin: 0 !important;
+
+        padding: 10px 20px 16px !important;
+
+        background:
+            linear-gradient(
+                100deg,
+                #061a45,
+                #0a3374
+            ) !important;
+
+        border: 0 !important;
+
+        border-top:
+            1px solid rgba(255,255,255,.12) !important;
+
+        box-shadow:
+            0 18px 35px rgba(4,28,75,.30) !important;
+
+        z-index: 1000000 !important;
+
+        /* CLOSED */
+        opacity: 0 !important;
+        visibility: hidden !important;
+
+        transform: translateY(-8px) !important;
+
+        pointer-events: none !important;
+
+        overflow: visible !important;
+
+        transition:
+            opacity .18s ease,
+            transform .18s ease,
+            visibility .18s ease !important;
+    }
+
+
+    /* OPEN */
+    header.navbar.nav-open nav#mainNavbarNav {
+
+        opacity: 1 !important;
+
+        visibility: visible !important;
+
+        transform: translateY(0) !important;
+
+        pointer-events: auto !important;
+    }
+
+
+    /* Semua link */
+    header.navbar nav#mainNavbarNav
+    a.main-nav-link {
+
+        display: flex !important;
+
+        align-items: center !important;
+
+        width: 100% !important;
+
+        min-height: 50px !important;
+
+        box-sizing: border-box !important;
+
+        padding: 0 4px !important;
+
+        margin: 0 !important;
+
+        color: #ffffff !important;
+
+        background: transparent !important;
+
+        font-size: 15px !important;
+
+        font-weight: 600 !important;
+
+        line-height: 1.4 !important;
+
+        text-decoration: none !important;
+
+        visibility: visible !important;
+
+        opacity: 1 !important;
+
+        border: 0 !important;
+
+        border-bottom:
+            1px solid rgba(255,255,255,.10) !important;
+    }
+
+
+    header.navbar nav#mainNavbarNav
+    a.main-nav-link:last-child {
+
+        border-bottom: 0 !important;
+    }
+
+
+    header.navbar nav#mainNavbarNav
+    a.main-nav-link:hover {
+
+        color: #ffffff !important;
+
+        background:
+            rgba(255,255,255,.07) !important;
+    }
+
+
+    /* Hamburger X */
+    header.navbar.nav-open
+    .navbar-toggle span:nth-child(1) {
+
+        transform:
+            translateY(7px)
+            rotate(45deg) !important;
+    }
+
+    header.navbar.nav-open
+    .navbar-toggle span:nth-child(2) {
+
+        opacity: 0 !important;
+    }
+
+    header.navbar.nav-open
+    .navbar-toggle span:nth-child(3) {
+
+        transform:
+            translateY(-7px)
+            rotate(-45deg) !important;
+    }
+
+}
+
+
+/* ==========================================================
+   DESKTOP
+========================================================== */
+
+@media (min-width: 701px) {
+
+    header.navbar .navbar-toggle {
+        display: none !important;
+    }
+
+    header.navbar nav#mainNavbarNav {
+
+        display: flex !important;
+
+        position: static !important;
+
+        opacity: 1 !important;
+
+        visibility: visible !important;
+
+        transform: none !important;
+
+        pointer-events: auto !important;
+
+        width: auto !important;
+
+        height: auto !important;
+
+        padding: 0 !important;
+
+        background: transparent !important;
+
+        box-shadow: none !important;
+
+        border: 0 !important;
+    }
+
+}

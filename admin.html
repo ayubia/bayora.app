@@ -545,6 +545,56 @@
     white-space: nowrap !important;
 }
 
+
+/* =========================
+   ADMIN ACCOUNT
+========================= */
+
+.admin-account {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-account-info {
+    text-align: right;
+}
+
+.admin-account-role {
+    margin-top: 3px;
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    color: #888;
+}
+
+.admin-logout-button {
+    border: 1px solid #dedbd3;
+    background: #ffffff;
+    color: #171717;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-logout-button:hover {
+    background: #f5f3ee;
+}
+
+@media (max-width: 600px) {
+
+    .admin-account-info {
+        display: none;
+    }
+
+    .admin-logout-button {
+        padding: 8px 11px;
+    }
+
+}
+
 </style>
 
 
@@ -658,8 +708,18 @@
     <strong class="bayora-logo-text" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">BAYORA</strong>
 </a>
 
-    <div class="admin-label">
-        Admin Dashboard
+    <div class="admin-account">
+
+
+
+        <button
+            type="button"
+            id="adminLogoutButton"
+            class="admin-logout-button"
+        >
+            Logout
+        </button>
+
     </div>
 
 </header>
@@ -1209,6 +1269,82 @@
 </div>
 
 </main>
+
+
+
+<script>
+/* ==========================================================
+   BAYORA ADMIN AUTH GUARD
+========================================================== */
+
+(async function protectAdminPage() {
+
+    try {
+
+        const response = await fetch(
+            "/api/admin/me",
+            {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store"
+            }
+        );
+
+        const data = await response.json();
+
+        if (
+            !response.ok ||
+            !data.success ||
+            !data.authenticated ||
+            !data.admin
+        ) {
+
+            window.location.replace(
+                "/admin-login.html"
+            );
+
+            return;
+        }
+
+        window.BAYORA_ADMIN = data.admin;
+
+        const adminName =
+            document.getElementById("adminName");
+
+        const adminRole =
+            document.getElementById("adminRole");
+
+        if (adminName) {
+            adminName.textContent =
+                data.admin.name ||
+                data.admin.username;
+        }
+
+        if (adminRole) {
+            adminRole.textContent =
+                String(data.admin.role || "")
+                    .toUpperCase();
+        }
+
+        document.documentElement
+            .classList
+            .add("admin-authenticated");
+
+    } catch (error) {
+
+        console.error(
+            "[ADMIN AUTH]",
+            error
+        );
+
+        window.location.replace(
+            "/admin-login.html"
+        );
+
+    }
+
+})();
+</script>
 
 
 <script>
@@ -3169,6 +3305,68 @@ document.addEventListener(
 
     </div>
 </div>
+
+<script>
+/* =========================
+   BAYORA ADMIN LOGOUT
+========================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const logoutButton =
+        document.getElementById("adminLogoutButton");
+
+    if (!logoutButton) return;
+
+    logoutButton.addEventListener("click", async function () {
+
+        const confirmed = window.confirm(
+            "Apakah kamu yakin ingin keluar dari dashboard admin?"
+        );
+
+        if (!confirmed) return;
+
+        logoutButton.disabled = true;
+        logoutButton.textContent = "Keluar...";
+
+        try {
+
+            const response = await fetch(
+                "/api/admin/logout",
+                {
+                    method: "POST",
+                    credentials: "include"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Logout gagal.");
+            }
+
+            window.location.replace(
+                "/admin-login.html"
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN LOGOUT]",
+                error
+            );
+
+            alert(
+                "Logout gagal. Silakan coba lagi."
+            );
+
+            logoutButton.disabled = false;
+            logoutButton.textContent = "Logout";
+        }
+
+    });
+
+});
+</script>
+
 </body>
 </html>
 

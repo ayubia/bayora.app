@@ -2911,7 +2911,7 @@ if (!existingOwner) {
                     created_at,
                     updated_at
                 )
-                VALUES (?, ?, ?, "owner", 1, ?, ?)
+                VALUES (?, ?, ?, 'owner', 1, ?, ?)
             `).run(
                 "admin",
                 "BAYORA Owner",

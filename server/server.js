@@ -1631,12 +1631,14 @@ async function sendTransactionToDigiflazz(transactionId) {
     db.prepare(`
         UPDATE transactions
         SET
+            status = ?,
             digiflazz_status = ?,
             digiflazz_ref = ?,
             digiflazz_message = ?,
             processed_at = ?
         WHERE transaction_id = ?
     `).run(
+        finalStatus,
         finalStatus,
         String(digiflazzRef),
         String(message),
@@ -1898,6 +1900,7 @@ app.post("/api/webhooks/digiflazz", (req, res) => {
         db.prepare(`
             UPDATE transactions
             SET
+                status = ?,
                 digiflazz_status = ?,
                 digiflazz_ref = COALESCE(
                     ?,
@@ -1907,6 +1910,7 @@ app.post("/api/webhooks/digiflazz", (req, res) => {
                 processed_at = ?
             WHERE transaction_id = ?
         `).run(
+            finalStatus,
             finalStatus,
             data.ref_id || null,
             String(message),

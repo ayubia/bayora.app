@@ -80,6 +80,41 @@ db.exec(`
     `);
 
 
+/* ==========================================================
+   ADMIN AUTHENTICATION
+========================================================== */
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS admins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'admin',
+        active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS admin_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        admin_id INTEGER NOT NULL,
+        token_hash TEXT UNIQUE NOT NULL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (admin_id)
+            REFERENCES admins(id)
+            ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_admin_sessions_token
+        ON admin_sessions(token_hash);
+
+    CREATE INDEX IF NOT EXISTS idx_admin_sessions_admin
+        ON admin_sessions(admin_id);
+`);
+
+
 /* =========================
    DATABASE MIGRATION
 ========================= */
@@ -1082,7 +1117,59 @@ app.post("/api/transactions", (req, res) => {
    GET ALL TRANSACTIONS
 ========================= */
 
-app.get("/api/transactions", (req, res) => {
+function requireRoles(...allowedRoles) {
+
+    return (req, res, next) => {
+
+        const admin = getCurrentAdmin(req);
+
+        if (!admin) {
+
+            return res.status(401).json({
+                success: false,
+                authenticated: false,
+                error: "Admin belum login."
+            });
+
+        }
+
+        if (!allowedRoles.includes(admin.role)) {
+
+            return res.status(403).json({
+                success: false,
+                error: "Kamu tidak memiliki akses ke fitur ini."
+            });
+
+        }
+
+        req.admin = admin;
+
+        next();
+    };
+
+}
+
+
+/*
+ * Owner + Admin
+ * Dipakai untuk pengelolaan layanan dan produk.
+ */
+const requireCatalogManager =
+    requireRoles("owner", "admin");
+
+
+/*
+ * Owner + Admin + Support
+ * Dipakai untuk membaca data admin.
+ */
+const requireAdminStaff =
+    requireRoles("owner", "admin", "support");
+
+
+
+
+
+app.get("/api/transactions", requireAdminStaff, (req, res) => {
 
     try {
 
@@ -1135,7 +1222,7 @@ app.get("/api/transactions", (req, res) => {
    RESET TRANSACTIONS BY MONTH
 ========================= */
 
-app.delete("/api/transactions", (req, res) => {
+app.delete("/api/transactions", requireRoles("owner"), (req, res) => {
 
     try {
 
@@ -1230,6 +1317,7 @@ app.get("/api/transactions/:id", (req, res) => {
 
 app.patch(
     "/api/transactions/:id/status",
+    requireRoles("owner", "admin"),
     (req, res) => {
 
         try {
@@ -2016,7 +2104,7 @@ app.get("/api/catalog", (req, res) => {
    CREATE SERVICE
 ========================= */
 
-app.post("/api/services", (req, res) => {
+app.post("/api/services", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2116,7 +2204,7 @@ app.post("/api/services", (req, res) => {
    UPDATE SERVICE
 ========================= */
 
-app.put("/api/services/:id", (req, res) => {
+app.put("/api/services/:id", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2222,7 +2310,7 @@ app.put("/api/services/:id", (req, res) => {
    DELETE SERVICE
 ========================= */
 
-app.delete("/api/services/:id", (req, res) => {
+app.delete("/api/services/:id", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2272,7 +2360,7 @@ app.delete("/api/services/:id", (req, res) => {
    CREATE PRODUCT
 ========================= */
 
-app.post("/api/products", (req, res) => {
+app.post("/api/products", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2403,7 +2491,7 @@ app.post("/api/products", (req, res) => {
    UPDATE PRODUCT
 ========================= */
 
-app.put("/api/products/:id", (req, res) => {
+app.put("/api/products/:id", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2541,7 +2629,7 @@ app.put("/api/products/:id", (req, res) => {
    DELETE PRODUCT
 ========================= */
 
-app.delete("/api/products/:id", (req, res) => {
+app.delete("/api/products/:id", requireCatalogManager, (req, res) => {
 
     try {
 
@@ -2582,9 +2670,269 @@ app.delete("/api/products/:id", (req, res) => {
 });
 
 
-/* =========================
+
+/* ==========================================================
+   ADMIN AUTH HELPERS
+========================================================== */
+
+const ADMIN_SESSION_DAYS = 7;
+
+function hashAdminPassword(password) {
+    const salt = crypto.randomBytes(16).toString("hex");
+
+    const hash = crypto
+        .scryptSync(password, salt, 64)
+        .toString("hex");
+
+    return `${salt}:${hash}`;
+}
+
+function verifyAdminPassword(password, stored) {
+    try {
+        const parts = String(stored || "").split(":");
+
+        if (parts.length !== 2) {
+            return false;
+        }
+
+        const salt = parts[0];
+        const storedHash = Buffer.from(parts[1], "hex");
+
+        const derivedHash = crypto.scryptSync(
+            password,
+            salt,
+            64
+        );
+
+        return (
+            storedHash.length === derivedHash.length &&
+            crypto.timingSafeEqual(
+                storedHash,
+                derivedHash
+            )
+        );
+
+    } catch {
+        return false;
+    }
+}
+
+function hashAdminSessionToken(token) {
+    return crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+}
+
+function getAdminSessionToken(req) {
+
+    const header = req.headers.cookie || "";
+
+    const match = header.match(
+        /(?:^|;\s*)bayora_admin_session=([^;]+)/
+    );
+
+    return match
+        ? decodeURIComponent(match[1])
+        : null;
+}
+
+function createAdminSession(adminId) {
+
+    const token = crypto
+        .randomBytes(32)
+        .toString("hex");
+
+    const tokenHash =
+        hashAdminSessionToken(token);
+
+    const now = new Date();
+
+    const expires = new Date(
+        now.getTime() +
+        ADMIN_SESSION_DAYS *
+        24 *
+        60 *
+        60 *
+        1000
+    );
+
+    db.prepare(`
+        INSERT INTO admin_sessions (
+            admin_id,
+            token_hash,
+            expires_at,
+            created_at
+        )
+        VALUES (?, ?, ?, ?)
+    `).run(
+        adminId,
+        tokenHash,
+        expires.toISOString(),
+        now.toISOString()
+    );
+
+    return token;
+}
+
+function getCurrentAdmin(req) {
+
+    const token = getAdminSessionToken(req);
+
+    if (!token) {
+        return null;
+    }
+
+    const tokenHash =
+        hashAdminSessionToken(token);
+
+    const session = db.prepare(`
+        SELECT
+            s.id AS session_id,
+            s.expires_at,
+            a.id,
+            a.username,
+            a.name,
+            a.role,
+            a.active
+        FROM admin_sessions s
+        JOIN admins a
+            ON a.id = s.admin_id
+        WHERE s.token_hash = ?
+        LIMIT 1
+    `).get(tokenHash);
+
+    if (!session) {
+        return null;
+    }
+
+    if (
+        !session.active ||
+        new Date(session.expires_at).getTime() <= Date.now()
+    ) {
+
+        db.prepare(`
+            DELETE FROM admin_sessions
+            WHERE id = ?
+        `).run(session.session_id);
+
+        return null;
+    }
+
+    return {
+        id: session.id,
+        username: session.username,
+        name: session.name,
+        role: session.role,
+        session_id: session.session_id
+    };
+}
+
+function requireAdmin(req, res, next) {
+
+    const admin = getCurrentAdmin(req);
+
+    if (!admin) {
+        return res.status(401).json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+        });
+    }
+
+    req.admin = admin;
+
+    next();
+}
+
+function requireOwner(req, res, next) {
+
+    const admin = getCurrentAdmin(req);
+
+    if (!admin) {
+        return res.status(401).json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+        });
+    }
+
+    if (admin.role !== "owner") {
+        return res.status(403).json({
+            success: false,
+            error: "Akses khusus Owner."
+        });
+    }
+
+    req.admin = admin;
+
+    next();
+}
+
+
+/* ==========================================================
+   DEFAULT OWNER
+========================================================== */
+
+const existingOwner = db.prepare(`
+    SELECT id
+    FROM admins
+    WHERE role = 'owner'
+    LIMIT 1
+`).get();
+
+if (!existingOwner) {
+
+    const envPassword =
+        process.env.ADMIN_PASSWORD;
+
+    if (envPassword) {
+
+        const now =
+            new Date().toISOString();
+
+        const existingAdmin =
+            db.prepare(`
+                SELECT id
+                FROM admins
+                WHERE username = 'admin'
+                LIMIT 1
+            `).get();
+
+        if (!existingAdmin) {
+
+            db.prepare(`
+                INSERT INTO admins (
+                    username,
+                    name,
+                    password_hash,
+                    role,
+                    active,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, "owner", 1, ?, ?)
+            `).run(
+                "admin",
+                "BAYORA Owner",
+                hashAdminPassword(
+                    envPassword
+                ),
+                now,
+                now
+            );
+
+            console.log(
+                "[ADMIN] Default Owner dibuat dari ADMIN_PASSWORD."
+            );
+        }
+    }
+}
+
+
+/* ==========================================================
    ADMIN LOGIN
-========================= */
+========================================================== */
 
 app.post(
     "/api/admin/login",
@@ -2597,33 +2945,512 @@ app.post(
                 password
             } = req.body;
 
-            const ADMIN_USERNAME = "admin";
-            const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+            if (
+                typeof username !== "string" ||
+                typeof password !== "string"
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Username dan password wajib diisi."
+                });
+            }
+
+            const admin = db.prepare(`
+                SELECT
+                    id,
+                    username,
+                    name,
+                    password_hash,
+                    role,
+                    active
+                FROM admins
+                WHERE username = ?
+                LIMIT 1
+            `).get(username.trim());
 
             if (
-                username !== ADMIN_USERNAME ||
-                password !== ADMIN_PASSWORD
+                !admin ||
+                !admin.active ||
+                !verifyAdminPassword(
+                    password,
+                    admin.password_hash
+                )
             ) {
 
                 return res.status(401).json({
                     success: false,
                     error: "Username atau password salah."
                 });
-
             }
+
+            const token =
+                createAdminSession(admin.id);
+
+            res.setHeader(
+                "Set-Cookie",
+                [
+                    `bayora_admin_session=${encodeURIComponent(token)}`,
+                    "Path=/",
+                    "HttpOnly",
+                    "SameSite=Lax",
+                    "Max-Age=604800"
+                ].join("; ")
+            );
 
             return res.json({
                 success: true,
-                message: "Login berhasil."
+                message: "Login admin berhasil.",
+                admin: {
+                    id: admin.id,
+                    username: admin.username,
+                    name: admin.name,
+                    role: admin.role
+                }
             });
 
         } catch (error) {
 
-            console.error(error);
+            console.error("[ADMIN LOGIN]", error);
 
             return res.status(500).json({
                 success: false,
                 error: "Terjadi kesalahan pada server."
+            });
+        }
+    }
+);
+
+
+/* ==========================================================
+   ADMIN CURRENT SESSION
+========================================================== */
+
+app.get(
+    "/api/admin/me",
+    requireAdmin,
+    (req, res) => {
+
+        return res.json({
+            success: true,
+            authenticated: true,
+            admin: {
+                id: req.admin.id,
+                username: req.admin.username,
+                name: req.admin.name,
+                role: req.admin.role
+            }
+        });
+    }
+);
+
+
+/* ==========================================================
+   ADMIN CHANGE OWN PASSWORD
+========================================================== */
+
+app.post(
+    "/api/admin/change-password",
+    requireAdmin,
+    (req, res) => {
+
+        try {
+
+            const currentPassword =
+                String(req.body.currentPassword || "");
+
+            const newPassword =
+                String(req.body.newPassword || "");
+
+            const confirmPassword =
+                String(req.body.confirmPassword || "");
+
+            if (
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Semua password wajib diisi."
+                });
+            }
+
+            if (newPassword.length < 8) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Password baru minimal 8 karakter."
+                });
+            }
+
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Konfirmasi password tidak cocok."
+                });
+            }
+
+            const admin = db.prepare(`
+                SELECT id, password_hash
+                FROM admins
+                WHERE id = ?
+                LIMIT 1
+            `).get(req.admin.id);
+
+            if (!admin) {
+                return res.status(404).json({
+                    success: false,
+                    error: "Akun admin tidak ditemukan."
+                });
+            }
+
+            if (
+                !verifyAdminPassword(
+                    currentPassword,
+                    admin.password_hash
+                )
+            ) {
+                return res.status(401).json({
+                    success: false,
+                    error: "Password saat ini salah."
+                });
+            }
+
+            const passwordHash =
+                hashAdminPassword(newPassword);
+
+            const result = db.prepare(`
+                UPDATE admins
+                SET password_hash = ?,
+                    updated_at = ?
+                WHERE id = ?
+            `).run(
+                passwordHash,
+                new Date().toISOString(),
+                req.admin.id
+            );
+
+            if (result.changes !== 1) {
+                return res.status(500).json({
+                    success: false,
+                    error: "Password gagal diperbarui."
+                });
+            }
+
+            return res.json({
+                success: true,
+                message: "Password berhasil diperbarui."
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN CHANGE PASSWORD]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "Terjadi kesalahan pada server."
+            });
+        }
+    }
+);
+
+
+/* ==========================================================
+   ADMIN LOGOUT
+========================================================== */
+
+app.post(
+    "/api/admin/logout",
+    (req, res) => {
+
+        try {
+
+            const token =
+                getAdminSessionToken(req);
+
+            if (token) {
+
+                const tokenHash =
+                    hashAdminSessionToken(token);
+
+                db.prepare(`
+                    DELETE FROM admin_sessions
+                    WHERE token_hash = ?
+                `).run(tokenHash);
+            }
+
+            res.setHeader(
+                "Set-Cookie",
+                [
+                    "bayora_admin_session=",
+                    "Path=/",
+                    "HttpOnly",
+                    "SameSite=Lax",
+                    "Max-Age=0"
+                ].join("; ")
+            );
+
+            return res.json({
+                success: true,
+                message: "Logout admin berhasil."
+            });
+
+        } catch (error) {
+
+            console.error("[ADMIN LOGOUT]", error);
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal melakukan logout."
+            });
+        }
+    }
+);
+
+
+/* ==========================================================
+   ADMIN MANAGEMENT — OWNER ONLY
+========================================================== */
+
+app.get(
+    "/api/admin/admins",
+    requireOwner,
+    (req, res) => {
+
+        const admins = db.prepare(`
+            SELECT
+                id,
+                username,
+                name,
+                role,
+                active,
+                created_at,
+                updated_at
+            FROM admins
+            ORDER BY id ASC
+        `).all();
+
+        return res.json({
+            success: true,
+            admins
+        });
+    }
+);
+
+
+app.post(
+    "/api/admin/admins",
+    requireOwner,
+    (req, res) => {
+
+        try {
+
+            const {
+                username,
+                name,
+                password,
+                role = "admin"
+            } = req.body;
+
+            if (
+                !username ||
+                !name ||
+                !password
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Username, nama, dan password wajib diisi."
+                });
+            }
+
+            if (
+                !["owner", "admin", "support"].includes(role)
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Role tidak valid."
+                });
+            }
+
+            if (String(password).length < 8) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Password minimal 8 karakter."
+                });
+            }
+
+            const now =
+                new Date().toISOString();
+
+            const passwordHash =
+                hashAdminPassword(password);
+
+            const result = db.prepare(`
+                INSERT INTO admins (
+                    username,
+                    name,
+                    password_hash,
+                    role,
+                    active,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, 1, ?, ?)
+            `).run(
+                username.trim(),
+                name.trim(),
+                passwordHash,
+                role,
+                now,
+                now
+            );
+
+            return res.json({
+                success: true,
+                message: "Admin berhasil ditambahkan.",
+                id: result.lastInsertRowid
+            });
+
+        } catch (error) {
+
+            if (
+                String(error.message || "")
+                    .includes("UNIQUE")
+            ) {
+                return res.status(409).json({
+                    success: false,
+                    error: "Username admin sudah digunakan."
+                });
+            }
+
+            console.error(
+                "[ADMIN CREATE]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal menambahkan admin."
+            });
+        }
+    }
+);
+
+
+app.patch(
+    "/api/admin/admins/:id/password",
+    requireOwner,
+    (req, res) => {
+
+        try {
+
+            const id =
+                Number(req.params.id);
+
+            const password =
+                String(
+                    req.body.password || ""
+                );
+
+            if (!Number.isInteger(id)) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "ID admin tidak valid."
+                });
+
+            }
+
+            if (password.length < 8) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Password minimal 8 karakter."
+                });
+
+            }
+
+            const admin =
+                db.prepare(`
+                    SELECT
+                        id,
+                        username,
+                        name,
+                        role
+                    FROM admins
+                    WHERE id = ?
+                `).get(id);
+
+            if (!admin) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Admin tidak ditemukan."
+                });
+
+            }
+
+            /*
+             * Password baru selalu di-hash dengan
+             * mekanisme yang sama dengan password login.
+             */
+
+            const passwordHash =
+                hashAdminPassword(password);
+
+            const now =
+                new Date().toISOString();
+
+            const result =
+                db.prepare(`
+                    UPDATE admins
+                    SET password_hash = ?,
+                        updated_at = ?
+                    WHERE id = ?
+                `).run(
+                    passwordHash,
+                    now,
+                    id
+                );
+
+            if (!result.changes) {
+
+                return res.status(500).json({
+                    success: false,
+                    error: "Password gagal diperbarui."
+                });
+
+            }
+
+            /*
+             * Cabut semua session admin tersebut.
+             * Jika Owner mereset password admin lain,
+             * session Owner sendiri tidak terpengaruh.
+             */
+
+            db.prepare(`
+                DELETE FROM admin_sessions
+                WHERE admin_id = ?
+            `).run(id);
+
+            return res.json({
+                success: true,
+                message:
+                    `Password admin "${admin.username}" berhasil direset.`
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN PASSWORD RESET]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal mereset password admin."
             });
 
         }
@@ -2631,6 +3458,104 @@ app.post(
     }
 );
 
+
+
+app.patch(
+    "/api/admin/admins/:id/status",
+    requireOwner,
+    (req, res) => {
+
+        const id =
+            Number(req.params.id);
+
+        if (!Number.isInteger(id)) {
+            return res.status(400).json({
+                success: false,
+                error: "ID admin tidak valid."
+            });
+        }
+
+        if (
+            id === req.admin.id &&
+            req.body.active === false
+        ) {
+            return res.status(400).json({
+                success: false,
+                error: "Kamu tidak dapat menonaktifkan akun sendiri."
+            });
+        }
+
+        const active =
+            req.body.active ? 1 : 0;
+
+        const result = db.prepare(`
+            UPDATE admins
+            SET active = ?,
+                updated_at = ?
+            WHERE id = ?
+        `).run(
+            active,
+            new Date().toISOString(),
+            id
+        );
+
+        if (!result.changes) {
+            return res.status(404).json({
+                success: false,
+                error: "Admin tidak ditemukan."
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: active
+                ? "Admin diaktifkan."
+                : "Admin dinonaktifkan."
+        });
+    }
+);
+
+
+app.delete(
+    "/api/admin/admins/:id",
+    requireOwner,
+    (req, res) => {
+
+        const id =
+            Number(req.params.id);
+
+        if (!Number.isInteger(id)) {
+            return res.status(400).json({
+                success: false,
+                error: "ID admin tidak valid."
+            });
+        }
+
+        if (id === req.admin.id) {
+            return res.status(400).json({
+                success: false,
+                error: "Kamu tidak dapat menghapus akun sendiri."
+            });
+        }
+
+        const result = db.prepare(`
+            DELETE FROM admins
+            WHERE id = ?
+        `).run(id);
+
+        if (!result.changes) {
+            return res.status(404).json({
+                success: false,
+                error: "Admin tidak ditemukan."
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Admin berhasil dihapus."
+        });
+    }
+);
 
 
 /* =========================

@@ -595,6 +595,858 @@
 
 }
 
+
+/* ==========================================================
+   KELOLA ADMIN
+========================================================== */
+
+.admin-management-panel {
+    margin-top: 35px;
+    margin-bottom: 35px;
+}
+
+.admin-management-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-management-title {
+    font-weight: 700;
+}
+
+.admin-add-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #171717;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-add-button:hover {
+    opacity: .9;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #f0eee9;
+    white-space: nowrap;
+}
+
+.admin-table th {
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+}
+
+.admin-table td {
+    font-size: 14px;
+}
+
+.admin-status {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-status.active {
+    background: #eaf7ee;
+    color: #16753b;
+}
+
+.admin-status.inactive {
+    background: #f3f3f3;
+    color: #777;
+}
+
+.admin-role {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.admin-action-button {
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #f3f1ec;
+    color: #222;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-action-button.danger {
+    background: #fff0f0;
+    color: #b42318;
+}
+
+.admin-empty {
+    padding: 35px 20px;
+    text-align: center;
+    color: #888;
+}
+
+.admin-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(0, 0, 0, .35);
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-modal-overlay.open {
+    display: flex;
+}
+
+.admin-modal {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    overflow: hidden;
+}
+
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 22px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-modal-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.admin-modal-close {
+    border: 0;
+    background: transparent;
+    font-size: 25px;
+    color: #777;
+    cursor: pointer;
+}
+
+.admin-modal-body {
+    padding: 22px;
+}
+
+.admin-form-group {
+    margin-bottom: 16px;
+}
+
+.admin-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+}
+
+.admin-form-group input,
+.admin-form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus {
+    border-color: #1264d8;
+}
+
+.admin-form-error {
+    display: none;
+    margin-bottom: 15px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #fff0f0;
+    color: #b42318;
+    font-size: 13px;
+}
+
+.admin-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 20px;
+}
+
+.admin-cancel-button,
+.admin-submit-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-cancel-button {
+    background: #f3f1ec;
+    color: #222;
+}
+
+.admin-submit-button {
+    background: #1264d8;
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+
+    .admin-management-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-add-button {
+        width: 100%;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+    }
+
+    .admin-modal-overlay {
+        padding: 12px;
+    }
+
+}
+
+
+/* ==========================================================
+   BAYORA ADMIN SIDEBAR - FINAL LAYOUT
+========================================================== */
+
+.bayora-admin-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+
+    width: 238px !important;
+    height: 100vh !important;
+
+    z-index: 99999 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+
+    padding: 24px 14px !important;
+
+    background: #ffffff !important;
+    border-right: 1px solid #e5e5e5 !important;
+
+    overflow-y: auto !important;
+}
+
+.bayora-sidebar-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+
+    padding: 4px 12px 28px !important;
+}
+
+.bayora-sidebar-brand img {
+    width: 38px !important;
+    height: 38px !important;
+
+    object-fit: contain !important;
+    display: block !important;
+}
+
+.bayora-sidebar-brand strong {
+    color: #1264d8 !important;
+
+    font-size: 19px !important;
+    font-weight: 800 !important;
+
+    line-height: 1 !important;
+}
+
+.bayora-sidebar-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+.bayora-sidebar-label {
+    margin: 19px 12px 7px !important;
+
+    color: #969696 !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+
+    letter-spacing: 1.2px !important;
+}
+
+.bayora-nav-item {
+    width: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 11px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 11px 12px !important;
+
+    border: 0 !important;
+    border-radius: 10px !important;
+
+    background: transparent !important;
+    color: #555555 !important;
+
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+
+    text-align: left !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background .15s ease,
+        color .15s ease !important;
+}
+
+.bayora-nav-item span:first-child {
+    width: 18px !important;
+
+    flex: 0 0 18px !important;
+
+    text-align: center !important;
+
+    font-size: 15px !important;
+}
+
+.bayora-nav-item:hover {
+    background: #f3f7ff !important;
+    color: #1264d8 !important;
+}
+
+.bayora-nav-item.active {
+    background: #eaf2ff !important;
+    color: #1264d8 !important;
+
+    font-weight: 750 !important;
+}
+
+.bayora-sidebar-bottom {
+    margin-top: auto !important;
+    padding-top: 18px !important;
+    border-top: 1px solid #eeeeee !important;
+    flex-shrink: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.bayora-sidebar-logout {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.bayora-sidebar-logout:hover {
+    background: #fff1f1 !important;
+    color: #c62828 !important;
+}
+
+
+/* ==========================================================
+   HILANGKAN HEADER LAMA
+========================================================== */
+
+body > header {
+    display: none !important;
+}
+
+
+/* ==========================================================
+   AREA KONTEN
+========================================================== */
+
+body {
+    padding-left: 238px !important;
+    margin: 0 !important;
+}
+
+body > main {
+    width: auto !important;
+    max-width: 1180px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    padding: 46px 42px 70px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ==========================================================
+   SISTEM MENU
+========================================================== */
+
+.bayora-admin-view-hidden {
+    display: none !important;
+}
+
+.bayora-admin-view-visible {
+    display: block !important;
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+.bayora-sidebar-mobile-toggle {
+    display: none !important;
+}
+
+.bayora-sidebar-overlay {
+    display: none !important;
+}
+
+@media (max-width: 800px) {
+
+    body {
+        padding-left: 0 !important;
+    }
+
+    body > main {
+        width: 100% !important;
+
+        padding: 72px 18px 50px !important;
+
+        margin: 0 !important;
+    }
+
+    .bayora-admin-sidebar {
+        width: 238px !important;
+
+        transform: translateX(-100%) !important;
+
+        transition: transform .22s ease !important;
+
+        box-shadow:
+            12px 0 35px rgba(0,0,0,.10) !important;
+    }
+
+    .bayora-admin-sidebar.open {
+        transform: translateX(0) !important;
+    }
+
+    .bayora-sidebar-overlay {
+        position: fixed !important;
+        inset: 0 !important;
+
+        z-index: 99998 !important;
+
+        background: rgba(0,0,0,.28) !important;
+    }
+
+    .bayora-sidebar-overlay.open {
+        display: block !important;
+    }
+
+    .bayora-sidebar-mobile-toggle {
+        position: fixed !important;
+
+        top: 14px !important;
+        left: 14px !important;
+
+        z-index: 100000 !important;
+
+        display: flex !important;
+
+        align-items: center !important;
+        justify-content: center !important;
+
+        width: 42px !important;
+        height: 42px !important;
+
+        border: 1px solid #e4e4e4 !important;
+        border-radius: 11px !important;
+
+        background: #ffffff !important;
+        color: #222222 !important;
+
+        font-size: 19px !important;
+
+        cursor: pointer !important;
+    }
+
+}
+
+
+/* ==========================================================
+   RINGKASAN TRANSAKSI - RESPONSIVE GRID
+========================================================== */
+
+.stats {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr)) !important;
+
+    gap: 18px !important;
+
+    width: 100% !important;
+
+    margin-top: 24px !important;
+    margin-bottom: 32px !important;
+}
+
+.stats > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+
+/* Desktop besar */
+
+@media (min-width: 1101px) {
+
+    .stats {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+    }
+
+}
+
+
+/* Laptop / tablet */
+
+@media (min-width: 601px) and (max-width: 1100px) {
+
+    .stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 16px !important;
+    }
+
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+
+        margin-top: 18px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .stats > * {
+        min-height: 120px !important;
+    }
+
+}
+
+
+/* HP sangat kecil */
+
+@media (max-width: 380px) {
+
+    .stats {
+        grid-template-columns:
+            1fr !important;
+
+        gap: 12px !important;
+    }
+
+}
+
+
+/* ==========================================================
+   BAYORA DASHBOARD VIEW FIX
+========================================================== */
+
+body.bayora-view-dashboard > main > .eyebrow,
+body.bayora-view-dashboard > main > h1,
+body.bayora-view-dashboard > main > .stats {
+    display: block !important;
+}
+
+body.bayora-view-transactions > main > .eyebrow,
+body.bayora-view-transactions > main > h1,
+body.bayora-view-transactions > main > .stats,
+
+body.bayora-view-catalog > main > .eyebrow,
+body.bayora-view-catalog > main > h1,
+body.bayora-view-catalog > main > .stats,
+
+body.bayora-view-admins > main > .eyebrow,
+body.bayora-view-admins > main > h1,
+body.bayora-view-admins > main > .stats {
+    display: none !important;
+}
+
+
+/* ==========================================================
+   BAYORA ADMIN - RESET PASSWORD MODAL
+========================================================== */
+
+.bayora-reset-password-modal {
+    position: fixed !important;
+    inset: 0 !important;
+
+    z-index: 100000 !important;
+
+    display: none;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 20px !important;
+
+    box-sizing: border-box !important;
+
+    background: rgba(15, 23, 42, .42) !important;
+
+    backdrop-filter: blur(3px) !important;
+    -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.bayora-reset-password-modal.open {
+    display: flex !important;
+}
+
+.bayora-reset-password-card {
+    width: 100% !important;
+    max-width: 430px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 26px !important;
+
+    border: 1px solid #e8e8e8 !important;
+    border-radius: 18px !important;
+
+    background: #ffffff !important;
+
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .16) !important;
+}
+
+.bayora-reset-password-title {
+    margin: 0 !important;
+
+    color: #202020 !important;
+
+    font-size: 20px !important;
+    font-weight: 800 !important;
+}
+
+.bayora-reset-password-subtitle {
+    margin: 7px 0 22px !important;
+
+    color: #777777 !important;
+
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+.bayora-reset-password-user {
+    margin-bottom: 17px !important;
+
+    padding: 11px 13px !important;
+
+    border-radius: 10px !important;
+
+    background: #f5f8fc !important;
+
+    color: #1264d8 !important;
+
+    font-size: 13px !important;
+    font-weight: 750 !important;
+}
+
+.bayora-reset-password-label {
+    display: block !important;
+
+    margin-bottom: 7px !important;
+
+    color: #444444 !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.bayora-reset-password-input {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 12px 13px !important;
+
+    border: 1px solid #dcdcdc !important;
+    border-radius: 10px !important;
+
+    outline: none !important;
+
+    background: #ffffff !important;
+
+    color: #222222 !important;
+
+    font-family: inherit !important;
+    font-size: 14px !important;
+}
+
+.bayora-reset-password-input:focus {
+    border-color: #1264d8 !important;
+
+    box-shadow:
+        0 0 0 3px rgba(18, 100, 216, .10) !important;
+}
+
+.bayora-reset-password-hint {
+    margin-top: 7px !important;
+
+    color: #929292 !important;
+
+    font-size: 11px !important;
+}
+
+.bayora-reset-password-error {
+    display: none;
+
+    margin-top: 13px !important;
+
+    padding: 10px 12px !important;
+
+    border-radius: 9px !important;
+
+    background: #fff1f1 !important;
+
+    color: #c62828 !important;
+
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+}
+
+.bayora-reset-password-actions {
+    display: flex !important;
+
+    justify-content: flex-end !important;
+
+    gap: 9px !important;
+
+    margin-top: 23px !important;
+}
+
+.bayora-reset-password-cancel,
+.bayora-reset-password-submit {
+    border: 0 !important;
+
+    border-radius: 10px !important;
+
+    padding: 10px 15px !important;
+
+    font-family: inherit !important;
+
+    font-size: 12px !important;
+    font-weight: 750 !important;
+
+    cursor: pointer !important;
+}
+
+.bayora-reset-password-cancel {
+    background: #f1f1f1 !important;
+
+    color: #555555 !important;
+}
+
+.bayora-reset-password-cancel:hover {
+    background: #e8e8e8 !important;
+}
+
+.bayora-reset-password-submit {
+    background: #1264d8 !important;
+
+    color: #ffffff !important;
+}
+
+.bayora-reset-password-submit:hover {
+    background: #0d55bb !important;
+}
+
+.bayora-reset-password-submit:disabled {
+    opacity: .6 !important;
+
+    cursor: not-allowed !important;
+}
+
+@media (max-width: 500px) {
+
+    .bayora-reset-password-card {
+        padding: 21px !important;
+
+        border-radius: 15px !important;
+    }
+
+    .bayora-reset-password-actions {
+        flex-direction: column-reverse !important;
+    }
+
+    .bayora-reset-password-cancel,
+    .bayora-reset-password-submit {
+        width: 100% !important;
+    }
+
+}
+
 </style>
 
 
@@ -724,6 +1576,127 @@
 
 </header>
 
+
+
+<!-- ========================================================
+     BAYORA ADMIN SIDEBAR
+========================================================= -->
+
+<aside class="bayora-admin-sidebar" id="bayoraAdminSidebar">
+
+    <div class="bayora-sidebar-brand">
+        <img
+            src="/logo-bayora.png"
+            alt="Bayora"
+        >
+
+        <strong>BAYORA</strong>
+    </div>
+
+    <nav class="bayora-sidebar-nav">
+
+        <div class="bayora-sidebar-label">
+            OVERVIEW
+        </div>
+
+        <button
+            type="button"
+            class="bayora-nav-item active"
+            data-admin-view="dashboard"
+        >
+            <span>▦</span>
+            <span>Dashboard</span>
+        </button>
+
+
+        <div class="bayora-sidebar-label">
+            TRANSAKSI
+        </div>
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            data-admin-view="transactions"
+        >
+            <span>▤</span>
+            <span>Transaksi</span>
+        </button>
+
+
+        <div
+            class="bayora-sidebar-label"
+            id="catalogSidebarLabel"
+        >
+            KATALOG
+        </div>
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            data-admin-view="catalog"
+            id="catalogNavButton"
+        >
+            <span>▧</span>
+            <span>Layanan & Produk</span>
+        </button>
+
+
+        <div
+            class="bayora-sidebar-label"
+            id="adminSidebarLabel"
+        >
+            ADMINISTRASI
+        </div>
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            data-admin-view="admins"
+            id="adminNavButton"
+        >
+            <span>♙</span>
+            <span>Kelola Admin</span>
+        </button>
+
+    </nav>
+
+    <div class="bayora-sidebar-bottom">
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            id="myAccountButton"
+        >
+            <span>♙</span>
+            <span>Akun Saya</span>
+        </button>
+
+        <button
+            type="button"
+            class="bayora-nav-item bayora-sidebar-logout"
+            id="sidebarLogoutButton"
+        >
+            <span>↪</span>
+            <span>Logout</span>
+        </button>
+
+    </div>
+
+</aside>
+
+<div
+    class="bayora-sidebar-overlay"
+    id="bayoraSidebarOverlay"
+></div>
+
+<button
+    type="button"
+    class="bayora-sidebar-mobile-toggle"
+    id="bayoraSidebarMobileToggle"
+    aria-label="Buka menu"
+>
+    ☰
+</button>
 
 <main>
 
@@ -1268,6 +2241,204 @@
 
 </div>
 
+
+<!-- ========================================================
+     KELOLA ADMIN
+========================================================= -->
+
+<section
+    class="panel admin-management-panel"
+    id="adminManagementPanel"
+>
+
+    <div class="admin-management-header">
+
+        <div class="admin-management-title">
+            Kelola Admin
+        </div>
+
+        <button
+            type="button"
+            class="admin-add-button"
+            id="adminAddButton"
+        >
+            + Tambah Admin
+        </button>
+
+    </div>
+
+    <div class="admin-table-wrap">
+
+        <table class="admin-table">
+
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Nama</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody id="adminTableBody">
+                <tr>
+                    <td
+                        colspan="5"
+                        class="admin-empty"
+                    >
+                        Memuat admin...
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     MODAL TAMBAH ADMIN
+========================================================= -->
+
+<div
+    class="admin-modal-overlay"
+    id="adminAddModal"
+>
+
+    <div class="admin-modal">
+
+        <div class="admin-modal-header">
+
+            <div class="admin-modal-title">
+                Tambah Admin
+            </div>
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="adminModalClose"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <form
+            class="admin-modal-body"
+            id="adminAddForm"
+        >
+
+            <div
+                class="admin-form-error"
+                id="adminFormError"
+            ></div>
+
+            <div class="admin-form-group">
+
+                <label for="newAdminUsername">
+                    Username
+                </label>
+
+                <input
+                    id="newAdminUsername"
+                    type="text"
+                    autocomplete="off"
+                    required
+                    maxlength="50"
+                    placeholder="contoh: support01"
+                >
+
+            </div>
+
+            <div class="admin-form-group">
+
+                <label for="newAdminName">
+                    Nama
+                </label>
+
+                <input
+                    id="newAdminName"
+                    type="text"
+                    autocomplete="name"
+                    required
+                    maxlength="100"
+                    placeholder="Nama admin"
+                >
+
+            </div>
+
+            <div class="admin-form-group">
+
+                <label for="newAdminPassword">
+                    Password
+                </label>
+
+                <input
+                    id="newAdminPassword"
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                    minlength="8"
+                    placeholder="Minimal 8 karakter"
+                >
+
+            </div>
+
+            <div class="admin-form-group">
+
+                <label for="newAdminRole">
+                    Role
+                </label>
+
+                <select id="newAdminRole">
+
+                    <option value="admin">
+                        Admin
+                    </option>
+
+                    <option value="support">
+                        Support
+                    </option>
+
+                    <option value="owner">
+                        Owner
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="admin-form-actions">
+
+                <button
+                    type="button"
+                    class="admin-cancel-button"
+                    id="adminModalCancel"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="admin-submit-button"
+                    id="adminSubmitButton"
+                >
+                    Tambah Admin
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
 </main>
 
 
@@ -1324,6 +2495,115 @@
             adminRole.textContent =
                 String(data.admin.role || "")
                     .toUpperCase();
+        }
+
+
+        /* ==================================================
+           ROLE-BASED SIDEBAR
+        ================================================== */
+
+        const currentRole =
+            String(data.admin.role || "")
+                .trim()
+                .toLowerCase();
+
+
+        const catalogButton =
+            document.getElementById(
+                "catalogNavButton"
+            );
+
+        const catalogLabel =
+            document.getElementById(
+                "catalogSidebarLabel"
+            );
+
+        const adminButton =
+            document.getElementById(
+                "adminNavButton"
+            );
+
+        const adminLabel =
+            document.getElementById(
+                "adminSidebarLabel"
+            );
+
+
+        /*
+         * SUPPORT:
+         * hanya Dashboard + Transaksi.
+         */
+        if (currentRole === "support") {
+
+            if (catalogButton) {
+                catalogButton.style.display =
+                    "none";
+            }
+
+            if (catalogLabel) {
+                catalogLabel.style.display =
+                    "none";
+            }
+
+            if (adminButton) {
+                adminButton.style.display =
+                    "none";
+            }
+
+            if (adminLabel) {
+                adminLabel.style.display =
+                    "none";
+            }
+
+        }
+
+
+        /*
+         * ADMIN:
+         * Dashboard + Transaksi + Katalog.
+         * Kelola Admin hanya Owner.
+         */
+        else if (currentRole === "admin") {
+
+            if (adminButton) {
+                adminButton.style.display =
+                    "none";
+            }
+
+            if (adminLabel) {
+                adminLabel.style.display =
+                    "none";
+            }
+
+        }
+
+
+        /*
+         * OWNER:
+         * semua menu ditampilkan.
+         */
+        else if (currentRole === "owner") {
+
+            if (catalogButton) {
+                catalogButton.style.display =
+                    "";
+            }
+
+            if (catalogLabel) {
+                catalogLabel.style.display =
+                    "";
+            }
+
+            if (adminButton) {
+                adminButton.style.display =
+                    "";
+            }
+
+            if (adminLabel) {
+                adminLabel.style.display =
+                    "";
+            }
+
         }
 
         document.documentElement
@@ -3306,6 +4586,178 @@ document.addEventListener(
     </div>
 </div>
 
+
+<!-- ========================================================
+     AKUN SAYA
+========================================================= -->
+
+<div
+    id="myAccountModal"
+    class="admin-modal-overlay"
+    aria-hidden="true"
+>
+
+    <div
+        class="admin-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="myAccountModalTitle"
+    >
+
+        <div class="admin-modal-header">
+
+            <div class="admin-modal-title" id="myAccountModalTitle">
+                Akun Saya
+            </div>
+
+            <button
+                type="button"
+                class="admin-modal-close"
+                id="myAccountModalClose"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div class="admin-modal-body">
+
+            <div class="admin-form-group">
+
+                <label>Username</label>
+
+                <input
+                    type="text"
+                    id="myAccountUsername"
+                    readonly
+                >
+
+            </div>
+
+            <div class="admin-form-group">
+
+                <label>Role</label>
+
+                <input
+                    type="text"
+                    id="myAccountRole"
+                    readonly
+                >
+
+            </div>
+
+            <div
+                style="
+                    margin: 22px 0 16px;
+                    padding-top: 18px;
+                    border-top: 1px solid #eee;
+                    font-size: 14px;
+                    font-weight: 800;
+                "
+            >
+                Ubah Password
+            </div>
+
+            <form id="myAccountPasswordForm">
+
+                <div class="admin-form-group">
+
+                    <label for="myCurrentPassword">
+                        Password Saat Ini
+                    </label>
+
+                    <input
+                        type="password"
+                        id="myCurrentPassword"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <div class="admin-form-group">
+
+                    <label for="myNewPassword">
+                        Password Baru
+                    </label>
+
+                    <input
+                        type="password"
+                        id="myNewPassword"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+                <div class="admin-form-group">
+
+                    <label for="myConfirmPassword">
+                        Konfirmasi Password Baru
+                    </label>
+
+                    <input
+                        type="password"
+                        id="myConfirmPassword"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+                </div>
+
+                <div
+                    id="myAccountPasswordError"
+                    style="
+                        display:none;
+                        margin-bottom:14px;
+                        padding:10px 12px;
+                        border-radius:10px;
+                        background:#fff0f0;
+                        color:#b42318;
+                        font-size:13px;
+                        font-weight:600;
+                    "
+                ></div>
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:flex-end;
+                        gap:8px;
+                        margin-top:20px;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        class="admin-action-button"
+                        id="myAccountCancelButton"
+                    >
+                        Batal
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="admin-action-button"
+                        id="myAccountSaveButton"
+                    >
+                        Simpan Password
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <script>
 /* =========================
    BAYORA ADMIN LOGOUT
@@ -3316,9 +4768,284 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutButton =
         document.getElementById("adminLogoutButton");
 
-    if (!logoutButton) return;
+    const sidebarLogoutButton =
+        document.getElementById("sidebarLogoutButton");
 
-    logoutButton.addEventListener("click", async function () {
+    const myAccountButton =
+        document.getElementById("myAccountButton");
+
+    const myAccountModal =
+        document.getElementById("myAccountModal");
+
+    const myAccountModalClose =
+        document.getElementById("myAccountModalClose");
+
+    const myAccountCancelButton =
+        document.getElementById("myAccountCancelButton");
+
+    const myAccountPasswordForm =
+        document.getElementById("myAccountPasswordForm");
+
+    const myAccountUsername =
+        document.getElementById("myAccountUsername");
+
+    const myAccountRole =
+        document.getElementById("myAccountRole");
+
+    const myCurrentPassword =
+        document.getElementById("myCurrentPassword");
+
+    const myNewPassword =
+        document.getElementById("myNewPassword");
+
+    const myConfirmPassword =
+        document.getElementById("myConfirmPassword");
+
+    const myAccountPasswordError =
+        document.getElementById("myAccountPasswordError");
+
+    const myAccountSaveButton =
+        document.getElementById("myAccountSaveButton");
+
+
+    function openMyAccountModal() {
+
+        const admin =
+            window.BAYORA_ADMIN || {};
+
+        if (myAccountUsername) {
+            myAccountUsername.value =
+                admin.username || "";
+        }
+
+        if (myAccountRole) {
+            myAccountRole.value =
+                String(admin.role || "")
+                    .toUpperCase();
+        }
+
+        if (myAccountPasswordForm) {
+            myAccountPasswordForm.reset();
+        }
+
+        if (myAccountPasswordError) {
+            myAccountPasswordError.textContent = "";
+            myAccountPasswordError.style.display = "none";
+        }
+
+        if (myAccountModal) {
+            myAccountModal.classList.add("open");
+            myAccountModal.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+        }
+
+        if (myCurrentPassword) {
+            setTimeout(function () {
+                myCurrentPassword.focus();
+            }, 50);
+        }
+    }
+
+
+    function closeMyAccountModal() {
+
+        if (myAccountModal) {
+            myAccountModal.classList.remove("open");
+            myAccountModal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+        }
+
+        if (myAccountPasswordForm) {
+            myAccountPasswordForm.reset();
+        }
+
+        if (myAccountPasswordError) {
+            myAccountPasswordError.textContent = "";
+            myAccountPasswordError.style.display = "none";
+        }
+    }
+
+
+    if (myAccountButton) {
+        myAccountButton.addEventListener(
+            "click",
+            openMyAccountModal
+        );
+    }
+
+
+    if (myAccountModalClose) {
+        myAccountModalClose.addEventListener(
+            "click",
+            closeMyAccountModal
+        );
+    }
+
+
+    if (myAccountCancelButton) {
+        myAccountCancelButton.addEventListener(
+            "click",
+            closeMyAccountModal
+        );
+    }
+
+
+    if (myAccountModal) {
+        myAccountModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target === myAccountModal
+                ) {
+                    closeMyAccountModal();
+                }
+
+            }
+        );
+    }
+
+
+    if (myAccountPasswordForm) {
+
+        myAccountPasswordForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                const currentPassword =
+                    myCurrentPassword
+                        ? myCurrentPassword.value
+                        : "";
+
+                const newPassword =
+                    myNewPassword
+                        ? myNewPassword.value
+                        : "";
+
+                const confirmPassword =
+                    myConfirmPassword
+                        ? myConfirmPassword.value
+                        : "";
+
+
+                if (myAccountPasswordError) {
+                    myAccountPasswordError.textContent = "";
+                    myAccountPasswordError.style.display = "none";
+                }
+
+
+                if (newPassword.length < 8) {
+
+                    if (myAccountPasswordError) {
+                        myAccountPasswordError.textContent =
+                            "Password baru minimal 8 karakter.";
+                        myAccountPasswordError.style.display =
+                            "block";
+                    }
+
+                    return;
+                }
+
+
+                if (newPassword !== confirmPassword) {
+
+                    if (myAccountPasswordError) {
+                        myAccountPasswordError.textContent =
+                            "Konfirmasi password tidak cocok.";
+                        myAccountPasswordError.style.display =
+                            "block";
+                    }
+
+                    return;
+                }
+
+
+                if (myAccountSaveButton) {
+                    myAccountSaveButton.disabled = true;
+                    myAccountSaveButton.textContent =
+                        "Menyimpan...";
+                }
+
+
+                try {
+
+                    const response = await fetch(
+                        "/api/admin/change-password",
+                        {
+                            method: "POST",
+                            credentials: "include",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify({
+                                currentPassword,
+                                newPassword,
+                                confirmPassword
+                            })
+                        }
+                    );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        throw new Error(
+                            data.error ||
+                            "Password gagal diperbarui."
+                        );
+                    }
+
+
+                    alert(
+                        "Password berhasil diperbarui."
+                    );
+
+                    closeMyAccountModal();
+
+                } catch (error) {
+
+                    console.error(
+                        "[ADMIN CHANGE PASSWORD]",
+                        error
+                    );
+
+                    if (myAccountPasswordError) {
+                        myAccountPasswordError.textContent =
+                            error.message;
+                        myAccountPasswordError.style.display =
+                            "block";
+                    }
+
+                } finally {
+
+                    if (myAccountSaveButton) {
+                        myAccountSaveButton.disabled = false;
+                        myAccountSaveButton.textContent =
+                            "Simpan Password";
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    async function performAdminLogout(button) {
 
         const confirmed = window.confirm(
             "Apakah kamu yakin ingin keluar dari dashboard admin?"
@@ -3326,8 +5053,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!confirmed) return;
 
-        logoutButton.disabled = true;
-        logoutButton.textContent = "Keluar...";
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Keluar...";
+        }
 
         try {
 
@@ -3358,14 +5087,1342 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Logout gagal. Silakan coba lagi."
             );
 
-            logoutButton.disabled = false;
-            logoutButton.textContent = "Logout";
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Logout";
+            }
         }
+    }
 
-    });
+    if (logoutButton) {
+        logoutButton.addEventListener(
+            "click",
+            function () {
+                performAdminLogout(logoutButton);
+            }
+        );
+    }
+
+    if (sidebarLogoutButton) {
+        sidebarLogoutButton.addEventListener(
+            "click",
+            function () {
+                performAdminLogout(sidebarLogoutButton);
+            }
+        );
+    }
 
 });
 </script>
+
+
+<script>
+/* ==========================================================
+   KELOLA ADMIN
+========================================================== */
+
+(function () {
+
+    const panel =
+        document.getElementById(
+            "adminManagementPanel"
+        );
+
+    if (!panel) return;
+
+    const tableBody =
+        document.getElementById(
+            "adminTableBody"
+        );
+
+    const addButton =
+        document.getElementById(
+            "adminAddButton"
+        );
+
+    const modal =
+        document.getElementById(
+            "adminAddModal"
+        );
+
+    const closeButton =
+        document.getElementById(
+            "adminModalClose"
+        );
+
+    const cancelButton =
+        document.getElementById(
+            "adminModalCancel"
+        );
+
+    const form =
+        document.getElementById(
+            "adminAddForm"
+        );
+
+    const errorBox =
+        document.getElementById(
+            "adminFormError"
+        );
+
+    const submitButton =
+        document.getElementById(
+            "adminSubmitButton"
+        );
+
+
+    function openModal() {
+
+        errorBox.style.display = "none";
+        errorBox.textContent = "";
+
+        form.reset();
+
+        modal.classList.add("open");
+
+        document
+            .getElementById("newAdminUsername")
+            .focus();
+    }
+
+
+    function closeModal() {
+
+        modal.classList.remove("open");
+
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    async function loadAdmins() {
+
+        tableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="5"
+                    class="admin-empty"
+                >
+                    Memuat admin...
+                </td>
+            </tr>
+        `;
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/admins",
+                    {
+                        method: "GET",
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal mengambil data admin."
+                );
+            }
+
+            const admins =
+                Array.isArray(data.admins)
+                    ? data.admins
+                    : [];
+
+            if (!admins.length) {
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="5"
+                            class="admin-empty"
+                        >
+                            Belum ada admin.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tableBody.innerHTML =
+                admins.map(function (admin) {
+
+                    const active =
+                        Number(admin.active) === 1;
+
+                    const role =
+                        String(
+                            admin.role || "admin"
+                        ).toUpperCase();
+
+                    return `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(admin.username)}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(admin.name)}
+                            </td>
+
+                            <td>
+                                <span class="admin-role">
+                                    ${escapeHtml(role)}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span
+                                    class="admin-status ${
+                                        active
+                                            ? "active"
+                                            : "inactive"
+                                    }"
+                                >
+                                    ${
+                                        active
+                                            ? "Aktif"
+                                            : "Nonaktif"
+                                    }
+                                </span>
+                            </td>
+
+                            <td>
+
+                                <div class="admin-actions">
+
+                                    <button
+                                        type="button"
+                                        class="admin-action-button"
+                                        data-action="status"
+                                        data-id="${Number(admin.id)}"
+                                        data-active="${active ? 1 : 0}"
+                                    >
+                                        ${
+                                            active
+                                                ? "Nonaktifkan"
+                                                : "Aktifkan"
+                                        }
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="admin-action-button"
+                                        data-action="reset-password"
+                                        data-id="${Number(admin.id)}"
+                                        data-username="${escapeHtml(admin.username)}"
+                                    >
+                                        Reset Password
+                                    </button>
+
+                                    ${
+                                        String(window.BAYORA_ADMIN?.role || "").toUpperCase() === "OWNER"
+                                            ? `
+                                            <button
+                                                type="button"
+                                                class="admin-action-button danger"
+                                                data-action="delete"
+                                                data-id="${Number(admin.id)}"
+                                                data-username="${escapeHtml(admin.username)}"
+                                            >
+                                                Hapus
+                                            </button>
+                                            `
+                                            : ""
+                                    }
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    `;
+
+                }).join("");
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN LIST]",
+                error
+            );
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td
+                        colspan="5"
+                        class="admin-empty"
+                    >
+                        ${escapeHtml(error.message)}
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+
+    async function createAdmin(event) {
+
+        event.preventDefault();
+
+        errorBox.style.display = "none";
+        errorBox.textContent = "";
+
+        const username =
+            document
+                .getElementById("newAdminUsername")
+                .value
+                .trim();
+
+        const name =
+            document
+                .getElementById("newAdminName")
+                .value
+                .trim();
+
+        const password =
+            document
+                .getElementById("newAdminPassword")
+                .value;
+
+        const role =
+            document
+                .getElementById("newAdminRole")
+                .value;
+
+        if (password.length < 8) {
+
+            errorBox.textContent =
+                "Password minimal 8 karakter.";
+
+            errorBox.style.display =
+                "block";
+
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent =
+            "Menyimpan...";
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/admins",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            username,
+                            name,
+                            password,
+                            role
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal menambahkan admin."
+                );
+            }
+
+            closeModal();
+
+            await loadAdmins();
+
+            alert(
+                "Admin berhasil ditambahkan."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN CREATE]",
+                error
+            );
+
+            errorBox.textContent =
+                error.message;
+
+            errorBox.style.display =
+                "block";
+
+        } finally {
+
+            submitButton.disabled = false;
+            submitButton.textContent =
+                "Tambah Admin";
+
+        }
+
+    }
+
+
+    async function changeStatus(id, active) {
+
+        const nextActive =
+            active ? 0 : 1;
+
+        const actionText =
+            nextActive
+                ? "mengaktifkan"
+                : "menonaktifkan";
+
+        if (
+            !confirm(
+                `Yakin ingin ${actionText} admin ini?`
+            )
+        ) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/admin/admins/${id}/status`,
+                    {
+                        method: "PATCH",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            active: nextActive
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal mengubah status admin."
+                );
+            }
+
+            await loadAdmins();
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN STATUS]",
+                error
+            );
+
+            alert(error.message);
+
+        }
+
+    }
+
+
+    async function resetAdminPassword(
+        id,
+        username
+    ) {
+
+        const modal =
+            document.getElementById(
+                "bayoraResetPasswordModal"
+            );
+
+        const input =
+            document.getElementById(
+                "bayoraResetPasswordInput"
+            );
+
+        const userBox =
+            document.getElementById(
+                "bayoraResetPasswordUser"
+            );
+
+        const errorBox =
+            document.getElementById(
+                "bayoraResetPasswordError"
+            );
+
+        const submitButton =
+            document.getElementById(
+                "bayoraResetPasswordSubmit"
+            );
+
+        const cancelButton =
+            document.getElementById(
+                "bayoraResetPasswordCancel"
+            );
+
+
+        userBox.textContent =
+            `Admin: ${username}`;
+
+        input.value = "";
+
+        errorBox.style.display =
+            "none";
+
+        errorBox.textContent =
+            "";
+
+        modal.classList.add("open");
+
+        setTimeout(
+            () => input.focus(),
+            50
+        );
+
+
+        function closeResetModal() {
+
+            modal.classList.remove(
+                "open"
+            );
+
+        }
+
+
+        cancelButton.onclick =
+            closeResetModal;
+
+
+        modal.onclick =
+            function (event) {
+
+                if (
+                    event.target === modal
+                ) {
+                    closeResetModal();
+                }
+
+            };
+
+
+        const submitHandler =
+            async function () {
+
+                const password =
+                    input.value;
+
+
+                if (password.length < 8) {
+
+                    errorBox.textContent =
+                        "Password minimal 8 karakter.";
+
+                    errorBox.style.display =
+                        "block";
+
+                    input.focus();
+
+                    return;
+                }
+
+
+                const confirmed =
+                    confirm(
+                        `Reset password admin "${username}"?\n\n` +
+                        "Semua session admin tersebut akan dicabut."
+                    );
+
+
+                if (!confirmed) {
+                    return;
+                }
+
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Mereset...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            `/api/admin/admins/${id}/password`,
+                            {
+                                method: "PATCH",
+
+                                credentials: "include",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        throw new Error(
+                            data.error ||
+                            "Gagal mereset password."
+                        );
+
+                    }
+
+
+                    closeResetModal();
+
+
+                    alert(
+                        "Password admin berhasil direset.\n\n" +
+                        "Session admin tersebut telah dicabut."
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "[ADMIN PASSWORD RESET]",
+                        error
+                    );
+
+                    errorBox.textContent =
+                        error.message;
+
+                    errorBox.style.display =
+                        "block";
+
+                } finally {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        "Reset Password";
+
+                }
+
+            };
+
+
+        submitButton.onclick =
+            submitHandler;
+
+    }
+
+
+
+    async function deleteAdmin(
+        id,
+        username
+    ) {
+
+        if (
+            !confirm(
+                `Hapus admin "${username}"?\n\n` +
+                "Tindakan ini tidak dapat dibatalkan."
+            )
+        ) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/admin/admins/${id}`,
+                    {
+                        method: "DELETE",
+                        credentials: "include"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal menghapus admin."
+                );
+            }
+
+            await loadAdmins();
+
+        } catch (error) {
+
+            console.error(
+                "[ADMIN DELETE]",
+                error
+            );
+
+            alert(error.message);
+
+        }
+
+    }
+
+
+    addButton.addEventListener(
+        "click",
+        openModal
+    );
+
+    closeButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+    cancelButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+    modal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target === modal
+            ) {
+                closeModal();
+            }
+
+        }
+    );
+
+    form.addEventListener(
+        "submit",
+        createAdmin
+    );
+
+
+    tableBody.addEventListener(
+        "click",
+        function (event) {
+
+            const button =
+                event.target.closest(
+                    "[data-action]"
+                );
+
+            if (!button) return;
+
+            const id =
+                Number(button.dataset.id);
+
+            if (!id) return;
+
+            const action =
+                button.dataset.action;
+
+            if (action === "status") {
+
+                changeStatus(
+                    id,
+                    Number(
+                        button.dataset.active
+                    ) === 1
+                );
+
+            }
+
+            if (action === "reset-password") {
+
+                resetAdminPassword(
+                    id,
+                    button.dataset.username
+                );
+
+            }
+
+
+            if (action === "delete") {
+
+                deleteAdmin(
+                    id,
+                    button.dataset.username
+                );
+
+            }
+
+        }
+    );
+
+
+    loadAdmins();
+
+})();
+</script>
+
+
+<script>
+/* ==========================================================
+   BAYORA ADMIN VIEW NAVIGATION
+========================================================== */
+
+(function () {
+
+    function setupBayoraAdminNavigation() {
+
+        const main =
+            document.querySelector("body > main");
+
+        if (!main) return;
+
+
+        /*
+         * Cari panel yang sudah ada.
+         */
+
+        const stats =
+            main.querySelector(".stats");
+
+        const panels =
+            Array.from(
+                main.querySelectorAll(
+                    ":scope > section.panel"
+                )
+            );
+
+        const catalog =
+            main.querySelector(
+                ".catalog-panel"
+            );
+
+        const admins =
+            main.querySelector(
+                "#adminManagementPanel"
+            );
+
+
+        /*
+         * Panel transaksi adalah section.panel
+         * yang bukan katalog dan bukan admin.
+         */
+
+        const transactions =
+            panels.find(function (panel) {
+
+                return (
+                    !panel.classList.contains(
+                        "catalog-panel"
+                    ) &&
+                    panel.id !==
+                        "adminManagementPanel"
+                );
+
+            });
+
+
+        /*
+         * Heading dashboard.
+         */
+
+        const dashboardHeading =
+            Array.from(
+                main.children
+            ).find(function (element) {
+
+                return (
+                    element.tagName === "H1"
+                );
+
+            });
+
+
+        /*
+         * Tandai elemen yang dikontrol menu.
+         */
+
+        if (stats) {
+            stats.dataset.bayoraView =
+                "dashboard";
+        }
+
+        if (dashboardHeading) {
+            dashboardHeading.dataset.bayoraView =
+                "dashboard";
+        }
+
+        if (transactions) {
+            transactions.dataset.bayoraView =
+                "transactions";
+        }
+
+        if (catalog) {
+            catalog.dataset.bayoraView =
+                "catalog";
+        }
+
+        if (admins) {
+            admins.dataset.bayoraView =
+                "admins";
+        }
+
+
+        /*
+         * Semua elemen view.
+         */
+
+        const views = [
+            stats,
+            dashboardHeading,
+            transactions,
+            catalog,
+            admins
+        ].filter(Boolean);
+
+
+        function showView(viewName) {
+
+            views.forEach(function (element) {
+
+                const match =
+                    element.dataset.bayoraView ===
+                    viewName;
+
+                element.classList.toggle(
+                    "bayora-admin-view-visible",
+                    match
+                );
+
+                element.classList.toggle(
+                    "bayora-admin-view-hidden",
+                    !match
+                );
+
+            });
+
+
+            document
+                .querySelectorAll(
+                    ".bayora-nav-item[data-admin-view]"
+                )
+                .forEach(function (button) {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.adminView ===
+                            viewName
+                    );
+
+                });
+
+
+            /*
+             * Tutup sidebar mobile setelah memilih menu.
+             */
+
+            const sidebar =
+                document.getElementById(
+                    "bayoraAdminSidebar"
+                );
+
+            const overlay =
+                document.getElementById(
+                    "bayoraSidebarOverlay"
+                );
+
+            if (sidebar) {
+                sidebar.classList.remove("open");
+            }
+
+            if (overlay) {
+                overlay.classList.remove("open");
+            }
+
+        }
+
+
+        /*
+         * Menu.
+         */
+
+        document
+            .querySelectorAll(
+                ".bayora-nav-item[data-admin-view]"
+            )
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        showView(
+                            button.dataset.adminView
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /*
+         * Mobile sidebar.
+         */
+
+        const mobileToggle =
+            document.getElementById(
+                "bayoraSidebarMobileToggle"
+            );
+
+        const sidebar =
+            document.getElementById(
+                "bayoraAdminSidebar"
+            );
+
+        const overlay =
+            document.getElementById(
+                "bayoraSidebarOverlay"
+            );
+
+
+        function toggleMobileSidebar() {
+
+            if (!sidebar) return;
+
+            sidebar.classList.toggle("open");
+
+            if (overlay) {
+                overlay.classList.toggle(
+                    "open"
+                );
+            }
+
+        }
+
+
+        if (mobileToggle) {
+
+            mobileToggle.addEventListener(
+                "click",
+                toggleMobileSidebar
+            );
+
+        }
+
+
+        if (overlay) {
+
+            overlay.addEventListener(
+                "click",
+                function () {
+
+                    sidebar.classList.remove(
+                        "open"
+                    );
+
+                    overlay.classList.remove(
+                        "open"
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+         * Default: Dashboard.
+         */
+
+        showView("dashboard");
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupBayoraAdminNavigation
+        );
+
+    } else {
+
+        setupBayoraAdminNavigation();
+
+    }
+
+})();
+</script>
+
+
+<script>
+/* ==========================================================
+   BAYORA - FINAL DASHBOARD VISIBILITY FIX
+========================================================== */
+
+(function () {
+
+    function updateDashboardVisibility(view) {
+
+        const main = document.querySelector("body > main");
+
+        if (!main) return;
+
+        const eyebrow =
+            main.querySelector(":scope > .eyebrow");
+
+        const heading =
+            main.querySelector(":scope > h1");
+
+        const stats =
+            main.querySelector(":scope > .stats");
+
+
+        const dashboardElements = [
+            eyebrow,
+            heading,
+            stats
+        ].filter(Boolean);
+
+
+        const showDashboard =
+            view === "dashboard";
+
+
+        dashboardElements.forEach(function (element) {
+
+            if (showDashboard) {
+
+                element.style.removeProperty(
+                    "display"
+                );
+
+            } else {
+
+                element.style.setProperty(
+                    "display",
+                    "none",
+                    "important"
+                );
+
+            }
+
+        });
+
+    }
+
+
+    function setupFinalDashboardFix() {
+
+        const menuButtons =
+            document.querySelectorAll(
+                ".bayora-nav-item[data-admin-view]"
+            );
+
+
+        if (!menuButtons.length) return;
+
+
+        menuButtons.forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    updateDashboardVisibility(
+                        button.dataset.adminView
+                    );
+
+                },
+                true
+            );
+
+        });
+
+
+        /*
+         * Tentukan menu aktif saat halaman pertama dibuka.
+         */
+
+        const activeButton =
+            document.querySelector(
+                ".bayora-nav-item[data-admin-view].active"
+            );
+
+
+        if (activeButton) {
+
+            updateDashboardVisibility(
+                activeButton.dataset.adminView
+            );
+
+        } else {
+
+            updateDashboardVisibility(
+                "dashboard"
+            );
+
+        }
+
+    }
+
+
+    if (
+        document.readyState === "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupFinalDashboardFix
+        );
+
+    } else {
+
+        setupFinalDashboardFix();
+
+    }
+
+})();
+</script>
+
+
+<div
+    id="bayoraResetPasswordModal"
+    class="bayora-reset-password-modal"
+>
+
+    <div
+        class="bayora-reset-password-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bayoraResetPasswordTitle"
+    >
+
+        <h2
+            id="bayoraResetPasswordTitle"
+            class="bayora-reset-password-title"
+        >
+            Reset Password
+        </h2>
+
+        <p
+            class="bayora-reset-password-subtitle"
+        >
+            Buat password baru untuk admin ini.
+            Semua session aktif admin tersebut
+            akan dicabut setelah reset.
+        </p>
+
+        <div
+            id="bayoraResetPasswordUser"
+            class="bayora-reset-password-user"
+        >
+            Admin:
+        </div>
+
+        <label
+            class="bayora-reset-password-label"
+            for="bayoraResetPasswordInput"
+        >
+            Password baru
+        </label>
+
+        <input
+            id="bayoraResetPasswordInput"
+            class="bayora-reset-password-input"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Masukkan password baru"
+        >
+
+        <div
+            class="bayora-reset-password-hint"
+        >
+            Minimal 8 karakter.
+        </div>
+
+        <div
+            id="bayoraResetPasswordError"
+            class="bayora-reset-password-error"
+        ></div>
+
+        <div
+            class="bayora-reset-password-actions"
+        >
+
+            <button
+                id="bayoraResetPasswordCancel"
+                type="button"
+                class="bayora-reset-password-cancel"
+            >
+                Batal
+            </button>
+
+            <button
+                id="bayoraResetPasswordSubmit"
+                type="button"
+                class="bayora-reset-password-submit"
+            >
+                Reset Password
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 </body>
 </html>

@@ -514,6 +514,37 @@
 
 }
 
+
+/* BAYORA LOGO FIX */
+.logo.bayora-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.logo.bayora-brand .bayora-logo-image {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+.logo.bayora-brand .bayora-logo-text {
+    display: inline-block !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
 </style>
 
 
@@ -3189,7 +3220,7 @@ header{
   gap:10px;
 }
 
-.logo::before{
+.logo::before{ display:none !important; content:none !important; 
   content:"B";
   width:36px;
   height:36px;
@@ -3525,7 +3556,7 @@ header{
     letter-spacing:-.8px;
 }
 
-.logo::before{
+.logo::before{ display:none !important; content:none !important; 
     content:"B";
     width:38px;
     height:38px;
@@ -4036,7 +4067,7 @@ table tbody tr:hover{
         font-size:20px!important;
     }
 
-    .logo::before{
+    .logo::before{ display:none !important; content:none !important; 
         width:32px;
         height:32px;
         border-radius:10px;
@@ -4105,6 +4136,62 @@ table tbody tr:hover{
         grid-column:2!important;
         grid-row:1 / span 2!important;
     }
+}
+
+
+
+
+/* =========================================================
+   BAYORA LOGO — FINAL
+   ========================================================= */
+
+header .logo.bayora-brand {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+
+    width: auto !important;
+    height: 48px !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    background: none !important;
+    overflow: hidden !important;
+}
+
+header .logo.bayora-brand::before,
+header .logo.bayora-brand::after {
+    display: none !important;
+    content: none !important;
+}
+
+header .logo.bayora-brand .bayora-logo-image {
+    display: block !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    flex: 0 0 48px !important;
+    object-fit: contain !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+header .logo.bayora-brand .bayora-logo-text {
+    display: inline-block !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
 }
 
 </style>

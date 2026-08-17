@@ -187,6 +187,8 @@ const transactionMigrations = [
     ["digiflazz_status", 'TEXT NOT NULL DEFAULT "PENDING"'],
     ["digiflazz_ref", "TEXT"],
     ["digiflazz_message", "TEXT"],
+    ["digiflazz_rc", "TEXT"],
+    ["digiflazz_sn", "TEXT"],
     ["paid_at", "TEXT"],
     ["processed_at", "TEXT"]
 ];
@@ -1652,6 +1654,198 @@ async function sendTransactionToDigiflazz(transactionId) {
         ref_id: digiflazzRef,
         message
     };
+}
+
+
+/* ============================================================
+   DIGIFLAZZ PENDING STATUS CHECKER
+   Mengecek transaksi PAID yang masih PENDING menggunakan
+   ref_id yang sama. Tidak membuat ref_id baru.
+============================================================ */
+
+async function checkPendingDigiflazzTransactions() {
+
+    try {
+
+        const pending = db.prepare(`
+            SELECT
+                t.transaction_id,
+                t.reference,
+                t.target,
+                t.digiflazz_ref,
+                p.digiflazz_sku
+            FROM transactions t
+            LEFT JOIN products p
+                ON p.id = t.product_id
+            WHERE t.payment_status = 'PAID'
+              AND t.digiflazz_status = 'PENDING'
+              AND t.digiflazz_ref IS NOT NULL
+              AND t.digiflazz_ref != ''
+              AND p.digiflazz_sku IS NOT NULL
+              AND p.digiflazz_sku != ''
+              AND (
+                    t.processed_at IS NULL
+                    OR datetime(t.processed_at) <= datetime('now', '-1 minute')
+              )
+            ORDER BY t.id ASC
+            LIMIT 10
+        `).all();
+
+        if (!pending.length) {
+            return;
+        }
+
+        const username =
+            process.env.DIGIFLAZZ_USERNAME;
+
+        const apiKey =
+            process.env.DIGIFLAZZ_API_KEY;
+
+        if (!username || !apiKey) {
+            console.error(
+                "[DIGIFLAZZ CHECKER] Credential belum dikonfigurasi."
+            );
+            return;
+        }
+
+        for (const transaction of pending) {
+
+            try {
+
+                /*
+                 * Tandai waktu pengecekan sebelum request.
+                 * Ini mencegah transaksi yang sama langsung
+                 * dicek berulang kali.
+                 */
+                db.prepare(`
+                    UPDATE transactions
+                    SET processed_at = ?
+                    WHERE transaction_id = ?
+                      AND payment_status = 'PAID'
+                      AND digiflazz_status = 'PENDING'
+                `).run(
+                    new Date().toISOString(),
+                    transaction.transaction_id
+                );
+
+                const refId =
+                    String(transaction.digiflazz_ref);
+
+                const sign =
+                    crypto
+                        .createHash("md5")
+                        .update(
+                            username +
+                            apiKey +
+                            refId
+                        )
+                        .digest("hex");
+
+                const payload = {
+                    username,
+                    buyer_sku_code:
+                        transaction.digiflazz_sku,
+                    customer_no:
+                        String(transaction.target),
+                    ref_id: refId,
+                    sign
+                };
+
+                const response =
+                    await axios.post(
+                        "https://api.digiflazz.com/v1/transaction",
+                        payload,
+                        {
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            timeout: 30000
+                        }
+                    );
+
+                const result =
+                    response.data?.data || {};
+
+                const status =
+                    String(
+                        result.status || ""
+                    ).toLowerCase();
+
+                const finalStatus =
+                    status === "sukses"
+                        ? "SUCCESS"
+                        : status === "gagal"
+                            ? "FAILED"
+                            : "PENDING";
+
+                const message =
+                    result.message ||
+                    "Tidak ada pesan dari Digiflazz.";
+
+                db.prepare(`
+                    UPDATE transactions
+                    SET
+                        status = ?,
+                        digiflazz_status = ?,
+                        digiflazz_ref = COALESCE(
+                            ?,
+                            digiflazz_ref
+                        ),
+                        digiflazz_message = ?,
+                        digiflazz_rc = COALESCE(
+                            ?,
+                            digiflazz_rc
+                        ),
+                        digiflazz_sn = COALESCE(
+                            ?,
+                            digiflazz_sn
+                        ),
+                        processed_at = ?
+                    WHERE transaction_id = ?
+                `).run(
+                    finalStatus,
+                    finalStatus,
+                    result.ref_id || null,
+                    String(message),
+                    result.rc || null,
+                    result.sn || null,
+                    new Date().toISOString(),
+                    transaction.transaction_id
+                );
+
+                console.log(
+                    "[DIGIFLAZZ CHECKER]",
+                    transaction.transaction_id,
+                    finalStatus,
+                    result.rc || "-",
+                    result.sn || "-"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[DIGIFLAZZ CHECKER]",
+                    transaction.transaction_id,
+                    error.response?.data ||
+                    error.message
+                );
+
+                /*
+                 * Jangan ubah menjadi FAILED hanya karena
+                 * request pengecekan gagal. Transaksi tetap
+                 * menunggu pengecekan berikutnya.
+                 */
+            }
+        }
+
+    } catch (error) {
+
+        console.error(
+            "[DIGIFLAZZ CHECKER] ERROR",
+            error
+        );
+    }
 }
 
 
@@ -4437,6 +4631,22 @@ setInterval(
 
 console.log(
     "[DIGIFLAZZ AUTO SYNC] Scheduler aktif: setiap 60 menit."
+);
+
+
+/*
+ * Cek transaksi Digiflazz yang masih PENDING
+ * setiap 1 menit.
+ *
+ * Tidak membuat ref_id baru.
+ */
+setInterval(
+    checkPendingDigiflazzTransactions,
+    60 * 1000
+);
+
+console.log(
+    "[DIGIFLAZZ CHECKER] Scheduler aktif: setiap 1 menit."
 );
 
 

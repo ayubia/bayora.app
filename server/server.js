@@ -1637,6 +1637,8 @@ async function sendTransactionToDigiflazz(transactionId) {
             digiflazz_status = ?,
             digiflazz_ref = ?,
             digiflazz_message = ?,
+            digiflazz_rc = ?,
+            digiflazz_sn = ?,
             processed_at = ?
         WHERE transaction_id = ?
     `).run(
@@ -1644,6 +1646,8 @@ async function sendTransactionToDigiflazz(transactionId) {
         finalStatus,
         String(digiflazzRef),
         String(message),
+        result.rc || null,
+        result.sn || null,
         new Date().toISOString(),
         transactionId
     );

@@ -191,6 +191,10 @@ const transactionMigrations = [
     ["digiflazz_sn", "TEXT"],
     ["payment_session_id", "TEXT"],
     ["payment_request_id", "TEXT"],
+    ["refund_status", "TEXT"],
+    ["refund_id", "TEXT"],
+    ["refund_message", "TEXT"],
+    ["refund_processed_at", "TEXT"],
     ["paid_at", "TEXT"],
     ["processed_at", "TEXT"]
 ];
@@ -1820,6 +1824,41 @@ async function checkPendingDigiflazzTransactions() {
                     transaction.transaction_id
                 );
 
+                /*
+                 * Jika Digiflazz GAGAL setelah pembayaran PAID,
+                 * otomatis minta refund ke Xendit.
+                 *
+                 * Hanya transaksi yang mempunyai
+                 * payment_request_id yang bisa direfund.
+                 */
+                if (finalStatus === "FAILED") {
+
+                    try {
+
+                        const refundResult =
+                            await refundXenditTransaction(
+                                transaction.transaction_id
+                            );
+
+                        console.log(
+                            "[AUTO REFUND]",
+                            transaction.transaction_id,
+                            refundResult
+                        );
+
+                    } catch (refundError) {
+
+                        console.error(
+                            "[AUTO REFUND ERROR]",
+                            transaction.transaction_id,
+                            refundError.response?.data ||
+                            refundError.message ||
+                            refundError
+                        );
+
+                    }
+                }
+
                 console.log(
                     "[DIGIFLAZZ CHECKER]",
                     transaction.transaction_id,
@@ -1853,6 +1892,213 @@ async function checkPendingDigiflazzTransactions() {
         );
     }
 }
+
+
+/* ============================================================
+   XENDIT REFUND
+   Meminta refund menggunakan payment_request_id.
+   Idempotent: transaksi yang sudah memiliki refund tidak
+   boleh dikirim ke Xendit untuk kedua kalinya.
+============================================================ */
+
+async function refundXenditTransaction(transactionId) {
+
+    const transaction = db.prepare(`
+        SELECT
+            transaction_id,
+            reference,
+            price,
+            payment_status,
+            payment_request_id,
+            refund_status,
+            refund_id
+        FROM transactions
+        WHERE transaction_id = ?
+    `).get(transactionId);
+
+    if (!transaction) {
+        throw new Error("Transaksi tidak ditemukan.");
+    }
+
+    if (transaction.payment_status !== "PAID") {
+        throw new Error("Transaksi belum PAID.");
+    }
+
+    if (!transaction.payment_request_id) {
+        throw new Error(
+            "payment_request_id Xendit tidak tersedia."
+        );
+    }
+
+    /*
+     * Jangan pernah membuat refund kedua.
+     */
+    if (
+        transaction.refund_status === "PENDING" ||
+        transaction.refund_status === "SUCCESS"
+    ) {
+        return {
+            skipped: true,
+            reason: "REFUND_SUDAH_DIPROSES",
+            refund_status:
+                transaction.refund_status,
+            refund_id:
+                transaction.refund_id || null
+        };
+    }
+
+    if (!process.env.XENDIT_SECRET_KEY) {
+        throw new Error(
+            "XENDIT_SECRET_KEY belum tersedia."
+        );
+    }
+
+    /*
+     * Claim refund secara atomik sebelum request ke Xendit.
+     * Ini mencegah dua proses mengirim refund bersamaan.
+     */
+    const claim = db.prepare(`
+        UPDATE transactions
+        SET
+            refund_status = 'PROCESSING',
+            refund_processed_at = ?
+        WHERE transaction_id = ?
+          AND payment_status = 'PAID'
+          AND payment_request_id IS NOT NULL
+          AND (
+                refund_status IS NULL
+                OR refund_status = ''
+          )
+    `).run(
+        new Date().toISOString(),
+        transactionId
+    );
+
+    if (claim.changes === 0) {
+
+        const current = db.prepare(`
+            SELECT
+                transaction_id,
+                refund_status,
+                refund_id,
+                refund_message
+            FROM transactions
+            WHERE transaction_id = ?
+        `).get(transactionId);
+
+        return {
+            skipped: true,
+            reason: "REFUND_SUDAH_DIAMBIL_ALIH_PROSES_LAIN",
+            transaction: current
+        };
+    }
+
+    try {
+
+        const response = await axios.post(
+            "https://api.xendit.co/refunds",
+            {
+                reference_id:
+                    `REFUND-${transaction.transaction_id}`,
+                payment_request_id:
+                    transaction.payment_request_id,
+                currency: "IDR",
+                amount: transaction.price,
+                reason: "CANCELLATION"
+            },
+            {
+                auth: {
+                    username:
+                        process.env.XENDIT_SECRET_KEY,
+                    password: ""
+                },
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                timeout: 30000
+            }
+        );
+
+        const refund =
+            response.data || {};
+
+        const refundId =
+            refund.id ||
+            refund.refund_id ||
+            null;
+
+        const refundStatus =
+            String(
+                refund.status || "PENDING"
+            ).toUpperCase();
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                refund_status = ?,
+                refund_id = COALESCE(
+                    ?,
+                    refund_id
+                ),
+                refund_message = ?,
+                refund_processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            refundStatus === "SUCCEEDED"
+                ? "SUCCESS"
+                : "PENDING",
+            refundId,
+            JSON.stringify(refund),
+            new Date().toISOString(),
+            transactionId
+        );
+
+        console.log(
+            "[XENDIT REFUND]",
+            transactionId,
+            refundStatus,
+            refundId || "-"
+        );
+
+        return {
+            success: true,
+            refund_id: refundId,
+            refund_status: refundStatus
+        };
+
+    } catch (error) {
+
+        const message =
+            error.response?.data
+                ? JSON.stringify(
+                    error.response.data
+                )
+                : error.message;
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                refund_status = 'FAILED',
+                refund_message = ?,
+                refund_processed_at = ?
+            WHERE transaction_id = ?
+        `).run(
+            String(message),
+            new Date().toISOString(),
+            transactionId
+        );
+
+        console.error(
+            "[XENDIT REFUND]",
+            transactionId,
+            message
+        );
+
+        throw error;
+    }
+}
+
 
 
 /* =========================
@@ -1971,6 +2217,144 @@ app.post("/api/webhooks/xendit", async (req, res) => {
                 transaction_id:
                     transaction.transaction_id,
                 digiflazz: result
+            });
+        }
+
+        /*
+         * Webhook hasil refund Xendit.
+         *
+         * Refund dibuat dengan payment_request_id.
+         * Status final datang dari webhook Xendit.
+         */
+        if (
+            event === "refund.succeeded" ||
+            event === "refund.failed"
+        ) {
+
+            const refund =
+                data || {};
+
+            const paymentRequestId =
+                refund.payment_request_id ||
+                refund.payment_request?.id ||
+                null;
+
+            const refundId =
+                refund.id ||
+                refund.refund_id ||
+                null;
+
+            const referenceId =
+                refund.reference_id ||
+                null;
+
+            if (
+                !paymentRequestId &&
+                !referenceId
+            ) {
+                console.warn(
+                    "[XENDIT REFUND WEBHOOK] Identifier tidak ditemukan."
+                );
+
+                return res.json({
+                    success: true,
+                    ignored: true,
+                    reason:
+                        "REFUND_IDENTIFIER_TIDAK_DITEMUKAN"
+                });
+            }
+
+            let transaction = null;
+
+            if (paymentRequestId) {
+                transaction = db.prepare(`
+                    SELECT
+                        transaction_id,
+                        payment_request_id,
+                        refund_status
+                    FROM transactions
+                    WHERE payment_request_id = ?
+                `).get(paymentRequestId);
+            }
+
+            /*
+             * Fallback ke reference_id yang kita buat:
+             * REFUND-PPOB-XXXXXXXX
+             */
+            if (!transaction && referenceId) {
+
+                const transactionId =
+                    String(referenceId)
+                        .replace(
+                            /^REFUND-/i,
+                            ""
+                        );
+
+                transaction = db.prepare(`
+                    SELECT
+                        transaction_id,
+                        payment_request_id,
+                        refund_status
+                    FROM transactions
+                    WHERE transaction_id = ?
+                `).get(transactionId);
+            }
+
+            if (!transaction) {
+
+                console.warn(
+                    "[XENDIT REFUND WEBHOOK] Transaksi tidak ditemukan.",
+                    paymentRequestId || referenceId
+                );
+
+                return res.json({
+                    success: true,
+                    ignored: true,
+                    reason:
+                        "TRANSAKSI_REFUND_TIDAK_DITEMUKAN"
+                });
+            }
+
+            const finalRefundStatus =
+                event === "refund.succeeded"
+                    ? "SUCCESS"
+                    : "FAILED";
+
+            db.prepare(`
+                UPDATE transactions
+                SET
+                    refund_status = ?,
+                    refund_id = COALESCE(
+                        ?,
+                        refund_id
+                    ),
+                    refund_message = ?,
+                    refund_processed_at = ?
+                WHERE transaction_id = ?
+            `).run(
+                finalRefundStatus,
+                refundId,
+                JSON.stringify(refund),
+                new Date().toISOString(),
+                transaction.transaction_id
+            );
+
+            console.log(
+                "[XENDIT REFUND WEBHOOK]",
+                transaction.transaction_id,
+                finalRefundStatus,
+                refundId || "-"
+            );
+
+            return res.json({
+                success: true,
+                event,
+                transaction_id:
+                    transaction.transaction_id,
+                refund_status:
+                    finalRefundStatus,
+                refund_id:
+                    refundId
             });
         }
 

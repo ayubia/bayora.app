@@ -176,6 +176,78 @@ let services = {
 };
 
 
+
+/* =========================================================
+   BAYORA — PAGE PERSISTENCE
+   Mempertahankan halaman terakhir saat browser di-refresh.
+========================================================= */
+
+const BAYORA_PAGE_STATE_KEY =
+    "bayora_last_page";
+
+function saveBayoraPage(page) {
+
+    try {
+
+        sessionStorage.setItem(
+            BAYORA_PAGE_STATE_KEY,
+            page
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Gagal menyimpan halaman BAYORA.",
+            error
+        );
+
+    }
+
+}
+
+
+function getBayoraSavedPage() {
+
+    try {
+
+        return sessionStorage.getItem(
+            BAYORA_PAGE_STATE_KEY
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Gagal membaca halaman BAYORA.",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+function clearBayoraSavedPage() {
+
+    try {
+
+        sessionStorage.removeItem(
+            BAYORA_PAGE_STATE_KEY
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Gagal menghapus state halaman BAYORA.",
+            error
+        );
+
+    }
+
+}
+
+
 let currentService = null;
 let currentProduct = null;
 
@@ -558,6 +630,8 @@ function formatRupiah(number) {
 
 function showHome() {
 
+    saveBayoraPage("home");
+
     document
         .getElementById("homePage")
         .classList.remove("page-hidden");
@@ -591,6 +665,27 @@ function openService(serviceId) {
     }
 
     currentService = serviceId;
+
+    saveBayoraPage(
+        "service:" + serviceId
+    );
+
+    try {
+
+        sessionStorage.setItem(
+            "bayora_last_service",
+            serviceId
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Gagal menyimpan service terakhir.",
+            error
+        );
+
+    }
+
     currentProduct = null;
     currentTarget = "";
     currentOperator = "";
@@ -1830,6 +1925,7 @@ function goToCheckout(event) {
 
     renderCheckout();
 
+    saveBayoraPage("checkout");
 
     document
         .getElementById("servicePage")
@@ -2557,6 +2653,7 @@ function goToDigitalCheckout() {
 
     renderDigitalCheckout();
 
+    saveBayoraPage("checkout");
 
     document
         .getElementById("servicePage")
@@ -3309,3 +3406,92 @@ function getPaymentName(payment) {
 ========================================================= */
 
 setupDigitalProductFlow();
+
+
+/* =========================================================
+   BAYORA — RESTORE LAST PAGE AFTER REFRESH
+========================================================= */
+
+(function restoreBayoraLastPage() {
+
+    const savedPage =
+        getBayoraSavedPage();
+
+    if (!savedPage) {
+        return;
+    }
+
+    /*
+     * HOME
+     */
+    if (savedPage === "home") {
+
+        showHome();
+
+        return;
+    }
+
+
+    /*
+     * SERVICE
+     */
+    if (
+        savedPage.startsWith("service:")
+    ) {
+
+        const serviceId =
+            savedPage.substring(
+                "service:".length
+            );
+
+        if (
+            serviceId &&
+            services[serviceId]
+        ) {
+
+            openService(serviceId);
+
+        } else {
+
+            clearBayoraSavedPage();
+
+        }
+
+        return;
+    }
+
+
+    /*
+     * CHECKOUT
+     *
+     * Untuk sementara checkout tidak
+     * dipulihkan otomatis karena data
+     * form/order belum disimpan.
+     *
+     * Kita kembalikan ke service yang
+     * terakhir dibuka agar user tidak
+     * kehilangan konteks.
+     */
+    if (savedPage === "checkout") {
+
+        const lastService =
+            sessionStorage.getItem(
+                "bayora_last_service"
+            );
+
+        if (
+            lastService &&
+            services[lastService]
+        ) {
+
+            openService(lastService);
+
+        } else {
+
+            showHome();
+
+        }
+
+    }
+
+})();

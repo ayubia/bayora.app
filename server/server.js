@@ -16,7 +16,9 @@ const PORT = process.env.PORT || 3000;
 ========================= */
 
 const digitalUploadRoot =
-    path.join(__dirname, "..", "uploads", "digital");
+    process.env.NODE_ENV === "production"
+        ? "/data/uploads/digital"
+        : path.join(__dirname, "..", "uploads", "digital");
 
 const digitalPreviewDir =
     path.join(digitalUploadRoot, "preview");
@@ -3613,8 +3615,10 @@ async function sendDigitalProductEmail(transactionId) {
         );
     }
 
-    const projectRoot =
-        path.join(__dirname, "..");
+    const digitalStorageRoot =
+        process.env.NODE_ENV === "production"
+            ? "/data"
+            : path.join(__dirname, "..");
 
     const attachments = [];
 
@@ -3624,7 +3628,7 @@ async function sendDigitalProductEmail(transactionId) {
 
             let zipPath =
                 path.resolve(
-                    projectRoot,
+                    digitalStorageRoot,
                     String(item.digital_file)
                         .replace(/^\/+/, "")
                 );
@@ -3648,7 +3652,7 @@ async function sendDigitalProductEmail(transactionId) {
 
                     const fallbackPath =
                         path.resolve(
-                            projectRoot,
+                            digitalStorageRoot,
                             String(product.digital_file)
                                 .replace(/^\/+/, "")
                         );
@@ -3661,7 +3665,7 @@ async function sendDigitalProductEmail(transactionId) {
 
             const relativeZip =
                 path.relative(
-                    projectRoot,
+                    digitalStorageRoot,
                     zipPath
                 );
 
@@ -3687,14 +3691,14 @@ async function sendDigitalProductEmail(transactionId) {
 
             const pdfPath =
                 path.resolve(
-                    projectRoot,
+                    digitalStorageRoot,
                     String(item.device_file)
                         .replace(/^\/+/, "")
                 );
 
             const relativePdf =
                 path.relative(
-                    projectRoot,
+                    digitalStorageRoot,
                     pdfPath
                 );
 
@@ -4896,11 +4900,10 @@ app.get(
 
             }
 
-            const projectRoot =
-                path.join(
-                    __dirname,
-                    ".."
-                );
+            const digitalStorageRoot =
+                process.env.NODE_ENV === "production"
+                    ? "/data"
+                    : path.join(__dirname, "..");
 
             const relativeFile =
                 String(
@@ -4910,14 +4913,14 @@ app.get(
 
             const filePath =
                 path.resolve(
-                    projectRoot,
+                    digitalStorageRoot,
                     relativeFile
                 );
 
             const digitalRoot =
                 path.resolve(
                     path.join(
-                        projectRoot,
+                        digitalStorageRoot,
                         "uploads",
                         "digital",
                         "files"

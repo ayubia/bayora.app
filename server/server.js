@@ -2415,6 +2415,16 @@ app.post(
             res,
             error => {
 
+                console.log(
+                    "[DIGITAL UPLOAD DEBUG]",
+                    {
+                        hasFile: !!req.file,
+                        filename: req.file?.filename || "***NONE***",
+                        path: req.file?.path || "***NONE***",
+                        size: req.file?.size || 0
+                    }
+                );
+
                 if (error) {
 
                     console.error(

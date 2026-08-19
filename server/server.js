@@ -3420,6 +3420,25 @@ app.post("/api/digital/retry-delivery/:transactionId", async (req, res) => {
 
     try {
 
+        const retryToken =
+            process.env.DIGITAL_RETRY_TOKEN;
+
+        const receivedToken =
+            req.headers["x-digital-retry-token"];
+
+        if (
+            !retryToken ||
+            !receivedToken ||
+            receivedToken !== retryToken
+        ) {
+
+            return res.status(401).json({
+                success: false,
+                error: "Unauthorized."
+            });
+
+        }
+
         const transactionId =
             String(req.params.transactionId || "").trim();
 
@@ -3579,6 +3598,7 @@ async function sendDigitalProductEmail(transactionId) {
     const items =
         db.prepare(`
             SELECT
+                product_id,
                 product_name,
                 digital_file,
                 device_file
@@ -3602,12 +3622,42 @@ async function sendDigitalProductEmail(transactionId) {
 
         if (item.digital_file) {
 
-            const zipPath =
+            let zipPath =
                 path.resolve(
                     projectRoot,
                     String(item.digital_file)
                         .replace(/^\/+/, "")
                 );
+
+            /*
+             * Jika file yang tersimpan pada transaksi lama
+             * sudah tidak tersedia, gunakan digital_file terbaru
+             * dari produk yang sama.
+             */
+            if (!fs.existsSync(zipPath) && item.product_id) {
+
+                const product =
+                    db.prepare(`
+                        SELECT digital_file
+                        FROM products
+                        WHERE id = ?
+                        LIMIT 1
+                    `).get(item.product_id);
+
+                if (product && product.digital_file) {
+
+                    const fallbackPath =
+                        path.resolve(
+                            projectRoot,
+                            String(product.digital_file)
+                                .replace(/^\/+/, "")
+                        );
+
+                    if (fs.existsSync(fallbackPath)) {
+                        zipPath = fallbackPath;
+                    }
+                }
+            }
 
             const relativeZip =
                 path.relative(

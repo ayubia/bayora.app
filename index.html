@@ -1974,13 +1974,39 @@ footer a{
                 </div>
 
 
-                <button
-                    type="button"
-                    id="selectAllDigitalProducts"
-                    class="digital-select-all"
-                >
-                    Pilih Semua
-                </button>
+                <div class="digital-catalog-actions">
+
+                    <div class="digital-product-filters">
+
+                        <button
+                            type="button"
+                            class="digital-product-filter active"
+                            data-filter="all"
+                            onclick="setDigitalProductFilter('all')"
+                        >
+                            Semua Produk
+                        </button>
+
+                        <button
+                            type="button"
+                            class="digital-product-filter"
+                            data-filter="lightroom"
+                            onclick="setDigitalProductFilter('lightroom')"
+                        >
+                            Lightroom Presets
+                        </button>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="selectAllDigitalProducts"
+                        class="digital-select-all"
+                    >
+                        Pilih Semua
+                    </button>
+
+                </div>
 
             </div>
 
@@ -1992,21 +2018,6 @@ footer a{
             </div>
 
 
-            <div class="digital-selection-summary">
-
-                <div>
-
-                    <span id="digitalSelectedCount">
-                        0 preset dipilih
-                    </span>
-
-                    <strong id="digitalSelectedTotal">
-                        Rp0
-                    </strong>
-
-                </div>
-
-            </div>
 
 
             <div class="digital-device-card">
@@ -2186,6 +2197,24 @@ footer a{
                 </div>
 
 
+
+
+
+            <div class="digital-selection-summary">
+
+                <div>
+
+                    <span id="digitalSelectedCount">
+                        0 preset dipilih
+                    </span>
+
+                    <strong id="digitalSelectedTotal">
+                        Rp0
+                    </strong>
+
+                </div>
+
+            </div>
 
             <button
                 type="button"
@@ -2370,7 +2399,7 @@ footer a{
                 class="submit-button"
             >
 
-                Review Pesanan
+                Beli Sekarang
 
             </button>
 

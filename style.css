@@ -6325,3 +6325,338 @@ git push origin main
     }
 
 }
+
+
+/* =========================================================
+   DIGITAL PRODUCT CATALOG — FILTER + VERTICAL GRID
+========================================================= */
+
+.digital-catalog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+
+.digital-product-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+.digital-product-filter {
+    appearance: none;
+    border: 1px solid #d8e5fb;
+    background: #ffffff;
+    color: #65748d;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.digital-product-filter:hover {
+    border-color: #bcd4ff;
+    background: #f7faff;
+}
+
+
+.digital-product-filter.active {
+    background: #1769ff;
+    border-color: #1769ff;
+    color: #ffffff;
+}
+
+
+/* 4 produk per baris */
+
+.digital-product-grid {
+    display: grid !important;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+}
+
+
+/*
+ * Sticky area:
+ * perangkat + informasi pembelian + total + tombol
+ */
+
+.digital-flow-sticky {
+    position: sticky;
+    bottom: 14px;
+    z-index: 20;
+
+    margin-top: 22px;
+    padding: 16px;
+
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #dfe7f3;
+    border-radius: 18px;
+
+    box-shadow:
+        0 12px 40px rgba(20, 55, 110, 0.14);
+
+    backdrop-filter: blur(12px);
+}
+
+
+/*
+ * Karena device/customer card sekarang berada
+ * dalam sticky container, hilangkan jarak bawah
+ * yang berlebihan.
+ */
+
+.digital-flow-sticky .digital-device-card,
+.digital-flow-sticky .digital-customer-card {
+    margin-bottom: 14px;
+}
+
+
+.digital-flow-sticky .digital-selection-summary {
+    margin: 14px 0;
+}
+
+
+@media (max-width: 1100px) {
+
+    .digital-product-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr)) !important;
+    }
+
+}
+
+
+@media (max-width: 760px) {
+
+    .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .digital-catalog-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .digital-product-filters {
+        width: 100%;
+    }
+
+    .digital-product-filter {
+        flex: 1;
+    }
+
+    .digital-select-all {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .digital-product-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .digital-flow-sticky {
+        bottom: 8px;
+        padding: 10px;
+        border-radius: 15px;
+    }
+
+}
+
+
+/* =========================================================
+   DIGITAL CATALOG — FINAL RESPONSIVE LAYOUT
+   ========================================================= */
+
+#digitalFlowWrapper,
+#digitalPresetPanel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+}
+
+
+/* KATALOG SELALU 2 KOLOM */
+
+#digitalFlowWrapper .digital-product-grid {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 18px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* KARTU MENYESUAIKAN LEBAR KOLOM */
+
+#digitalFlowWrapper .digital-product-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ISI KARTU TIDAK BOLEH MEMBUAT OVERFLOW */
+
+#digitalFlowWrapper .digital-product-card-body {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+
+/* GAMBAR MENGIKUTI KARTU */
+
+#digitalFlowWrapper .digital-product-image {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* DESKTOP */
+
+@media (min-width: 901px) {
+
+    #digitalFlowWrapper .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 18px !important;
+    }
+
+}
+
+
+/* TABLET */
+
+@media (min-width: 601px) and (max-width: 900px) {
+
+    #digitalFlowWrapper .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 14px !important;
+    }
+
+}
+
+
+/* MOBILE — TETAP 2 KOLOM */
+
+@media (max-width: 600px) {
+
+    #digitalFlowWrapper .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card {
+        min-width: 0 !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-body {
+        padding: 12px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-top {
+        gap: 6px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-top h4 {
+        font-size: 14px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-top > strong {
+        font-size: 13px !important;
+        white-space: nowrap !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-info {
+        font-size: 11px !important;
+        line-height: 1.45 !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-actions {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+    }
+
+}
+
+
+/* HP SANGAT KECIL — TETAP 2 KOLOM */
+
+@media (max-width: 400px) {
+
+    #digitalFlowWrapper .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 10px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-body {
+        padding: 10px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-top h4 {
+        font-size: 13px !important;
+    }
+
+
+    #digitalFlowWrapper .digital-product-card-top > strong {
+        font-size: 12px !important;
+    }
+
+}
+
+
+/* CEGAH HORIZONTAL SCROLL */
+
+html,
+body {
+    overflow-x: hidden !important;
+}

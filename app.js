@@ -179,6 +179,8 @@ let services = {
 let currentService = null;
 let currentProduct = null;
 
+window.showAllDigitalProducts = false;
+
 let selectedDigitalProducts = [];
 
 let digitalCustomerEmail = "";
@@ -600,6 +602,7 @@ function openService(serviceId) {
     digitalCustomerEmail = "";
     digitalCustomerWhatsapp = "";
     selectedDigitalDevice = "";
+    window.showAllDigitalProducts = false;
 
     document
         .getElementById("homePage")
@@ -986,13 +989,51 @@ function openService(serviceId) {
    Tidak mengubah flow PPOB.
 ========================================================= */
 
+let digitalProductFilter = "all";
+
+
+function setDigitalProductFilter(filter) {
+
+    digitalProductFilter =
+        filter === "lightroom"
+            ? "lightroom"
+            : "all";
+
+    document
+        .querySelectorAll(".digital-product-filter")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.filter === digitalProductFilter
+            );
+
+        });
+
+    renderDigitalProducts();
+
+}
+
+
 function getDigitalProducts() {
 
-    return (
-        products[currentService] || []
-    ).filter(product =>
-        product.productType === "digital"
-    );
+    const list =
+        (products[currentService] || [])
+            .filter(product =>
+                product.productType === "digital"
+            );
+
+    if (digitalProductFilter === "lightroom") {
+
+        return list.filter(product =>
+            product.digitalCategory === "lightroom" ||
+            product.digitalCategory === "preset" ||
+            !product.digitalCategory
+        );
+
+    }
+
+    return list;
 
 }
 
@@ -1017,12 +1058,12 @@ function renderDigitalProducts() {
         return;
     }
 
-    const list =
+    const allDigitalProducts =
         getDigitalProducts();
 
     grid.innerHTML = "";
 
-    if (!list.length) {
+    if (!allDigitalProducts.length) {
 
         grid.innerHTML = `
             <div class="product-empty">
@@ -1035,6 +1076,38 @@ function renderDigitalProducts() {
         return;
     }
 
+
+    const showAll =
+        Boolean(window.showAllDigitalProducts);
+
+    const list =
+        showAll
+            ? allDigitalProducts
+            : allDigitalProducts.slice(0, 4);
+
+    const catalogButton =
+        document.getElementById(
+            "selectAllDigitalProducts"
+        );
+
+    if (catalogButton) {
+
+        if (allDigitalProducts.length > 4) {
+
+            catalogButton.style.display = "";
+
+            catalogButton.textContent =
+                showAll
+                    ? "Tampilkan 4 Produk"
+                    : "Semua Produk";
+
+        } else {
+
+            catalogButton.style.display = "none";
+
+        }
+
+    }
 
     list.forEach(product => {
 
@@ -1336,28 +1409,12 @@ function selectAllDigitalProducts() {
     const list =
         getDigitalProducts();
 
-
-    if (!list.length) {
+    if (list.length <= 4) {
         return;
     }
 
-
-    const allSelected =
-        selectedDigitalProducts.length ===
-        list.length;
-
-
-    if (allSelected) {
-
-        selectedDigitalProducts = [];
-
-    } else {
-
-        selectedDigitalProducts =
-            [...list];
-
-    }
-
+    window.showAllDigitalProducts =
+        !window.showAllDigitalProducts;
 
     renderDigitalProducts();
 

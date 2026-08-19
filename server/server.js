@@ -4228,8 +4228,14 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
             label,
             placeholder,
             active,
-            sort_order
+            sort_order,
+            type
         } = req.body;
+
+        const serviceType =
+            type === "digital"
+                ? "digital"
+                : "ppob";
 
         if (!id || !title) {
 
@@ -4269,9 +4275,10 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
                 placeholder,
                 active,
                 sort_order,
+                type,
                 created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             serviceId,
             String(title).trim(),
@@ -4283,6 +4290,7 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
             Number.isFinite(Number(sort_order))
                 ? Number(sort_order)
                 : 0,
+            serviceType,
             catalogNow()
         );
 
@@ -4346,8 +4354,16 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
             label,
             placeholder,
             active,
-            sort_order
+            sort_order,
+            type
         } = req.body;
+
+        const serviceType =
+            type === undefined
+                ? existing.type || "ppob"
+                : type === "digital"
+                    ? "digital"
+                    : "ppob";
 
         db.prepare(`
             UPDATE services
@@ -4358,7 +4374,8 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
                 label = ?,
                 placeholder = ?,
                 active = ?,
-                sort_order = ?
+                sort_order = ?,
+                type = ?
             WHERE id = ?
         `).run(
             title !== undefined
@@ -4388,6 +4405,8 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
             sort_order === undefined
                 ? existing.sort_order
                 : Number(sort_order),
+
+            serviceType,
 
             serviceId
         );

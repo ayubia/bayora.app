@@ -584,6 +584,315 @@ footer a{
     }
 }
 
+
+/* =========================================================
+   FINAL FIX — DIGITAL DETAIL GALLERY 1:1
+   Menghapus batas tinggi CSS lama
+========================================================= */
+
+.digital-detail-dialog {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.digital-detail-gallery {
+    position: relative !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    aspect-ratio: 1 / 1 !important;
+
+    max-height: none !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
+
+    flex: none !important;
+}
+
+.digital-detail-gallery::before {
+    content: "";
+    display: block;
+    width: 100%;
+    padding-top: 100%;
+}
+
+.digital-detail-gallery img {
+    position: absolute !important;
+    inset: 0 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+}
+
+@media (max-width: 640px) {
+
+    .digital-detail-dialog {
+        width: 100%;
+        max-height: calc(100vh - 24px);
+    }
+
+    .digital-detail-gallery {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1 !important;
+
+        max-height: none !important;
+        min-height: 0 !important;
+    }
+
+}
+
+
+/* =========================================================
+   FINAL FIX — CLOSE BUTTON DIGITAL DETAIL
+========================================================= */
+
+.digital-detail-dialog {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+/* Tombol X selalu berada di atas foto */
+.digital-detail-close {
+    position: absolute !important;
+
+    top: 16px !important;
+    right: 16px !important;
+
+    z-index: 99999 !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 50% !important;
+
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #172554 !important;
+
+    font-size: 27px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+
+    cursor: pointer !important;
+
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.20) !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+}
+
+/* Jangan sampai gallery menutupi tombol X */
+.digital-detail-gallery {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.digital-detail-close:hover {
+    transform: scale(1.06) !important;
+    background: #fff !important;
+}
+
+.digital-detail-close:active {
+    transform: scale(0.94) !important;
+}
+
+@media (max-width: 640px) {
+
+    .digital-detail-close {
+        top: 10px !important;
+        right: 10px !important;
+
+        width: 38px !important;
+        height: 38px !important;
+
+        font-size: 24px !important;
+    }
+
+}
+
+
+/* =========================================================
+   FINAL FIX — DIGITAL DETAIL MODAL POSITION
+========================================================= */
+
+.digital-detail-modal {
+    position: fixed !important;
+    inset: 0 !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    padding: 24px 16px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    z-index: 9990 !important;
+
+    box-sizing: border-box !important;
+}
+
+.digital-detail-dialog {
+    position: relative !important;
+
+    width: min(680px, 100%) !important;
+
+    max-height: none !important;
+    height: auto !important;
+
+    margin: 0 auto !important;
+
+    overflow: visible !important;
+
+    background: #fff !important;
+    border-radius: 24px !important;
+
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.22) !important;
+
+    flex-shrink: 0 !important;
+}
+
+/* FOTO TETAP 1:1 */
+.digital-detail-gallery {
+    position: relative !important;
+
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    overflow: hidden !important;
+
+    border-radius: 24px 24px 0 0 !important;
+
+    background: #f1f3f5 !important;
+}
+
+/* GAMBAR MEMENUHI AREA 1:1 */
+.digital-detail-gallery img {
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+}
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.digital-detail-close {
+    position: absolute !important;
+
+    top: 14px !important;
+    right: 14px !important;
+
+    z-index: 99999 !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 50% !important;
+
+    background: rgba(255, 255, 255, 0.97) !important;
+    color: #172554 !important;
+
+    font-size: 27px !important;
+    line-height: 42px !important;
+    font-weight: 500 !important;
+
+    cursor: pointer !important;
+
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.22) !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+}
+
+.digital-detail-close:hover {
+    transform: scale(1.06) !important;
+}
+
+.digital-detail-close:active {
+    transform: scale(0.94) !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    .digital-detail-modal {
+        padding: 12px !important;
+    }
+
+    .digital-detail-dialog {
+        width: 100% !important;
+        border-radius: 20px !important;
+    }
+
+    .digital-detail-gallery {
+        border-radius: 20px 20px 0 0 !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+
+    .digital-detail-close {
+        top: 10px !important;
+        right: 10px !important;
+
+        width: 38px !important;
+        height: 38px !important;
+
+        font-size: 24px !important;
+        line-height: 38px !important;
+    }
+
+}
+
 </style>
 
 
@@ -933,6 +1242,459 @@ footer a{
 </style>
 
 
+
+<style id="digital-before-after-style">
+.digital-before-after {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #eee;
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.digital-before-after-track {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.digital-before-after-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.digital-before-image {
+    z-index: 1;
+}
+
+.digital-after-image {
+    z-index: 2;
+    clip-path: inset(0 50% 0 0);
+}
+
+.digital-before-after-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: #fff;
+    transform: translateX(-50%);
+    z-index: 4;
+    pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+}
+
+.digital-before-after-divider::after {
+    content: "↔";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 10px rgba(0,0,0,.18);
+}
+
+.digital-before-after-label {
+    position: absolute;
+    top: 12px;
+    z-index: 5;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    pointer-events: none;
+}
+
+.digital-before-label {
+    left: 12px;
+}
+
+.digital-after-label {
+    right: 12px;
+}
+
+.digital-before-after-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    z-index: 10;
+}
+
+.digital-before-after-range::-webkit-slider-thumb {
+    width: 40px;
+    height: 100%;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+}
+
+.digital-before-after-range::-moz-range-thumb {
+    width: 40px;
+    height: 100%;
+    cursor: ew-resize;
+}
+</style>
+
+
+<style id="digital-detail-modal-style">
+
+/* =========================================================
+   DIGITAL PRODUCT DETAIL MODAL — FINAL POSITION
+========================================================= */
+
+.digital-detail-modal {
+    position: fixed !important;
+    inset: 0 !important;
+
+    z-index: 9999999 !important;
+
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    /*
+     * Navbar BAYORA tingginya sekitar 70px.
+     * Modal dimulai di bawah navbar agar tombol X
+     * tidak tertutup navbar.
+     */
+    padding: 88px 16px 24px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.digital-detail-modal.page-hidden {
+    display: none !important;
+}
+
+.digital-detail-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+
+    z-index: 0 !important;
+
+    background: rgba(15, 23, 42, 0.58) !important;
+
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.digital-detail-dialog {
+    position: relative !important;
+
+    z-index: 2 !important;
+
+    width: min(680px, 100%) !important;
+
+    height: auto !important;
+    max-height: none !important;
+
+    margin: 0 auto !important;
+
+    flex: 0 0 auto !important;
+
+    overflow: visible !important;
+
+    box-sizing: border-box !important;
+
+    background: #fff !important;
+
+    border-radius: 24px !important;
+
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+/* =========================================================
+   GALLERY — TRUE 1:1
+========================================================= */
+
+.digital-detail-gallery {
+    position: relative !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    aspect-ratio: 1 / 1 !important;
+
+    min-height: 0 !important;
+    max-height: none !important;
+
+    flex: none !important;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box !important;
+
+    background: #f1f3f5 !important;
+
+    border-radius: 24px 24px 0 0 !important;
+}
+
+.digital-detail-gallery::before {
+    content: none !important;
+}
+
+.digital-detail-gallery img {
+    position: absolute !important;
+    inset: 0 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover !important;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.digital-detail-close {
+    position: absolute !important;
+
+    top: 14px !important;
+    right: 14px !important;
+
+    z-index: 99999999 !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 50% !important;
+
+    background: rgba(255, 255, 255, 0.97) !important;
+
+    color: #172554 !important;
+
+    font-family: inherit !important;
+    font-size: 27px !important;
+    font-weight: 500 !important;
+
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.22) !important;
+
+    transform: none !important;
+}
+
+.digital-detail-close:hover {
+    background: #fff !important;
+    transform: scale(1.06) !important;
+}
+
+.digital-detail-close:active {
+    transform: scale(0.94) !important;
+}
+
+
+/* =========================================================
+   GALLERY NAVIGATION
+========================================================= */
+
+.digital-detail-gallery .digital-gallery-nav {
+    position: absolute !important;
+
+    top: 50% !important;
+
+    z-index: 10 !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 50% !important;
+
+    background: rgba(255, 255, 255, 0.94) !important;
+
+    color: #172554 !important;
+
+    font-size: 30px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    transform: translateY(-50%) !important;
+
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+.digital-detail-gallery .digital-gallery-nav:hover {
+    background: #fff !important;
+    transform:
+        translateY(-50%)
+        scale(1.06) !important;
+}
+
+.digital-detail-gallery .digital-gallery-prev {
+    left: 14px !important;
+}
+
+.digital-detail-gallery .digital-gallery-next {
+    right: 14px !important;
+}
+
+
+/* =========================================================
+   INDICATOR
+========================================================= */
+
+.digital-detail-gallery .digital-gallery-indicator {
+    position: absolute !important;
+
+    left: 50% !important;
+    bottom: 14px !important;
+
+    z-index: 10 !important;
+
+    padding: 5px 10px !important;
+
+    border-radius: 999px !important;
+
+    background: rgba(15, 23, 42, 0.62) !important;
+
+    color: #fff !important;
+
+    font-size: 12px !important;
+    font-weight: 600 !important;
+
+    transform: translateX(-50%) !important;
+
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.digital-detail-content {
+    padding: 24px !important;
+    box-sizing: border-box !important;
+}
+
+.digital-detail-content h2 {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+}
+
+.digital-detail-price {
+    display: block !important;
+    margin-bottom: 10px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    .digital-detail-modal {
+        padding:
+            76px
+            12px
+            12px !important;
+    }
+
+    .digital-detail-dialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 20px !important;
+    }
+
+    .digital-detail-gallery {
+        aspect-ratio: 1 / 1 !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .digital-detail-close {
+        top: 10px !important;
+        right: 10px !important;
+
+        width: 40px !important;
+        height: 40px !important;
+
+        font-size: 25px !important;
+    }
+
+    .digital-detail-gallery .digital-gallery-nav {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 27px !important;
+    }
+
+    .digital-detail-gallery .digital-gallery-prev {
+        left: 10px !important;
+    }
+
+    .digital-detail-gallery .digital-gallery-next {
+        right: 10px !important;
+    }
+
+    .digital-detail-content {
+        padding: 20px !important;
+    }
+
+}
+
+</style>
+
 </head>
 
 
@@ -1097,57 +1859,7 @@ footer a{
             </div>
         </div>
 
-        <div class="bayora-service-grid" id="customerServiceGrid">
-
-            <button class="bayora-service-card" onclick="openService('pulsa')">
-                <span class="bayora-service-icon">📱</span>
-                <strong>Pulsa</strong>
-                <small>Semua operator</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('data')">
-                <span class="bayora-service-icon">🌐</span>
-                <strong>Paket Data</strong>
-                <small>Internet semua operator</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('pln-token')">
-                <span class="bayora-service-icon">⚡</span>
-                <strong>Token PLN</strong>
-                <small>Listrik prabayar</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('pln-bill')">
-                <span class="bayora-service-icon">💡</span>
-                <strong>Tagihan PLN</strong>
-                <small>Listrik pascabayar</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('ewallet')">
-                <span class="bayora-service-icon">💰</span>
-                <strong>E-Wallet</strong>
-                <small>Top up saldo</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('bpjs')">
-                <span class="bayora-service-icon">🏥</span>
-                <strong>BPJS</strong>
-                <small>Bayar tagihan BPJS</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('game')">
-                <span class="bayora-service-icon">🎮</span>
-                <strong>Voucher Game</strong>
-                <small>Top up game favorit</small>
-            </button>
-
-            <button class="bayora-service-card" onclick="openService('voucher')">
-                <span class="bayora-service-icon">🎟️</span>
-                <strong>Voucher Digital</strong>
-                <small>Beragam voucher</small>
-            </button>
-
-        </div>
+        <div class="bayora-service-grid" id="customerServiceGrid"></div>
 
         <div class="bayora-trust-banner">
             <div class="trust-shield">✓</div>
@@ -1223,6 +1935,264 @@ footer a{
 
         </button>
 
+
+
+
+        <!-- ==================================================
+             LIGHTROOM PRESET FLOW
+        ================================================== -->
+
+        <div
+            id="digitalPresetPanel"
+            class="digital-preset-panel page-hidden"
+        >
+
+            </div>
+
+
+            <div class="digital-catalog-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        LIGHTROOM PRESETS
+                    </p>
+
+                    <h3>
+                        Pilih preset kamu
+                    </h3>
+
+                    <p>
+                        Pilih satu atau beberapa preset.
+                        Kamu bisa melihat detail setiap produk
+                        sebelum memilih.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="selectAllDigitalProducts"
+                    class="digital-select-all"
+                >
+                    Pilih Semua
+                </button>
+
+            </div>
+
+
+            <div
+                id="digitalProductGrid"
+                class="digital-product-grid"
+            >
+            </div>
+
+
+            <div class="digital-selection-summary">
+
+                <div>
+
+                    <span id="digitalSelectedCount">
+                        0 preset dipilih
+                    </span>
+
+                    <strong id="digitalSelectedTotal">
+                        Rp0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="digital-device-card">
+
+                <div class="product-heading">
+
+                    <div>
+
+                        <label>
+                            Pilih perangkat
+                        </label>
+
+                        <p class="digital-section-description">
+                            Pilih perangkat utama yang akan digunakan
+                            untuk Lightroom.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="digital-device-grid">
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="iOS"
+                    >
+
+                        <span class="digital-device-icon">
+                            
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                iPhone / iPad
+                            </strong>
+
+                            <small>
+                                iOS
+                            </small>
+
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="Android"
+                    >
+
+                        <span class="digital-device-icon">
+                            ◉
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                Android
+                            </strong>
+
+                            <small>
+                                Android phone / tablet
+                            </small>
+
+                        </span>
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="MacOS"
+                    >
+
+                        <span class="digital-device-icon">
+                            
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                MacOS
+                            </strong>
+
+                            <small>
+                                MacBook / iMac
+                            </small>
+
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="Windows"
+                    >
+
+                        <span class="digital-device-icon">
+                            ⊞
+                        </span>
+
+                        <span>
+
+                            <strong>
+                                Windows
+                            </strong>
+
+                            <small>
+                                PC / Laptop
+                            </small>
+
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="digital-customer-card">
+
+                <div class="product-heading">
+
+                    <div>
+
+                        <label>
+                            Informasi pembelian
+                        </label>
+
+                        <p class="digital-section-description">
+                            Masukkan kontak untuk menerima informasi
+                            dan akses produk setelah pembayaran.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label for="digitalEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="digitalEmail"
+                        placeholder="nama@email.com"
+                        autocomplete="email"
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label for="digitalWhatsapp">
+                        WhatsApp
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="digitalWhatsapp"
+                        placeholder="08xxxxxxxxxx"
+                        autocomplete="tel"
+                    >
+
+                </div>
+
+
+
+            <button
+                type="button"
+                id="digitalContinueButton"
+                class="submit-button"
+            >
+                Pesan Sekarang
+            </button>
+
+        </div>
 
 
         <div class="form-header">
@@ -1460,7 +2430,7 @@ footer a{
 
         <!-- PAYMENT -->
 
-        
+
 
 
 
@@ -1478,6 +2448,96 @@ footer a{
 
 </section>
 
+
+
+
+<!-- ==================================================
+     LIGHTROOM PRODUCT DETAIL MODAL
+================================================== -->
+
+<div
+    id="digitalProductDetailModal"
+    class="digital-detail-modal page-hidden"
+>
+
+    <div
+        class="digital-detail-backdrop"
+        onclick="closeDigitalProductDetail()"
+    ></div>
+
+
+    <div class="digital-detail-dialog">
+
+        <button
+            type="button"
+            class="digital-detail-close"
+            onclick="closeDigitalProductDetail()"
+        >
+            ×
+        </button>
+
+
+        <div
+            id="digitalDetailGallery"
+            class="digital-detail-gallery"
+        >
+        </div>
+
+
+        <div class="digital-detail-content">
+
+            <p class="eyebrow">
+                LIGHTROOM PRESET
+            </p>
+
+
+            <h2 id="digitalDetailName">
+                Preset
+            </h2>
+
+
+            <strong
+                id="digitalDetailPrice"
+                class="digital-detail-price"
+            >
+                Rp0
+            </strong>
+
+
+            <p id="digitalDetailDescription">
+            </p>
+
+
+            <div class="digital-detail-features">
+
+                <span>
+                    ✓ File digital
+                </span>
+
+                <span>
+                    ✓ iOS & Android
+                </span>
+
+                <span>
+                    ✓ Download setelah pembayaran
+                </span>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="digitalDetailSelectButton"
+                class="submit-button"
+            >
+                Pilih Preset
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <!-- ==================================================

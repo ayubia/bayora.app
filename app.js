@@ -179,6 +179,12 @@ let services = {
 let currentService = null;
 let currentProduct = null;
 
+let selectedDigitalProducts = [];
+
+let digitalCustomerEmail = "";
+let digitalCustomerWhatsapp = "";
+let selectedDigitalDevice = "";
+
 
 /* =========================
    DYNAMIC CATALOG
@@ -224,7 +230,8 @@ async function loadCustomerCatalog() {
                 icon: service.icon,
                 description: service.description,
                 label: service.label,
-                placeholder: service.placeholder
+                placeholder: service.placeholder,
+                type: service.type || "ppob"
             };
 
         });
@@ -256,7 +263,36 @@ async function loadCustomerCatalog() {
                 name: product.name,
                 price: Number(product.price) || 0,
                 info: product.info || "",
-                operator: product.operator || ""
+                operator: product.operator || "",
+                productType: product.product_type || "ppob",
+                previewImage: product.preview_image || "",
+                beforeImage: product.before_image || "",
+                afterImage: product.after_image || "",
+                galleryImages: (() => {
+                    if (!product.gallery_images) {
+                        return [];
+                    }
+
+                    if (Array.isArray(product.gallery_images)) {
+                        return product.gallery_images.filter(Boolean);
+                    }
+
+                    try {
+                        const parsed =
+                            JSON.parse(product.gallery_images);
+
+                        return Array.isArray(parsed)
+                            ? parsed.filter(Boolean)
+                            : [];
+                    } catch (error) {
+                        console.warn(
+                            "[DIGITAL PRODUCT] Gallery JSON tidak valid:",
+                            error
+                        );
+
+                        return [];
+                    }
+                })()
             });
 
         });
@@ -340,8 +376,19 @@ function renderCustomerServices() {
         return;
     }
 
-    grid.innerHTML =
-        entries.map(([id, service]) => {
+    const ppobServices =
+        entries.filter(([, service]) =>
+            (service.type || "ppob") === "ppob"
+        );
+
+    const digitalServices =
+        entries.filter(([, service]) =>
+            service.type === "digital"
+        );
+
+    function renderCards(list) {
+
+        return list.map(([id, service]) => {
 
             const safeId =
                 String(id)
@@ -379,6 +426,39 @@ function renderCustomerServices() {
             `;
 
         }).join("");
+    }
+
+    let html = "";
+
+    if (ppobServices.length) {
+
+        html += `
+            <div class="service-section-title">
+                <h2>Layanan PPOB</h2>
+                <p>Penuhi kebutuhan pembayaran dan layanan digital dalam satu tempat.</p>
+            </div>
+
+            <div class="service-section-grid">
+                ${renderCards(ppobServices)}
+            </div>
+        `;
+    }
+
+    if (digitalServices.length) {
+
+        html += `
+            <div class="service-section-title service-section-title-digital">
+                <h2>Produk Digital</h2>
+                <p>Produk digital pilihan untuk kebutuhan kreatif dan sehari-hari.</p>
+            </div>
+
+            <div class="service-section-grid">
+                ${renderCards(digitalServices)}
+            </div>
+        `;
+    }
+
+    grid.innerHTML = html;
 }
 
 let currentTarget = "";
@@ -438,6 +518,14 @@ function openService(serviceId) {
     currentTarget = "";
     currentOperator = "";
 
+    /*
+     * Reset state digital setiap kali layanan dibuka.
+     */
+    selectedDigitalProducts = [];
+    digitalCustomerEmail = "";
+    digitalCustomerWhatsapp = "";
+    selectedDigitalDevice = "";
+
     document
         .getElementById("homePage")
         .classList.add("page-hidden");
@@ -453,6 +541,253 @@ function openService(serviceId) {
     document
         .getElementById("successPage")
         .classList.add("page-hidden");
+
+
+    /*
+     * =====================================================
+     * DIGITAL PRODUCT
+     * =====================================================
+     *
+     * Hanya produk digital yang menggunakan flow baru.
+     *
+     * PPOB tetap menggunakan flow lama di bawah.
+     */
+
+    if (service.type === "digital") {
+
+        const formHeader =
+            document.querySelector(
+                "#servicePage .form-header"
+            );
+
+        if (formHeader) {
+            formHeader.style.display = "none";
+        }
+
+        const digitalPanel =
+            document.getElementById(
+                "digitalPresetPanel"
+            );
+
+        if (digitalPanel) {
+            digitalPanel.classList.remove(
+                "page-hidden"
+            );
+        }
+
+        /*
+         * Sembunyikan form PPOB lama.
+         */
+        const targetGroup =
+            document
+                .getElementById("targetNumber")
+                ?.closest(".input-group");
+
+        const operatorGroup =
+            document.getElementById(
+                "operatorGroup"
+            );
+
+        const productGrid =
+            document.getElementById(
+                "productGrid"
+            );
+
+        const productGroup =
+            productGrid
+                ?.closest(".input-group");
+
+        const price =
+            document.getElementById("price");
+
+        const priceSummary =
+            price?.closest(".summary");
+
+        const submitButton =
+            document
+                .getElementById("transactionForm")
+                ?.querySelector(
+                    'button[type="submit"]'
+                );
+
+        if (targetGroup) {
+            targetGroup.style.display = "none";
+        }
+
+        if (operatorGroup) {
+            operatorGroup.style.display = "none";
+        }
+
+        if (productGroup) {
+            productGroup.style.display = "none";
+        }
+
+        if (priceSummary) {
+            priceSummary.style.display = "none";
+        }
+
+        if (submitButton) {
+            submitButton.style.display = "none";
+        }
+
+
+        /*
+         * Header layanan.
+         */
+        const icon =
+            document.getElementById("formIcon");
+
+        const title =
+            document.getElementById("formTitle");
+
+        const description =
+            document.getElementById(
+                "formDescription"
+            );
+
+        if (icon) {
+            icon.textContent =
+                service.icon || "✨";
+        }
+
+        if (title) {
+            title.textContent =
+                service.title;
+        }
+
+        if (description) {
+            description.textContent =
+                service.description;
+        }
+
+
+        /*
+         * Reset kontak.
+         */
+        const email =
+            document.getElementById(
+                "digitalEmail"
+            );
+
+        const whatsapp =
+            document.getElementById(
+                "digitalWhatsapp"
+            );
+
+        if (email) {
+            email.value = "";
+        }
+
+        if (whatsapp) {
+            whatsapp.value = "";
+        }
+
+
+        /*
+         * Reset perangkat.
+         */
+        document
+            .querySelectorAll(
+                ".digital-device-option"
+            )
+            .forEach(option => {
+                option.classList.remove(
+                    "selected"
+                );
+            });
+
+
+        /*
+         * Render katalog preset.
+         */
+        if (typeof renderDigitalProducts === "function") {
+            renderDigitalProducts();
+        }
+
+        if (typeof updateDigitalSelection === "function") {
+            updateDigitalSelection();
+        }
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        return;
+    }
+
+
+    /*
+     * =====================================================
+     * PPOB FLOW LAMA — TIDAK DIUBAH
+     * =====================================================
+     */
+
+    const formHeader =
+        document.querySelector(
+            "#servicePage .form-header"
+        );
+
+    if (formHeader) {
+        formHeader.style.display = "";
+    }
+
+    const digitalPanel =
+        document.getElementById(
+            "digitalPresetPanel"
+        );
+
+    if (digitalPanel) {
+        digitalPanel.classList.add(
+            "page-hidden"
+        );
+    }
+
+
+    const targetGroup =
+        document
+            .getElementById("targetNumber")
+            ?.closest(".input-group");
+
+    const productGrid =
+        document.getElementById(
+            "productGrid"
+        );
+
+    const productGroup =
+        productGrid
+            ?.closest(".input-group");
+
+    const price =
+        document.getElementById("price");
+
+    const priceSummary =
+        price?.closest(".summary");
+
+    const submitButton =
+        document
+            .getElementById("transactionForm")
+            ?.querySelector(
+                'button[type="submit"]'
+            );
+
+    if (targetGroup) {
+        targetGroup.style.display = "";
+    }
+
+    if (productGroup) {
+        productGroup.style.display = "";
+    }
+
+    if (priceSummary) {
+        priceSummary.style.display = "";
+    }
+
+    if (submitButton) {
+        submitButton.style.display = "";
+    }
+
 
     document
         .getElementById("formIcon")
@@ -478,6 +813,7 @@ function openService(serviceId) {
         .getElementById("targetNumber")
         .value = "";
 
+
     document
         .getElementById("operatorGroup")
         .style.display =
@@ -486,14 +822,19 @@ function openService(serviceId) {
             ? "block"
             : "none";
 
+
     const operatorSelect =
         document.getElementById("operator");
 
     operatorSelect.value = "";
 
+
     // Saat operator berubah, tampilkan produk operator tersebut
     operatorSelect.onchange = function () {
-        currentOperator = this.value.trim();
+
+        currentOperator =
+            this.value.trim();
+
         currentProduct = null;
 
         document
@@ -505,7 +846,9 @@ function openService(serviceId) {
             .textContent = "Rp0";
 
         renderProducts();
+
     };
+
 
     document
         .getElementById("price")
@@ -516,6 +859,1207 @@ function openService(serviceId) {
         .value = "";
 
     renderProducts();
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+/* =========================================================
+   LIGHTROOM DIGITAL PRODUCT FLOW
+   Tidak mengubah flow PPOB.
+========================================================= */
+
+function getDigitalProducts() {
+
+    return (
+        products[currentService] || []
+    ).filter(product =>
+        product.productType === "digital"
+    );
+
+}
+
+
+function formatDigitalProductPrice(price) {
+
+    return formatRupiah(
+        Number(price) || 0
+    );
+
+}
+
+
+function renderDigitalProducts() {
+
+    const grid =
+        document.getElementById(
+            "digitalProductGrid"
+        );
+
+    if (!grid) {
+        return;
+    }
+
+    const list =
+        getDigitalProducts();
+
+    grid.innerHTML = "";
+
+    if (!list.length) {
+
+        grid.innerHTML = `
+            <div class="product-empty">
+                Belum ada preset tersedia.
+            </div>
+        `;
+
+        updateDigitalSelection();
+
+        return;
+    }
+
+
+    list.forEach(product => {
+
+        const selected =
+            selectedDigitalProducts.some(
+                item => item.id === product.id
+            );
+
+
+        const card =
+            document.createElement("article");
+
+        card.className =
+            "digital-product-card" +
+            (
+                selected
+                    ? " selected"
+                    : ""
+            );
+
+
+        /*
+         * KATALOG DIGITAL
+         *
+         * Before + After ditampilkan sebagai slider 1:1.
+         * Gallery detail tidak digunakan di sini.
+         */
+        const beforeImage =
+            product.beforeImage || "";
+
+        const afterImage =
+            product.afterImage || "";
+
+        const hasBeforeAfter =
+            beforeImage &&
+            afterImage;
+
+        const image =
+            hasBeforeAfter
+                ? `
+                    <div
+                        class="digital-product-image digital-before-after"
+                        data-before="${beforeImage}"
+                        data-after="${afterImage}"
+                    >
+
+                        <div
+                            class="digital-before-after-track"
+                        >
+
+                            <img
+                                class="digital-before-after-image digital-before-image"
+                                src="${beforeImage}"
+                                alt="${product.name} Before"
+                                loading="lazy"
+                            >
+
+                            <img
+                                class="digital-before-after-image digital-after-image"
+                                src="${afterImage}"
+                                alt="${product.name} After"
+                                loading="lazy"
+                            >
+
+                        </div>
+
+                        <div
+                            class="digital-before-after-divider"
+                        ></div>
+
+                        <span
+                            class="digital-before-after-label digital-before-label"
+                        >
+                            BEFORE
+                        </span>
+
+                        <span
+                            class="digital-before-after-label digital-after-label"
+                        >
+                            AFTER
+                        </span>
+
+                        <input
+                            class="digital-before-after-range"
+                            type="range"
+                            min="0"
+                            max="100"
+                            value="50"
+                            aria-label="Geser Before After"
+                        >
+
+                    </div>
+                `
+                : product.previewImage
+                    ? `
+                        <div class="digital-product-image">
+                            <img
+                                src="${product.previewImage}"
+                                alt="${product.name}"
+                                loading="lazy"
+                            >
+                        </div>
+                    `
+                    : `
+                        <div class="digital-product-image digital-product-image-empty">
+                            <span>PRESET</span>
+                        </div>
+                    `;
+
+
+        card.innerHTML = `
+
+            ${image}
+
+            <div class="digital-product-card-body">
+
+                <div class="digital-product-card-top">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            LIGHTROOM PRESET
+                        </p>
+
+                        <h4>
+                            ${product.name}
+                        </h4>
+
+                    </div>
+
+                    <strong>
+                        ${formatDigitalProductPrice(product.price)}
+                    </strong>
+
+                </div>
+
+
+                <p class="digital-product-info">
+                    ${product.info || "Preset Lightroom untuk mempercantik foto kamu."}
+                </p>
+
+
+                <div class="digital-product-actions">
+
+                    <button
+                        type="button"
+                        class="digital-detail-button"
+                    >
+                        Lihat Detail
+                    </button>
+
+                    <button
+                        type="button"
+                        class="digital-pick-button"
+                    >
+                        ${
+                            selected
+                                ? "✓ Dipilih"
+                                : "Pilih"
+                        }
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+
+        const detailButton =
+            card.querySelector(
+                ".digital-detail-button"
+            );
+
+        const pickButton =
+            card.querySelector(
+                ".digital-pick-button"
+            );
+
+
+        detailButton.onclick = () => {
+
+            openDigitalProductDetail(
+                product
+            );
+
+        };
+
+
+        pickButton.onclick = () => {
+
+            toggleDigitalProduct(
+                product
+            );
+
+        };
+
+
+        grid.appendChild(card);
+
+    });
+
+    setupDigitalBeforeAfterSliders();
+
+    updateDigitalSelection();
+
+}
+
+
+
+
+function setupDigitalBeforeAfterSliders() {
+
+    const sliders =
+        document.querySelectorAll(
+            ".digital-before-after"
+        );
+
+    sliders.forEach(slider => {
+
+        const range =
+            slider.querySelector(
+                ".digital-before-after-range"
+            );
+
+        const afterImage =
+            slider.querySelector(
+                ".digital-after-image"
+            );
+
+        const divider =
+            slider.querySelector(
+                ".digital-before-after-divider"
+            );
+
+        if (
+            !range ||
+            !afterImage ||
+            !divider
+        ) {
+            return;
+        }
+
+        const update = () => {
+
+            const value =
+                Number(range.value);
+
+            afterImage.style.clipPath =
+                `inset(0 ${100 - value}% 0 0)`;
+
+            divider.style.left =
+                `${value}%`;
+
+        };
+
+        range.addEventListener(
+            "input",
+            update
+        );
+
+        update();
+
+    });
+
+}
+
+
+function toggleDigitalProduct(product) {
+
+    const index =
+        selectedDigitalProducts.findIndex(
+            item => item.id === product.id
+        );
+
+
+    if (index >= 0) {
+
+        selectedDigitalProducts.splice(
+            index,
+            1
+        );
+
+    } else {
+
+        selectedDigitalProducts.push(
+            product
+        );
+
+    }
+
+
+    renderDigitalProducts();
+
+}
+
+
+function selectAllDigitalProducts() {
+
+    const list =
+        getDigitalProducts();
+
+
+    if (!list.length) {
+        return;
+    }
+
+
+    const allSelected =
+        selectedDigitalProducts.length ===
+        list.length;
+
+
+    if (allSelected) {
+
+        selectedDigitalProducts = [];
+
+    } else {
+
+        selectedDigitalProducts =
+            [...list];
+
+    }
+
+
+    renderDigitalProducts();
+
+}
+
+
+function updateDigitalSelection() {
+
+    const count =
+        document.getElementById(
+            "digitalSelectedCount"
+        );
+
+    const total =
+        document.getElementById(
+            "digitalSelectedTotal"
+        );
+
+    const selectAll =
+        document.getElementById(
+            "selectAllDigitalProducts"
+        );
+
+
+    const selectedCount =
+        selectedDigitalProducts.length;
+
+
+    const selectedTotal =
+        selectedDigitalProducts.reduce(
+            (sum, product) =>
+                sum +
+                (
+                    Number(product.price) || 0
+                ),
+            0
+        );
+
+
+    if (count) {
+
+        count.textContent =
+            `${selectedCount} preset dipilih`;
+
+    }
+
+
+    if (total) {
+
+        total.textContent =
+            formatDigitalProductPrice(
+                selectedTotal
+            );
+
+    }
+
+
+    if (selectAll) {
+
+        const list =
+            getDigitalProducts();
+
+        selectAll.textContent =
+            list.length &&
+            selectedCount === list.length
+                ? "Batalkan Semua"
+                : "Pilih Semua";
+
+    }
+
+}
+
+
+function getDigitalGalleryImages(product) {
+
+    /*
+     * Mendukung beberapa format:
+     *
+     * 1. product.previewImages = ["foto1", "foto2"]
+     * 2. previewImage berisi JSON array
+     * 3. previewImage berisi beberapa URL dipisahkan ||
+     * 4. previewImage biasa = satu foto
+     */
+
+    if (
+        Array.isArray(product.previewImages) &&
+        product.previewImages.length
+    ) {
+
+        return product.previewImages
+            .map(image => String(image).trim())
+            .filter(Boolean);
+
+    }
+
+
+    const preview =
+        String(product.previewImage || "").trim();
+
+
+    if (!preview) {
+        return [];
+    }
+
+
+    /*
+     * Jika previewImage disimpan
+     * sebagai JSON array.
+     */
+    if (
+        preview.startsWith("[") &&
+        preview.endsWith("]")
+    ) {
+
+        try {
+
+            const parsed =
+                JSON.parse(preview);
+
+            if (
+                Array.isArray(parsed)
+            ) {
+
+                return parsed
+                    .map(image =>
+                        String(image).trim()
+                    )
+                    .filter(Boolean);
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Preview image bukan JSON array."
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Beberapa gambar bisa dipisahkan
+     * menggunakan ||
+     */
+    if (preview.includes("||")) {
+
+        return preview
+            .split("||")
+            .map(image => image.trim())
+            .filter(Boolean);
+
+    }
+
+
+    return [preview];
+
+}
+
+
+let digitalGalleryImages = [];
+let digitalGalleryIndex = 0;
+
+
+function renderDigitalGallery() {
+
+    const gallery =
+        document.getElementById(
+            "digitalDetailGallery"
+        );
+
+
+    if (!gallery) {
+        return;
+    }
+
+
+    gallery.innerHTML = "";
+
+
+    if (!digitalGalleryImages.length) {
+
+        gallery.innerHTML = `
+            <div class="digital-detail-gallery-empty">
+                Preview belum tersedia.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    const image =
+        document.createElement("img");
+
+    image.src =
+        digitalGalleryImages[
+            digitalGalleryIndex
+        ];
+
+    image.alt =
+        window.currentDigitalDetailProduct?.name ||
+        "Preview preset";
+
+    image.loading = "eager";
+
+
+    gallery.appendChild(image);
+
+
+    /*
+     * Tombol navigasi hanya ditampilkan
+     * jika ada lebih dari satu gambar.
+     */
+
+    if (
+        digitalGalleryImages.length > 1
+    ) {
+
+        const previous =
+            document.createElement("button");
+
+        previous.type = "button";
+        previous.className =
+            "digital-gallery-nav digital-gallery-prev";
+
+        previous.innerHTML = "‹";
+
+        previous.onclick = () => {
+
+            digitalGalleryIndex =
+                (
+                    digitalGalleryIndex -
+                    1 +
+                    digitalGalleryImages.length
+                ) %
+                digitalGalleryImages.length;
+
+            renderDigitalGallery();
+
+        };
+
+
+        const next =
+            document.createElement("button");
+
+        next.type = "button";
+        next.className =
+            "digital-gallery-nav digital-gallery-next";
+
+        next.innerHTML = "›";
+
+        next.onclick = () => {
+
+            digitalGalleryIndex =
+                (
+                    digitalGalleryIndex +
+                    1
+                ) %
+                digitalGalleryImages.length;
+
+            renderDigitalGallery();
+
+        };
+
+
+        gallery.appendChild(previous);
+        gallery.appendChild(next);
+
+
+        const indicator =
+            document.createElement("div");
+
+        indicator.className =
+            "digital-gallery-indicator";
+
+        indicator.textContent =
+            `${digitalGalleryIndex + 1} / ${digitalGalleryImages.length}`;
+
+        gallery.appendChild(indicator);
+
+    }
+
+}
+
+
+function openDigitalProductDetail(product) {
+
+    const modal =
+        document.getElementById(
+            "digitalProductDetailModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+
+    window.currentDigitalDetailProduct =
+        product;
+
+
+    const name =
+        document.getElementById(
+            "digitalDetailName"
+        );
+
+    const price =
+        document.getElementById(
+            "digitalDetailPrice"
+        );
+
+    const description =
+        document.getElementById(
+            "digitalDetailDescription"
+        );
+
+    const gallery =
+        document.getElementById(
+            "digitalDetailGallery"
+        );
+
+
+    if (name) {
+        name.textContent =
+            product.name;
+    }
+
+
+    if (price) {
+        price.textContent =
+            formatDigitalProductPrice(
+                product.price
+            );
+    }
+
+
+    if (description) {
+
+        description.textContent =
+            product.info ||
+            "Preset Lightroom digital yang siap digunakan.";
+
+    }
+
+
+    /*
+     * DETAIL GALLERY
+     * Menggunakan galleryImages yang berasal
+     * dari database produk.
+     */
+    digitalGalleryImages =
+        Array.isArray(product.galleryImages)
+            ? product.galleryImages.filter(Boolean)
+            : [];
+
+    /*
+     * Fallback ke preview lama jika gallery
+     * belum tersedia.
+     */
+    if (!digitalGalleryImages.length) {
+
+        digitalGalleryImages =
+            getDigitalGalleryImages(product);
+
+    }
+
+    digitalGalleryIndex = 0;
+
+    window.currentDigitalDetailProduct =
+        product;
+
+    renderDigitalGallery();
+
+
+    const selectButton =
+        document.getElementById(
+            "digitalDetailSelectButton"
+        );
+
+
+    if (selectButton) {
+
+        const alreadySelected =
+            selectedDigitalProducts.some(
+                item =>
+                    item.id === product.id
+            );
+
+
+        selectButton.textContent =
+            alreadySelected
+                ? "✓ Preset Dipilih"
+                : "Pilih Preset";
+
+
+        selectButton.onclick = () => {
+
+            const alreadySelected =
+                selectedDigitalProducts.some(
+                    item =>
+                        item.id === product.id
+                );
+
+            /*
+             * Dari detail, tombol ini hanya digunakan
+             * untuk memilih preset.
+             *
+             * Jika belum dipilih:
+             * pilih preset lalu kembali ke katalog.
+             */
+            if (!alreadySelected) {
+
+                toggleDigitalProduct(
+                    product
+                );
+
+                closeDigitalProductDetail();
+
+                return;
+
+            }
+
+            /*
+             * Jika preset sudah dipilih,
+             * jangan batalkan pilihan dari halaman detail.
+             * Cukup kembali ke katalog.
+             */
+            closeDigitalProductDetail();
+
+        };
+
+    }
+
+
+    modal.classList.remove(
+        "page-hidden"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+function closeDigitalProductDetail() {
+
+    const modal =
+        document.getElementById(
+            "digitalProductDetailModal"
+        );
+
+    if (modal) {
+
+        modal.classList.add(
+            "page-hidden"
+        );
+
+    }
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+function setupDigitalProductFlow() {
+
+    const selectAll =
+        document.getElementById(
+            "selectAllDigitalProducts"
+        );
+
+
+    if (selectAll) {
+
+        selectAll.onclick =
+            selectAllDigitalProducts;
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".digital-device-option"
+        )
+        .forEach(option => {
+
+            option.onclick = () => {
+
+                selectedDigitalDevice =
+                    option.dataset.device ||
+                    "";
+
+
+                document
+                    .querySelectorAll(
+                        ".digital-device-option"
+                    )
+                    .forEach(item => {
+
+                        item.classList.remove(
+                            "selected"
+                        );
+
+                    });
+
+
+                option.classList.add(
+                    "selected"
+                );
+
+            };
+
+        });
+
+
+    const continueButton =
+        document.getElementById(
+            "digitalContinueButton"
+        );
+
+
+    if (continueButton) {
+
+        continueButton.onclick =
+            goToDigitalCheckout;
+
+    }
+
+
+    /*
+     * Validasi email + WhatsApp
+     * dilakukan ketika lanjut ke review.
+     */
+
+}
+
+
+setupDigitalProductFlow();
+
+
+
+function goToDigitalCheckout() {
+
+    const email =
+        document.getElementById(
+            "digitalEmail"
+        );
+
+    const whatsapp =
+        document.getElementById(
+            "digitalWhatsapp"
+        );
+
+
+    digitalCustomerEmail =
+        email
+            ? email.value.trim()
+            : "";
+
+
+    digitalCustomerWhatsapp =
+        whatsapp
+            ? whatsapp.value.trim()
+            : "";
+
+
+    if (!digitalCustomerEmail) {
+
+        alert(
+            "Silakan masukkan email."
+        );
+
+        email?.focus();
+
+        return;
+
+    }
+
+
+    if (
+        !digitalCustomerEmail.includes("@") ||
+        !digitalCustomerEmail.includes(".")
+    ) {
+
+        alert(
+            "Silakan masukkan email yang valid."
+        );
+
+        email?.focus();
+
+        return;
+
+    }
+
+
+    if (!digitalCustomerWhatsapp) {
+
+        alert(
+            "Silakan masukkan nomor WhatsApp."
+        );
+
+        whatsapp?.focus();
+
+        return;
+
+    }
+
+
+    if (!selectedDigitalProducts.length) {
+
+        alert(
+            "Silakan pilih minimal satu preset."
+        );
+
+        return;
+
+    }
+
+
+    if (!selectedDigitalDevice) {
+
+        alert(
+            "Silakan pilih perangkat."
+        );
+
+        return;
+
+    }
+
+
+    renderDigitalCheckout();
+
+
+    document
+        .getElementById("servicePage")
+        .classList.add(
+            "page-hidden"
+        );
+
+
+    document
+        .getElementById("checkoutPage")
+        .classList.remove(
+            "page-hidden"
+        );
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+function renderDigitalCheckout() {
+
+    const service =
+        services[currentService];
+
+
+    const total =
+        selectedDigitalProducts.reduce(
+            (sum, product) =>
+                sum +
+                (
+                    Number(product.price) || 0
+                ),
+            0
+        );
+
+
+    const productRows =
+        selectedDigitalProducts
+            .map(product => `
+
+                <div class="checkout-row">
+
+                    <span>
+                        ${product.name}
+                    </span>
+
+                    <strong>
+                        ${formatDigitalProductPrice(product.price)}
+                    </strong>
+
+                </div>
+
+            `)
+            .join("");
+
+
+    document
+        .getElementById(
+            "checkoutSummary"
+        )
+        .innerHTML = `
+
+            <div class="checkout-row">
+
+                <span>
+                    Layanan
+                </span>
+
+                <strong>
+                    ${service.icon || "✨"}
+                    ${service.title}
+                </strong>
+
+            </div>
+
+
+            <div class="checkout-row">
+
+                <span>
+                    Email
+                </span>
+
+                <strong>
+                    ${digitalCustomerEmail}
+                </strong>
+
+            </div>
+
+
+            <div class="checkout-row">
+
+                <span>
+                    WhatsApp
+                </span>
+
+                <strong>
+                    ${digitalCustomerWhatsapp}
+                </strong>
+
+            </div>
+
+
+            <div class="checkout-row">
+
+                <span>
+                    Perangkat
+                </span>
+
+                <strong>
+                    ${selectedDigitalDevice}
+                </strong>
+
+            </div>
+
+
+            <div
+                class="digital-checkout-products"
+            >
+
+                <div
+                    class="checkout-row"
+                >
+
+                    <span>
+                        Produk
+                    </span>
+
+                    <strong>
+                        ${selectedDigitalProducts.length}
+                        preset
+                    </strong>
+
+                </div>
+
+                ${productRows}
+
+            </div>
+
+
+            <div class="
+                checkout-row
+                checkout-total
+            ">
+
+                <span>
+                    Total pembayaran
+                </span>
+
+                <strong>
+                    ${formatDigitalProductPrice(total)}
+                </strong>
+
+            </div>
+
+        `;
+
+}
+
+
+function backToDigitalProducts() {
+
+    document
+        .getElementById("checkoutPage")
+        .classList.add(
+            "page-hidden"
+        );
+
+    document
+        .getElementById("servicePage")
+        .classList.remove(
+            "page-hidden"
+        );
+
 
     window.scrollTo({
         top: 0,
@@ -862,14 +2406,188 @@ function backToService() {
 }
 
 
+
+async function processDigitalPayment() {
+
+    const button =
+        document.querySelector(
+            "#checkoutPage .submit-button"
+        );
+
+    if (!button) {
+        alert("Tombol pembayaran tidak ditemukan.");
+        return;
+    }
+
+    const originalText =
+        button.textContent;
+
+    button.disabled = true;
+    button.textContent =
+        "Membuat pesanan...";
+
+    try {
+
+        /*
+         * Kirim hanya ID produk.
+         * Harga akan diverifikasi ulang
+         * oleh server dari database.
+         */
+        const response =
+            await fetch(
+                "/api/digital-transactions",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        service:
+                            currentService,
+
+                        productIds:
+                            selectedDigitalProducts.map(
+                                product => product.id
+                            ),
+
+                        customerEmail:
+                            digitalCustomerEmail,
+
+                        customerWhatsapp:
+                            digitalCustomerWhatsapp,
+
+                        device:
+                            selectedDigitalDevice,
+
+                        paymentMethod:
+                            "xendit"
+
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error ||
+                "Gagal membuat transaksi digital."
+            );
+
+        }
+
+        const transaction =
+            data.transaction;
+
+        button.textContent =
+            "Membuka pembayaran...";
+
+        /*
+         * Gunakan endpoint khusus Xendit
+         * untuk transaksi produk digital.
+         */
+        const xenditResponse =
+            await fetch(
+                "/api/payments/xendit-digital",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        transactionId:
+                            transaction.transactionId,
+
+                        customerEmail:
+                            digitalCustomerEmail,
+
+                        customerWhatsapp:
+                            digitalCustomerWhatsapp
+
+                    })
+                }
+            );
+
+        const xenditData =
+            await xenditResponse.json();
+
+        if (
+            !xenditResponse.ok ||
+            !xenditData.success ||
+            !xenditData.paymentUrl
+        ) {
+
+            throw new Error(
+                xenditData.error ||
+                "Gagal membuat pembayaran Xendit."
+            );
+
+        }
+
+        window.location.href =
+            xenditData.paymentUrl;
+
+    } catch (error) {
+
+        console.error(
+            "Digital payment error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Gagal memproses pembayaran."
+        );
+
+        button.disabled = false;
+
+        button.textContent =
+            originalText;
+
+    }
+
+}
+
+
 async function processPayment() {
 
-    // Pembayaran menggunakan Xendit secara otomatis.
-    const payment = "xendit";
-
+    /*
+     * =====================================================
+     * DIGITAL PRODUCT PAYMENT
+     * =====================================================
+     *
+     * Lightroom / preset menggunakan transaksi
+     * digital multi-produk.
+     *
+     * Flow PPOB di bawah TIDAK DIUBAH.
+     */
 
     const service =
         services[currentService];
+
+    if (
+        service &&
+        service.type === "digital"
+    ) {
+
+        await processDigitalPayment();
+
+        return;
+    }
+
+
+    // Pembayaran PPOB menggunakan Xendit secara otomatis.
+    const payment = "xendit";
 
 
     if (!service) {
@@ -1197,12 +2915,88 @@ async function processPayment() {
 }
 
 
+function showDigitalDownloadButton(
+    transactionId,
+    productName
+) {
+
+    const successPage =
+        document.getElementById("successPage");
+
+    if (!successPage) {
+        return;
+    }
+
+    const existing =
+        document.getElementById(
+            "digitalDownloadContainer"
+        );
+
+    if (existing) {
+        return;
+    }
+
+    const container =
+        document.createElement("div");
+
+    container.id =
+        "digitalDownloadContainer";
+
+    container.style.marginTop =
+        "20px";
+
+    container.style.textAlign =
+        "center";
+
+    const title =
+        document.createElement("p");
+
+    title.textContent =
+        productName
+            ? `Produk ${productName} siap didownload.`
+            : "Produk digital kamu siap didownload.";
+
+    title.style.marginBottom =
+        "12px";
+
+    const button =
+        document.createElement("a");
+
+    button.href =
+        `/api/digital-products/download/${encodeURIComponent(transactionId)}`;
+
+    button.textContent =
+        "Download Produk";
+
+    button.setAttribute(
+        "download",
+        ""
+    );
+
+    button.style.display =
+        "inline-block";
+
+    button.style.textDecoration =
+        "none";
+
+    button.style.cursor =
+        "pointer";
+
+    container.appendChild(title);
+
+    container.appendChild(button);
+
+    successPage.appendChild(container);
+
+}
+
+
 async function checkTransactionStatus(transactionId) {
 
     try {
 
         const response = await fetch(
-            `/api/transactions/${transactionId}`
+            `/api/transactions/${encodeURIComponent(transactionId)}`
         );
 
         const data = await response.json();
@@ -1211,6 +3005,9 @@ async function checkTransactionStatus(transactionId) {
             return;
         }
 
+        const transaction =
+            data.transaction;
+
         const statusElement =
             document.getElementById("transactionStatus");
 
@@ -1218,9 +3015,65 @@ async function checkTransactionStatus(transactionId) {
             return;
         }
 
-        const status =
-            data.transaction.status;
+        const isDigital =
+            transaction.productType === "digital";
 
+        const paymentStatus =
+            transaction.paymentStatus;
+
+        const status =
+            transaction.status;
+
+        /*
+         * PRODUK DIGITAL
+         *
+         * Produk digital tidak dikirim ke Digiflazz.
+         * Jadi status transaksi boleh tetap PENDING,
+         * tetapi akses diberikan setelah payment_status
+         * benar-benar PAID.
+         */
+        if (isDigital) {
+
+            if (paymentStatus === "PAID") {
+
+                statusElement.textContent =
+                    "PEMBAYARAN BERHASIL";
+
+                showDigitalDownloadButton(
+                    transactionId,
+                    transaction.productName
+                );
+
+                return;
+
+            }
+
+            if (paymentStatus === "EXPIRED") {
+
+                statusElement.textContent =
+                    "PEMBAYARAN KEDALUWARSA";
+
+                return;
+
+            }
+
+            statusElement.textContent =
+                "MENUNGGU PEMBAYARAN";
+
+            setTimeout(
+                () => checkTransactionStatus(transactionId),
+                3000
+            );
+
+            return;
+        }
+
+        /*
+         * PRODUK PPOB
+         *
+         * Pertahankan alur status Digiflazz
+         * seperti sebelumnya.
+         */
         if (status === "SUCCESS") {
 
             statusElement.textContent =

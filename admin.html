@@ -1939,7 +1939,10 @@ body.bayora-view-admins > main > .stats {
                 ></select>
             </div>
 
-            <div class="catalog-form-group">
+            <div
+                class="catalog-form-group"
+                id="productOperatorGroup"
+            >
                 <label>Operator</label>
 
                 <input
@@ -1947,6 +1950,146 @@ body.bayora-view-admins > main > .stats {
                     id="productOperator"
                     placeholder="Telkomsel"
                 >
+            </div>
+
+            <div
+                class="catalog-form-group"
+                id="productPreviewGroup"
+                style="display:none;"
+            >
+                <label>Preview Image</label>
+
+                <input
+                    type="file"
+                    id="productPreviewUpload"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <input
+                    type="hidden"
+                    id="productPreviewImage"
+                >
+
+                <small>
+                    Path atau URL gambar preview produk.
+                </small>
+            </div>
+
+            <div
+                class="catalog-form-group"
+                id="productBeforeGroup"
+                style="display:none;"
+            >
+
+                <label>Foto Before</label>
+
+                <input
+                    type="file"
+                    id="productBeforeUpload"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <input
+                    type="hidden"
+                    id="productBeforeImage"
+                >
+
+                <div
+                    id="productBeforeCurrent"
+                    class="product-current-image"
+                ></div>
+
+                <small id="productBeforeStatus">
+                    Foto sebelum preset.
+                </small>
+
+            </div>
+
+
+            <div
+                class="catalog-form-group"
+                id="productAfterGroup"
+                style="display:none;"
+            >
+
+                <label>Foto After</label>
+
+                <input
+                    type="file"
+                    id="productAfterUpload"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <input
+                    type="hidden"
+                    id="productAfterImage"
+                >
+
+                <div
+                    id="productAfterCurrent"
+                    class="product-current-image"
+                ></div>
+
+                <small id="productAfterStatus">
+                    Foto sesudah preset.
+                </small>
+
+            </div>
+
+
+            <div
+                class="catalog-form-group"
+                id="productGalleryGroup"
+                style="display:none;"
+            >
+
+                <label>Detail Gallery</label>
+
+                <input
+                    type="file"
+                    id="productGalleryUpload"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                >
+
+                <input
+                    type="hidden"
+                    id="productGalleryImages"
+                >
+
+                <div
+                    id="productGalleryPreview"
+                    class="product-gallery-upload-preview"
+                ></div>
+
+                <small id="productGalleryStatus">
+                    Pilih beberapa foto untuk gallery detail.
+                </small>
+
+            </div>
+
+
+            <div
+                class="catalog-form-group"
+                id="productDigitalFileGroup"
+                style="display:none;"
+            >
+                <label>Digital File</label>
+
+                <input
+                    type="file"
+                    id="productDigitalUpload"
+                    accept=".zip"
+                >
+
+                <input
+                    type="hidden"
+                    id="productDigitalFile"
+                >
+
+                <small>
+                    Path atau URL file preset yang akan dikirim setelah pembayaran.
+                </small>
             </div>
 
             <div class="catalog-form-group">
@@ -3977,6 +4120,42 @@ async function saveService(event) {
             "serviceId"
         ).value.trim();
 
+    /*
+     * Tunggu semua upload preview / ZIP yang masih berjalan.
+     * Ini mencegah produk tersimpan sebelum digital_file
+     * menerima path dari server.
+     */
+    if (window.digitalUploadPromises?.length) {
+
+        try {
+
+            await Promise.all(
+                window.digitalUploadPromises
+            );
+
+        } catch (error) {
+
+            alert(
+                error.message ||
+                "Upload file produk gagal."
+            );
+
+            return;
+
+        }
+
+    }
+
+    console.log(
+        "[SAVE PRODUCT] productDigitalFile =",
+        document.getElementById("productDigitalFile")?.value
+    );
+
+    console.log(
+        "[SAVE PRODUCT] digitalUploadPromises =",
+        window.digitalUploadPromises?.length || 0
+    );
+
     const payload = {
 
         id,
@@ -4196,6 +4375,83 @@ async function deleteService(id) {
 }
 
 
+function setupProductServiceTypeListener() {
+
+    const select =
+        document.getElementById("productService");
+
+    if (!select) return;
+
+    select.onchange =
+        updateProductDigitalFields;
+}
+
+
+function updateProductDigitalFields() {
+
+    const serviceId =
+        document.getElementById("productService").value;
+
+    const service =
+        catalogData.services.find(
+            item => item.id === serviceId
+        );
+
+    const isDigital =
+        service &&
+        service.type === "digital";
+
+    const operatorGroup =
+        document.getElementById("productOperatorGroup");
+
+    const previewGroup =
+        document.getElementById("productPreviewGroup");
+
+    const digitalFileGroup =
+        document.getElementById("productDigitalFileGroup");
+
+    const beforeGroup =
+        document.getElementById("productBeforeGroup");
+
+    const afterGroup =
+        document.getElementById("productAfterGroup");
+
+    const galleryGroup =
+        document.getElementById("productGalleryGroup");
+
+    if (operatorGroup) {
+        operatorGroup.style.display =
+            isDigital ? "none" : "";
+    }
+
+    if (previewGroup) {
+        previewGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (digitalFileGroup) {
+        digitalFileGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (beforeGroup) {
+        beforeGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (afterGroup) {
+        afterGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (galleryGroup) {
+        galleryGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+}
+
+
 function openProductModal(serviceId = "") {
 
     document.getElementById(
@@ -4228,6 +4484,47 @@ function openProductModal(serviceId = "") {
     ).value = "";
 
     document.getElementById(
+        "productPreviewImage"
+    ).value = "";
+
+    document.getElementById(
+        "productDigitalFile"
+    ).value = "";
+
+    document.getElementById(
+        "productBeforeImage"
+    ).value = "";
+
+    document.getElementById(
+        "productAfterImage"
+    ).value = "";
+
+    renderCurrentProductImage(
+        "productBeforeCurrent",
+        "",
+        "Before"
+    );
+
+    renderCurrentProductImage(
+        "productAfterCurrent",
+        "",
+        "After"
+    );
+
+    document.getElementById(
+        "productGalleryImages"
+    ).value = "";
+
+    const galleryPreview =
+        document.getElementById(
+            "productGalleryPreview"
+        );
+
+    if (galleryPreview) {
+        galleryPreview.innerHTML = "";
+    }
+
+    document.getElementById(
         "productSort"
     ).value = 0;
 
@@ -4244,6 +4541,10 @@ function openProductModal(serviceId = "") {
         ).value = serviceId;
 
     }
+
+    updateProductDigitalFields();
+    setupProductServiceTypeListener();
+    setupDigitalProductUploadListeners();
 
     openCatalogModal("productModal");
 
@@ -4295,6 +4596,52 @@ function editProduct(id) {
         product.info || "";
 
     document.getElementById(
+        "productPreviewImage"
+    ).value =
+        product.preview_image || "";
+
+    document.getElementById(
+        "productDigitalFile"
+    ).value =
+        product.digital_file || "";
+
+    document.getElementById(
+        "productBeforeImage"
+    ).value =
+        product.before_image || "";
+
+    document.getElementById(
+        "productAfterImage"
+    ).value =
+        product.after_image || "";
+
+    renderCurrentProductImage(
+        "productBeforeCurrent",
+        product.before_image || "",
+        "Before"
+    );
+
+    renderCurrentProductImage(
+        "productAfterCurrent",
+        product.after_image || "",
+        "After"
+    );
+
+    const galleryImages =
+        parseProductGalleryImages(
+            product.gallery_images
+        );
+
+    document.getElementById(
+        "productGalleryImages"
+    ).value =
+        JSON.stringify(galleryImages);
+
+    renderProductGalleryUploadPreview(
+        galleryImages
+    );
+
+    document.getElementById(
         "productSort"
     ).value =
         product.sort_order;
@@ -4310,6 +4657,10 @@ function editProduct(id) {
         "productService"
     ).value =
         product.service_id;
+
+    updateProductDigitalFields();
+    setupProductServiceTypeListener();
+    setupDigitalProductUploadListeners();
 
     openCatalogModal("productModal");
 
@@ -4330,19 +4681,66 @@ async function saveProduct(event) {
             "productId"
         ).value.trim();
 
+    const serviceId =
+        document.getElementById(
+            "productService"
+        ).value;
+
+    const service =
+        catalogData.services.find(
+            item => item.id === serviceId
+        );
+
+    const isDigital =
+        service &&
+        service.type === "digital";
+
+    /*
+     * Jika ada upload digital yang sedang berjalan,
+     * tunggu sampai selesai sebelum membaca hidden input
+     * dan menyimpan produk.
+     */
+    if (
+        isDigital &&
+        window.digitalUploadPromises &&
+        window.digitalUploadPromises.length
+    ) {
+
+        try {
+
+            await Promise.all(
+                window.digitalUploadPromises
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[SAVE PRODUCT] Upload digital gagal:",
+                error
+            );
+
+            throw new Error(
+                error.message ||
+                "Upload file digital gagal."
+            );
+
+        }
+
+    }
+
     const payload = {
 
         id,
 
         service_id:
-            document.getElementById(
-                "productService"
-            ).value,
+            serviceId,
 
         operator:
-            document.getElementById(
-                "productOperator"
-            ).value.trim(),
+            isDigital
+                ? ""
+                : document.getElementById(
+                    "productOperator"
+                ).value.trim(),
 
         name:
             document.getElementById(
@@ -4371,7 +4769,47 @@ async function saveProduct(event) {
                 document.getElementById(
                     "productSort"
                 ).value
-            ) || 0
+            ) || 0,
+
+        product_type:
+            isDigital
+                ? "digital"
+                : "ppob",
+
+        preview_image:
+            isDigital
+                ? document.getElementById(
+                    "productPreviewImage"
+                ).value.trim()
+                : null,
+
+        digital_file:
+            isDigital
+                ? document.getElementById(
+                    "productDigitalFile"
+                ).value.trim()
+                : null,
+
+        before_image:
+            isDigital
+                ? document.getElementById(
+                    "productBeforeImage"
+                ).value.trim()
+                : null,
+
+        after_image:
+            isDigital
+                ? document.getElementById(
+                    "productAfterImage"
+                ).value.trim()
+                : null,
+
+        gallery_images:
+            isDigital
+                ? document.getElementById(
+                    "productGalleryImages"
+                ).value.trim()
+                : null
 
     };
 
@@ -4509,6 +4947,724 @@ document.addEventListener(
             });
     }
 );
+
+
+
+/* =========================================================
+   DIGITAL PRODUCT FILE UPLOAD
+========================================================= */
+
+function uploadDigitalProductFile(
+    input,
+    endpoint,
+    hiddenInputId,
+    statusId
+) {
+
+    const file =
+        input.files &&
+        input.files[0];
+
+    if (!file) {
+        return Promise.resolve();
+    }
+
+    const status =
+        document.getElementById(statusId);
+
+    const hidden =
+        document.getElementById(hiddenInputId);
+
+    if (!hidden) {
+
+        alert(
+            "Field penyimpanan path file tidak ditemukan."
+        );
+
+        return Promise.reject(
+            new Error(
+                "Field penyimpanan path file tidak ditemukan."
+            )
+        );
+
+    }
+
+    if (status) {
+
+        status.textContent =
+            "Mengupload file...";
+
+    }
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file,
+        file.name
+    );
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const xhr =
+                new XMLHttpRequest();
+
+            xhr.open(
+                "POST",
+                window.location.origin + endpoint,
+                true
+            );
+
+            xhr.onload = function () {
+
+                try {
+
+                    const data =
+                        JSON.parse(
+                            xhr.responseText || "{}"
+                        );
+
+                    if (
+                        xhr.status < 200 ||
+                        xhr.status >= 300 ||
+                        !data.success ||
+                        !data.file ||
+                        !data.file.path
+                    ) {
+
+                        throw new Error(
+                            data.error ||
+                            `Upload gagal (${xhr.status}).`
+                        );
+
+                    }
+
+                    hidden.value =
+                        data.file.path;
+
+                    if (status) {
+
+                        status.textContent =
+                            `✓ ${data.file.originalName} berhasil diupload.`;
+
+                    }
+
+                    resolve(
+                        data.file.path
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "[DIGITAL PRODUCT UPLOAD]",
+                        error
+                    );
+
+                    if (status) {
+
+                        status.textContent =
+                            error.message ||
+                            "Upload file gagal.";
+
+                    }
+
+                    reject(error);
+
+                }
+
+            };
+
+            xhr.onerror = function () {
+
+                const error =
+                    new Error(
+                        "Upload gagal. Periksa apakah server BAYORA sedang berjalan."
+                    );
+
+                console.error(
+                    "[DIGITAL PRODUCT UPLOAD] Network error"
+                );
+
+                if (status) {
+
+                    status.textContent =
+                        error.message;
+
+                }
+
+                reject(error);
+
+            };
+
+            xhr.send(formData);
+
+        }
+    );
+
+}
+
+
+
+function uploadDigitalPreviewField(
+    input,
+    hiddenId,
+    statusId
+) {
+
+    return uploadDigitalProductFile(
+        input,
+        "/api/products/upload-preview",
+        hiddenId,
+        statusId
+    );
+
+}
+
+
+function uploadDigitalGalleryFiles(input) {
+
+    const files =
+        Array.from(
+            input.files || []
+        );
+
+    if (!files.length) {
+        return Promise.resolve([]);
+    }
+
+
+    const hidden =
+        document.getElementById(
+            "productGalleryImages"
+        );
+
+    const status =
+        document.getElementById(
+            "productGalleryStatus"
+        );
+
+
+    if (!hidden) {
+
+        return Promise.reject(
+            new Error(
+                "Field gallery tidak ditemukan."
+            )
+        );
+
+    }
+
+
+    let existing = [];
+
+    try {
+
+        existing =
+            JSON.parse(
+                hidden.value || "[]"
+            );
+
+        if (!Array.isArray(existing)) {
+            existing = [];
+        }
+
+    } catch (error) {
+
+        existing = [];
+
+    }
+
+
+    const uploadOne =
+        file => {
+
+            return new Promise(
+                (resolve, reject) => {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        "file",
+                        file,
+                        file.name
+                    );
+
+
+                    const xhr =
+                        new XMLHttpRequest();
+
+                    xhr.open(
+                        "POST",
+                        window.location.origin +
+                        "/api/products/upload-preview",
+                        true
+                    );
+
+
+                    xhr.onload =
+                        function () {
+
+                            try {
+
+                                const data =
+                                    JSON.parse(
+                                        xhr.responseText ||
+                                        "{}"
+                                    );
+
+
+                                if (
+                                    xhr.status < 200 ||
+                                    xhr.status >= 300 ||
+                                    !data.success ||
+                                    !data.file ||
+                                    !data.file.path
+                                ) {
+
+                                    throw new Error(
+                                        data.error ||
+                                        "Upload gallery gagal."
+                                    );
+
+                                }
+
+
+                                resolve(
+                                    data.file.path
+                                );
+
+                            } catch (error) {
+
+                                reject(error);
+
+                            }
+
+                        };
+
+
+                    xhr.onerror =
+                        function () {
+
+                            reject(
+                                new Error(
+                                    "Upload gallery gagal."
+                                )
+                            );
+
+                        };
+
+
+                    xhr.send(formData);
+
+                }
+            );
+
+        };
+
+
+    if (status) {
+
+        status.textContent =
+            `Mengupload ${files.length} foto...`;
+
+    }
+
+
+    return Promise.all(
+        files.map(uploadOne)
+    ).then(
+        uploaded => {
+
+            const combined =
+                existing.concat(
+                    uploaded
+                );
+
+
+            hidden.value =
+                JSON.stringify(
+                    combined
+                );
+
+
+            renderProductGalleryUploadPreview(
+                combined
+            );
+
+
+            if (status) {
+
+                status.textContent =
+                    `✓ ${combined.length} foto gallery siap disimpan.`;
+
+            }
+
+
+            return combined;
+
+        }
+    );
+
+}
+
+
+function renderCurrentProductImage(
+    containerId,
+    image,
+    label
+) {
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+    if (!container) {
+        return;
+    }
+
+    if (!image) {
+
+        container.innerHTML = `
+            <div class="product-current-empty">
+                Belum ada ${label}.
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML = `
+
+        <div class="product-current-image-wrap">
+
+            <img
+                src="${image}"
+                alt="${label}"
+            >
+
+            <span>
+                ${label} saat ini
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+function parseProductGalleryImages(
+    value
+) {
+
+    if (!value) {
+        return [];
+    }
+
+    if (Array.isArray(value)) {
+        return value.filter(Boolean);
+    }
+
+    try {
+
+        const parsed =
+            JSON.parse(value);
+
+        if (Array.isArray(parsed)) {
+            return parsed.filter(Boolean);
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "[PRODUCT GALLERY] JSON tidak valid:",
+            error
+        );
+
+    }
+
+    return [];
+
+}
+
+
+function renderProductGalleryUploadPreview(
+    images
+) {
+
+    const container =
+        document.getElementById(
+            "productGalleryPreview"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    images.forEach(
+        (image, index) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "product-gallery-upload-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${image}"
+                    alt="Gallery ${index + 1}"
+                >
+
+                <button
+                    type="button"
+                    title="Hapus foto"
+                >
+                    ×
+                </button>
+
+            `;
+
+
+            item
+                .querySelector("button")
+                .onclick =
+                function () {
+
+                    images.splice(
+                        index,
+                        1
+                    );
+
+
+                    const hidden =
+                        document.getElementById(
+                            "productGalleryImages"
+                        );
+
+
+                    hidden.value =
+                        JSON.stringify(
+                            images
+                        );
+
+
+                    renderProductGalleryUploadPreview(
+                        images
+                    );
+
+                };
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+function setupDigitalProductUploadListeners() {
+
+    if (!window.digitalUploadPromises) {
+        window.digitalUploadPromises = [];
+    }
+
+
+    const previewInput =
+        document.getElementById(
+            "productPreviewUpload"
+        );
+
+
+    const beforeInput =
+        document.getElementById(
+            "productBeforeUpload"
+        );
+
+
+    const afterInput =
+        document.getElementById(
+            "productAfterUpload"
+        );
+
+
+    const galleryInput =
+        document.getElementById(
+            "productGalleryUpload"
+        );
+
+
+    const digitalInput =
+        document.getElementById(
+            "productDigitalUpload"
+        );
+
+
+    if (previewInput) {
+
+        previewInput.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalProductFile(
+                        previewInput,
+                        "/api/products/upload-preview",
+                        "productPreviewImage",
+                        "productPreviewStatus"
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+
+    if (beforeInput) {
+
+        beforeInput.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalPreviewField(
+                        beforeInput,
+                        "productBeforeImage",
+                        "productBeforeStatus"
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+
+    if (afterInput) {
+
+        afterInput.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalPreviewField(
+                        afterInput,
+                        "productAfterImage",
+                        "productAfterStatus"
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+
+    if (galleryInput) {
+
+        galleryInput.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalGalleryFiles(
+                        galleryInput
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+
+    if (digitalInput) {
+
+        digitalInput.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalProductFile(
+                        digitalInput,
+                        "/api/products/upload-file",
+                        "productDigitalFile",
+                        "productDigitalStatus"
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+}
 
 
 </script>
@@ -8096,5 +9252,131 @@ a.bayora-brand .bayora-logo-text {
     opacity: 1 !important;
     visibility: visible !important;
 }
+
+
+
+/* ==========================================================
+   DIGITAL PRODUCT MEDIA UPLOAD
+   Before / After / Gallery
+   Khusus Product Modal Admin
+========================================================== */
+
+#productBeforeCurrent,
+#productAfterCurrent {
+    margin-top: 10px;
+}
+
+.product-current-image-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+    max-width: 180px;
+}
+
+.product-current-image-wrap img {
+    display: block;
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.product-current-image-wrap span {
+    font-size: 12px;
+    opacity: 0.65;
+}
+
+.product-current-empty {
+    font-size: 12px;
+    opacity: 0.55;
+    padding: 8px 0;
+}
+
+
+.product-gallery-upload-preview {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+
+.product-gallery-upload-item {
+    position: relative;
+    width: 86px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #f5f5f5;
+}
+
+
+.product-gallery-upload-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+.product-gallery-upload-item button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    width: 24px;
+    height: 24px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: rgba(0, 0, 0, 0.72);
+    color: white;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+    line-height: 1;
+}
+
+
+#productBeforeStatus,
+#productAfterStatus,
+#productGalleryStatus {
+    display: block;
+    margin-top: 7px;
+}
+
+
+#productGalleryUpload {
+    min-height: 42px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .product-current-image-wrap {
+        max-width: 150px;
+    }
+
+    .product-current-image-wrap img {
+        width: 150px;
+    }
+
+    .product-gallery-upload-item {
+        width: 72px;
+    }
+
+}
+
 
 </style>

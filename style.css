@@ -4960,3 +4960,996 @@ cd ~/ppobku
 git add style.css
 git commit -m "Improve desktop service card layout"
 git push origin main
+/* ============================================================
+   BAYORA — FINAL SERVICE CATEGORY LAYOUT
+   Desktop : 4 kolom
+   Mobile  : 2 kolom
+============================================================ */
+
+#customerServiceGrid {
+    display: block !important;
+    width: 100% !important;
+}
+
+#customerServiceGrid .service-section-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+#customerServiceGrid .service-section-grid .service-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+
+    display: grid !important;
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+
+    column-gap: 18px !important;
+    align-items: center !important;
+
+    min-height: 150px !important;
+    padding: 24px 28px !important;
+
+    text-align: left !important;
+}
+
+#customerServiceGrid .service-section-grid .service-icon {
+    grid-column: 1 !important;
+    grid-row: 1 / 3 !important;
+
+    width: 62px !important;
+    height: 62px !important;
+    min-width: 62px !important;
+    min-height: 62px !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#customerServiceGrid .service-section-grid .service-title {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+
+    margin: 0 0 2px !important;
+    text-align: left !important;
+}
+
+#customerServiceGrid .service-section-grid .service-description {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+#customerServiceGrid .service-section-title {
+    width: 100% !important;
+    margin: 0 0 18px !important;
+}
+
+#customerServiceGrid .service-section-title h2 {
+    margin: 0 !important;
+    font-size: 20px !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+}
+
+#customerServiceGrid .service-section-title p {
+    margin: 5px 0 0 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    opacity: 0.7 !important;
+}
+
+#customerServiceGrid .service-section-title-digital {
+    margin-top: 42px !important;
+}
+
+@media (max-width: 768px) {
+
+    #customerServiceGrid .service-section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    #customerServiceGrid .service-section-title {
+        margin-bottom: 14px !important;
+    }
+
+    #customerServiceGrid .service-section-title h2 {
+        font-size: 18px !important;
+    }
+
+    #customerServiceGrid .service-section-title p {
+        font-size: 12px !important;
+    }
+
+    #customerServiceGrid .service-section-title-digital {
+        margin-top: 32px !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-card {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+
+        min-height: 205px !important;
+        padding: 22px 12px 18px !important;
+
+        text-align: center !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-icon {
+        width: 62px !important;
+        height: 62px !important;
+        min-width: 62px !important;
+        min-height: 62px !important;
+
+        margin: 0 auto 14px !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-title {
+        width: 100% !important;
+        margin: 0 !important;
+        text-align: center !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-description {
+        width: 100% !important;
+        margin: 6px 0 0 !important;
+        text-align: center !important;
+    }
+}
+
+
+
+/* ============================================================
+   BAYORA — SERVICE CATEGORY LAYOUT FINAL
+   Struktur:
+   Judul kategori
+   ↓
+   Grid kartu 4 kolom desktop
+   ↓
+   Grid kartu 2 kolom mobile
+   ============================================================ */
+
+/* =========================
+   DESKTOP
+   ========================= */
+
+@media (min-width: 769px) {
+
+    #customerServiceGrid {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    #customerServiceGrid .service-section-title {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 16px !important;
+    }
+
+    #customerServiceGrid .service-section-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 18px !important;
+        width: 100% !important;
+        margin: 0 0 34px !important;
+        box-sizing: border-box !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #customerServiceGrid .service-section-title-digital {
+        margin-top: 34px !important;
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 768px) {
+
+    #customerServiceGrid {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    #customerServiceGrid .service-section-title {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 14px !important;
+    }
+
+    #customerServiceGrid .service-section-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        width: 100% !important;
+        margin: 0 0 28px !important;
+        box-sizing: border-box !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #customerServiceGrid .service-section-title-digital {
+        margin-top: 28px !important;
+    }
+
+}
+
+
+/* =========================
+   CATEGORY TITLE
+   ========================= */
+
+#customerServiceGrid .service-section-title h2 {
+    margin: 0 !important;
+}
+
+#customerServiceGrid .service-section-title p {
+    margin: 4px 0 0 !important;
+    max-width: 520px !important;
+}
+
+
+
+
+/* ============================================================
+   BAYORA — SERVICE CATEGORY FINAL
+   PPOB dan PRODUK DIGITAL terpisah dengan rapi
+   ============================================================ */
+
+#customerServiceGrid {
+    display: block !important;
+    width: 100% !important;
+}
+
+
+/* =========================
+   CATEGORY TITLE
+   ========================= */
+
+#customerServiceGrid .service-section-title {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+}
+
+#customerServiceGrid .service-section-title h2 {
+    margin: 0 !important;
+    font-size: 22px !important;
+    line-height: 1.25 !important;
+}
+
+#customerServiceGrid .service-section-title p {
+    margin: 5px 0 0 !important;
+    max-width: 600px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+
+/* =========================
+   CARD GRID
+   ========================= */
+
+#customerServiceGrid .service-section-grid {
+    display: grid !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+
+/* =========================
+   DESKTOP
+   ========================= */
+
+@media (min-width: 769px) {
+
+    #customerServiceGrid .service-section-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+
+        gap: 18px !important;
+
+        margin: 0 0 42px !important;
+    }
+
+    #customerServiceGrid
+    .service-section-title-digital {
+        margin-top: 4px !important;
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 768px) {
+
+    #customerServiceGrid .service-section-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+
+        margin: 0 0 30px !important;
+    }
+
+    #customerServiceGrid
+    .service-section-title {
+        margin-bottom: 14px !important;
+    }
+
+    #customerServiceGrid
+    .service-section-title-digital {
+        margin-top: 4px !important;
+    }
+
+}
+
+
+/* =========================
+   SERVICE CARD
+   ========================= */
+
+#customerServiceGrid
+.service-section-grid
+.service-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+
+/* =========================
+   DESKTOP CARD
+   ========================= */
+
+@media (min-width: 769px) {
+
+    #customerServiceGrid
+    .service-section-grid
+    .service-card {
+
+        display: grid !important;
+
+        grid-template-columns:
+            62px minmax(0, 1fr) !important;
+
+        grid-template-rows:
+            auto auto !important;
+
+        column-gap: 18px !important;
+
+        align-items: center !important;
+
+        min-height: 140px !important;
+
+        padding: 22px 26px !important;
+
+        text-align: left !important;
+    }
+
+    #customerServiceGrid
+    .service-section-grid
+    .service-card
+    .service-icon {
+
+        grid-column: 1 !important;
+        grid-row: 1 / 3 !important;
+
+        width: 62px !important;
+        height: 62px !important;
+
+        min-width: 62px !important;
+        min-height: 62px !important;
+
+        margin: 0 !important;
+    }
+
+    #customerServiceGrid
+    .service-section-grid
+    .service-card
+    .service-title {
+
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+
+        margin: 0 0 2px !important;
+
+        text-align: left !important;
+    }
+
+    #customerServiceGrid
+    .service-section-grid
+    .service-card
+    .service-description {
+
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+
+        margin: 0 !important;
+
+        text-align: left !important;
+    }
+
+}
+
+
+/* =========================
+   MOBILE CARD
+   ========================= */
+
+@media (max-width: 768px) {
+
+    #customerServiceGrid
+    .service-section-grid
+    .service-card {
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+
+        align-items: center !important;
+        justify-content: flex-start !important;
+
+        text-align: center !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — LIGHTROOM DIGITAL PRODUCT FLOW
+========================================================= */
+
+.digital-preset-panel {
+    width: 100%;
+}
+
+.digital-customer-card,
+.digital-device-card {
+    background: #ffffff;
+    border: 1px solid #e7edf7;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(20, 55, 110, 0.04);
+}
+
+.digital-section-description {
+    margin: 6px 0 0;
+    color: #71809a;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.digital-catalog-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 28px 0 16px;
+}
+
+.digital-catalog-header h3 {
+    margin: 5px 0 5px;
+    font-size: 22px;
+    color: #102650;
+}
+
+.digital-catalog-header > div > p:last-child {
+    margin: 0;
+    color: #71809a;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.digital-select-all {
+    flex-shrink: 0;
+    border: 1px solid #d8e5fb;
+    background: #f7faff;
+    color: #1769ff;
+    border-radius: 10px;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.digital-select-all:hover {
+    background: #eef5ff;
+    border-color: #bcd4ff;
+}
+
+/* PRODUCT GRID */
+
+.digital-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* PRODUCT CARD */
+
+.digital-product-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e5ebf5;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(20, 55, 110, 0.05);
+    transition: transform 0.2s ease, border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.digital-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(20, 55, 110, 0.09);
+}
+
+.digital-product-card.selected {
+    border-color: #3180ff;
+    box-shadow: 0 0 0 2px rgba(49, 128, 255, 0.12);
+}
+
+/* PRODUCT IMAGE */
+
+.digital-product-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #f2f5fa;
+}
+
+.digital-product-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.digital-product-image-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9aa7bb;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+/* PRODUCT BODY */
+
+.digital-product-card-body {
+    padding: 17px;
+}
+
+.digital-product-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.digital-product-card-top h4 {
+    margin: 4px 0 0;
+    color: #102650;
+    font-size: 17px;
+}
+
+.digital-product-card-top > strong {
+    flex-shrink: 0;
+    color: #1769ff;
+    font-size: 16px;
+}
+
+.digital-product-info {
+    min-height: 42px;
+    margin: 10px 0 16px;
+    color: #71809a;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* BUTTONS */
+
+.digital-product-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+}
+
+.digital-detail-button,
+.digital-pick-button {
+    min-height: 40px;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.digital-detail-button {
+    border: 1px solid #dce6f5;
+    background: #ffffff;
+    color: #31517f;
+}
+
+.digital-detail-button:hover {
+    background: #f6f9fd;
+}
+
+.digital-pick-button {
+    border: 1px solid #1769ff;
+    background: #1769ff;
+    color: #ffffff;
+}
+
+.digital-pick-button:hover {
+    background: #0f5de7;
+}
+
+.digital-product-card.selected .digital-pick-button {
+    background: #eaf3ff;
+    border-color: #b8d2ff;
+    color: #1769ff;
+}
+
+/* SELECTION SUMMARY */
+
+.digital-selection-summary {
+    margin: 20px 0 26px;
+    padding: 17px 20px;
+    background: #f7faff;
+    border: 1px solid #dfeafa;
+    border-radius: 14px;
+}
+
+.digital-selection-summary > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.digital-selection-summary span {
+    color: #65748d;
+    font-size: 14px;
+}
+
+.digital-selection-summary strong {
+    color: #102650;
+    font-size: 18px;
+}
+
+/* DEVICE */
+
+.digital-device-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.digital-device-option {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    min-height: 72px;
+    padding: 13px 15px;
+    border: 1px solid #dfe7f3;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #102650;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.digital-device-option:hover {
+    border-color: #b8d2ff;
+    background: #f8fbff;
+}
+
+.digital-device-option.selected {
+    border-color: #3180ff;
+    background: #f2f7ff;
+    box-shadow: 0 0 0 2px rgba(49, 128, 255, 0.10);
+}
+
+.digital-device-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: #edf4ff;
+    color: #1769ff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.digital-device-option strong {
+    display: block;
+    font-size: 14px;
+}
+
+.digital-device-option small {
+    display: block;
+    margin-top: 3px;
+    color: #7a879b;
+    font-size: 11px;
+}
+
+/* DETAIL MODAL */
+
+.digital-detail-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.digital-detail-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 25, 55, 0.55);
+    backdrop-filter: blur(5px);
+}
+
+.digital-detail-dialog {
+    position: relative;
+    width: min(720px, calc(100% - 32px));
+    max-height: calc(100vh - 32px);
+    margin: 16px auto;
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
+}
+
+.digital-detail-close {
+    position: absolute;
+    top: 13px;
+    right: 13px;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #102650;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
+}
+
+.digital-detail-gallery {
+    width: 100%;
+    max-height: 420px;
+    overflow: hidden;
+    background: #f3f5f8;
+}
+
+.digital-detail-gallery img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+}
+
+.digital-detail-content {
+    padding: 24px;
+}
+
+.digital-detail-content h2 {
+    margin: 5px 0 7px;
+    color: #102650;
+}
+
+.digital-detail-price {
+    display: block;
+    margin-bottom: 14px;
+    color: #1769ff;
+    font-size: 21px;
+}
+
+.digital-detail-content > p:not(.eyebrow) {
+    color: #65748d;
+    line-height: 1.65;
+}
+
+.digital-detail-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0;
+}
+
+.digital-detail-features span {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #f4f7fb;
+    color: #52627b;
+    font-size: 12px;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    .digital-catalog-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .digital-select-all {
+        width: 100%;
+    }
+
+    .digital-product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .digital-device-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .digital-product-image {
+        aspect-ratio: 16 / 10;
+    }
+
+    .digital-detail-dialog {
+        width: calc(100% - 20px);
+        margin: 10px auto;
+        max-height: calc(100vh - 20px);
+    }
+
+}
+
+
+/* =========================================================
+   LIGHTROOM DETAIL GALLERY SLIDER
+========================================================= */
+
+.digital-detail-gallery {
+    position: relative;
+    width: 100%;
+    max-height: 440px;
+    min-height: 300px;
+    overflow: hidden;
+    background: #f3f5f8;
+}
+
+.digital-detail-gallery img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    max-height: 440px;
+    object-fit: cover;
+}
+
+.digital-detail-gallery-empty {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8a96a9;
+    font-size: 13px;
+}
+
+.digital-gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+
+    width: 42px;
+    height: 42px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.94);
+    color: #102650;
+
+    font-size: 30px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.14);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.digital-gallery-nav:hover {
+    background: #ffffff;
+}
+
+.digital-gallery-prev {
+    left: 14px;
+}
+
+.digital-gallery-next {
+    right: 14px;
+}
+
+.digital-gallery-indicator {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    background: rgba(15, 30, 60, 0.68);
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.03em;
+}
+
+@media (max-width: 700px) {
+
+    .digital-detail-gallery {
+        min-height: 240px;
+        max-height: 340px;
+    }
+
+    .digital-detail-gallery img {
+        min-height: 240px;
+        max-height: 340px;
+    }
+
+    .digital-gallery-nav {
+        width: 38px;
+        height: 38px;
+        font-size: 27px;
+    }
+
+}

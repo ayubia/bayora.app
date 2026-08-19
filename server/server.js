@@ -4,9 +4,192 @@ const path = require("path");
 const crypto = require("crypto");
 const Database = require("better-sqlite3");
 const axios = require("axios");
+const multer = require("multer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
+/* =========================
+   DIGITAL PRODUCT UPLOAD
+========================= */
+
+const digitalUploadRoot =
+    path.join(__dirname, "..", "uploads", "digital");
+
+const digitalPreviewDir =
+    path.join(digitalUploadRoot, "preview");
+
+const digitalFileDir =
+    path.join(digitalUploadRoot, "files");
+
+const fs =
+    require("fs");
+
+fs.mkdirSync(
+    digitalPreviewDir,
+    { recursive: true }
+);
+
+fs.mkdirSync(
+    digitalFileDir,
+    { recursive: true }
+);
+
+
+const previewStorage =
+    multer.diskStorage({
+
+        destination:
+            (req, file, cb) => {
+
+                cb(
+                    null,
+                    digitalPreviewDir
+                );
+
+            },
+
+        filename:
+            (req, file, cb) => {
+
+                const extension =
+                    path.extname(
+                        file.originalname
+                    ).toLowerCase();
+
+                const filename =
+                    `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+                cb(
+                    null,
+                    filename
+                );
+
+            }
+
+    });
+
+
+const digitalFileStorage =
+    multer.diskStorage({
+
+        destination:
+            (req, file, cb) => {
+
+                cb(
+                    null,
+                    digitalFileDir
+                );
+
+            },
+
+        filename:
+            (req, file, cb) => {
+
+                const filename =
+                    `${Date.now()}-${crypto.randomBytes(8).toString("hex")}.zip`;
+
+                cb(
+                    null,
+                    filename
+                );
+
+            }
+
+    });
+
+
+const uploadPreview =
+    multer({
+
+        storage:
+            previewStorage,
+
+        limits: {
+            fileSize:
+                10 * 1024 * 1024
+        },
+
+        fileFilter:
+            (req, file, cb) => {
+
+                const allowed =
+                    [
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                    ];
+
+                if (
+                    allowed.includes(
+                        file.mimetype
+                    )
+                ) {
+
+                    cb(
+                        null,
+                        true
+                    );
+
+                    return;
+
+                }
+
+                cb(
+                    new Error(
+                        "Preview hanya boleh JPG, PNG, atau WEBP."
+                    )
+                );
+
+            }
+
+    });
+
+
+const uploadDigitalFile =
+    multer({
+
+        storage:
+            digitalFileStorage,
+
+        limits: {
+            fileSize:
+                50 * 1024 * 1024
+        },
+
+        fileFilter:
+            (req, file, cb) => {
+
+                const extension =
+                    path.extname(
+                        file.originalname
+                    ).toLowerCase();
+
+                if (
+                    extension === ".zip"
+                ) {
+
+                    cb(
+                        null,
+                        true
+                    );
+
+                    return;
+
+                }
+
+                cb(
+                    new Error(
+                        "File preset harus berupa ZIP."
+                    )
+                );
+
+            }
+
+    });
+
+
 
 
 /* =========================
@@ -43,6 +226,33 @@ db.exec(`
         created_at TEXT NOT NULL
     );
 `);
+
+/* ==========================================================
+   DIGITAL TRANSACTION ITEMS
+   Khusus transaksi Lightroom / produk digital.
+   Tidak mengubah sistem transaksi PPOB.
+========================================================== */
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS digital_transaction_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        product_name TEXT NOT NULL,
+        price INTEGER NOT NULL DEFAULT 0,
+        digital_file TEXT,
+        created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS
+        idx_digital_transaction_items_transaction
+        ON digital_transaction_items(transaction_id);
+
+    CREATE INDEX IF NOT EXISTS
+        idx_digital_transaction_items_product
+        ON digital_transaction_items(product_id);
+`);
+
 
 
 
@@ -212,6 +422,122 @@ for (const [columnName, columnDefinition] of transactionMigrations) {
         );
     }
 }
+
+
+
+/* =========================
+   SERVICE TYPE MIGRATION
+   ppob = layanan PPOB lama
+   digital = produk digital
+========================= */
+
+const serviceColumns =
+    db.prepare("PRAGMA table_info(services)").all();
+
+const serviceColumnNames =
+    serviceColumns.map(column => column.name);
+
+if (!serviceColumnNames.includes("type")) {
+
+    db.prepare(`
+        ALTER TABLE services
+        ADD COLUMN type TEXT NOT NULL DEFAULT 'ppob'
+    `).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom services.type berhasil ditambahkan. Default: ppob."
+    );
+}
+
+db.prepare(`
+    UPDATE services
+    SET type = 'ppob'
+    WHERE type IS NULL
+       OR TRIM(type) = ''
+`).run();
+
+
+
+/* =========================
+   PRODUCT DIGITAL MIGRATION
+   Field khusus produk digital.
+========================= */
+
+const digitalProductColumns =
+    db.prepare("PRAGMA table_info(products)").all();
+
+const digitalProductColumnNames =
+    digitalProductColumns.map(column => column.name);
+
+/*
+ * ==========================================================
+ * DIGITAL PREVIEW GALLERY MIGRATION
+ *
+ * before_image  = foto BEFORE untuk katalog
+ * after_image   = foto AFTER untuk katalog
+ * gallery_images = daftar foto untuk detail produk
+ *
+ * Tidak mengubah flow PPOB.
+ * ==========================================================
+ */
+
+const digitalPreviewMigrations = [
+    ["before_image", "TEXT"],
+    ["after_image", "TEXT"],
+    ["gallery_images", "TEXT"]
+];
+
+for (
+    const [columnName, columnDefinition]
+    of digitalPreviewMigrations
+) {
+
+    if (
+        !digitalProductColumnNames.includes(
+            columnName
+        )
+    ) {
+
+        db.prepare(
+            `ALTER TABLE products ADD COLUMN ${columnName} ${columnDefinition}`
+        ).run();
+
+        console.log(
+            `[DB MIGRATION] Kolom products.${columnName} berhasil ditambahkan.`
+        );
+
+    }
+
+}
+
+
+
+const productMigrations = [
+    ["product_type", "TEXT NOT NULL DEFAULT 'ppob'"],
+    ["preview_image", "TEXT"],
+    ["digital_file", "TEXT"]
+];
+
+for (const [columnName, columnDefinition] of productMigrations) {
+
+    if (!digitalProductColumnNames.includes(columnName)) {
+
+        db.prepare(
+            `ALTER TABLE products ADD COLUMN ${columnName} ${columnDefinition}`
+        ).run();
+
+        console.log(
+            `[DB MIGRATION] Kolom products.${columnName} berhasil ditambahkan.`
+        );
+    }
+}
+
+db.prepare(`
+    UPDATE products
+    SET product_type = 'ppob'
+    WHERE product_type IS NULL
+       OR TRIM(product_type) = ''
+`).run();
 
 
 /* =========================
@@ -838,6 +1164,7 @@ app.delete("/api/auth/delete-account", (req, res) => {
 });
 
 
+
 app.use(
     express.static(
         path.join(__dirname, "..")
@@ -1089,9 +1416,13 @@ app.post("/api/transactions", (req, res) => {
                 price,
                 payment_method AS paymentMethod,
                 status,
+                payment_status AS paymentStatus,
+                p.product_type AS productType,
                 created_at AS createdAt
-            FROM transactions
-            WHERE transaction_id = ?
+            FROM transactions t
+            LEFT JOIN products p
+                ON p.id = t.product_id
+            WHERE t.transaction_id = ?
         `).get(transactionId);
 
         console.log("");
@@ -1114,6 +1445,458 @@ app.post("/api/transactions", (req, res) => {
         return res.status(500).json({
             success: false,
             error: "Gagal menyimpan transaksi."
+        });
+
+    }
+
+});
+
+
+
+/* ==========================================================
+   CREATE DIGITAL TRANSACTION
+   Khusus Lightroom / produk digital multi-produk.
+   Tidak mengubah endpoint PPOB /api/transactions.
+========================================================== */
+
+app.post("/api/digital-transactions", (req, res) => {
+
+    try {
+
+        const currentUser =
+            getCurrentUser(req);
+
+        if (!currentUser) {
+
+            return res.status(401).json({
+                success: false,
+                error: "Silakan login terlebih dahulu."
+            });
+
+        }
+
+
+        const {
+            service,
+            productIds,
+            customerEmail,
+            customerWhatsapp,
+            device,
+            paymentMethod = "xendit"
+        } = req.body;
+
+
+        if (
+            !service ||
+            !Array.isArray(productIds) ||
+            !productIds.length ||
+            !customerEmail ||
+            !customerWhatsapp ||
+            !device
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Data pembelian digital belum lengkap."
+            });
+
+        }
+
+
+        const email =
+            String(customerEmail)
+                .trim()
+                .toLowerCase();
+
+        const whatsapp =
+            String(customerWhatsapp)
+                .trim();
+
+        const selectedDevice =
+            String(device)
+                .trim();
+
+
+        if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Format email tidak valid."
+            });
+
+        }
+
+
+        if (!whatsapp) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Nomor WhatsApp wajib diisi."
+            });
+
+        }
+
+
+        if (
+            !["iOS", "Android", "MacOS", "Windows"].includes(
+                selectedDevice
+            )
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Perangkat tidak valid."
+            });
+
+        }
+
+
+        /*
+         * Hilangkan duplikat product ID.
+         */
+        const uniqueProductIds =
+            [
+                ...new Set(
+                    productIds
+                        .map(id =>
+                            String(id).trim()
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+        if (!uniqueProductIds.length) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Tidak ada produk yang dipilih."
+            });
+
+        }
+
+
+        /*
+         * Ambil produk langsung dari database.
+         * Harga dari browser TIDAK dipercaya.
+         */
+        const placeholders =
+            uniqueProductIds
+                .map(() => "?")
+                .join(",");
+
+
+        const products =
+            db.prepare(`
+                SELECT
+                    id,
+                    service_id,
+                    name,
+                    price,
+                    active,
+                    product_type,
+                    preview_image,
+                    digital_file
+                FROM products
+                WHERE id IN (${placeholders})
+            `).all(
+                ...uniqueProductIds
+            );
+
+
+        if (
+            products.length !==
+            uniqueProductIds.length
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Salah satu produk tidak ditemukan."
+            });
+
+        }
+
+
+        const invalidProduct =
+            products.find(product =>
+                !Number(product.active) ||
+                product.product_type !== "digital" ||
+                !product.digital_file
+            );
+
+
+        if (invalidProduct) {
+
+            return res.status(400).json({
+                success: false,
+                error:
+                    `Produk "${invalidProduct.name}" tidak tersedia untuk pembelian digital.`
+            });
+
+        }
+
+
+        /*
+         * Pastikan seluruh produk memang
+         * berasal dari layanan yang dikirim.
+         */
+        const invalidService =
+            products.find(product =>
+                product.service_id !== service
+            );
+
+
+        if (invalidService) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Produk tidak sesuai dengan layanan."
+            });
+
+        }
+
+
+        const total =
+            products.reduce(
+                (sum, product) =>
+                    sum +
+                    Number(product.price || 0),
+                0
+            );
+
+
+        if (
+            !Number.isFinite(total) ||
+            total <= 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Total pembayaran tidak valid."
+            });
+
+        }
+
+
+        const transactionId =
+            "DIGITAL-" + Date.now();
+
+
+        const reference =
+            crypto
+                .randomBytes(4)
+                .toString("hex")
+                .toUpperCase();
+
+
+        const createdAt =
+            new Date().toISOString();
+
+
+        /*
+         * Nama ringkas untuk tabel transactions.
+         * Detail seluruh produk disimpan
+         * di digital_transaction_items.
+         */
+        const productName =
+            products.length === 1
+                ? products[0].name
+                : `${products[0].name} + ${products.length - 1} preset lainnya`;
+
+
+        const transaction =
+            db.transaction(() => {
+
+                db.prepare(`
+                    INSERT INTO transactions (
+                        user_id,
+                        transaction_id,
+                        reference,
+                        service,
+                        target,
+                        operator,
+                        product_id,
+                        product_name,
+                        price,
+                        payment_method,
+                        status,
+                        created_at
+                    )
+                    VALUES (
+                        @userId,
+                        @transactionId,
+                        @reference,
+                        @service,
+                        @target,
+                        NULL,
+                        NULL,
+                        @productName,
+                        @price,
+                        @paymentMethod,
+                        'PENDING',
+                        @createdAt
+                    )
+                `).run({
+
+                    userId:
+                        currentUser.id,
+
+                    transactionId,
+
+                    reference,
+
+                    service,
+
+                    target:
+                        email,
+
+                    productName,
+
+                    price:
+                        total,
+
+                    paymentMethod,
+
+                    createdAt
+
+                });
+
+
+                const insertItem =
+                    db.prepare(`
+                        INSERT INTO digital_transaction_items (
+                            transaction_id,
+                            product_id,
+                            product_name,
+                            price,
+                            digital_file,
+                            created_at
+                        )
+                        VALUES (
+                            @transactionId,
+                            @productId,
+                            @productName,
+                            @price,
+                            @digitalFile,
+                            @createdAt
+                        )
+                    `);
+
+
+                for (
+                    const product of products
+                ) {
+
+                    insertItem.run({
+
+                        transactionId,
+
+                        productId:
+                            product.id,
+
+                        productName:
+                            product.name,
+
+                        price:
+                            Number(
+                                product.price || 0
+                            ),
+
+                        digitalFile:
+                            product.digital_file,
+
+                        createdAt
+
+                    });
+
+                }
+
+
+                return db.prepare(`
+                    SELECT
+                        id,
+                        transaction_id AS transactionId,
+                        reference,
+                        service,
+                        target,
+                        product_name AS productName,
+                        price,
+                        payment_method AS paymentMethod,
+                        status,
+                        payment_status AS paymentStatus,
+                        created_at AS createdAt
+                    FROM transactions
+                    WHERE transaction_id = ?
+                `).get(
+                    transactionId
+                );
+
+            })();
+
+
+        console.log("");
+        console.log("==============================");
+        console.log("DIGITAL TRANSAKSI TERSIMPAN");
+        console.log({
+            transaction,
+            customerEmail: email,
+            customerWhatsapp: whatsapp,
+            device: selectedDevice,
+            products:
+                products.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price
+                }))
+        });
+        console.log("==============================");
+        console.log("");
+
+
+        return res.status(201).json({
+
+            success: true,
+
+            message:
+                "Transaksi digital berhasil disimpan.",
+
+            transaction,
+
+            customer: {
+                email,
+                whatsapp,
+                device: selectedDevice
+            },
+
+            products:
+                products.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: Number(
+                        product.price || 0
+                    )
+                })),
+
+            total
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Digital transaction error:",
+            error
+        );
+
+        return res.status(500).json({
+
+            success: false,
+
+            error:
+                "Gagal menyimpan transaksi digital."
+
         });
 
     }
@@ -1227,6 +2010,144 @@ app.get("/api/transactions", requireAdminStaff, (req, res) => {
 
 
 /* =========================
+   DIGITAL PRODUCT UPLOAD API
+========================= */
+
+app.post(
+    "/api/products/upload-preview",
+    requireCatalogManager,
+    (req, res) => {
+
+        uploadPreview.single("file")(req, res, error => {
+
+            if (error) {
+
+                console.error(
+                    "[UPLOAD PREVIEW]",
+                    error
+                );
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        error.message ||
+                        "Gagal mengupload preview."
+                });
+
+            }
+
+            if (!req.file) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "File preview belum dipilih."
+                });
+
+            }
+
+            const relativePath =
+                path.relative(
+                    path.join(__dirname, ".."),
+                    req.file.path
+                ).split(path.sep).join("/");
+
+            return res.json({
+                success: true,
+                file: {
+                    originalName:
+                        req.file.originalname,
+
+                    filename:
+                        req.file.filename,
+
+                    path:
+                        "/" + relativePath,
+
+                    size:
+                        req.file.size,
+
+                    mimeType:
+                        req.file.mimetype
+                }
+            });
+
+        });
+
+    }
+);
+
+
+app.post(
+    "/api/products/upload-file",
+    requireCatalogManager,
+    (req, res) => {
+
+        uploadDigitalFile.single("file")(
+            req,
+            res,
+            error => {
+
+                if (error) {
+
+                    console.error(
+                        "[UPLOAD DIGITAL FILE]",
+                        error
+                    );
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            error.message ||
+                            "Gagal mengupload file preset."
+                    });
+
+                }
+
+                if (!req.file) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "File preset belum dipilih."
+                    });
+
+                }
+
+                const relativePath =
+                    path.relative(
+                        path.join(__dirname, ".."),
+                        req.file.path
+                    ).split(path.sep).join("/");
+
+                return res.json({
+                    success: true,
+                    file: {
+                        originalName:
+                            req.file.originalname,
+
+                        filename:
+                            req.file.filename,
+
+                        path:
+                            "/" + relativePath,
+
+                        size:
+                            req.file.size,
+
+                        mimeType:
+                            req.file.mimetype
+                    }
+                });
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================
    RESET TRANSACTIONS BY MONTH
 ========================= */
 
@@ -1275,20 +2196,24 @@ app.get("/api/transactions/:id", (req, res) => {
 
         const transaction = db.prepare(`
             SELECT
-                id,
-                transaction_id AS transactionId,
-                reference,
-                service,
-                target,
-                operator,
-                product_id AS productId,
-                product_name AS productName,
-                price,
-                payment_method AS paymentMethod,
-                status,
-                created_at AS createdAt
-            FROM transactions
-            WHERE transaction_id = ?
+                t.id,
+                t.transaction_id AS transactionId,
+                t.reference,
+                t.service,
+                t.target,
+                t.operator,
+                t.product_id AS productId,
+                t.product_name AS productName,
+                t.price,
+                t.payment_method AS paymentMethod,
+                t.status,
+                t.payment_status AS paymentStatus,
+                p.product_type AS productType,
+                t.created_at AS createdAt
+            FROM transactions t
+            LEFT JOIN products p
+                ON p.id = t.product_id
+            WHERE t.transaction_id = ?
         `).get(req.params.id);
 
         if (!transaction) {
@@ -1439,6 +2364,8 @@ async function sendTransactionToDigiflazz(transactionId) {
             t.payment_status,
             t.digiflazz_status,
             t.digiflazz_ref,
+            p.product_type,
+            p.digital_file,
             p.digiflazz_sku,
             p.cost_price
         FROM transactions t
@@ -1449,6 +2376,23 @@ async function sendTransactionToDigiflazz(transactionId) {
 
     if (!transaction) {
         throw new Error("Transaksi tidak ditemukan.");
+    }
+
+    /*
+     * Produk digital tidak dikirim ke Digiflazz.
+     * Pembayaran tetap diproses sebagai PAID,
+     * sedangkan file digital akan diberikan melalui
+     * mekanisme download khusus.
+     */
+    if (transaction.product_type === "digital") {
+
+        return {
+            skipped: true,
+            digital: true,
+            reason: "PRODUK_DIGITAL",
+            digitalFile: transaction.digital_file || null
+        };
+
     }
 
     if (transaction.payment_status !== "PAID") {
@@ -1927,13 +2871,32 @@ async function refundXenditTransaction(transactionId) {
             payment_status,
             payment_request_id,
             refund_status,
-            refund_id
+            refund_id,
+            product_id
         FROM transactions
         WHERE transaction_id = ?
     `).get(transactionId);
 
     if (!transaction) {
         throw new Error("Transaksi tidak ditemukan.");
+    }
+
+    /*
+     * Produk digital tidak boleh direfund.
+     */
+    if (transaction.product_id) {
+
+        const product = db.prepare(`
+            SELECT product_type
+            FROM products
+            WHERE id = ?
+        `).get(transaction.product_id);
+
+        if (product?.product_type === "digital") {
+            throw new Error(
+                "Produk digital tidak dapat direfund."
+            );
+        }
     }
 
     if (transaction.payment_status !== "PAID") {
@@ -2661,6 +3624,17 @@ app.post("/api/payments/xendit", async (req, res) => {
                 currency: "IDR",
                 country: "ID",
                 locale: "id",
+
+                success_return_url:
+                    process.env.PUBLIC_BASE_URL.replace(/\/$/, "") +
+                    "/?payment=success&transactionId=" +
+                    encodeURIComponent(transactionId),
+
+                cancel_return_url:
+                    process.env.PUBLIC_BASE_URL.replace(/\/$/, "") +
+                    "/?payment=cancel&transactionId=" +
+                    encodeURIComponent(transactionId),
+
                 customer: {
                     reference_id: "CUST-" + crypto.randomUUID(),
                     type: "INDIVIDUAL",
@@ -2710,6 +3684,460 @@ app.post("/api/payments/xendit", async (req, res) => {
 });
 
 
+
+
+/* ==========================================================
+   XENDIT PAYMENT — DIGITAL
+   Khusus Lightroom / multi-product.
+   Endpoint Xendit PPOB lama tetap tidak disentuh.
+========================================================== */
+
+app.post(
+    "/api/payments/xendit-digital",
+    async (req, res) => {
+
+        try {
+
+            const {
+                transactionId,
+                customerEmail,
+                customerWhatsapp
+            } = req.body;
+
+
+            if (!transactionId) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "transactionId wajib diisi."
+                });
+
+            }
+
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        transaction_id AS transactionId,
+                        reference,
+                        service,
+                        product_name AS productName,
+                        price,
+                        payment_status AS paymentStatus
+                    FROM transactions
+                    WHERE transaction_id = ?
+                      AND transaction_id LIKE 'DIGITAL-%'
+                    LIMIT 1
+                `).get(transactionId);
+
+
+            if (!transaction) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Transaksi digital tidak ditemukan."
+                });
+
+            }
+
+
+            if (!Number.isFinite(
+                Number(transaction.price)
+            ) || Number(transaction.price) <= 0) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Total transaksi digital tidak valid."
+                });
+
+            }
+
+
+            if (!process.env.XENDIT_SECRET_KEY) {
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "XENDIT_SECRET_KEY belum tersedia."
+                });
+
+            }
+
+
+            const items =
+                db.prepare(`
+                    SELECT
+                        product_id AS productId,
+                        product_name AS productName,
+                        price
+                    FROM digital_transaction_items
+                    WHERE transaction_id = ?
+                    ORDER BY id ASC
+                `).all(transactionId);
+
+
+            if (!items.length) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "Item produk digital tidak ditemukan."
+                });
+
+            }
+
+
+            const response =
+                await axios.post(
+                    "https://api.xendit.co/sessions",
+                    {
+                        reference_id:
+                            transaction.reference,
+
+                        session_type:
+                            "PAY",
+
+                        mode:
+                            "PAYMENT_LINK",
+
+                        amount:
+                            Number(transaction.price),
+
+                        currency:
+                            "IDR",
+
+                        country:
+                            "ID",
+
+                        locale:
+                            "id",
+
+                        success_return_url:
+                            process.env.PUBLIC_BASE_URL.replace(
+                                /\/$/,
+                                ""
+                            ) +
+                            "/?payment=success&transactionId=" +
+                            encodeURIComponent(
+                                transactionId
+                            ),
+
+                        cancel_return_url:
+                            process.env.PUBLIC_BASE_URL.replace(
+                                /\/$/,
+                                ""
+                            ) +
+                            "/?payment=cancel&transactionId=" +
+                            encodeURIComponent(
+                                transactionId
+                            ),
+
+                        customer: {
+
+                            reference_id:
+                                "CUST-" +
+                                crypto.randomUUID(),
+
+                            type:
+                                "INDIVIDUAL",
+
+                            email:
+                                customerEmail ||
+                                "customer@example.com",
+
+                            individual_detail: {
+
+                                given_names:
+                                    "Pelanggan BAYORA"
+
+                            }
+
+                        }
+
+                    },
+
+                    {
+                        auth: {
+
+                            username:
+                                process.env.XENDIT_SECRET_KEY,
+
+                            password:
+                                ""
+
+                        },
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        }
+
+                    }
+
+                );
+
+
+            db.prepare(`
+                UPDATE transactions
+                SET payment_session_id = ?
+                WHERE transaction_id = ?
+            `).run(
+                response.data.payment_session_id,
+                transactionId
+            );
+
+
+            console.log("");
+            console.log("==============================");
+            console.log("XENDIT DIGITAL PAYMENT");
+            console.log({
+                transactionId,
+                reference:
+                    transaction.reference,
+                total:
+                    transaction.price,
+                items:
+                    items.length,
+                customerEmail:
+                    customerEmail || null,
+                customerWhatsapp:
+                    customerWhatsapp || null
+            });
+            console.log("==============================");
+            console.log("");
+
+
+            return res.json({
+
+                success:
+                    true,
+
+                paymentSessionId:
+                    response.data.payment_session_id,
+
+                paymentUrl:
+                    response.data.payment_link_url
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Xendit digital error:",
+                error.response?.data ||
+                error.message
+            );
+
+
+            return res.status(500).json({
+
+                success:
+                    false,
+
+                error:
+                    "Gagal membuat pembayaran digital."
+
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================
+   DIGITAL PRODUCT DOWNLOAD
+========================= */
+
+app.get(
+    "/api/digital-products/download/:transactionId",
+    (req, res) => {
+
+        try {
+
+            const currentUser =
+                getCurrentUser(req);
+
+            if (!currentUser) {
+
+                return res.status(401).json({
+                    success: false,
+                    error: "Silakan login terlebih dahulu."
+                });
+
+            }
+
+            const transactionId =
+                String(
+                    req.params.transactionId || ""
+                ).trim();
+
+            if (!transactionId) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "ID transaksi tidak valid."
+                });
+
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        t.transaction_id,
+                        t.user_id,
+                        t.payment_status,
+                        t.product_id,
+                        p.name AS product_name,
+                        p.product_type,
+                        p.digital_file
+                    FROM transactions t
+                    LEFT JOIN products p
+                        ON p.id = t.product_id
+                    WHERE t.transaction_id = ?
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (!transaction) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Transaksi tidak ditemukan."
+                });
+
+            }
+
+            if (
+                Number(transaction.user_id) !==
+                Number(currentUser.id)
+            ) {
+
+                return res.status(403).json({
+                    success: false,
+                    error: "Kamu tidak memiliki akses ke transaksi ini."
+                });
+
+            }
+
+            if (
+                transaction.payment_status !==
+                "PAID"
+            ) {
+
+                return res.status(403).json({
+                    success: false,
+                    error: "Pembayaran belum dikonfirmasi."
+                });
+
+            }
+
+            if (
+                transaction.product_type !==
+                "digital"
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Transaksi ini bukan produk digital."
+                });
+
+            }
+
+            if (!transaction.digital_file) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "File digital belum tersedia."
+                });
+
+            }
+
+            const projectRoot =
+                path.join(
+                    __dirname,
+                    ".."
+                );
+
+            const relativeFile =
+                String(
+                    transaction.digital_file
+                )
+                .replace(/^\/+/, "");
+
+            const filePath =
+                path.resolve(
+                    projectRoot,
+                    relativeFile
+                );
+
+            const digitalRoot =
+                path.resolve(
+                    path.join(
+                        projectRoot,
+                        "uploads",
+                        "digital",
+                        "files"
+                    )
+                );
+
+            if (
+                filePath !== digitalRoot &&
+                !filePath.startsWith(
+                    digitalRoot + path.sep
+                )
+            ) {
+
+                console.error(
+                    "[DIGITAL DOWNLOAD] Path tidak aman:",
+                    transaction.digital_file
+                );
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Lokasi file digital tidak valid."
+                });
+
+            }
+
+            return res.download(
+                filePath,
+                transaction.product_name + ".zip",
+                error => {
+
+                    if (error) {
+
+                        console.error(
+                            "[DIGITAL DOWNLOAD]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[DIGITAL DOWNLOAD ERROR]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal menyediakan file digital."
+            });
+
+        }
+
+    }
+);
+
+
+
 /* =========================
    CATALOG API
 ========================= */
@@ -2737,7 +4165,8 @@ app.get("/api/catalog", (req, res) => {
                 placeholder,
                 active,
                 sort_order,
-                created_at
+                created_at,
+                type
             FROM services
             ORDER BY sort_order ASC, title ASC
         `).all();
@@ -2752,7 +4181,13 @@ app.get("/api/catalog", (req, res) => {
                 info,
                 active,
                 sort_order,
-                created_at
+                created_at,
+                product_type,
+                preview_image,
+                digital_file,
+                before_image,
+                after_image,
+                gallery_images
             FROM products
             ORDER BY sort_order ASC, name ASC
         `).all();
@@ -3049,7 +4484,13 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             price,
             info,
             active,
-            sort_order
+            sort_order,
+            product_type,
+            preview_image,
+            digital_file,
+            before_image,
+            after_image,
+            gallery_images
         } = req.body;
 
         if (!id || !service_id || !name) {
@@ -3121,9 +4562,15 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
                 info,
                 active,
                 sort_order,
-                created_at
+                created_at,
+                product_type,
+                preview_image,
+                digital_file,
+                before_image,
+                after_image,
+                gallery_images
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             productId,
             service_id,
@@ -3135,7 +4582,15 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             Number.isFinite(Number(sort_order))
                 ? Number(sort_order)
                 : 0,
-            catalogNow()
+            catalogNow(),
+            product_type === "digital"
+                ? "digital"
+                : "ppob",
+            preview_image || null,
+            digital_file || null,
+            before_image || null,
+            after_image || null,
+            gallery_images || null
         );
 
         const product =
@@ -3198,7 +4653,13 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             price,
             info,
             active,
-            sort_order
+            sort_order,
+            product_type,
+            preview_image,
+            digital_file,
+            before_image,
+            after_image,
+            gallery_images
         } = req.body;
 
         const targetService =
@@ -3246,7 +4707,13 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
                 price = ?,
                 info = ?,
                 active = ?,
-                sort_order = ?
+                sort_order = ?,
+                product_type = ?,
+                preview_image = ?,
+                digital_file = ?,
+                before_image = ?,
+                after_image = ?,
+                gallery_images = ?
             WHERE id = ?
         `).run(
             targetService,
@@ -3272,6 +4739,32 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             sort_order === undefined
                 ? existing.sort_order
                 : Number(sort_order),
+
+            product_type === undefined
+                ? existing.product_type
+                : product_type === "digital"
+                    ? "digital"
+                    : "ppob",
+
+            preview_image === undefined
+                ? existing.preview_image
+                : preview_image || null,
+
+            digital_file === undefined
+                ? existing.digital_file
+                : digital_file || null,
+
+            before_image === undefined
+                ? existing.before_image
+                : before_image || null,
+
+            after_image === undefined
+                ? existing.after_image
+                : after_image || null,
+
+            gallery_images === undefined
+                ? existing.gallery_images
+                : gallery_images || null,
 
             productId
         );

@@ -3409,6 +3409,105 @@ async function refundXenditTransaction(transactionId) {
 
 
 
+
+/* ==========================================================
+   RETRY DIGITAL PRODUCT EMAIL
+   Untuk transaksi DIGITAL-* yang sudah PAID tetapi
+   delivery sebelumnya gagal.
+========================================================== */
+
+app.post("/api/digital/retry-delivery/:transactionId", async (req, res) => {
+
+    try {
+
+        const transactionId =
+            String(req.params.transactionId || "").trim();
+
+        if (!transactionId.startsWith("DIGITAL-")) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Transaction ID digital tidak valid."
+            });
+
+        }
+
+        const transaction =
+            db.prepare(`
+                SELECT
+                    transaction_id,
+                    payment_status,
+                    delivery_status,
+                    customer_email
+                FROM transactions
+                WHERE transaction_id = ?
+            `).get(transactionId);
+
+        if (!transaction) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Transaksi digital tidak ditemukan."
+            });
+
+        }
+
+        if (transaction.payment_status !== "PAID") {
+
+            return res.status(400).json({
+                success: false,
+                error: "Transaksi belum PAID.",
+                transaction
+            });
+
+        }
+
+        if (transaction.delivery_status === "SENT") {
+
+            return res.json({
+                success: true,
+                skipped: true,
+                message: "Produk digital sudah terkirim.",
+                transaction
+            });
+
+        }
+
+        console.log(
+            "[DIGITAL DELIVERY RETRY]",
+            transactionId
+        );
+
+        const delivery =
+            await sendDigitalProductEmail(
+                transactionId
+            );
+
+        return res.json({
+            success: true,
+            retry: true,
+            delivery
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[DIGITAL DELIVERY RETRY ERROR]",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error:
+                error.message ||
+                "Gagal mengirim ulang produk digital."
+        });
+
+    }
+
+});
+
+
 /* ==========================================================
    DIGITAL PRODUCT EMAIL DELIVERY
    ZIP + PDF sesuai perangkat.

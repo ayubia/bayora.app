@@ -7262,3 +7262,207 @@ body {
 
 }
 
+
+/* =========================================================
+   BAYORA — BEFORE / AFTER 1:1 FINAL
+========================================================= */
+
+/*
+ * Foto produk kembali ke ukuran 1:1
+ */
+.digital-product-image {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: #f2f5fa !important;
+}
+
+
+/*
+ * Container BEFORE / AFTER memenuhi
+ * seluruh area foto 1:1.
+ */
+.digital-before-after {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    touch-action: none !important;
+    cursor: ew-resize !important;
+}
+
+
+/*
+ * Track hanya sebagai container.
+ * Kedua foto ditumpuk, bukan displit.
+ */
+.digital-before-after-track {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+
+/*
+ * BEFORE = gambar dasar penuh.
+ */
+.digital-before-after-track .digital-before-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+
+    z-index: 1 !important;
+}
+
+
+/*
+ * AFTER = gambar di atas BEFORE.
+ * JavaScript mengatur clip-path-nya.
+ */
+.digital-before-after-track .digital-after-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+
+    z-index: 2 !important;
+
+    clip-path: inset(
+        0 50% 0 0
+    ) !important;
+
+    -webkit-clip-path: inset(
+        0 50% 0 0
+    ) !important;
+
+    transition: none !important;
+}
+
+
+/*
+ * Garis slider mengikuti batas BEFORE/AFTER.
+ */
+.digital-before-after-divider {
+    position: absolute !important;
+
+    top: 0 !important;
+    bottom: 0 !important;
+
+    width: 2px !important;
+
+    margin: 0 !important;
+
+    transform: translateX(-50%) !important;
+
+    z-index: 10 !important;
+
+    pointer-events: none !important;
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.78
+    ) !important;
+
+    box-shadow:
+        0 1px 4px rgba(
+            0,
+            0,
+            0,
+            0.10
+        ) !important;
+}
+
+
+/*
+ * Bulatan slider tetap di atas garis.
+ */
+.digital-before-after-divider::before,
+.digital-before-after-divider::after {
+    pointer-events: none !important;
+}
+
+
+/*
+ * Input transparan menutupi seluruh foto.
+ * Pointer event tetap ditangani JavaScript.
+ */
+.digital-before-after-range {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+
+    z-index: 20 !important;
+
+    cursor: ew-resize !important;
+
+    touch-action: none !important;
+}
+
+
+/*
+ * Jangan biarkan browser melakukan drag gambar.
+ */
+.digital-before-after img,
+.digital-before-after-image {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-user-drag: none !important;
+    pointer-events: none !important;
+}
+
+
+/*
+ * Label tetap ringan/transparan.
+ */
+.digital-before-after-label {
+    z-index: 11 !important;
+
+    background: rgba(
+        20,
+        20,
+        20,
+        0.22
+    ) !important;
+
+    box-shadow: none !important;
+
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+
+/*
+ * Mobile + tablet tetap 1:1.
+ */
+@media (max-width: 1100px) {
+
+    .digital-product-image,
+    .digital-before-after {
+        aspect-ratio: 1 / 1 !important;
+    }
+
+}

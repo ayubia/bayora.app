@@ -441,6 +441,7 @@ async function loadCustomerCatalog() {
                 id: product.id,
                 name: product.name,
                 price: Number(product.price) || 0,
+                mood: product.mood || "",
                 info: product.info || "",
                 operator: product.operator || "",
                 productType: product.product_type || "ppob",
@@ -846,7 +847,7 @@ function openService(serviceId) {
 
         const formHeader =
             document.querySelector(
-                "#servicePage .form-header"
+                "#servicePage .ppob-form-header"
             );
 
         if (formHeader) {
@@ -944,15 +945,37 @@ function openService(serviceId) {
                 service.title;
         }
 
+        const digitalServiceIcon =
+            document.querySelector(
+                ".digital-form-icon"
+            );
+
         const digitalServiceTitle =
             document.querySelector(
-                ".bayora-digital-service-title"
+                ".digital-form-title"
             );
+
+        const digitalServiceDescription =
+            document.querySelector(
+                ".digital-form-description"
+            );
+
+        if (digitalServiceIcon) {
+            digitalServiceIcon.textContent =
+                service.icon ||
+                "✨";
+        }
 
         if (digitalServiceTitle) {
             digitalServiceTitle.textContent =
                 service.title ||
                 "Layanan Digital";
+        }
+
+        if (digitalServiceDescription) {
+            digitalServiceDescription.textContent =
+                service.description ||
+                "";
         }
 
         if (description) {
@@ -1036,7 +1059,7 @@ function openService(serviceId) {
 
     const formHeader =
         document.querySelector(
-            "#servicePage .form-header"
+            "#servicePage .ppob-form-header"
         );
 
     if (formHeader) {
@@ -1610,8 +1633,8 @@ function renderDigitalProducts() {
 
                 <p class="digital-product-info">
                     ${
-                        product.info ||
-                        "Preset Lightroom untuk mempercantik foto kamu."
+                        product.mood ||
+                        "Preset Lightroom"
                     }
                 </p>
 
@@ -1777,13 +1800,9 @@ function setupDigitalBeforeAfterSliders() {
                 );
 
 
-            /*
-             * Bagian AFTER dipotong dari kanan.
-             * Semakin besar slider,
-             * semakin banyak AFTER yang terlihat.
-             */
             const clipValue =
                 `inset(0 ${100 - percentage}% 0 0)`;
+
 
             afterImage.style.setProperty(
                 "clip-path",
@@ -1798,9 +1817,6 @@ function setupDigitalBeforeAfterSliders() {
             );
 
 
-            /*
-             * Posisi divider.
-             */
             if (divider) {
 
                 divider.style.left =
@@ -1809,9 +1825,6 @@ function setupDigitalBeforeAfterSliders() {
             }
 
 
-            /*
-             * Simpan posisi untuk CSS.
-             */
             slider.style.setProperty(
                 "--before-after-position",
                 percentage + "%"
@@ -1872,21 +1885,61 @@ function setupDigitalBeforeAfterSliders() {
 
 
         /*
-         * DRAG / SWIPE LANGSUNG
-         * DARI SELURUH FOTO
+         * =====================================================
+         * DESKTOP — HOVER LANGSUNG
+         *
+         * Mouse tidak perlu klik.
+         * Posisi slider mengikuti cursor selama
+         * cursor berada di atas gambar.
+         * =====================================================
          */
-        let dragging = false;
+        slider.addEventListener(
+            "pointerenter",
+            event => {
+
+                if (
+                    event.pointerType ===
+                    "mouse"
+                ) {
+
+                    updatePosition(
+                        event.clientX
+                    );
+
+                }
+
+            }
+        );
 
 
         slider.addEventListener(
-            "pointerdown",
+            "pointermove",
             event => {
 
-                dragging = true;
+                /*
+                 * Mouse:
+                 * langsung mengikuti cursor.
+                 */
+                if (
+                    event.pointerType ===
+                    "mouse"
+                ) {
 
-                slider.setPointerCapture?.(
-                    event.pointerId
-                );
+                    updatePosition(
+                        event.clientX
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Touch / stylus:
+                 * tetap menggunakan drag/swipe.
+                 */
+                if (!dragging) {
+                    return;
+                }
 
 
                 updatePosition(
@@ -1903,13 +1956,43 @@ function setupDigitalBeforeAfterSliders() {
         );
 
 
+        /*
+         * =====================================================
+         * MOBILE / TABLET — DRAG / SWIPE
+         * =====================================================
+         */
+        let dragging = false;
+
+
         slider.addEventListener(
-            "pointermove",
+            "pointerdown",
             event => {
 
-                if (!dragging) {
+                /*
+                 * Mouse tidak membutuhkan
+                 * mode dragging karena hover
+                 * sudah aktif.
+                 */
+                if (
+                    event.pointerType ===
+                    "mouse"
+                ) {
+
+                    updatePosition(
+                        event.clientX
+                    );
+
                     return;
+
                 }
+
+
+                dragging = true;
+
+
+                slider.setPointerCapture?.(
+                    event.pointerId
+                );
 
 
                 updatePosition(

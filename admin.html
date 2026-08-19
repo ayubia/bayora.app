@@ -2137,13 +2137,15 @@ body.bayora-view-admins > main > .stats {
                 >
             </div>
 
-            <div class="catalog-form-group">
-                <label>Keterangan</label>
+            <div class="catalog-form-group" id="productMoodGroup" style="display:none;">
+                <label>Mood / Deskripsi Singkat</label>
+                <input type="text" id="productMood" placeholder="Warm • Golden • Soft">
+                <small>Contoh: Warm • Golden • Soft</small>
+            </div>
 
-                <textarea
-                    id="productInfo"
-                    placeholder="Pulsa Rp10.000"
-                ></textarea>
+            <div class="catalog-form-group">
+                <label>Deskripsi Produk</label>
+                <textarea id="productInfo" placeholder="Jelaskan karakter dan hasil warna preset."></textarea>
             </div>
 
             <div class="catalog-form-group">
@@ -4491,6 +4493,9 @@ function updateProductDigitalFields() {
     const galleryGroup =
         document.getElementById("productGalleryGroup");
 
+    const moodGroup =
+        document.getElementById("productMoodGroup");
+
     if (operatorGroup) {
         operatorGroup.style.display =
             isDigital ? "none" : "";
@@ -4518,6 +4523,11 @@ function updateProductDigitalFields() {
 
     if (galleryGroup) {
         galleryGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (moodGroup) {
+        moodGroup.style.display =
             isDigital ? "" : "none";
     }
 
@@ -4825,6 +4835,11 @@ async function saveProduct(event) {
                     "productPrice"
                 ).value
             ),
+
+        mood:
+            document.getElementById(
+                "productMood"
+            ).value.trim(),
 
         info:
             document.getElementById(

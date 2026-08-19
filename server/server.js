@@ -515,7 +515,8 @@ for (
 const productMigrations = [
     ["product_type", "TEXT NOT NULL DEFAULT 'ppob'"],
     ["preview_image", "TEXT"],
-    ["digital_file", "TEXT"]
+    ["digital_file", "TEXT"],
+    ["mood", "TEXT NOT NULL DEFAULT ''"]
 ];
 
 for (const [columnName, columnDefinition] of productMigrations) {
@@ -4179,6 +4180,7 @@ app.get("/api/catalog", (req, res) => {
                 name,
                 price,
                 info,
+                mood,
                 active,
                 sort_order,
                 created_at,
@@ -4502,6 +4504,7 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             name,
             price,
             info,
+            mood,
             active,
             sort_order,
             product_type,
@@ -4579,6 +4582,7 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
                 name,
                 price,
                 info,
+                mood,
                 active,
                 sort_order,
                 created_at,
@@ -4597,6 +4601,7 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             String(name).trim(),
             numericPrice,
             info || "",
+            mood || "",
             active === false ? 0 : 1,
             Number.isFinite(Number(sort_order))
                 ? Number(sort_order)
@@ -4671,6 +4676,7 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             name,
             price,
             info,
+            mood,
             active,
             sort_order,
             product_type,
@@ -4725,6 +4731,7 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
                 name = ?,
                 price = ?,
                 info = ?,
+                mood = ?,
                 active = ?,
                 sort_order = ?,
                 product_type = ?,
@@ -4750,6 +4757,10 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             info === undefined
                 ? existing.info
                 : info,
+
+            mood === undefined
+                ? (existing.mood || "")
+                : mood,
 
             active === undefined
                 ? existing.active

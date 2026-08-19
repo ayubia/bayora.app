@@ -944,6 +944,17 @@ function openService(serviceId) {
                 service.title;
         }
 
+        const digitalServiceTitle =
+            document.querySelector(
+                ".bayora-digital-service-title"
+            );
+
+        if (digitalServiceTitle) {
+            digitalServiceTitle.textContent =
+                service.title ||
+                "Layanan Digital";
+        }
+
         if (description) {
             description.textContent =
                 service.description;
@@ -993,10 +1004,18 @@ function openService(serviceId) {
             renderDigitalProducts();
         }
 
-        if (typeof updateDigitalSelection === "function") {
+        if (
+            typeof setupDigitalBeforeAfterSliders ===
+            "function"
+        ) {
             setupDigitalBeforeAfterSliders();
+        }
 
-    updateDigitalSelection();
+        if (
+            typeof updateDigitalSelection ===
+            "function"
+        ) {
+            updateDigitalSelection();
         }
 
 
@@ -1709,48 +1728,228 @@ function setupDigitalBeforeAfterSliders() {
                 ".digital-before-after-range"
             );
 
-        const afterImage =
-            slider.querySelector(
-                ".digital-after-image"
-            );
-
         const divider =
             slider.querySelector(
                 ".digital-before-after-divider"
             );
 
+        if (!range) {
+            return;
+        }
+
+
+        /*
+         * Hindari listener ganda ketika katalog
+         * dirender ulang.
+         */
         if (
-            !range ||
-            !afterImage ||
-            !divider
+            slider.dataset.beforeAfterReady ===
+            "true"
         ) {
             return;
         }
 
-        const update = () => {
+        slider.dataset.beforeAfterReady =
+            "true";
 
-            const value =
-                Number(range.value);
 
-            afterImage.style.clipPath =
-                `inset(0 ${100 - value}% 0 0)`;
+        function updatePosition(clientX) {
 
-            divider.style.left =
-                `${value}%`;
+            const rect =
+                slider.getBoundingClientRect();
 
-        };
+            if (!rect.width) {
+                return;
+            }
 
-        range.addEventListener(
-            "input",
-            update
+
+            let percentage =
+                (
+                    (clientX - rect.left) /
+                    rect.width
+                ) * 100;
+
+
+            percentage =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        percentage
+                    )
+                );
+
+
+            range.value =
+                percentage;
+
+
+            slider.style.setProperty(
+                "--before-after-position",
+                percentage + "%"
+            );
+
+
+            if (divider) {
+
+                divider.style.left =
+                    percentage + "%";
+
+            }
+
+        }
+
+
+        /*
+         * Posisi awal.
+         */
+        const initial =
+            Number(range.value || 50);
+
+        slider.style.setProperty(
+            "--before-after-position",
+            initial + "%"
         );
 
-        update();
+
+        if (divider) {
+
+            divider.style.left =
+                initial + "%";
+
+        }
+
+
+        /*
+         * Tetap mendukung range input.
+         */
+        range.addEventListener(
+            "input",
+            function () {
+
+                const value =
+                    Number(
+                        this.value || 50
+                    );
+
+                slider.style.setProperty(
+                    "--before-after-position",
+                    value + "%"
+                );
+
+
+                if (divider) {
+
+                    divider.style.left =
+                        value + "%";
+
+                }
+
+            }
+        );
+
+
+        /*
+         * DRAG / SWIPE DARI SELURUH FOTO
+         */
+        let dragging = false;
+
+
+        slider.addEventListener(
+            "pointerdown",
+            event => {
+
+                dragging = true;
+
+                slider.setPointerCapture?.(
+                    event.pointerId
+                );
+
+
+                updatePosition(
+                    event.clientX
+                );
+
+
+                event.preventDefault();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        slider.addEventListener(
+            "pointermove",
+            event => {
+
+                if (!dragging) {
+                    return;
+                }
+
+
+                updatePosition(
+                    event.clientX
+                );
+
+
+                event.preventDefault();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        function stopDragging(event) {
+
+            if (!dragging) {
+                return;
+            }
+
+
+            dragging = false;
+
+
+            try {
+
+                slider.releasePointerCapture?.(
+                    event.pointerId
+                );
+
+            } catch (error) {
+                /* aman diabaikan */
+            }
+
+        }
+
+
+        slider.addEventListener(
+            "pointerup",
+            stopDragging
+        );
+
+
+        slider.addEventListener(
+            "pointercancel",
+            stopDragging
+        );
+
+
+        slider.addEventListener(
+            "lostpointercapture",
+            () => {
+
+                dragging = false;
+
+            }
+        );
 
     });
 
 }
-
 
 function toggleDigitalProduct(product) {
 

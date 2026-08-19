@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const Database = require("better-sqlite3");
 const axios = require("axios");
 const multer = require("multer");
+const { Resend } = require("resend");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -200,6 +201,9 @@ const dbPath = process.env.NODE_ENV === "production"
     ? "/data/ppobku.db"
     : path.join(__dirname, "..", "database", "ppobku.db");
 
+console.log("[DATABASE] NODE_ENV:", process.env.NODE_ENV || "(undefined)");
+console.log("[DATABASE] DB PATH:", dbPath);
+
 const db = new Database(dbPath);
 
 db.pragma("journal_mode = WAL");
@@ -385,6 +389,22 @@ if (!hasDigiflazzSku) {
    PAYMENT / DIGIFLAZZ MIGRATION
 ========================= */
 
+const deliveryStatusColumn =
+    db.prepare("PRAGMA table_info(transactions)")
+        .all()
+        .some(column => column.name === "delivery_status");
+
+if (!deliveryStatusColumn) {
+    db.prepare(`
+        ALTER TABLE transactions
+        ADD COLUMN delivery_status TEXT NOT NULL DEFAULT 'PENDING'
+    `).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom transactions.delivery_status berhasil ditambahkan."
+    );
+}
+
 const transactionColumns =
     db.prepare("PRAGMA table_info(transactions)").all();
 
@@ -539,6 +559,107 @@ db.prepare(`
     WHERE product_type IS NULL
        OR TRIM(product_type) = ''
 `).run();
+
+
+/* ==========================================================
+   DIGITAL TRANSACTION — CUSTOMER & DEVICE
+========================================================== */
+
+    db.prepare("PRAGMA table_info(transactions)").all();
+
+const digitalTransactionMigrations = [
+    ["customer_email", "TEXT"],
+    ["customer_whatsapp", "TEXT"],
+    ["device", "TEXT"]
+];
+
+for (
+    const [columnName, columnDefinition]
+    of digitalTransactionMigrations
+) {
+
+    const exists =
+        transactionColumns.some(
+            column => column.name === columnName
+        );
+
+    if (!exists) {
+
+        db.prepare(
+            `ALTER TABLE transactions ADD COLUMN ${columnName} ${columnDefinition}`
+        ).run();
+
+        console.log(
+            `[DB MIGRATION] Kolom transactions.${columnName} berhasil ditambahkan.`
+        );
+    }
+}
+
+
+/* ==========================================================
+   DIGITAL PRODUCT — PDF PER DEVICE
+========================================================== */
+
+const pdfProductMigrations = [
+    ["pdf_ios", "TEXT"],
+    ["pdf_android", "TEXT"],
+    ["pdf_mac", "TEXT"],
+    ["pdf_windows", "TEXT"]
+];
+
+for (
+    const [columnName, columnDefinition]
+    of pdfProductMigrations
+) {
+
+    const columns =
+        db.prepare(
+            "PRAGMA table_info(products)"
+        ).all();
+
+    const exists =
+        columns.some(
+            column => column.name === columnName
+        );
+
+    if (!exists) {
+
+        db.prepare(
+            `ALTER TABLE products ADD COLUMN ${columnName} ${columnDefinition}`
+        ).run();
+
+        console.log(
+            `[DB MIGRATION] Kolom products.${columnName} berhasil ditambahkan.`
+        );
+    }
+}
+
+
+/* ==========================================================
+   DIGITAL TRANSACTION — FILE PDF DEVICE
+========================================================== */
+
+const digitalTransactionColumns =
+    db.prepare(
+        "PRAGMA table_info(digital_transaction_items)"
+    ).all();
+
+const hasDeviceFile =
+    digitalTransactionColumns.some(
+        column => column.name === "device_file"
+    );
+
+if (!hasDeviceFile) {
+
+    db.prepare(`
+        ALTER TABLE digital_transaction_items
+        ADD COLUMN device_file TEXT
+    `).run();
+
+    console.log(
+        "[DB MIGRATION] Kolom digital_transaction_items.device_file berhasil ditambahkan."
+    );
+}
 
 
 /* =========================
@@ -1599,7 +1720,11 @@ app.post("/api/digital-transactions", (req, res) => {
                     active,
                     product_type,
                     preview_image,
-                    digital_file
+                    digital_file,
+                    pdf_ios,
+                    pdf_android,
+                    pdf_mac,
+                    pdf_windows
                 FROM products
                 WHERE id IN (${placeholders})
             `).all(
@@ -1723,6 +1848,9 @@ app.post("/api/digital-transactions", (req, res) => {
                         price,
                         payment_method,
                         status,
+                        customer_email,
+                        customer_whatsapp,
+                        device,
                         created_at
                     )
                     VALUES (
@@ -1732,11 +1860,14 @@ app.post("/api/digital-transactions", (req, res) => {
                         @service,
                         @target,
                         NULL,
-                        NULL,
+                        @productId,
                         @productName,
                         @price,
                         @paymentMethod,
                         'PENDING',
+                        @customerEmail,
+                        @customerWhatsapp,
+                        @device,
                         @createdAt
                     )
                 `).run({
@@ -1753,12 +1884,26 @@ app.post("/api/digital-transactions", (req, res) => {
                     target:
                         email,
 
+                    productId:
+                        products.length === 1
+                            ? products[0].id
+                            : null,
+
                     productName,
 
                     price:
                         total,
 
                     paymentMethod,
+
+                    customerEmail:
+                        email,
+
+                    customerWhatsapp:
+                        whatsapp,
+
+                    device:
+                        selectedDevice,
 
                     createdAt
 
@@ -1773,6 +1918,7 @@ app.post("/api/digital-transactions", (req, res) => {
                             product_name,
                             price,
                             digital_file,
+                            device_file,
                             created_at
                         )
                         VALUES (
@@ -1781,6 +1927,7 @@ app.post("/api/digital-transactions", (req, res) => {
                             @productName,
                             @price,
                             @digitalFile,
+                            @deviceFile,
                             @createdAt
                         )
                     `);
@@ -1789,6 +1936,16 @@ app.post("/api/digital-transactions", (req, res) => {
                 for (
                     const product of products
                 ) {
+
+                    console.log("=== DIGITAL DEVICE DEBUG ===");
+                    console.log({
+                        selectedDevice,
+                        productId: product.id,
+                        pdf_ios: product.pdf_ios,
+                        pdf_android: product.pdf_android,
+                        pdf_mac: product.pdf_mac,
+                        pdf_windows: product.pdf_windows
+                    });
 
                     insertItem.run({
 
@@ -1807,6 +1964,17 @@ app.post("/api/digital-transactions", (req, res) => {
 
                         digitalFile:
                             product.digital_file,
+
+                        deviceFile:
+                            selectedDevice === "iOS"
+                                ? product.pdf_ios
+                                : selectedDevice === "Android"
+                                    ? product.pdf_android
+                                    : selectedDevice === "MacOS"
+                                        ? product.pdf_mac
+                                        : selectedDevice === "Windows"
+                                            ? product.pdf_windows
+                                            : null,
 
                         createdAt
 
@@ -2076,6 +2244,162 @@ app.post(
         });
 
     }
+);
+
+
+/* =========================================================
+   DIGITAL PRODUCT PDF UPLOAD
+   PDF panduan per perangkat:
+   iOS / Android / Mac / Windows
+========================================================= */
+
+const pdfStorage =
+    multer.diskStorage({
+
+        destination:
+            (req, file, cb) => {
+
+                cb(
+                    null,
+                    digitalFileDir
+                );
+
+            },
+
+        filename:
+            (req, file, cb) => {
+
+                const filename =
+                    `${Date.now()}-${crypto.randomBytes(8).toString("hex")}.pdf`;
+
+                cb(
+                    null,
+                    filename
+                );
+
+            }
+
+    });
+
+
+const uploadDigitalPdf =
+    multer({
+
+        storage:
+            pdfStorage,
+
+        limits: {
+            fileSize:
+                20 * 1024 * 1024
+        },
+
+        fileFilter:
+            (req, file, cb) => {
+
+                const extension =
+                    path.extname(
+                        file.originalname
+                    ).toLowerCase();
+
+                if (
+                    extension === ".pdf"
+                ) {
+
+                    cb(
+                        null,
+                        true
+                    );
+
+                    return;
+
+                }
+
+                cb(
+                    new Error(
+                        "File panduan harus berupa PDF."
+                    )
+                );
+
+            }
+
+    });
+
+
+app.post(
+    "/api/products/upload-pdf",
+    requireCatalogManager,
+    (req, res) => {
+
+        uploadDigitalPdf.single("file")(
+            req,
+            res,
+            error => {
+
+                if (error) {
+
+                    console.error(
+                        "[UPLOAD DIGITAL PDF]",
+                        error
+                    );
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            error.message ||
+                            "Gagal mengupload PDF."
+                    });
+
+                }
+
+                if (!req.file) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "File PDF belum dipilih."
+                    });
+
+                }
+
+                const relativePath =
+                    path.relative(
+                        path.join(__dirname, ".."),
+                        req.file.path
+                    )
+                    .split(path.sep)
+                    .join("/");
+
+                return res.json({
+
+                    success: true,
+
+                    file: {
+
+                        originalName:
+                            req.file.originalname,
+
+                        filename:
+                            req.file.filename,
+
+                        path:
+                            "/" + relativePath,
+
+                        size:
+                            req.file.size,
+
+                        mimeType:
+                            req.file.mimetype
+
+                    }
+
+                });
+
+            }
+
+        );
+
+    }
+
 );
 
 
@@ -2385,7 +2709,10 @@ async function sendTransactionToDigiflazz(transactionId) {
      * sedangkan file digital akan diberikan melalui
      * mekanisme download khusus.
      */
-    if (transaction.product_type === "digital") {
+    if (
+        transaction.transaction_id.startsWith("DIGITAL-") ||
+        transaction.product_type === "digital"
+    ) {
 
         return {
             skipped: true,
@@ -3081,6 +3408,310 @@ async function refundXenditTransaction(transactionId) {
 
 
 
+
+/* ==========================================================
+   DIGITAL PRODUCT EMAIL DELIVERY
+   ZIP + PDF sesuai perangkat.
+   Hanya dijalankan setelah pembayaran PAID.
+========================================================== */
+
+async function sendDigitalProductEmail(transactionId) {
+
+    const resendApiKey =
+        process.env.RESEND_API_KEY;
+
+    const fromEmail =
+        process.env.RESEND_FROM_EMAIL;
+
+    if (!resendApiKey) {
+        throw new Error(
+            "RESEND_API_KEY belum dikonfigurasi."
+        );
+    }
+
+    if (!fromEmail) {
+        throw new Error(
+            "RESEND_FROM_EMAIL belum dikonfigurasi."
+        );
+    }
+
+    const transaction =
+        db.prepare(`
+            SELECT
+                t.transaction_id,
+                t.payment_status,
+                t.delivery_status,
+                t.customer_email,
+                t.device
+            FROM transactions t
+            WHERE t.transaction_id = ?
+              AND t.transaction_id LIKE 'DIGITAL-%'
+            LIMIT 1
+        `).get(transactionId);
+
+    if (!transaction) {
+        throw new Error(
+            "Transaksi digital tidak ditemukan."
+        );
+    }
+
+    if (transaction.payment_status !== "PAID") {
+        throw new Error(
+            "Transaksi digital belum PAID."
+        );
+    }
+
+    /*
+     * Anti double-send.
+     */
+    if (transaction.delivery_status === "SENT") {
+        return {
+            skipped: true,
+            reason: "DELIVERY_SUDAH_TERKIRIM"
+        };
+    }
+
+    if (!transaction.customer_email) {
+        throw new Error(
+            "Email pelanggan tidak tersedia."
+        );
+    }
+
+    const items =
+        db.prepare(`
+            SELECT
+                product_name,
+                digital_file,
+                device_file
+            FROM digital_transaction_items
+            WHERE transaction_id = ?
+            ORDER BY id ASC
+        `).all(transactionId);
+
+    if (!items.length) {
+        throw new Error(
+            "Item produk digital tidak ditemukan."
+        );
+    }
+
+    const projectRoot =
+        path.join(__dirname, "..");
+
+    const attachments = [];
+
+    for (const item of items) {
+
+        if (item.digital_file) {
+
+            const zipPath =
+                path.resolve(
+                    projectRoot,
+                    String(item.digital_file)
+                        .replace(/^\/+/, "")
+                );
+
+            const relativeZip =
+                path.relative(
+                    projectRoot,
+                    zipPath
+                );
+
+            if (
+                relativeZip.startsWith("..") ||
+                path.isAbsolute(relativeZip) ||
+                !fs.existsSync(zipPath)
+            ) {
+                throw new Error(
+                    `File ZIP tidak ditemukan untuk produk "${item.product_name}".`
+                );
+            }
+
+            attachments.push({
+                filename:
+                    path.basename(zipPath),
+                content:
+                    fs.readFileSync(zipPath)
+            });
+        }
+
+        if (item.device_file) {
+
+            const pdfPath =
+                path.resolve(
+                    projectRoot,
+                    String(item.device_file)
+                        .replace(/^\/+/, "")
+                );
+
+            const relativePdf =
+                path.relative(
+                    projectRoot,
+                    pdfPath
+                );
+
+            if (
+                relativePdf.startsWith("..") ||
+                path.isAbsolute(relativePdf) ||
+                !fs.existsSync(pdfPath)
+            ) {
+                throw new Error(
+                    `PDF tidak ditemukan untuk produk "${item.product_name}".`
+                );
+            }
+
+            attachments.push({
+                filename:
+                    path.basename(pdfPath),
+                content:
+                    fs.readFileSync(pdfPath)
+            });
+        }
+    }
+
+    if (!attachments.length) {
+        throw new Error(
+            "Tidak ada file digital yang dapat dikirim."
+        );
+    }
+
+    /*
+     * Claim delivery secara atomik.
+     * Hanya proses pertama yang mendapat PENDING.
+     */
+    const claim =
+        db.prepare(`
+            UPDATE transactions
+            SET
+                delivery_status = 'PROCESSING'
+            WHERE transaction_id = ?
+              AND payment_status = 'PAID'
+              AND transaction_id LIKE 'DIGITAL-%'
+              AND (
+                    delivery_status IS NULL
+                    OR delivery_status = 'PENDING'
+              )
+        `).run(transactionId);
+
+    if (claim.changes === 0) {
+
+        const current =
+            db.prepare(`
+                SELECT
+                    delivery_status
+                FROM transactions
+                WHERE transaction_id = ?
+            `).get(transactionId);
+
+        return {
+            skipped: true,
+            reason:
+                "DELIVERY_SUDAH_DIAMBIL_ALIH_PROSES_LAIN",
+            delivery_status:
+                current?.delivery_status || null
+        };
+    }
+
+    try {
+
+        const resend =
+            new Resend(resendApiKey);
+
+        const device =
+            transaction.device ||
+            "perangkat yang dipilih";
+
+        const result =
+            await resend.emails.send({
+
+                from: fromEmail,
+
+                to: [
+                    transaction.customer_email
+                ],
+
+                subject:
+                    "BAYORA — Produk Lightroom Kamu Sudah Siap ✨",
+
+                html: `
+                    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717">
+                        <h2>Pesanan kamu sudah siap ✨</h2>
+
+                        <p>
+                            Pembayaran berhasil diterima.
+                            Berikut file produk Lightroom yang kamu beli.
+                        </p>
+
+                        <p>
+                            <strong>Perangkat:</strong>
+                            ${device}
+                        </p>
+
+                        <p>
+                            File ZIP preset dan PDF panduan
+                            sudah dilampirkan pada email ini.
+                        </p>
+
+                        <p>
+                            Terima kasih sudah berbelanja di BAYORA.
+                        </p>
+                    </div>
+                `,
+
+                attachments
+            });
+
+        if (result?.error) {
+            throw new Error(
+                result.error.message ||
+                JSON.stringify(result.error)
+            );
+        }
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                delivery_status = 'SENT'
+            WHERE transaction_id = ?
+        `).run(transactionId);
+
+        console.log(
+            "[DIGITAL DELIVERY] Email berhasil dikirim:",
+            transactionId,
+            transaction.customer_email
+        );
+
+        return {
+            success: true,
+            delivery_status: "SENT",
+            email:
+                transaction.customer_email,
+            attachments:
+                attachments.map(
+                    item => item.filename
+                )
+        };
+
+    } catch (error) {
+
+        db.prepare(`
+            UPDATE transactions
+            SET
+                delivery_status = 'FAILED'
+            WHERE transaction_id = ?
+              AND delivery_status = 'PROCESSING'
+        `).run(transactionId);
+
+        console.error(
+            "[DIGITAL DELIVERY ERROR]",
+            transactionId,
+            error.message || error
+        );
+
+        throw error;
+    }
+}
+
+
 /* =========================
    XENDIT PAYMENT SESSION WEBHOOK
 ========================= */
@@ -3136,6 +3767,15 @@ app.post("/api/webhooks/xendit", async (req, res) => {
 
         const data =
             req.body?.data || {};
+
+        console.log("=== XENDIT WEBHOOK DEBUG ===");
+        console.log({
+            event,
+            status: data?.status,
+            reference_id: data?.reference_id,
+            payment_session_id: data?.payment_session_id,
+            payment_request_id: data?.payment_request_id
+        });
 
         console.log(
             "[XENDIT WEBHOOK]",
@@ -3228,10 +3868,61 @@ app.post("/api/webhooks/xendit", async (req, res) => {
              * Fungsi di dalamnya mempunyai claim atomik
              * untuk mencegah double-order.
              */
-            const result =
-                await sendTransactionToDigiflazz(
-                    transaction.transaction_id
-                );
+            let result;
+
+            if (
+                transaction.transaction_id.startsWith(
+                    "DIGITAL-"
+                )
+            ) {
+
+                result = {
+                    skipped: true,
+                    digital: true,
+                    reason: "PRODUK_DIGITAL"
+                };
+
+                try {
+
+                    const delivery =
+                        await sendDigitalProductEmail(
+                            transaction.transaction_id
+                        );
+
+                    result.delivery =
+                        delivery;
+
+                } catch (deliveryError) {
+
+                    console.error(
+                        "[DIGITAL DELIVERY WEBHOOK ERROR]",
+                        transaction.transaction_id,
+                        deliveryError.message ||
+                        deliveryError
+                    );
+
+                    /*
+                     * Pembayaran tetap PAID.
+                     * Delivery gagal akan tercatat FAILED
+                     * dan bisa diproses ulang tanpa refund.
+                     */
+
+                    result.delivery = {
+                        success: false,
+                        error:
+                            deliveryError.message ||
+                            "Pengiriman produk digital gagal."
+                    };
+                }
+
+            } else {
+
+                result =
+                    await sendTransactionToDigiflazz(
+                        transaction.transaction_id
+                    );
+
+            }
 
             return res.json({
                 success: true,
@@ -4512,7 +5203,11 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             digital_file,
             before_image,
             after_image,
-            gallery_images
+            gallery_images,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows
         } = req.body;
 
         if (!id || !service_id || !name) {
@@ -4591,9 +5286,13 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
                 digital_file,
                 before_image,
                 after_image,
-                gallery_images
+                gallery_images,
+                pdf_ios,
+                pdf_android,
+                pdf_mac,
+                pdf_windows
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             productId,
             service_id,
@@ -4614,7 +5313,11 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
             digital_file || null,
             before_image || null,
             after_image || null,
-            gallery_images || null
+            gallery_images || null,
+            pdf_ios || null,
+            pdf_android || null,
+            pdf_mac || null,
+            pdf_windows || null
         );
 
         const product =
@@ -4684,7 +5387,11 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             digital_file,
             before_image,
             after_image,
-            gallery_images
+            gallery_images,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows
         } = req.body;
 
         const targetService =
@@ -4723,6 +5430,19 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
 
         }
 
+        console.log("=== PRODUCT UPDATE PDF DEBUG ===");
+        console.log({
+            productId,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows,
+            existingPdfIos: existing.pdf_ios,
+            existingPdfAndroid: existing.pdf_android,
+            existingPdfMac: existing.pdf_mac,
+            existingPdfWindows: existing.pdf_windows
+        });
+
         db.prepare(`
             UPDATE products
             SET
@@ -4739,7 +5459,11 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
                 digital_file = ?,
                 before_image = ?,
                 after_image = ?,
-                gallery_images = ?
+                gallery_images = ?,
+                pdf_ios = ?,
+                pdf_android = ?,
+                pdf_mac = ?,
+                pdf_windows = ?
             WHERE id = ?
         `).run(
             targetService,
@@ -4795,6 +5519,22 @@ app.put("/api/products/:id", requireCatalogManager, (req, res) => {
             gallery_images === undefined
                 ? existing.gallery_images
                 : gallery_images || null,
+
+            pdf_ios === undefined
+                ? existing.pdf_ios
+                : pdf_ios || null,
+
+            pdf_android === undefined
+                ? existing.pdf_android
+                : pdf_android || null,
+
+            pdf_mac === undefined
+                ? existing.pdf_mac
+                : pdf_mac || null,
+
+            pdf_windows === undefined
+                ? existing.pdf_windows
+                : pdf_windows || null,
 
             productId
         );

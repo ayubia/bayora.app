@@ -991,6 +991,181 @@ function openService(serviceId) {
    Tidak mengubah flow PPOB.
 ========================================================= */
 
+function getDigitalGalleryImages(product) {
+
+    /*
+     * Mendukung beberapa format:
+     *
+     * 1. product.previewImages = ["foto1", "foto2"]
+     * 2. previewImage berisi JSON array
+     * 3. previewImage berisi beberapa URL dipisahkan ||
+     * 4. previewImage biasa = satu foto
+     */
+
+    if (
+        Array.isArray(product.previewImages) &&
+        product.previewImages.length
+    ) {
+
+        return product.previewImages
+            .map(image => String(image).trim())
+            .filter(Boolean);
+
+    }
+
+
+    const preview =
+        String(product.previewImage || "").trim();
+
+
+    if (!preview) {
+        return [];
+    }
+
+
+    /*
+     * Jika previewImage disimpan
+     * sebagai JSON array.
+     */
+    if (
+        preview.startsWith("[") &&
+        preview.endsWith("]")
+    ) {
+
+        try {
+
+            const parsed =
+                JSON.parse(preview);
+
+            if (
+                Array.isArray(parsed)
+            ) {
+
+                return parsed
+                    .map(image =>
+                        String(image).trim()
+                    )
+                    .filter(Boolean);
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Preview image bukan JSON array."
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Beberapa gambar bisa dipisahkan
+     * menggunakan ||
+     */
+    if (preview.includes("||")) {
+
+        return preview
+            .split("||")
+            .map(image => image.trim())
+            .filter(Boolean);
+
+    }
+
+
+    return [preview];
+
+}
+
+
+function renderProducts() {
+
+    const grid =
+        document.getElementById("productGrid");
+
+    const count =
+        document.getElementById("productCount");
+
+    grid.innerHTML = "";
+
+    let list =
+        products[currentService] || [];
+
+    // Filter produk berdasarkan operator yang dipilih
+    if (currentOperator) {
+        list = list.filter(product =>
+            String(product.operator || "").toUpperCase() ===
+            String(currentOperator || "").toUpperCase()
+        );
+    }
+
+    count.textContent =
+        `${list.length} produk`;
+
+
+    if (
+        currentService === "pln-bill" ||
+        currentService === "bpjs"
+    ) {
+
+        grid.innerHTML = `
+
+            <div class="product-empty">
+
+                Tagihan akan dicek setelah
+                nomor pelanggan dikirim
+                ke provider.
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    list.forEach(product => {
+
+        const button =
+            document.createElement("button");
+
+        button.type = "button";
+
+        button.className = "product-card";
+
+        button.innerHTML = `
+
+            <span class="product-card-name">
+                ${product.name}
+            </span>
+
+            <span class="product-card-price">
+                ${formatRupiah(product.price)}
+            </span>
+
+            <span class="product-card-info">
+                ${product.info}
+            </span>
+
+        `;
+
+        button.onclick = () => {
+
+            selectProduct(
+                button,
+                product
+            );
+
+        };
+
+        grid.appendChild(button);
+
+    });
+
+}
+
+
 function getDigitalProducts() {
 
     return (

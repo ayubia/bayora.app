@@ -1830,7 +1830,10 @@ body.bayora-view-admins > main > .stats {
                 ></textarea>
             </div>
 
-            <div class="catalog-form-group">
+            <div
+                class="catalog-form-group"
+                id="serviceTargetLabelGroup"
+            >
                 <label>Label Nomor Tujuan</label>
 
                 <input
@@ -1840,7 +1843,10 @@ body.bayora-view-admins > main > .stats {
                 >
             </div>
 
-            <div class="catalog-form-group">
+            <div
+                class="catalog-form-group"
+                id="servicePlaceholderGroup"
+            >
                 <label>Placeholder</label>
 
                 <input
@@ -4032,6 +4038,59 @@ function closeCatalogModal(id) {
 }
 
 
+function updateServiceTypeFields() {
+
+    const type =
+        document.getElementById(
+            "serviceType"
+        )?.value || "ppob";
+
+    const targetLabelGroup =
+        document.getElementById(
+            "serviceTargetLabelGroup"
+        );
+
+    const placeholderGroup =
+        document.getElementById(
+            "servicePlaceholderGroup"
+        );
+
+    const serviceLabel =
+        document.getElementById(
+            "serviceLabel"
+        );
+
+    const servicePlaceholder =
+        document.getElementById(
+            "servicePlaceholder"
+        );
+
+    const isDigital =
+        type === "digital";
+
+    if (targetLabelGroup) {
+        targetLabelGroup.style.display =
+            isDigital ? "none" : "";
+    }
+
+    if (placeholderGroup) {
+        placeholderGroup.style.display =
+            isDigital ? "none" : "";
+    }
+
+    if (serviceLabel) {
+        serviceLabel.required =
+            !isDigital;
+    }
+
+    if (servicePlaceholder) {
+        servicePlaceholder.required =
+            false;
+    }
+
+}
+
+
 function openServiceModal(serviceId = "") {
 
     const service =
@@ -4117,6 +4176,8 @@ function openServiceModal(serviceId = "") {
             ? Boolean(Number(service.active))
             : true;
 
+    updateServiceTypeFields();
+
     openCatalogModal("serviceModal");
 
 }
@@ -4127,6 +4188,25 @@ function editService(id) {
     openServiceModal(id);
 
 }
+function setupServiceTypeListener() {
+
+    const serviceType =
+        document.getElementById(
+            "serviceType"
+        );
+
+    if (!serviceType) {
+        return;
+    }
+
+    serviceType.onchange =
+        updateServiceTypeFields;
+
+    updateServiceTypeFields();
+
+}
+
+
 
 
 async function saveService(event) {
@@ -9372,3 +9452,11 @@ a.bayora-brand .bayora-logo-text {
 
 
 </style>
+
+
+<script>
+document.addEventListener(
+    "DOMContentLoaded",
+    setupServiceTypeListener
+);
+</script>

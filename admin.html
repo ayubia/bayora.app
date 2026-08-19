@@ -1786,6 +1786,21 @@ body.bayora-view-admins > main > .stats {
             </div>
 
             <div class="catalog-form-group">
+                <label>Jenis Layanan</label>
+
+                <select id="serviceType">
+                    <option value="ppob">
+                        PPOB
+                    </option>
+
+                    <option value="digital">
+                        Produk Digital
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="catalog-form-group">
                 <label>Nama Layanan</label>
 
                 <input
@@ -4046,6 +4061,14 @@ function openServiceModal(serviceId = "") {
             : "";
 
     document.getElementById(
+        "serviceType"
+    ).value =
+        service
+            ? (service.type || "ppob")
+            : "ppob";
+
+
+    document.getElementById(
         "serviceTitle"
     ).value =
         service
@@ -4195,7 +4218,12 @@ async function saveService(event) {
                 document.getElementById(
                     "serviceSort"
                 ).value
-            ) || 0
+            ) || 0,
+
+        type:
+            document.getElementById(
+                "serviceType"
+            ).value || "ppob"
 
     };
 

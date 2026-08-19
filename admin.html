@@ -4143,42 +4143,6 @@ async function saveService(event) {
             "serviceId"
         ).value.trim();
 
-    /*
-     * Tunggu semua upload preview / ZIP yang masih berjalan.
-     * Ini mencegah produk tersimpan sebelum digital_file
-     * menerima path dari server.
-     */
-    if (window.digitalUploadPromises?.length) {
-
-        try {
-
-            await Promise.all(
-                window.digitalUploadPromises
-            );
-
-        } catch (error) {
-
-            alert(
-                error.message ||
-                "Upload file produk gagal."
-            );
-
-            return;
-
-        }
-
-    }
-
-    console.log(
-        "[SAVE PRODUCT] productDigitalFile =",
-        document.getElementById("productDigitalFile")?.value
-    );
-
-    console.log(
-        "[SAVE PRODUCT] digitalUploadPromises =",
-        window.digitalUploadPromises?.length || 0
-    );
-
     const payload = {
 
         id,

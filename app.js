@@ -1728,12 +1728,17 @@ function setupDigitalBeforeAfterSliders() {
                 ".digital-before-after-range"
             );
 
+        const afterImage =
+            slider.querySelector(
+                ".digital-after-image"
+            );
+
         const divider =
             slider.querySelector(
                 ".digital-before-after-divider"
             );
 
-        if (!range) {
+        if (!range || !afterImage) {
             return;
         }
 
@@ -1753,6 +1758,72 @@ function setupDigitalBeforeAfterSliders() {
             "true";
 
 
+        /*
+         * Update foto + posisi divider.
+         *
+         * 0%   = BEFORE penuh
+         * 50%  = BEFORE + AFTER
+         * 100% = AFTER penuh
+         */
+        function updateSlider(value) {
+
+            const percentage =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(value) || 0
+                    )
+                );
+
+
+            /*
+             * Bagian AFTER dipotong dari kanan.
+             * Semakin besar slider,
+             * semakin banyak AFTER yang terlihat.
+             */
+            const clipValue =
+                `inset(0 ${100 - percentage}% 0 0)`;
+
+            afterImage.style.setProperty(
+                "clip-path",
+                clipValue,
+                "important"
+            );
+
+            afterImage.style.setProperty(
+                "-webkit-clip-path",
+                clipValue,
+                "important"
+            );
+
+
+            /*
+             * Posisi divider.
+             */
+            if (divider) {
+
+                divider.style.left =
+                    percentage + "%";
+
+            }
+
+
+            /*
+             * Simpan posisi untuk CSS.
+             */
+            slider.style.setProperty(
+                "--before-after-position",
+                percentage + "%"
+            );
+
+
+            range.value =
+                percentage;
+
+        }
+
+
         function updatePosition(clientX) {
 
             const rect =
@@ -1763,39 +1834,16 @@ function setupDigitalBeforeAfterSliders() {
             }
 
 
-            let percentage =
+            const percentage =
                 (
                     (clientX - rect.left) /
                     rect.width
                 ) * 100;
 
 
-            percentage =
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        percentage
-                    )
-                );
-
-
-            range.value =
-                percentage;
-
-
-            slider.style.setProperty(
-                "--before-after-position",
-                percentage + "%"
+            updateSlider(
+                percentage
             );
-
-
-            if (divider) {
-
-                divider.style.left =
-                    percentage + "%";
-
-            }
 
         }
 
@@ -1803,54 +1851,29 @@ function setupDigitalBeforeAfterSliders() {
         /*
          * Posisi awal.
          */
-        const initial =
-            Number(range.value || 50);
-
-        slider.style.setProperty(
-            "--before-after-position",
-            initial + "%"
+        updateSlider(
+            Number(range.value || 50)
         );
 
 
-        if (divider) {
-
-            divider.style.left =
-                initial + "%";
-
-        }
-
-
         /*
-         * Tetap mendukung range input.
+         * Tetap mendukung input range.
          */
         range.addEventListener(
             "input",
             function () {
 
-                const value =
-                    Number(
-                        this.value || 50
-                    );
-
-                slider.style.setProperty(
-                    "--before-after-position",
-                    value + "%"
+                updateSlider(
+                    this.value
                 );
-
-
-                if (divider) {
-
-                    divider.style.left =
-                        value + "%";
-
-                }
 
             }
         );
 
 
         /*
-         * DRAG / SWIPE DARI SELURUH FOTO
+         * DRAG / SWIPE LANGSUNG
+         * DARI SELURUH FOTO
          */
         let dragging = false;
 
@@ -1950,6 +1973,7 @@ function setupDigitalBeforeAfterSliders() {
     });
 
 }
+
 
 function toggleDigitalProduct(product) {
 

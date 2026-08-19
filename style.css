@@ -6914,3 +6914,351 @@ body {
     }
 
 }
+
+
+/* =========================================================
+   BAYORA — BEFORE / AFTER TRUE OVERLAY SLIDER
+   Kedua foto harus bertumpuk, bukan split.
+========================================================= */
+
+.digital-before-after {
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+}
+
+
+.digital-before-after-track {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    overflow: hidden !important;
+}
+
+
+/*
+ * BEFORE menjadi foto dasar.
+ */
+.digital-before-after-track .digital-before-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    object-fit: cover !important;
+
+    display: block !important;
+
+    z-index: 1 !important;
+}
+
+
+/*
+ * AFTER berada tepat di atas BEFORE.
+ *
+ * JavaScript akan mengubah clip-path
+ * mengikuti posisi slider.
+ */
+.digital-before-after-track .digital-after-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    object-fit: cover !important;
+
+    display: block !important;
+
+    z-index: 2 !important;
+
+    clip-path: inset(
+        0 50% 0 0
+    );
+
+    -webkit-clip-path: inset(
+        0 50% 0 0
+    );
+}
+
+
+/*
+ * Divider berada di atas kedua foto.
+ */
+.digital-before-after-divider {
+    position: absolute !important;
+
+    top: 0 !important;
+    bottom: 0 !important;
+
+    width: 2px !important;
+
+    transform: translateX(-50%) !important;
+
+    z-index: 10 !important;
+
+    pointer-events: none !important;
+}
+
+
+/*
+ * Label BEFORE / AFTER berada di atas foto.
+ */
+.digital-before-after-label {
+    position: absolute !important;
+    z-index: 11 !important;
+
+    pointer-events: none !important;
+}
+
+
+/*
+ * Range transparan tetap berada paling atas
+ * agar seluruh foto bisa langsung di-swipe.
+ */
+.digital-before-after-range {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    opacity: 0 !important;
+
+    z-index: 20 !important;
+
+    cursor: ew-resize !important;
+
+    touch-action: none !important;
+}
+
+
+/*
+ * Jangan biarkan gambar mengambil gesture.
+ */
+.digital-before-after img {
+    pointer-events: none !important;
+
+    user-select: none !important;
+    -webkit-user-select: none !important;
+
+    -webkit-user-drag: none !important;
+}
+
+
+/* =========================================================
+   BAYORA — BEFORE / AFTER SLIDER FINAL FIX
+   BEFORE = base
+   AFTER  = overlay yang mengikuti slider
+========================================================= */
+
+.digital-before-after {
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    width: 100% !important;
+    aspect-ratio: 4 / 3 !important;
+    cursor: ew-resize !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+
+/* Track memenuhi seluruh frame */
+.digital-before-after-track {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+
+/* BEFORE = gambar dasar penuh */
+.digital-before-after-track .digital-before-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+    object-position: center !important;
+
+    z-index: 1 !important;
+
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+}
+
+
+/* AFTER = overlay di atas BEFORE */
+.digital-before-after-track .digital-after-image {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+    object-position: center !important;
+
+    z-index: 2 !important;
+
+    /*
+     * Default 50%.
+     * JavaScript akan mengubah ini.
+     */
+    clip-path: inset(
+        0 50% 0 0
+    ) !important;
+
+    -webkit-clip-path: inset(
+        0 50% 0 0
+    ) !important;
+}
+
+
+/* Garis slider */
+.digital-before-after-divider {
+    position: absolute !important;
+
+    top: 0 !important;
+    bottom: 0 !important;
+
+    left: 50%;
+
+    width: 2px !important;
+
+    transform: translateX(-50%) !important;
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.75
+    ) !important;
+
+    box-shadow:
+        0 1px 4px rgba(
+            0,
+            0,
+            0,
+            0.10
+        ) !important;
+
+    z-index: 10 !important;
+
+    pointer-events: none !important;
+}
+
+
+/*
+ * Input transparan di seluruh foto.
+ * Tetap bisa digunakan pada desktop/mobile/tablet.
+ */
+.digital-before-after-range {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    opacity: 0 !important;
+
+    cursor: ew-resize !important;
+
+    z-index: 20 !important;
+
+    touch-action: none !important;
+}
+
+
+/*
+ * Foto tidak menangkap gesture browser.
+ */
+.digital-before-after img,
+.digital-before-after-image {
+    pointer-events: none !important;
+
+    user-select: none !important;
+
+    -webkit-user-select: none !important;
+
+    -webkit-user-drag: none !important;
+}
+
+
+/* Label BEFORE / AFTER */
+.digital-before-after-label {
+    position: absolute !important;
+
+    top: 12px !important;
+
+    z-index: 12 !important;
+
+    background: rgba(
+        20,
+        20,
+        20,
+        0.22
+    ) !important;
+
+    box-shadow: none !important;
+
+    backdrop-filter: blur(2px);
+
+    -webkit-backdrop-filter: blur(2px);
+
+    pointer-events: none !important;
+}
+
+
+/* Pastikan label tidak ikut terpotong */
+.digital-before-label {
+    left: 12px !important;
+}
+
+.digital-after-label {
+    right: 12px !important;
+}
+
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1100px) {
+
+    .digital-before-after {
+        touch-action: none !important;
+    }
+
+}
+
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    .digital-before-after {
+        touch-action: none !important;
+    }
+
+    .digital-before-after-label {
+        top: 10px !important;
+    }
+
+}
+

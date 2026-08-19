@@ -6340,54 +6340,6 @@ git push origin main
 }
 
 
-.digital-product-filters {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-
-.digital-product-filter {
-    appearance: none;
-    border: 1px solid #d8e5fb;
-    background: #ffffff;
-    color: #65748d;
-    border-radius: 10px;
-    padding: 9px 14px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-}
-
-
-.digital-product-filter:hover {
-    border-color: #bcd4ff;
-    background: #f7faff;
-}
-
-
-.digital-product-filter.active {
-    background: #1769ff;
-    border-color: #1769ff;
-    color: #ffffff;
-}
-
-
-/* 4 produk per baris */
-
-.digital-product-grid {
-    display: grid !important;
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr)) !important;
-    gap: 18px !important;
-}
-
-
 /*
  * Sticky area:
  * perangkat + informasi pembelian + total + tombol
@@ -6659,4 +6611,182 @@ git push origin main
 html,
 body {
     overflow-x: hidden !important;
+}
+
+
+/* =========================================================
+   BAYORA — DIGITAL PRODUCT CATALOG
+   2 COLUMN + VERTICAL SCROLL
+========================================================= */
+
+.digital-product-grid {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 18px !important;
+
+    width: 100%;
+    max-width: 100%;
+
+    /*
+     * Tampilkan sekitar 6 produk pertama
+     * lalu produk berikutnya dapat digeser
+     * ke bawah.
+     */
+    max-height: 1260px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 2px 8px 8px 2px;
+
+    box-sizing: border-box;
+
+    /*
+     * Scroll terasa lebih natural.
+     */
+    scroll-behavior: smooth;
+
+    /*
+     * Firefox
+     */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd9ee transparent;
+}
+
+
+/* Chrome / Safari / Edge */
+
+.digital-product-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.digital-product-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.digital-product-grid::-webkit-scrollbar-thumb {
+    background: #cbd9ee;
+    border-radius: 20px;
+}
+
+.digital-product-grid::-webkit-scrollbar-thumb:hover {
+    background: #aebfda;
+}
+
+
+/*
+ * Jangan pernah membuat katalog melebar
+ * keluar dari container.
+ */
+
+.digital-product-card {
+    min-width: 0;
+    width: 100%;
+}
+
+
+/*
+ * Mobile tetap 2 kolom.
+ * Tidak ada horizontal scroll.
+ */
+
+@media (max-width: 700px) {
+
+    .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+
+        max-height: 1000px;
+
+        padding-right: 5px;
+    }
+
+}
+
+
+/*
+ * Layar sangat kecil tetap 2 kolom.
+ */
+
+@media (max-width: 420px) {
+
+    .digital-product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 10px !important;
+
+        max-height: 900px;
+    }
+
+}
+
+/* =========================================================
+   BAYORA — DIGITAL PRODUCT CATALOG
+   2 KOLOM DI SEMUA DEVICE
+========================================================= */
+
+.digital-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.digital-product-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+
+    .digital-product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .digital-product-card {
+        min-width: 0;
+    }
+
+}
+
+@media (max-width: 400px) {
+
+    .digital-product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+}
+
+/* =========================================================
+   DIGITAL PRODUCT DETAIL — OPEN STATE
+========================================================= */
+
+.digital-detail-modal.digital-detail-open {
+    display: block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+}
+
+.digital-detail-modal.digital-detail-open .digital-detail-backdrop {
+    display: block !important;
+}
+
+.digital-detail-modal.digital-detail-open .digital-detail-dialog {
+    display: block !important;
+    visibility: visible !important;
 }

@@ -260,6 +260,111 @@ let digitalCustomerWhatsapp = "";
 let selectedDigitalDevice = "";
 
 
+/* =========================================================
+   BAYORA — RESTORE LAST PAGE
+========================================================= */
+
+function restoreBayoraLastPage() {
+
+    const savedPage =
+        getBayoraSavedPage();
+
+    if (!savedPage) {
+        return;
+    }
+
+
+    /*
+     * HOME
+     */
+    if (savedPage === "home") {
+
+        showHome();
+
+        return;
+    }
+
+
+    /*
+     * SERVICE
+     */
+    if (
+        savedPage.startsWith("service:")
+    ) {
+
+        const serviceId =
+            savedPage.substring(
+                "service:".length
+            );
+
+        if (
+            serviceId &&
+            services[serviceId]
+        ) {
+
+            openService(serviceId);
+
+        } else {
+
+            console.warn(
+                "[BAYORA] Service terakhir tidak ditemukan:",
+                serviceId
+            );
+
+            clearBayoraSavedPage();
+
+        }
+
+        return;
+    }
+
+
+    /*
+     * CHECKOUT
+     *
+     * Checkout tidak dipulihkan langsung
+     * karena data transaksi belum disimpan.
+     * Kembalikan user ke service terakhir.
+     */
+    if (savedPage === "checkout") {
+
+        let lastService = null;
+
+        try {
+
+            lastService =
+                sessionStorage.getItem(
+                    "bayora_last_service"
+                );
+
+        } catch (error) {
+
+            console.warn(
+                "Gagal membaca service terakhir.",
+                error
+            );
+
+        }
+
+
+        if (
+            lastService &&
+            services[lastService]
+        ) {
+
+            openService(lastService);
+
+        } else {
+
+            showHome();
+
+        }
+
+    }
+
+}
+
+
 /* =========================
    DYNAMIC CATALOG
 ========================= */
@@ -381,6 +486,8 @@ async function loadCustomerCatalog() {
         products = apiProducts;
 
         renderCustomerServices();
+
+        restoreBayoraLastPage();
 
         console.log(
             "Katalog customer berhasil dimuat dari database.",
@@ -3406,92 +3513,3 @@ function getPaymentName(payment) {
 ========================================================= */
 
 setupDigitalProductFlow();
-
-
-/* =========================================================
-   BAYORA — RESTORE LAST PAGE AFTER REFRESH
-========================================================= */
-
-(function restoreBayoraLastPage() {
-
-    const savedPage =
-        getBayoraSavedPage();
-
-    if (!savedPage) {
-        return;
-    }
-
-    /*
-     * HOME
-     */
-    if (savedPage === "home") {
-
-        showHome();
-
-        return;
-    }
-
-
-    /*
-     * SERVICE
-     */
-    if (
-        savedPage.startsWith("service:")
-    ) {
-
-        const serviceId =
-            savedPage.substring(
-                "service:".length
-            );
-
-        if (
-            serviceId &&
-            services[serviceId]
-        ) {
-
-            openService(serviceId);
-
-        } else {
-
-            clearBayoraSavedPage();
-
-        }
-
-        return;
-    }
-
-
-    /*
-     * CHECKOUT
-     *
-     * Untuk sementara checkout tidak
-     * dipulihkan otomatis karena data
-     * form/order belum disimpan.
-     *
-     * Kita kembalikan ke service yang
-     * terakhir dibuka agar user tidak
-     * kehilangan konteks.
-     */
-    if (savedPage === "checkout") {
-
-        const lastService =
-            sessionStorage.getItem(
-                "bayora_last_service"
-            );
-
-        if (
-            lastService &&
-            services[lastService]
-        ) {
-
-            openService(lastService);
-
-        } else {
-
-            showHome();
-
-        }
-
-    }
-
-})();

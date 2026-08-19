@@ -343,6 +343,21 @@ async function loadCustomerCatalog() {
 loadCustomerCatalog();
 
 
+let customerServiceCategory = "ppob";
+
+
+function setCustomerServiceCategory(category) {
+
+    customerServiceCategory =
+        category === "digital"
+            ? "digital"
+            : "ppob";
+
+    renderCustomerServices();
+
+}
+
+
 function renderCustomerServices() {
 
     const grid =
@@ -358,24 +373,6 @@ function renderCustomerServices() {
     const entries =
         Object.entries(services || {});
 
-    if (!entries.length) {
-
-        grid.innerHTML = `
-            <div
-                style="
-                    grid-column:1/-1;
-                    text-align:center;
-                    padding:30px 10px;
-                    color:#888;
-                "
-            >
-                Belum ada layanan tersedia.
-            </div>
-        `;
-
-        return;
-    }
-
     const ppobServices =
         entries.filter(([, service]) =>
             (service.type || "ppob") === "ppob"
@@ -386,14 +383,25 @@ function renderCustomerServices() {
             service.type === "digital"
         );
 
+
     function renderCards(list) {
+
+        if (!list.length) {
+
+            return `
+                <div class="customer-service-empty">
+                    Belum ada layanan tersedia.
+                </div>
+            `;
+
+        }
 
         return list.map(([id, service]) => {
 
             const safeId =
                 String(id)
                     .replace(/\\/g, "\\\\")
-                    .replace(/'/g, "\\'");
+                    .replace(/'/g, "\\\'");
 
             const icon =
                 service.icon || "📦";
@@ -426,40 +434,107 @@ function renderCustomerServices() {
             `;
 
         }).join("");
+
     }
 
-    let html = "";
 
-    if (ppobServices.length) {
+    const isPpob =
+        customerServiceCategory === "ppob";
 
-        html += `
-            <div class="service-section-title">
-                <h2>Layanan PPOB</h2>
-                <p>Penuhi kebutuhan pembayaran dan layanan digital dalam satu tempat.</p>
+
+    const activeServices =
+        isPpob
+            ? ppobServices
+            : digitalServices;
+
+
+    grid.innerHTML = `
+
+        <div class="customer-service-tabs">
+
+            <button
+                type="button"
+                class="customer-service-tab ${
+                    isPpob ? "active" : ""
+                }"
+                onclick="setCustomerServiceCategory('ppob')"
+            >
+                <span class="customer-service-tab-icon">
+                    🧾
+                </span>
+
+                <span>
+                    <strong>Layanan PPOB</strong>
+                    <small>
+                        Pulsa, tagihan & pembayaran
+                    </small>
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="customer-service-tab ${
+                    !isPpob ? "active" : ""
+                }"
+                onclick="setCustomerServiceCategory('digital')"
+            >
+                <span class="customer-service-tab-icon">
+                    ✨
+                </span>
+
+                <span>
+                    <strong>Produk Digital</strong>
+                    <small>
+                        Produk digital pilihan
+                    </small>
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <div class="customer-service-category">
+
+            <div class="customer-service-category-header">
+
+                <div class="service-section-title">
+
+                    <h2>
+                        ${
+                            isPpob
+                                ? "Layanan PPOB"
+                                : "Produk Digital"
+                        }
+                    </h2>
+
+                    <p>
+                        ${
+                            isPpob
+                                ? "Penuhi kebutuhan pembayaran dan layanan sehari-hari."
+                                : "Produk digital pilihan untuk kebutuhan kreatif dan sehari-hari."
+                        }
+                    </p>
+
+                </div>
+
             </div>
+
 
             <div class="service-section-grid">
-                ${renderCards(ppobServices)}
-            </div>
-        `;
-    }
 
-    if (digitalServices.length) {
+                ${renderCards(activeServices)}
 
-        html += `
-            <div class="service-section-title service-section-title-digital">
-                <h2>Produk Digital</h2>
-                <p>Produk digital pilihan untuk kebutuhan kreatif dan sehari-hari.</p>
             </div>
 
-            <div class="service-section-grid">
-                ${renderCards(digitalServices)}
-            </div>
-        `;
-    }
+        </div>
 
-    grid.innerHTML = html;
+    `;
+
 }
+
 
 let currentTarget = "";
 let currentOperator = "";
@@ -553,7 +628,16 @@ function openService(serviceId) {
      * PPOB tetap menggunakan flow lama di bawah.
      */
 
+    const digitalFlowWrapper =
+        document.getElementById(
+            "digitalFlowWrapper"
+        );
+
     if (service.type === "digital") {
+
+        if (digitalFlowWrapper) {
+            digitalFlowWrapper.style.display = "";
+        }
 
         const formHeader =
             document.querySelector(
@@ -743,6 +827,35 @@ function openService(serviceId) {
             "page-hidden"
         );
     }
+
+    if (digitalFlowWrapper) {
+        digitalFlowWrapper.style.display = "none";
+    }
+
+
+    /*
+     * Pastikan seluruh elemen flow digital
+     * tidak memengaruhi form PPOB.
+     */
+    const digitalEmail =
+        document.getElementById("digitalEmail");
+
+    const digitalWhatsapp =
+        document.getElementById("digitalWhatsapp");
+
+    if (digitalEmail) {
+        digitalEmail.value = "";
+    }
+
+    if (digitalWhatsapp) {
+        digitalWhatsapp.value = "";
+    }
+
+    document
+        .querySelectorAll(".digital-device-option")
+        .forEach(option => {
+            option.classList.remove("selected");
+        });
 
 
     const targetGroup =

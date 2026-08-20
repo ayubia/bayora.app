@@ -266,6 +266,39 @@ let selectedDigitalDevice = "";
 
 function restoreBayoraLastPage() {
 
+    /*
+     * Jangan restore halaman terakhir ketika user
+     * sedang kembali dari Xendit.
+     *
+     * Xendit menggunakan query:
+     * ?payment=success&transactionId=...
+     * atau:
+     * ?payment=cancel&transactionId=...
+     *
+     * handleXenditReturn() harus menjadi pemilik
+     * tampilan pada kondisi tersebut.
+     */
+    const returnParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const returnPayment =
+        returnParams.get("payment");
+
+    const returnTransactionId =
+        returnParams.get("transactionId");
+
+    if (
+        returnTransactionId &&
+        (
+            returnPayment === "success" ||
+            returnPayment === "cancel"
+        )
+    ) {
+        return;
+    }
+
     const savedPage =
         getBayoraSavedPage();
 
@@ -3647,129 +3680,95 @@ function showDigitalDownloadButton(
         "hidden";
 
     container.style.boxShadow =
-        "0 20px 55px rgba(6,26,69,.10)";
+        "0 12px 30px rgba(16,36,77,.08)";
+
+
+    /*
+     * =====================================================
+     * HEADER
+     * =====================================================
+     */
 
     const header =
         document.createElement("div");
 
     header.style.padding =
-        "28px 26px 24px";
-
-    header.style.textAlign =
-        "center";
+        "20px 24px";
 
     header.style.background =
-        "linear-gradient(100deg,#061a45,#0b2c68)";
+        "linear-gradient(100deg,#1268ff,#14c9f4)";
 
-    const brand =
+    const headerTitle =
         document.createElement("div");
 
-    brand.textContent =
-        "BAYORA";
+    headerTitle.textContent =
+        "Pesanan Siap Diunduh";
 
-    brand.style.fontSize =
-        "24px";
+    headerTitle.style.fontSize =
+        "18px";
 
-    brand.style.fontWeight =
-        "900";
+    headerTitle.style.fontWeight =
+        "800";
 
-    brand.style.letterSpacing =
-        "-.5px";
-
-    brand.style.color =
+    headerTitle.style.color =
         "#ffffff";
 
-    const subtitle =
+    headerTitle.style.letterSpacing =
+        ".2px";
+
+    const headerSub =
         document.createElement("div");
 
-    subtitle.textContent =
-        "LIGHTROOM PRESETS";
+    headerSub.textContent =
+        productName ||
+        "Produk Digital";
 
-    subtitle.style.marginTop =
-        "7px";
+    headerSub.style.marginTop =
+        "5px";
 
-    subtitle.style.fontSize =
-        "9px";
+    headerSub.style.fontSize =
+        "12px";
 
-    subtitle.style.fontWeight =
-        "700";
+    headerSub.style.color =
+        "rgba(255,255,255,.88)";
 
-    subtitle.style.letterSpacing =
-        "2px";
+    header.appendChild(headerTitle);
+    header.appendChild(headerSub);
 
-    subtitle.style.color =
-        "#14c9f4";
 
-    header.appendChild(brand);
-    header.appendChild(subtitle);
+    /*
+     * =====================================================
+     * CONTENT
+     * =====================================================
+     */
 
     const content =
         document.createElement("div");
 
     content.style.padding =
-        "30px 26px 28px";
+        "22px 24px";
 
     const title =
         document.createElement("div");
 
     title.textContent =
-        "Pembayaran berhasil ✨";
+        "FILE PESANAN";
 
     title.style.fontSize =
-        "24px";
+        "10px";
 
     title.style.fontWeight =
         "800";
 
-    title.style.lineHeight =
-        "1.3";
-
-    title.style.color =
-        "#10244d";
-
-    title.style.marginBottom =
-        "12px";
-
-    const description =
-        document.createElement("p");
-
-    description.textContent =
-        productName
-            ? `Terima kasih telah membeli ${productName} di BAYORA. Produk kamu sudah siap untuk didownload.`
-            : "Terima kasih telah berbelanja di BAYORA. Produk kamu sudah siap untuk didownload.";
-
-    description.style.margin =
-        "0 0 24px";
-
-    description.style.fontSize =
-        "14px";
-
-    description.style.lineHeight =
-        "1.8";
-
-    description.style.color =
-        "#64748b";
-
-    const filesTitle =
-        document.createElement("div");
-
-    filesTitle.textContent =
-        "FILE PESANAN";
-
-    filesTitle.style.fontSize =
-        "10px";
-
-    filesTitle.style.fontWeight =
-        "800";
-
-    filesTitle.style.letterSpacing =
+    title.style.letterSpacing =
         "1.7px";
 
-    filesTitle.style.color =
+    title.style.color =
         "#1268ff";
 
-    filesTitle.style.marginBottom =
+    title.style.marginBottom =
         "14px";
+
 
     const files =
         document.createElement("div");
@@ -3783,6 +3782,7 @@ function showDigitalDownloadButton(
     files.style.gap =
         "12px";
 
+
     function createDownloadButton(
         label,
         descriptionText,
@@ -3794,11 +3794,6 @@ function showDigitalDownloadButton(
 
         link.href =
             url;
-
-        link.setAttribute(
-            "download",
-            ""
-        );
 
         link.style.display =
             "flex";
@@ -3830,6 +3825,10 @@ function showDigitalDownloadButton(
         link.style.cursor =
             "pointer";
 
+        link.style.transition =
+            "transform .15s ease, box-shadow .15s ease";
+
+
         const left =
             document.createElement("div");
 
@@ -3848,6 +3847,7 @@ function showDigitalDownloadButton(
         name.style.color =
             "#10244d";
 
+
         const detail =
             document.createElement("div");
 
@@ -3863,8 +3863,10 @@ function showDigitalDownloadButton(
         detail.style.color =
             "#64748b";
 
+
         left.appendChild(name);
         left.appendChild(detail);
+
 
         const arrow =
             document.createElement("span");
@@ -3905,17 +3907,42 @@ function showDigitalDownloadButton(
         arrow.style.background =
             "linear-gradient(100deg,#1268ff,#14c9f4)";
 
+
         link.appendChild(left);
         link.appendChild(arrow);
 
+
+        link.addEventListener(
+            "mouseenter",
+            () => {
+                link.style.transform =
+                    "translateY(-1px)";
+                link.style.boxShadow =
+                    "0 8px 20px rgba(18,104,255,.10)";
+            }
+        );
+
+        link.addEventListener(
+            "mouseleave",
+            () => {
+                link.style.transform =
+                    "translateY(0)";
+                link.style.boxShadow =
+                    "none";
+            }
+        );
+
+
         return link;
     }
+
 
     const zipUrl =
         `/api/digital-products/download/${encodeURIComponent(transactionId)}`;
 
     const guideUrl =
         `/api/digital-products/download-guide/${encodeURIComponent(transactionId)}`;
+
 
     files.appendChild(
         createDownloadButton(
@@ -3925,6 +3952,7 @@ function showDigitalDownloadButton(
         )
     );
 
+
     files.appendChild(
         createDownloadButton(
             "Download Panduan",
@@ -3932,6 +3960,7 @@ function showDigitalDownloadButton(
             guideUrl
         )
     );
+
 
     const emailNote =
         document.createElement("div");
@@ -3963,6 +3992,7 @@ function showDigitalDownloadButton(
     emailNote.textContent =
         "File pesanan juga telah dikirim ke email kamu sebagai cadangan.";
 
+
     const closing =
         document.createElement("p");
 
@@ -3981,12 +4011,18 @@ function showDigitalDownloadButton(
     closing.innerHTML =
         'Terima kasih sudah menjadi bagian dari <strong style="color:#1268ff;">BAYORA</strong> 🤍';
 
+
     content.appendChild(title);
-    content.appendChild(description);
-    content.appendChild(filesTitle);
     content.appendChild(files);
     content.appendChild(emailNote);
     content.appendChild(closing);
+
+
+    /*
+     * =====================================================
+     * FOOTER
+     * =====================================================
+     */
 
     const footer =
         document.createElement("div");
@@ -4000,6 +4036,7 @@ function showDigitalDownloadButton(
     footer.style.background =
         "#061a45";
 
+
     const footerText =
         document.createElement("div");
 
@@ -4011,6 +4048,7 @@ function showDigitalDownloadButton(
 
     footerText.style.color =
         "#f5f9ff";
+
 
     const footerSub =
         document.createElement("div");
@@ -4027,8 +4065,10 @@ function showDigitalDownloadButton(
     footerSub.style.color =
         "#14c9f4";
 
+
     footer.appendChild(footerText);
     footer.appendChild(footerSub);
+
 
     container.appendChild(header);
     container.appendChild(content);
@@ -4160,6 +4200,167 @@ async function checkTransactionStatus(transactionId) {
 }
 
 
+/* =========================================================
+   HANDLE XENDIT RETURN
+========================================================= */
+
+async function handleXenditReturn() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const payment =
+        params.get("payment");
+
+    const transactionId =
+        params.get("transactionId");
+
+    if (
+        !transactionId ||
+        (
+            payment !== "success" &&
+            payment !== "cancel"
+        )
+    ) {
+        return;
+    }
+
+    const homePage =
+        document.getElementById("homePage");
+
+    const servicePage =
+        document.getElementById("servicePage");
+
+    const checkoutPage =
+        document.getElementById("checkoutPage");
+
+    const successPage =
+        document.getElementById("successPage");
+
+    if (homePage) {
+        homePage.classList.add("page-hidden");
+    }
+
+    if (servicePage) {
+        servicePage.classList.add("page-hidden");
+    }
+
+    if (checkoutPage) {
+        checkoutPage.classList.add("page-hidden");
+    }
+
+    if (!successPage) {
+        return;
+    }
+
+    successPage.classList.remove("page-hidden");
+
+    if (payment === "cancel") {
+
+        successPage.innerHTML = `
+            <div style="
+                padding:40px 24px;
+                text-align:center;
+            ">
+                <h2>Pembayaran Dibatalkan</h2>
+
+                <p style="
+                    margin-top:10px;
+                    color:#64748b;
+                ">
+                    Pembayaran transaksi
+                    ${transactionId}
+                    dibatalkan.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/transactions/${encodeURIComponent(transactionId)}`
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success ||
+            !data.transaction
+        ) {
+            throw new Error(
+                data.error ||
+                "Transaksi tidak ditemukan."
+            );
+        }
+
+        const transaction =
+            data.transaction;
+
+        if (
+            transaction.productType === "digital"
+        ) {
+
+            if (
+                transaction.paymentStatus === "PAID"
+            ) {
+
+                showDigitalDownloadButton(
+                    transaction.transactionId,
+                    transaction.productName
+                );
+
+                return;
+            }
+
+            setTimeout(
+                () => handleXenditReturn(),
+                3000
+            );
+
+            return;
+        }
+
+        checkTransactionStatus(
+            transaction.transactionId
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Xendit return error:",
+            error
+        );
+
+        successPage.innerHTML = `
+            <div style="
+                padding:40px 24px;
+                text-align:center;
+            ">
+                <h2>Memeriksa Pembayaran</h2>
+
+                <p style="
+                    margin-top:10px;
+                    color:#64748b;
+                ">
+                    Pembayaran sedang diverifikasi.
+                    Silakan tunggu beberapa saat.
+                </p>
+            </div>
+        `;
+
+    }
+
+}
+
+
 function getPaymentName(payment) {
 
     if (payment === "qris") {
@@ -4184,3 +4385,5 @@ function getPaymentName(payment) {
 ========================================================= */
 
 setupDigitalProductFlow();
+
+handleXenditReturn();

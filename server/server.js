@@ -4972,17 +4972,12 @@ app.get(
             const transaction =
                 db.prepare(`
                     SELECT
-                        t.transaction_id,
-                        t.user_id,
-                        t.payment_status,
-                        t.product_id,
-                        p.name AS product_name,
-                        p.product_type,
-                        p.digital_file
-                    FROM transactions t
-                    LEFT JOIN products p
-                        ON p.id = t.product_id
-                    WHERE t.transaction_id = ?
+                        transaction_id,
+                        user_id,
+                        payment_status,
+                        product_name
+                    FROM transactions
+                    WHERE transaction_id = ?
                     LIMIT 1
                 `).get(transactionId);
 
@@ -5002,7 +4997,8 @@ app.get(
 
                 return res.status(403).json({
                     success: false,
-                    error: "Kamu tidak memiliki akses ke transaksi ini."
+                    error:
+                        "Kamu tidak memiliki akses ke transaksi ini."
                 });
 
             }
@@ -5014,28 +5010,29 @@ app.get(
 
                 return res.status(403).json({
                     success: false,
-                    error: "Pembayaran belum dikonfirmasi."
+                    error:
+                        "Pembayaran belum dikonfirmasi."
                 });
 
             }
 
-            if (
-                transaction.product_type !==
-                "digital"
-            ) {
+            const items =
+                db.prepare(`
+                    SELECT
+                        product_id,
+                        product_name,
+                        digital_file
+                    FROM digital_transaction_items
+                    WHERE transaction_id = ?
+                    ORDER BY id ASC
+                `).all(transactionId);
 
-                return res.status(400).json({
-                    success: false,
-                    error: "Transaksi ini bukan produk digital."
-                });
-
-            }
-
-            if (!transaction.digital_file) {
+            if (!items.length) {
 
                 return res.status(404).json({
                     success: false,
-                    error: "File digital belum tersedia."
+                    error:
+                        "File preset transaksi tidak ditemukan."
                 });
 
             }
@@ -5044,18 +5041,6 @@ app.get(
                 process.env.NODE_ENV === "production"
                     ? "/data"
                     : path.join(__dirname, "..");
-
-            const relativeFile =
-                String(
-                    transaction.digital_file
-                )
-                .replace(/^\/+/, "");
-
-            const filePath =
-                path.resolve(
-                    digitalStorageRoot,
-                    relativeFile
-                );
 
             const digitalRoot =
                 path.resolve(
@@ -5067,41 +5052,173 @@ app.get(
                     )
                 );
 
-            if (
-                filePath !== digitalRoot &&
-                !filePath.startsWith(
-                    digitalRoot + path.sep
-                )
-            ) {
+            const files = [];
 
-                console.error(
-                    "[DIGITAL DOWNLOAD] Path tidak aman:",
-                    transaction.digital_file
-                );
+            for (const item of items) {
 
-                return res.status(400).json({
-                    success: false,
-                    error: "Lokasi file digital tidak valid."
+                if (!item.digital_file) {
+                    continue;
+                }
+
+                const relativeFile =
+                    String(
+                        item.digital_file
+                    )
+                    .replace(/^\/+/, "");
+
+                const filePath =
+                    path.resolve(
+                        digitalStorageRoot,
+                        relativeFile
+                    );
+
+                if (
+                    filePath === digitalRoot ||
+                    !filePath.startsWith(
+                        digitalRoot + path.sep
+                    )
+                ) {
+
+                    console.error(
+                        "[DIGITAL DOWNLOAD] Path tidak aman:",
+                        item.digital_file
+                    );
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "Lokasi file digital tidak valid."
+                    });
+
+                }
+
+                if (!fs.existsSync(filePath)) {
+
+                    console.error(
+                        "[DIGITAL DOWNLOAD] File tidak ditemukan:",
+                        filePath
+                    );
+
+                    continue;
+                }
+
+                files.push({
+                    path: filePath,
+                    name:
+                        item.product_name ||
+                        "Preset"
                 });
 
             }
 
-            return res.download(
-                filePath,
-                transaction.product_name + ".zip",
+            if (!files.length) {
+
+                return res.status(404).json({
+                    success: false,
+                    error:
+                        "File preset belum tersedia."
+                });
+
+            }
+
+            /*
+             * Jika hanya satu preset,
+             * kirim ZIP asli secara langsung.
+             */
+            if (files.length === 1) {
+
+                return res.download(
+                    files[0].path,
+                    files[0].name + ".zip",
+                    error => {
+
+                        if (error) {
+
+                            console.error(
+                                "[DIGITAL DOWNLOAD]",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+            /*
+             * Multi-produk:
+             * gabungkan seluruh ZIP menjadi satu ZIP.
+             */
+            const archiver =
+                require("archiver");
+
+            const safeName =
+                String(
+                    transaction.product_name ||
+                    "BAYORA Presets"
+                )
+                .replace(
+                    /[^a-zA-Z0-9._ -]/g,
+                    ""
+                )
+                .trim() ||
+                "BAYORA Presets";
+
+            res.attachment(
+                safeName + ".zip"
+            );
+
+            const archive =
+                archiver("zip", {
+                    zlib: {
+                        level: 9
+                    }
+                });
+
+            archive.on(
+                "error",
                 error => {
 
-                    if (error) {
+                    console.error(
+                        "[DIGITAL DOWNLOAD ARCHIVE]",
+                        error
+                    );
 
-                        console.error(
-                            "[DIGITAL DOWNLOAD]",
-                            error
-                        );
+                    if (!res.headersSent) {
+
+                        res.status(500).json({
+                            success: false,
+                            error:
+                                "Gagal membuat file ZIP."
+                        });
+
+                    } else {
+
+                        res.end();
 
                     }
 
                 }
             );
+
+            archive.pipe(res);
+
+            for (const file of files) {
+
+                archive.file(
+                    file.path,
+                    {
+                        name:
+                            path.basename(
+                                file.path
+                            )
+                    }
+                );
+
+            }
+
+            archive.finalize();
 
         } catch (error) {
 
@@ -5110,16 +5227,20 @@ app.get(
                 error
             );
 
-            return res.status(500).json({
-                success: false,
-                error: "Gagal menyediakan file digital."
-            });
+            if (!res.headersSent) {
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "Gagal menyediakan file digital."
+                });
+
+            }
 
         }
 
     }
 );
-
 
 
 /* =========================

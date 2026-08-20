@@ -521,7 +521,83 @@ async function loadCustomerCatalog() {
 
         renderCustomerServices();
 
-        restoreBayoraLastPage();
+        /*
+         * BAYORA — OPEN SHARED PRODUCT
+         *
+         * Jika halaman dibuka melalui:
+         * ?product=PRODUCT_ID
+         *
+         * cari produk dari katalog database,
+         * buka layanan terkait, lalu buka detail
+         * produk digital jika memang produk digital.
+         */
+        const sharedProductId =
+            new URLSearchParams(
+                window.location.search
+            ).get("product");
+
+        if (sharedProductId) {
+
+            let sharedProduct = null;
+            let sharedServiceId = null;
+
+            Object.entries(products)
+                .some(([serviceId, serviceProducts]) => {
+
+                    const found =
+                        serviceProducts.find(
+                            product =>
+                                String(product.id) ===
+                                String(sharedProductId)
+                        );
+
+                    if (!found) {
+                        return false;
+                    }
+
+                    sharedProduct = found;
+                    sharedServiceId = serviceId;
+
+                    return true;
+                });
+
+            if (
+                sharedProduct &&
+                sharedServiceId &&
+                services[sharedServiceId]
+            ) {
+
+                openService(sharedServiceId);
+
+                if (
+                    sharedProduct.productType ===
+                    "digital"
+                ) {
+
+                    setTimeout(() => {
+
+                        openDigitalProductDetail(
+                            sharedProduct
+                        );
+
+                    }, 0);
+
+                }
+
+            } else {
+
+                console.warn(
+                    "[BAYORA SHARE] Produk tidak ditemukan:",
+                    sharedProductId
+                );
+
+            }
+
+        } else {
+
+            restoreBayoraLastPage();
+
+        }
 
         console.log(
             "Katalog customer berhasil dimuat dari database.",

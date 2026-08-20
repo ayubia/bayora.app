@@ -1305,26 +1305,26 @@ app.get("/api/auth/history", (req, res) => {
         const transactions = db.prepare(`
             SELECT
                 t.id,
-                transaction_id AS transactionId,
-                reference,
-                service,
-                target,
-                operator,
-                product_id AS productId,
-                product_name AS productName,
-                price,
-                payment_method AS paymentMethod,
-                status,
-                payment_status AS paymentStatus,
-                digiflazz_status AS digiflazzStatus,
-                digiflazz_ref AS digiflazzRef,
-                digiflazz_message AS digiflazzMessage,
-                paid_at AS paidAt,
-                processed_at AS processedAt,
-                created_at AS createdAt
-            FROM transactions
-            WHERE user_id = ?
-            ORDER BY id DESC
+                t.transaction_id AS transactionId,
+                t.reference,
+                t.service,
+                t.target,
+                t.operator,
+                t.product_id AS productId,
+                t.product_name AS productName,
+                t.price,
+                t.payment_method AS paymentMethod,
+                t.status,
+                t.payment_status AS paymentStatus,
+                t.digiflazz_status AS digiflazzStatus,
+                t.digiflazz_ref AS digiflazzRef,
+                t.digiflazz_message AS digiflazzMessage,
+                t.paid_at AS paidAt,
+                t.processed_at AS processedAt,
+                t.created_at AS createdAt
+            FROM transactions t
+            WHERE t.user_id = ?
+            ORDER BY t.id DESC
         `).all(user.id);
 
         return res.json({

@@ -527,9 +527,14 @@ async function loadCustomerCatalog() {
          * Jika halaman dibuka melalui:
          * ?service=SERVICE_ID
          *
-         * buka layanan tersebut langsung.
+         * buka langsung halaman layanan tersebut.
          *
-         * Berlaku untuk PPOB maupun Digital.
+         * Halaman layanan sudah menangani:
+         * - informasi layanan
+         * - katalog produk layanan
+         * - form sesuai layanan
+         *
+         * PPOB maupun Digital mengikuti flow normal.
          */
         const sharedServiceId =
             new URLSearchParams(
@@ -544,11 +549,8 @@ async function loadCustomerCatalog() {
             if (sharedService) {
 
                 /*
-                 * Samakan kategori dengan saat user
-                 * membuka layanan secara normal.
-                 *
-                 * Digital -> tab Digital
-                 * PPOB    -> tab PPOB
+                 * Samakan kategori dengan layanan
+                 * yang dibagikan.
                  */
                 if (
                     typeof setCustomerServiceCategory ===
@@ -561,6 +563,13 @@ async function loadCustomerCatalog() {
                     );
                 }
 
+                /*
+                 * Gunakan flow layanan normal.
+                 *
+                 * Ini penting karena openService()
+                 * menyiapkan produk + form sesuai
+                 * layanan yang dipilih.
+                 */
                 openService(sharedServiceId);
 
             } else {

@@ -4121,6 +4121,7 @@ app.post("/api/webhooks/xendit", async (req, res) => {
             db.prepare(`
                 UPDATE transactions
                 SET
+                    status = 'SUCCESS',
                     payment_status = 'PAID',
                     payment_session_id = COALESCE(
                         ?,

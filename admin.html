@@ -382,6 +382,19 @@
     border-bottom: 0;
 }
 
+
+.catalog-product-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.catalog-product-actions .catalog-action-button {
+    flex: 0 0 auto;
+}
+
 .catalog-product-name {
     font-weight: 650;
     font-size: 13px;
@@ -547,7 +560,24 @@
     }
 
     .catalog-product-row {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .catalog-product-price {
+        margin-top: 2px;
+    }
+
+    .catalog-product-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .catalog-product-actions .catalog-action-button {
+        width: 100%;
+        min-height: 40px;
     }
 
     .catalog-product-row .catalog-product-status {
@@ -4289,37 +4319,41 @@ function renderCatalog() {
                                     ${formatCatalogPrice(product.price)}
                                 </div>
 
-                                <button
-                                    type="button"
-                                    class="catalog-action-button"
-                                    onclick="editProduct('${escapeCatalog(product.id)}')"
-                                >
-                                    Edit
-                                </button>
+                                <div class="catalog-product-actions">
 
-                                <button
-                                    type="button"
-                                    class="catalog-action-button"
-                                    onclick="duplicateProduct('${escapeCatalog(product.id)}')"
-                                >
-                                    Duplikat
-                                </button>
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="editProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Edit
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    class="catalog-action-button"
-                                    onclick="shareProduct('${escapeCatalog(product.id)}')"
-                                >
-                                    Bagikan
-                                </button>
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="duplicateProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Duplikat
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    class="catalog-action-button"
-                                    onclick="deleteProduct('${escapeCatalog(product.id)}')"
-                                >
-                                    Hapus
-                                </button>
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="shareProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Bagikan
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="deleteProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Hapus
+                                    </button>
+
+                                </div>
 
 
                             </div>

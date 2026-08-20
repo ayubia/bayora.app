@@ -10066,16 +10066,26 @@ table tbody tr:hover{
     }
 
     .catalog-product-row{
-        grid-template-columns:1fr auto!important;
+        grid-template-columns:1fr!important;
+        gap:8px!important;
     }
 
     .catalog-product-row .catalog-product-status{
         grid-column:1!important;
     }
 
-    .catalog-product-row .catalog-action-button{
-        grid-column:2!important;
-        grid-row:1 / span 2!important;
+    .catalog-product-actions{
+        width:100%!important;
+        display:grid!important;
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+        gap:8px!important;
+    }
+
+    .catalog-product-actions .catalog-action-button{
+        grid-column:auto!important;
+        grid-row:auto!important;
+        width:100%!important;
+        min-height:40px!important;
     }
 }
 

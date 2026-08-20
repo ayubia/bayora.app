@@ -244,6 +244,53 @@
     color: #b42318;
 }
 
+.catalog-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 18px 20px 0;
+}
+
+.catalog-tab {
+    border: 1px solid #e7e4dd;
+    background: #f7f5f0;
+    color: #555;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.catalog-tab:hover {
+    background: #efede7;
+}
+
+.catalog-tab.active {
+    background: #171717;
+    border-color: #171717;
+    color: white;
+}
+
+.catalog-search-wrap {
+    padding: 14px 20px 0;
+}
+
+.catalog-search {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #e7e4dd;
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 13px;
+    outline: none;
+    background: white;
+}
+
+.catalog-search:focus {
+    border-color: #bbb5a9;
+}
+
 .catalog-services {
     padding: 20px;
     display: grid;
@@ -2406,10 +2453,45 @@ body.bayora-view-admins > main > .stats {
         <button
             type="button"
             class="catalog-add-button"
-            onclick="openServiceModal()"
+            id="catalogAddServiceButton"
+            onclick="openNewCatalogServiceModal()"
         >
-            + Tambah Layanan
+            + Tambah Layanan PPOB
         </button>
+
+    </div>
+
+    <div class="catalog-tabs" role="tablist" aria-label="Jenis katalog">
+
+        <button
+            type="button"
+            id="catalogTabPpob"
+            class="catalog-tab active"
+            onclick="setCatalogTab('ppob')"
+        >
+            PPOB
+        </button>
+
+        <button
+            type="button"
+            id="catalogTabDigital"
+            class="catalog-tab"
+            onclick="setCatalogTab('digital')"
+        >
+            Produk Digital
+        </button>
+
+    </div>
+
+    <div class="catalog-search-wrap">
+
+        <input
+            type="search"
+            id="catalogSearch"
+            class="catalog-search"
+            placeholder="Cari produk PPOB..."
+            autocomplete="off"
+        >
 
     </div>
 
@@ -3656,7 +3738,16 @@ function ensureDigiflazzSyncButton() {
 
     if (!container) return;
 
-    if (document.getElementById("digiflazzAdminSyncBar")) {
+    const existingBar =
+        document.getElementById("digiflazzAdminSyncBar");
+
+    if (existingBar) {
+
+        existingBar.style.display =
+            activeCatalogTab === "ppob"
+                ? "flex"
+                : "none";
+
         return;
     }
 
@@ -3715,6 +3806,11 @@ function ensureDigiflazzSyncButton() {
     `;
 
     container.parentNode.insertBefore(bar, container);
+
+    bar.style.display =
+        activeCatalogTab === "ppob"
+            ? "flex"
+            : "none";
 }
 
 
@@ -3881,6 +3977,7 @@ async function loadCatalog() {
 
         renderCatalog();
         populateProductServiceOptions();
+        setupCatalogSearch();
 
     } catch (error) {
 
@@ -3923,6 +4020,110 @@ function formatCatalogPrice(value) {
 }
 
 
+let activeCatalogTab = "ppob";
+let catalogSearchQuery = "";
+
+function setCatalogTab(type) {
+
+    activeCatalogTab =
+        type === "digital"
+            ? "digital"
+            : "ppob";
+
+    catalogSearchQuery = "";
+
+    const addServiceButton =
+        document.getElementById(
+            "catalogAddServiceButton"
+        );
+
+    if (addServiceButton) {
+
+        addServiceButton.textContent =
+            activeCatalogTab === "digital"
+                ? "+ Tambah Layanan Digital"
+                : "+ Tambah Layanan PPOB";
+
+    }
+
+    const search =
+        document.getElementById("catalogSearch");
+
+    if (search) {
+
+        search.value = "";
+
+        search.placeholder =
+            activeCatalogTab === "digital"
+                ? "Cari produk digital..."
+                : "Cari produk PPOB...";
+
+    }
+
+    const ppobTab =
+        document.getElementById("catalogTabPpob");
+
+    const digitalTab =
+        document.getElementById("catalogTabDigital");
+
+    if (ppobTab) {
+
+        ppobTab.classList.toggle(
+            "active",
+            activeCatalogTab === "ppob"
+        );
+
+    }
+
+    if (digitalTab) {
+
+        digitalTab.classList.toggle(
+            "active",
+            activeCatalogTab === "digital"
+        );
+
+    }
+
+    const digiflazzBar =
+        document.getElementById(
+            "digiflazzAdminSyncBar"
+        );
+
+    if (digiflazzBar) {
+
+        digiflazzBar.style.display =
+            activeCatalogTab === "ppob"
+                ? "flex"
+                : "none";
+
+    }
+
+    renderCatalog();
+
+}
+
+
+function setupCatalogSearch() {
+
+    const search =
+        document.getElementById("catalogSearch");
+
+    if (!search) return;
+
+    search.oninput = () => {
+
+        catalogSearchQuery =
+            search.value
+                .trim()
+                .toLowerCase();
+
+        renderCatalog();
+
+    };
+
+}
+
+
 function renderCatalog() {
 
     const container =
@@ -3930,11 +4131,118 @@ function renderCatalog() {
 
     if (!container) return;
 
-    if (!catalogData.services.length) {
+    const isDigital =
+        activeCatalogTab === "digital";
+
+    const services =
+        catalogData.services.filter(
+            service =>
+                isDigital
+                    ? service.type === "digital"
+                    : service.type !== "digital"
+        );
+
+    const query =
+        catalogSearchQuery;
+
+    if (!services.length) {
 
         container.innerHTML = `
             <div class="catalog-empty">
-                Belum ada layanan.
+                ${
+                    isDigital
+                        ? "Belum ada layanan produk digital."
+                        : "Belum ada layanan PPOB."
+                }
+            </div>
+        `;
+
+        return;
+    }
+
+    const filteredServices =
+        services
+            .map(service => {
+
+                const products =
+                    catalogData.products
+                        .filter(product => {
+
+                            const sameService =
+                                product.service_id ===
+                                service.id;
+
+                            const sameType =
+                                isDigital
+                                    ? product.product_type === "digital"
+                                    : product.product_type !== "digital";
+
+                            if (
+                                !sameService ||
+                                !sameType
+                            ) {
+                                return false;
+                            }
+
+                            if (!query) {
+                                return true;
+                            }
+
+                            const searchableText =
+                                [
+                                    product.name,
+                                    product.operator,
+                                    product.info,
+                                    service.title,
+                                    service.description
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")
+                                    .toLowerCase();
+
+                            return searchableText.includes(
+                                query
+                            );
+
+                        });
+
+                const serviceSearchText =
+                    [
+                        service.title,
+                        service.description
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+                const serviceMatches =
+                    !query ||
+                    serviceSearchText.includes(query);
+
+                if (
+                    !products.length &&
+                    !serviceMatches
+                ) {
+                    return null;
+                }
+
+                return {
+                    service,
+                    products
+                };
+
+            })
+            .filter(Boolean);
+
+    if (!filteredServices.length) {
+
+        container.innerHTML = `
+            <div class="catalog-empty">
+                ${
+                    isDigital
+                        ? "Produk digital tidak ditemukan."
+                        : "Produk PPOB tidak ditemukan."
+                }
             </div>
         `;
 
@@ -3942,16 +4250,8 @@ function renderCatalog() {
     }
 
     container.innerHTML =
-        catalogData.services
-            .map(service => {
-
-                const products =
-                    catalogData.products
-                        .filter(
-                            product =>
-                                product.service_id ===
-                                service.id
-                        );
+        filteredServices
+            .map(({ service, products }) => {
 
                 const statusClass =
                     Number(service.active)
@@ -3976,7 +4276,12 @@ function renderCatalog() {
 
                                     <div class="catalog-product-info">
                                         ${escapeCatalog(product.operator || "")}
-                                        ${product.info ? " · " + escapeCatalog(product.info) : ""}
+                                        ${
+                                            product.info
+                                                ? " · " +
+                                                  escapeCatalog(product.info)
+                                                : ""
+                                        }
                                     </div>
                                 </div>
 
@@ -4056,7 +4361,11 @@ function renderCatalog() {
                                 class="catalog-action-button"
                                 onclick="toggleService('${escapeCatalog(service.id)}')"
                             >
-                                ${Number(service.active) ? "Nonaktifkan" : "Aktifkan"}
+                                ${
+                                    Number(service.active)
+                                        ? "Nonaktifkan"
+                                        : "Aktifkan"
+                                }
                             </button>
 
                             <button
@@ -4083,6 +4392,7 @@ function renderCatalog() {
             .join("");
 
 }
+
 
 
 function populateProductServiceOptions() {
@@ -4265,6 +4575,71 @@ function openServiceModal(serviceId = "") {
         service
             ? Boolean(Number(service.active))
             : true;
+
+    updateServiceTypeFields();
+
+    openCatalogModal("serviceModal");
+
+}
+
+
+function openNewCatalogServiceModal() {
+
+    const serviceType =
+        activeCatalogTab === "digital"
+            ? "digital"
+            : "ppob";
+
+    document.getElementById(
+        "serviceModalTitle"
+    ).textContent =
+        serviceType === "digital"
+            ? "Tambah Layanan Digital"
+            : "Tambah Layanan PPOB";
+
+    document.getElementById(
+        "serviceOriginalId"
+    ).value = "";
+
+    document.getElementById(
+        "serviceId"
+    ).value = "";
+
+    document.getElementById(
+        "serviceType"
+    ).value =
+        serviceType;
+
+    document.getElementById(
+        "serviceTitle"
+    ).value = "";
+
+    document.getElementById(
+        "serviceIcon"
+    ).value = "📦";
+
+    document.getElementById(
+        "serviceDescription"
+    ).value = "";
+
+    document.getElementById(
+        "serviceLabel"
+    ).value =
+        serviceType === "digital"
+            ? "Nama Produk"
+            : "Nomor Tujuan";
+
+    document.getElementById(
+        "servicePlaceholder"
+    ).value = "";
+
+    document.getElementById(
+        "serviceSort"
+    ).value = 0;
+
+    document.getElementById(
+        "serviceActive"
+    ).checked = true;
 
     updateServiceTypeFields();
 

@@ -7315,6 +7315,7 @@ function syncDigiflazzCatalogFromCache() {
     const existing = db.prepare(`
         SELECT id
         FROM products
+        WHERE product_type = 'ppob'
     `).all();
 
     const existingIds = new Set(
@@ -7335,6 +7336,7 @@ function syncDigiflazzCatalogFromCache() {
             margin = ?,
             digiflazz_sku = ?
         WHERE id = ?
+          AND product_type = 'ppob'
     `);
 
     const insertProduct = db.prepare(`
@@ -7348,11 +7350,12 @@ function syncDigiflazzCatalogFromCache() {
             active,
             sort_order,
             created_at,
+            product_type,
             cost_price,
             margin,
             digiflazz_sku
         )
-        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, 'ppob', ?, ?, ?)
     `);
 
     /*
@@ -7367,7 +7370,8 @@ function syncDigiflazzCatalogFromCache() {
     const deactivateOld = db.prepare(`
         UPDATE products
         SET active = 0
-        WHERE digiflazz_sku IS NOT NULL
+        WHERE product_type = 'ppob'
+          AND digiflazz_sku IS NOT NULL
           AND digiflazz_sku != ''
     `);
 

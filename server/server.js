@@ -1304,7 +1304,7 @@ app.get("/api/auth/history", (req, res) => {
 
         const transactions = db.prepare(`
             SELECT
-                id,
+                t.id,
                 transaction_id AS transactionId,
                 reference,
                 service,
@@ -1678,9 +1678,9 @@ app.post("/api/transactions", (req, res) => {
 
         const transaction = db.prepare(`
             SELECT
-                id,
-                transaction_id AS transactionId,
-                reference,
+                t.id,
+                t.transaction_id AS transactionId,
+                t.reference,
                 service,
                 target,
                 operator,

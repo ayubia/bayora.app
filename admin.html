@@ -374,8 +374,34 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 12px;
-    padding: 12px 0;
+    padding: 14px 0;
     border-bottom: 1px solid #f4f2ed;
+}
+
+.catalog-product-row > div:first-child {
+    min-width: 0;
+}
+
+.catalog-product-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.catalog-product-actions .catalog-action-button {
+    flex: 0 0 auto;
+}
+
+.catalog-products::before {
+    content: "PRODUK";
+    display: block;
+    margin-bottom: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    color: #7a8799;
 }
 
 .catalog-product-row:last-child {
@@ -4161,6 +4187,15 @@ function renderCatalog() {
 
     if (!container) return;
 
+    /*
+     * Jika sedang berada di halaman produk,
+     * jangan render daftar layanan.
+     */
+    if (activeCatalogServiceId) {
+        renderCatalogProducts(activeCatalogServiceId);
+        return;
+    }
+
     const isDigital =
         activeCatalogTab === "digital";
 
@@ -4195,46 +4230,45 @@ function renderCatalog() {
             .map(service => {
 
                 const products =
-                    catalogData.products
-                        .filter(product => {
+                    catalogData.products.filter(product => {
 
-                            const sameService =
-                                product.service_id ===
-                                service.id;
+                        const sameService =
+                            product.service_id ===
+                            service.id;
 
-                            const sameType =
-                                isDigital
-                                    ? product.product_type === "digital"
-                                    : product.product_type !== "digital";
+                        const sameType =
+                            isDigital
+                                ? product.product_type === "digital"
+                                : product.product_type !== "digital";
 
-                            if (
-                                !sameService ||
-                                !sameType
-                            ) {
-                                return false;
-                            }
+                        if (
+                            !sameService ||
+                            !sameType
+                        ) {
+                            return false;
+                        }
 
-                            if (!query) {
-                                return true;
-                            }
+                        if (!query) {
+                            return true;
+                        }
 
-                            const searchableText =
-                                [
-                                    product.name,
-                                    product.operator,
-                                    product.info,
-                                    service.title,
-                                    service.description
-                                ]
-                                    .filter(Boolean)
-                                    .join(" ")
-                                    .toLowerCase();
+                        const searchableText =
+                            [
+                                product.name,
+                                product.operator,
+                                product.info,
+                                service.title,
+                                service.description
+                            ]
+                                .filter(Boolean)
+                                .join(" ")
+                                .toLowerCase();
 
-                            return searchableText.includes(
-                                query
-                            );
+                        return searchableText.includes(
+                            query
+                        );
 
-                        });
+                    });
 
                 const serviceSearchText =
                     [
@@ -4270,8 +4304,8 @@ function renderCatalog() {
             <div class="catalog-empty">
                 ${
                     isDigital
-                        ? "Produk digital tidak ditemukan."
-                        : "Produk PPOB tidak ditemukan."
+                        ? "Layanan produk digital tidak ditemukan."
+                        : "Layanan PPOB tidak ditemukan."
                 }
             </div>
         `;
@@ -4292,78 +4326,6 @@ function renderCatalog() {
                     Number(service.active)
                         ? "Aktif"
                         : "Nonaktif";
-
-                const productHtml =
-                    products.length
-                        ? products.map(product => `
-
-                            <div class="catalog-product-row">
-
-                                <div>
-                                    <div class="catalog-product-name">
-                                        ${escapeCatalog(product.name)}
-                                    </div>
-
-                                    <div class="catalog-product-info">
-                                        ${escapeCatalog(product.operator || "")}
-                                        ${
-                                            product.info
-                                                ? " · " +
-                                                  escapeCatalog(product.info)
-                                                : ""
-                                        }
-                                    </div>
-                                </div>
-
-                                <div class="catalog-product-price">
-                                    ${formatCatalogPrice(product.price)}
-                                </div>
-
-                                <div class="catalog-product-actions">
-
-                                    <button
-                                        type="button"
-                                        class="catalog-action-button"
-                                        onclick="editProduct('${escapeCatalog(product.id)}')"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="catalog-action-button"
-                                        onclick="duplicateProduct('${escapeCatalog(product.id)}')"
-                                    >
-                                        Duplikat
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="catalog-action-button"
-                                        onclick="shareProduct('${escapeCatalog(product.id)}')"
-                                    >
-                                        Bagikan
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="catalog-action-button"
-                                        onclick="deleteProduct('${escapeCatalog(product.id)}')"
-                                    >
-                                        Hapus
-                                    </button>
-
-                                </div>
-
-
-                            </div>
-
-                        `).join("")
-                        : `
-                            <div class="catalog-empty">
-                                Belum ada produk.
-                            </div>
-                        `;
 
                 return `
 
@@ -4398,6 +4360,19 @@ function renderCatalog() {
                         </div>
 
                         <div class="catalog-service-actions">
+
+                            <button
+                                type="button"
+                                class="catalog-action-button catalog-products-button"
+                                onclick="openCatalogProducts('${escapeCatalog(service.id)}')"
+                            >
+                                Produk
+                                ${
+                                    products.length
+                                        ? `(${products.length})`
+                                        : ""
+                                }
+                            </button>
 
                             <button
                                 type="button"
@@ -4459,12 +4434,6 @@ function renderCatalog() {
 
                         </div>
 
-                        <div class="catalog-products">
-
-                            ${productHtml}
-
-                        </div>
-
                     </div>
 
                 `;
@@ -4474,6 +4443,242 @@ function renderCatalog() {
 
 }
 
+
+/* =========================================================
+   CATALOG — PRODUCTS VIEW
+========================================================= */
+
+let activeCatalogServiceId = null;
+
+
+function openCatalogProducts(serviceId) {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === serviceId
+        );
+
+    if (!service) {
+        alert("Layanan tidak ditemukan.");
+        return;
+    }
+
+    activeCatalogServiceId =
+        serviceId;
+
+    renderCatalogProducts(serviceId);
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+function closeCatalogProducts() {
+
+    activeCatalogServiceId =
+        null;
+
+    renderCatalog();
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+function renderCatalogProducts(serviceId) {
+
+    const container =
+        document.getElementById("catalogServices");
+
+    if (!container) return;
+
+    const service =
+        catalogData.services.find(
+            item => item.id === serviceId
+        );
+
+    if (!service) {
+        activeCatalogServiceId = null;
+        renderCatalog();
+        return;
+    }
+
+    const products =
+        catalogData.products.filter(
+            product => {
+
+                const sameService =
+                    product.service_id ===
+                    service.id;
+
+                const sameType =
+                    service.type === "digital"
+                        ? product.product_type === "digital"
+                        : product.product_type !== "digital";
+
+                return (
+                    sameService &&
+                    sameType
+                );
+
+            }
+        );
+
+    container.innerHTML = `
+
+        <div class="catalog-products-view">
+
+            <div class="catalog-products-view-header">
+
+                <button
+                    type="button"
+                    class="catalog-back-button"
+                    onclick="closeCatalogProducts()"
+                >
+                    ← Kembali
+                </button>
+
+                <div class="catalog-products-view-service">
+
+                    <div class="catalog-service-icon">
+                        ${escapeCatalog(service.icon || "📦")}
+                    </div>
+
+                    <div>
+
+                        <div class="catalog-service-name">
+                            ${escapeCatalog(service.title)}
+                        </div>
+
+                        <div class="catalog-service-description">
+                            ${escapeCatalog(service.description || "")}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="catalog-products-view-toolbar">
+
+                <div>
+
+                    <div class="catalog-products-view-title">
+                        Produk
+                    </div>
+
+                    <div class="catalog-products-view-count">
+                        ${products.length} produk
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="catalog-add-button"
+                    onclick="openProductModal('${escapeCatalog(service.id)}')"
+                >
+                    + Produk
+                </button>
+
+            </div>
+
+
+            <div class="catalog-products-list">
+
+                ${
+                    products.length
+                        ? products.map(product => `
+
+                            <div class="catalog-product-card">
+
+                                <div class="catalog-product-main">
+
+                                    <div>
+
+                                        <div class="catalog-product-name">
+                                            ${escapeCatalog(product.name)}
+                                        </div>
+
+                                        <div class="catalog-product-info">
+                                            ${escapeCatalog(product.operator || "")}
+                                            ${
+                                                product.info
+                                                    ? " · " +
+                                                      escapeCatalog(product.info)
+                                                    : ""
+                                            }
+                                        </div>
+
+                                    </div>
+
+                                    <div class="catalog-product-price">
+                                        ${formatCatalogPrice(product.price)}
+                                    </div>
+
+                                </div>
+
+                                <div class="catalog-product-actions">
+
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="editProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="duplicateProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Duplikat
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button"
+                                        onclick="shareProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Bagikan
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="catalog-action-button danger"
+                                        onclick="deleteProduct('${escapeCatalog(product.id)}')"
+                                    >
+                                        Hapus
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        `).join("")
+                        : `
+                            <div class="catalog-empty">
+                                Belum ada produk dalam layanan ini.
+                            </div>
+                        `
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+}
 
 
 function populateProductServiceOptions() {
@@ -10152,10 +10357,15 @@ table tbody tr:hover{
     .catalog-product-row{
         grid-template-columns:1fr!important;
         gap:8px!important;
+        padding:14px 0!important;
     }
 
     .catalog-product-row .catalog-product-status{
         grid-column:1!important;
+    }
+
+    .catalog-product-price{
+        margin-top:0!important;
     }
 
     .catalog-product-actions{
@@ -10461,3 +10671,437 @@ document.addEventListener(
     setupServiceTypeListener
 );
 </script>
+
+<style id="bayora-product-inside-service-final">
+
+/* =========================================================
+   BAYORA — PRODUCT BUBBLE INSIDE SERVICE
+   FINAL OVERRIDE
+========================================================= */
+
+.catalog-service-card .catalog-products {
+    display: block !important;
+    margin-top: 18px !important;
+    padding: 12px !important;
+
+    background: #f8fbff !important;
+    border: 1px solid #dce8f7 !important;
+    border-radius: 16px !important;
+
+    box-sizing: border-box !important;
+}
+
+.catalog-service-card .catalog-products::before {
+    content: "PRODUK" !important;
+
+    display: block !important;
+    margin: 0 2px 10px !important;
+
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: .08em !important;
+
+    color: #7a8799 !important;
+}
+
+/* Setiap produk menjadi bubble sendiri */
+.catalog-service-card .catalog-products .catalog-product-row {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        auto !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    margin: 8px 0 0 !important;
+    padding: 12px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e1eaf5 !important;
+    border-radius: 12px !important;
+
+    box-sizing: border-box !important;
+
+    box-shadow:
+        0 2px 8px rgba(25, 70, 125, .04) !important;
+}
+
+.catalog-service-card
+.catalog-products
+.catalog-product-row:first-of-type {
+    margin-top: 0 !important;
+}
+
+/* Jangan tampilkan garis pemisah lama */
+.catalog-service-card
+.catalog-products
+.catalog-product-row {
+    border-bottom: 1px solid #e1eaf5 !important;
+}
+
+/* Informasi produk */
+.catalog-service-card
+.catalog-products
+.catalog-product-name {
+    min-width: 0 !important;
+}
+
+.catalog-service-card
+.catalog-products
+.catalog-product-info {
+    min-width: 0 !important;
+}
+
+/* Harga */
+.catalog-service-card
+.catalog-products
+.catalog-product-price {
+    white-space: nowrap !important;
+}
+
+/* Tombol produk tetap DI DALAM bubble produk */
+.catalog-service-card
+.catalog-products
+.catalog-product-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: wrap !important;
+    gap: 7px !important;
+
+    width: auto !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .catalog-service-card .catalog-products {
+        margin-top: 14px !important;
+        padding: 10px !important;
+        border-radius: 14px !important;
+    }
+
+    .catalog-service-card
+    .catalog-products
+    .catalog-product-row {
+        display: grid !important;
+
+        grid-template-columns: 1fr !important;
+
+        gap: 8px !important;
+
+        margin-top: 8px !important;
+        padding: 12px !important;
+
+        border-radius: 11px !important;
+    }
+
+    .catalog-service-card
+    .catalog-products
+    .catalog-product-price {
+        margin-top: 0 !important;
+    }
+
+    .catalog-service-card
+    .catalog-products
+    .catalog-product-actions {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 8px !important;
+
+        width: 100% !important;
+    }
+
+    .catalog-service-card
+    .catalog-products
+    .catalog-product-actions
+    .catalog-action-button {
+        width: 100% !important;
+        min-height: 40px !important;
+    }
+
+}
+
+</style>
+
+<style id="bayora-products-view-final">
+
+/* =========================================================
+   BAYORA — PRODUCTS VIEW FINAL
+========================================================= */
+
+.catalog-products-view {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Kembali berada sendiri di paling atas */
+.catalog-products-view-header {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+}
+
+/* Tombol kembali */
+.catalog-products-view-header .catalog-back-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: auto !important;
+    min-height: 36px !important;
+
+    margin: 0 0 16px !important;
+    padding: 8px 13px !important;
+
+    background: #ffffff !important;
+    border: 1px solid #dfe6ef !important;
+    border-radius: 9px !important;
+
+    color: #315f96 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+}
+
+/* Informasi layanan */
+.catalog-products-view-service {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+
+    width: 100% !important;
+    padding: 14px !important;
+
+    box-sizing: border-box !important;
+
+    background: #f8fbff !important;
+    border: 1px solid #e2eaf4 !important;
+    border-radius: 13px !important;
+}
+
+.catalog-products-view-service .catalog-service-icon {
+    flex: 0 0 auto !important;
+}
+
+.catalog-products-view-service > div:last-child {
+    min-width: 0 !important;
+}
+
+.catalog-products-view-service .catalog-service-name {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+}
+
+.catalog-products-view-service .catalog-service-description {
+    margin-top: 4px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+}
+
+/* Header Produk */
+.catalog-products-view-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+
+    width: 100% !important;
+
+    margin: 0 0 14px !important;
+    padding: 0 0 14px !important;
+
+    border-bottom: 1px solid #edf0f4 !important;
+    box-sizing: border-box !important;
+}
+
+.catalog-products-view-title {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #182b49 !important;
+    line-height: 1.3 !important;
+}
+
+.catalog-products-view-count {
+    margin-top: 3px !important;
+    font-size: 11px !important;
+    color: #9299a3 !important;
+}
+
+/* Tombol + Produk */
+.catalog-products-view-toolbar .catalog-add-button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
+
+/* Daftar produk */
+.catalog-products-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+
+    width: 100% !important;
+}
+
+/* Satu produk */
+.catalog-products-list .catalog-product-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 18px !important;
+
+    padding: 14px !important;
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+}
+
+/* Informasi + harga produk */
+.catalog-products-list .catalog-product-main {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+
+    gap: 18px !important;
+}
+
+.catalog-products-list .catalog-product-main > div:first-child {
+    min-width: 0 !important;
+}
+
+.catalog-products-list .catalog-product-name {
+    font-size: 13px !important;
+    font-weight: 750 !important;
+    line-height: 1.35 !important;
+}
+
+.catalog-products-list .catalog-product-info {
+    margin-top: 4px !important;
+    font-size: 11px !important;
+    color: #9299a3 !important;
+    line-height: 1.4 !important;
+}
+
+.catalog-products-list .catalog-product-price {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+/* FITUR PRODUK — tetap di halaman produk */
+.catalog-products-list .catalog-product-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: wrap !important;
+
+    flex: 0 0 auto !important;
+    width: auto !important;
+
+    gap: 7px !important;
+    margin: 0 !important;
+}
+
+.catalog-products-list .catalog-product-actions .catalog-action-button {
+    width: auto !important;
+    min-height: 36px !important;
+    flex: 0 0 auto !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .catalog-products-view-header {
+        margin-bottom: 14px !important;
+    }
+
+    .catalog-products-view-header .catalog-back-button {
+        width: auto !important;
+        min-height: 36px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .catalog-products-view-service {
+        align-items: flex-start !important;
+        padding: 12px !important;
+    }
+
+    .catalog-products-view-service .catalog-service-name {
+        font-size: 15px !important;
+    }
+
+    .catalog-products-view-service .catalog-service-description {
+        font-size: 11px !important;
+    }
+
+    .catalog-products-view-toolbar {
+        align-items: stretch !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .catalog-products-view-toolbar .catalog-add-button {
+        width: 100% !important;
+    }
+
+    .catalog-products-list .catalog-product-card {
+        display: block !important;
+        padding: 12px !important;
+    }
+
+    .catalog-products-list .catalog-product-main {
+        display: block !important;
+    }
+
+    .catalog-products-list .catalog-product-price {
+        display: block !important;
+        margin-top: 7px !important;
+    }
+
+    .catalog-products-list .catalog-product-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+        width: 100% !important;
+        margin-top: 12px !important;
+
+        gap: 8px !important;
+    }
+
+    .catalog-products-list .catalog-product-actions .catalog-action-button {
+        width: 100% !important;
+        min-height: 40px !important;
+    }
+
+}
+
+</style>

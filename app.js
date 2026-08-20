@@ -543,6 +543,24 @@ async function loadCustomerCatalog() {
 
             if (sharedService) {
 
+                /*
+                 * Samakan kategori dengan saat user
+                 * membuka layanan secara normal.
+                 *
+                 * Digital -> tab Digital
+                 * PPOB    -> tab PPOB
+                 */
+                if (
+                    typeof setCustomerServiceCategory ===
+                    "function"
+                ) {
+                    setCustomerServiceCategory(
+                        sharedService.type === "digital"
+                            ? "digital"
+                            : "ppob"
+                    );
+                }
+
                 openService(sharedServiceId);
 
             } else {

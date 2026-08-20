@@ -2568,7 +2568,13 @@ app.get("/api/transactions/:id", (req, res) => {
                 t.payment_method AS paymentMethod,
                 t.status,
                 t.payment_status AS paymentStatus,
-                p.product_type AS productType,
+
+                CASE
+                    WHEN t.transaction_id LIKE 'DIGITAL-%'
+                        THEN 'digital'
+                    ELSE p.product_type
+                END AS productType,
+
                 t.created_at AS createdAt
             FROM transactions t
             LEFT JOIN products p

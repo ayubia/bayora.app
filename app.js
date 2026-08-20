@@ -3639,9 +3639,60 @@ function showDigitalDownloadButton(
     const successPage =
         document.getElementById("successPage");
 
-    if (!successPage) {
+    const orderSummary =
+        document.getElementById("orderSummary");
+
+    if (!successPage || !orderSummary) {
+
+        console.warn(
+            "[DIGITAL DOWNLOAD] successPage/orderSummary tidak ditemukan."
+        );
+
         return;
     }
+
+    /*
+     * =====================================================
+     * BAYORA — DIGITAL DOWNLOAD FINAL
+     * =====================================================
+     *
+     * Pastikan area download selalu menjadi
+     * satu kolom penuh.
+     */
+
+    orderSummary.style.width =
+        "100%";
+
+    orderSummary.style.maxWidth =
+        "100%";
+
+    orderSummary.style.minWidth =
+        "0";
+
+    orderSummary.style.boxSizing =
+        "border-box";
+
+    orderSummary.style.display =
+        "block";
+
+    orderSummary.style.gridColumn =
+        "1 / -1";
+
+    orderSummary.style.gridRow =
+        "auto";
+
+    orderSummary.style.flex =
+        "0 0 100%";
+
+    orderSummary.style.margin =
+        "0";
+
+    orderSummary.style.padding =
+        "0";
+
+    /*
+     * Jangan membuat container kedua.
+     */
 
     const existing =
         document.getElementById(
@@ -3652,20 +3703,35 @@ function showDigitalDownloadButton(
         return;
     }
 
+    /*
+     * =====================================================
+     * CONTAINER
+     * =====================================================
+     */
+
     const container =
         document.createElement("div");
 
     container.id =
         "digitalDownloadContainer";
 
-    container.style.marginTop =
-        "28px";
+    container.style.width =
+        "100%";
 
-    container.style.padding =
+    container.style.maxWidth =
+        "100%";
+
+    container.style.minWidth =
         "0";
 
-    container.style.textAlign =
-        "left";
+    container.style.boxSizing =
+        "border-box";
+
+    container.style.margin =
+        "28px 0 0";
+
+    container.style.padding =
+        "24px";
 
     container.style.background =
         "#ffffff";
@@ -3676,124 +3742,165 @@ function showDigitalDownloadButton(
     container.style.borderRadius =
         "20px";
 
+    container.style.boxShadow =
+        "0 20px 55px rgba(6,26,69,.10)";
+
     container.style.overflow =
         "hidden";
 
-    container.style.boxShadow =
-        "0 12px 30px rgba(16,36,77,.08)";
-
-
     /*
      * =====================================================
-     * HEADER
+     * HEADER — mengikuti visual email BAYORA
      * =====================================================
      */
 
     const header =
         document.createElement("div");
 
+    header.style.margin =
+        "-24px -24px 24px";
+
     header.style.padding =
-        "20px 24px";
+        "28px 24px 24px";
+
+    header.style.textAlign =
+        "center";
 
     header.style.background =
-        "linear-gradient(100deg,#1268ff,#14c9f4)";
+        "linear-gradient(100deg,#061a45,#0b2c68)";
 
-    const headerTitle =
+    const brand =
         document.createElement("div");
 
-    headerTitle.textContent =
-        "Pesanan Siap Diunduh";
+    brand.textContent =
+        "BAYORA";
 
-    headerTitle.style.fontSize =
-        "18px";
+    brand.style.fontSize =
+        "22px";
 
-    headerTitle.style.fontWeight =
-        "800";
+    brand.style.fontWeight =
+        "900";
 
-    headerTitle.style.color =
+    brand.style.letterSpacing =
+        "-0.5px";
+
+    brand.style.color =
         "#ffffff";
 
-    headerTitle.style.letterSpacing =
-        ".2px";
+    brand.style.marginBottom =
+        "6px";
 
-    const headerSub =
+    const eyebrow =
         document.createElement("div");
 
-    headerSub.textContent =
-        productName ||
-        "Produk Digital";
+    eyebrow.textContent =
+        "FILE PESANAN";
 
-    headerSub.style.marginTop =
-        "5px";
+    eyebrow.style.fontSize =
+        "11px";
 
-    headerSub.style.fontSize =
-        "12px";
+    eyebrow.style.fontWeight =
+        "800";
 
-    headerSub.style.color =
-        "rgba(255,255,255,.88)";
+    eyebrow.style.letterSpacing =
+        "2.5px";
 
-    header.appendChild(headerTitle);
-    header.appendChild(headerSub);
+    eyebrow.style.color =
+        "#8fe8ff";
 
-
-    /*
-     * =====================================================
-     * CONTENT
-     * =====================================================
-     */
-
-    const content =
-        document.createElement("div");
-
-    content.style.padding =
-        "22px 24px";
+    eyebrow.style.marginBottom =
+        "8px";
 
     const title =
         document.createElement("div");
 
     title.textContent =
-        "FILE PESANAN";
+        "Produk kamu siap";
 
     title.style.fontSize =
-        "10px";
+        "22px";
+
+    title.style.lineHeight =
+        "1.3";
 
     title.style.fontWeight =
         "800";
 
-    title.style.letterSpacing =
-        "1.7px";
-
     title.style.color =
-        "#1268ff";
+        "#ffffff";
 
-    title.style.marginBottom =
+    header.appendChild(brand);
+    header.appendChild(eyebrow);
+    header.appendChild(title);
+
+    /*
+     * =====================================================
+     * DESCRIPTION
+     * =====================================================
+     */
+
+    const description =
+        document.createElement("p");
+
+    description.textContent =
+        productName
+            ? `${productName} siap digunakan.`
+            : "File produk digital kamu siap digunakan.";
+
+    description.style.margin =
+        "0 0 20px";
+
+    description.style.fontSize =
         "14px";
 
+    description.style.lineHeight =
+        "1.6";
 
-    const files =
+    description.style.color =
+        "#64748b";
+
+    description.style.textAlign =
+        "center";
+
+    /*
+     * =====================================================
+     * DOWNLOAD ACTIONS
+     * =====================================================
+     */
+
+    const actions =
         document.createElement("div");
 
-    files.style.display =
+    actions.style.display =
         "flex";
 
-    files.style.flexDirection =
+    actions.style.flexDirection =
         "column";
 
-    files.style.gap =
+    actions.style.gap =
         "12px";
 
+    actions.style.width =
+        "100%";
 
-    function createDownloadButton(
-        label,
-        descriptionText,
-        url
+    function createDownloadLink(
+        href,
+        titleText,
+        subtitleText,
+        accent
     ) {
 
         const link =
             document.createElement("a");
 
         link.href =
-            url;
+            href;
+
+        link.target =
+            "_blank";
+
+        link.rel =
+            "noopener noreferrer";
 
         link.style.display =
             "flex";
@@ -3805,74 +3912,100 @@ function showDigitalDownloadButton(
             "space-between";
 
         link.style.gap =
-            "16px";
+            "14px";
+
+        link.style.width =
+            "100%";
+
+        link.style.minWidth =
+            "0";
+
+        link.style.boxSizing =
+            "border-box";
 
         link.style.padding =
-            "15px 17px";
+            "16px 18px";
 
         link.style.borderRadius =
-            "14px";
+            "16px";
 
         link.style.textDecoration =
             "none";
 
         link.style.background =
-            "#f5f9ff";
+            "#f8fbff";
 
         link.style.border =
             "1px solid rgba(20,201,244,.18)";
 
-        link.style.cursor =
-            "pointer";
-
-        link.style.transition =
-            "transform .15s ease, box-shadow .15s ease";
-
-
-        const left =
-            document.createElement("div");
-
-        const name =
-            document.createElement("div");
-
-        name.textContent =
-            label;
-
-        name.style.fontSize =
-            "14px";
-
-        name.style.fontWeight =
-            "800";
-
-        name.style.color =
+        link.style.color =
             "#10244d";
 
+        link.style.transition =
+            "transform .18s ease, box-shadow .18s ease";
 
-        const detail =
+        const textWrap =
             document.createElement("div");
 
-        detail.textContent =
-            descriptionText;
+        textWrap.style.minWidth =
+            "0";
 
-        detail.style.marginTop =
-            "3px";
+        textWrap.style.flex =
+            "1";
 
-        detail.style.fontSize =
-            "12px";
+        const title =
+            document.createElement("div");
 
-        detail.style.color =
+        title.textContent =
+            titleText;
+
+        title.style.fontSize =
+            "15px";
+
+        title.style.fontWeight =
+            "800";
+
+        title.style.lineHeight =
+            "1.35";
+
+        title.style.color =
+            "#10244d";
+
+        const subtitle =
+            document.createElement("div");
+
+        subtitle.textContent =
+            subtitleText;
+
+        subtitle.style.marginTop =
+            "4px";
+
+        subtitle.style.fontSize =
+            "13px";
+
+        subtitle.style.lineHeight =
+            "1.45";
+
+        subtitle.style.color =
             "#64748b";
 
-
-        left.appendChild(name);
-        left.appendChild(detail);
-
+        textWrap.appendChild(title);
+        textWrap.appendChild(subtitle);
 
         const arrow =
             document.createElement("span");
 
         arrow.textContent =
             "↓";
+
+        arrow.style.flex =
+            "0 0 auto";
+
+        arrow.style.width =
+            "38px";
+
+        arrow.style.height =
+            "38px";
 
         arrow.style.display =
             "flex";
@@ -3883,200 +4016,211 @@ function showDigitalDownloadButton(
         arrow.style.justifyContent =
             "center";
 
-        arrow.style.width =
-            "38px";
-
-        arrow.style.height =
-            "38px";
-
-        arrow.style.flexShrink =
-            "0";
-
         arrow.style.borderRadius =
-            "10px";
+            "12px";
+
+        arrow.style.background =
+            accent;
 
         arrow.style.color =
             "#ffffff";
 
         arrow.style.fontSize =
-            "19px";
+            "20px";
 
         arrow.style.fontWeight =
             "800";
 
-        arrow.style.background =
-            "linear-gradient(100deg,#1268ff,#14c9f4)";
-
-
-        link.appendChild(left);
+        link.appendChild(textWrap);
         link.appendChild(arrow);
-
-
-        link.addEventListener(
-            "mouseenter",
-            () => {
-                link.style.transform =
-                    "translateY(-1px)";
-                link.style.boxShadow =
-                    "0 8px 20px rgba(18,104,255,.10)";
-            }
-        );
-
-        link.addEventListener(
-            "mouseleave",
-            () => {
-                link.style.transform =
-                    "translateY(0)";
-                link.style.boxShadow =
-                    "none";
-            }
-        );
-
 
         return link;
     }
 
+    /*
+     * Preset
+     */
 
-    const zipUrl =
-        `/api/digital-products/download/${encodeURIComponent(transactionId)}`;
-
-    const guideUrl =
-        `/api/digital-products/download-guide/${encodeURIComponent(transactionId)}`;
-
-
-    files.appendChild(
-        createDownloadButton(
+    const presetLink =
+        createDownloadLink(
+            `/api/digital-products/download/${encodeURIComponent(
+                transactionId
+            )}`,
             "Download Preset",
             "File ZIP Lightroom",
-            zipUrl
-        )
-    );
+            "#3167f5"
+        );
 
+    /*
+     * Panduan
+     */
 
-    files.appendChild(
-        createDownloadButton(
+    const guideLink =
+        createDownloadLink(
+            `/api/digital-products/download-guide/${encodeURIComponent(
+                transactionId
+            )}`,
             "Download Panduan",
             "Panduan penggunaan sesuai perangkat",
-            guideUrl
-        )
-    );
+            "#0b2c68"
+        );
 
-
-    const emailNote =
-        document.createElement("div");
-
-    emailNote.style.marginTop =
-        "22px";
-
-    emailNote.style.padding =
-        "15px 17px";
-
-    emailNote.style.borderRadius =
-        "12px";
-
-    emailNote.style.background =
-        "#f5f9ff";
-
-    emailNote.style.borderLeft =
-        "4px solid #ffd21c";
-
-    emailNote.style.fontSize =
-        "13px";
-
-    emailNote.style.lineHeight =
-        "1.7";
-
-    emailNote.style.color =
-        "#64748b";
-
-    emailNote.textContent =
-        "File pesanan juga telah dikirim ke email kamu sebagai cadangan.";
-
-
-    const closing =
-        document.createElement("p");
-
-    closing.style.margin =
-        "24px 0 0";
-
-    closing.style.fontSize =
-        "13px";
-
-    closing.style.lineHeight =
-        "1.7";
-
-    closing.style.color =
-        "#64748b";
-
-    closing.innerHTML =
-        'Terima kasih sudah menjadi bagian dari <strong style="color:#1268ff;">BAYORA</strong> 🤍';
-
-
-    content.appendChild(title);
-    content.appendChild(files);
-    content.appendChild(emailNote);
-    content.appendChild(closing);
-
+    actions.appendChild(presetLink);
+    actions.appendChild(guideLink);
 
     /*
      * =====================================================
-     * FOOTER
+     * EMAIL NOTICE
+     * =====================================================
+     *
+     * Hanya tampilan browser.
+     * Email delivery TIDAK disentuh.
+     */
+
+    const emailNotice =
+        document.createElement("div");
+
+    emailNotice.style.margin =
+        "18px 0 0";
+
+    emailNotice.style.padding =
+        "14px 16px";
+
+    emailNotice.style.boxSizing =
+        "border-box";
+
+    emailNotice.style.width =
+        "100%";
+
+    emailNotice.style.borderRadius =
+        "14px";
+
+    emailNotice.style.background =
+        "#fffaf0";
+
+    emailNotice.style.borderLeft =
+        "4px solid #f5c842";
+
+    emailNotice.style.color =
+        "#64748b";
+
+    emailNotice.style.fontSize =
+        "13px";
+
+    emailNotice.style.lineHeight =
+        "1.6";
+
+    emailNotice.textContent =
+        "File pesanan juga telah dikirim ke email kamu sebagai cadangan.";
+
+    /*
+     * =====================================================
+     * ASSEMBLY
      * =====================================================
      */
 
-    const footer =
-        document.createElement("div");
-
-    footer.style.padding =
-        "18px 24px";
-
-    footer.style.textAlign =
-        "center";
-
-    footer.style.background =
-        "#061a45";
-
-
-    const footerText =
-        document.createElement("div");
-
-    footerText.textContent =
-        "© BAYORA · Lightroom Presets";
-
-    footerText.style.fontSize =
-        "10px";
-
-    footerText.style.color =
-        "#f5f9ff";
-
-
-    const footerSub =
-        document.createElement("div");
-
-    footerSub.textContent =
-        "Create. Edit. Express yourself.";
-
-    footerSub.style.marginTop =
-        "5px";
-
-    footerSub.style.fontSize =
-        "9px";
-
-    footerSub.style.color =
-        "#14c9f4";
-
-
-    footer.appendChild(footerText);
-    footer.appendChild(footerSub);
-
-
     container.appendChild(header);
-    container.appendChild(content);
-    container.appendChild(footer);
+    container.appendChild(description);
+    container.appendChild(actions);
+    container.appendChild(emailNotice);
 
-    successPage.appendChild(container);
+    /*
+     * KUNCI:
+     * download berada di dalam orderSummary.
+     */
 
+    orderSummary.appendChild(container);
 }
+
+
+/* =========================================================
+   BAYORA — DIGITAL DOWNLOAD RESPONSIVE
+========================================================= */
+
+(function injectDigitalDownloadResponsiveCSS() {
+
+    if (
+        document.getElementById(
+            "bayoraDigitalDownloadResponsive"
+        )
+    ) {
+        return;
+    }
+
+    const style =
+        document.createElement("style");
+
+    style.id =
+        "bayoraDigitalDownloadResponsive";
+
+    style.textContent = `
+
+        #successPage #orderSummary {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            display: block !important;
+            box-sizing: border-box !important;
+            grid-column: 1 / -1 !important;
+            flex: 0 0 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        #successPage #digitalDownloadContainer {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        @media screen and (max-width: 700px) {
+
+            #successPage {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #successPage .success-box {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #successPage #orderSummary {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                grid-column: 1 / -1 !important;
+            }
+
+            #successPage #digitalDownloadContainer {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 22px !important;
+                padding: 20px !important;
+                border-radius: 18px !important;
+            }
+
+            #successPage #digitalDownloadContainer > div:first-child {
+                margin: -20px -20px 20px !important;
+                padding: 24px 20px 22px !important;
+            }
+
+            #successPage #digitalDownloadContainer a {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+        }
+
+    `;
+
+    document.head.appendChild(style);
+
+})();
 
 
 async function checkTransactionStatus(transactionId) {

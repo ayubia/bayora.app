@@ -2219,11 +2219,15 @@ app.post(
 
             const relativePath =
                 path.relative(
-                    path.join(__dirname, ".."),
-                    req.file.path
-                ).split(path.sep).join("/");
+                        digitalUploadRoot,
+                        req.file.path
+                    ).split(path.sep).join("/");
 
-            return res.json({
+            
+                const publicPath =
+                    "/uploads/digital/" + relativePath;
+
+return res.json({
                 success: true,
                 file: {
                     originalName:
@@ -2233,7 +2237,7 @@ app.post(
                         req.file.filename,
 
                     path:
-                        "/" + relativePath,
+                        publicPath,
 
                     size:
                         req.file.size,
@@ -2365,13 +2369,17 @@ app.post(
 
                 const relativePath =
                     path.relative(
-                        path.join(__dirname, ".."),
+                        digitalUploadRoot,
                         req.file.path
                     )
                     .split(path.sep)
                     .join("/");
 
-                return res.json({
+                
+                const publicPath =
+                    "/uploads/digital/" + relativePath;
+
+return res.json({
 
                     success: true,
 

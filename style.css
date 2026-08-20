@@ -7466,3 +7466,25 @@ body {
     }
 
 }
+
+/* =========================================================
+   BAYORA SERVICE ICONS
+   Icon PNG transparan menggantikan emoji lama
+   ========================================================= */
+
+.service-icon .bayora-service-icon-image {
+    width: 100%;
+    height: 100%;
+    max-width: 72px;
+    max-height: 72px;
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* Ukuran khusus icon Lightroom agar visualnya sejajar dengan icon PPOB */
+.service-icon .bayora-lightroom-icon {
+    transform: scale(1.18);
+}

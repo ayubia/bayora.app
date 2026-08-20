@@ -742,6 +742,160 @@ function renderCustomerServices() {
         );
 
 
+    
+const BAYORA_SERVICE_ICONS = {
+
+    "pulsa": "pulsa.png",
+
+    "data": "paket-data.png",
+    "paket-data": "paket-data.png",
+
+    "pln-token": "token-pln.png",
+    "token-pln": "token-pln.png",
+
+    "pln-bill": "token-pln.png",
+    "tagihan-pln": "token-pln.png",
+
+    "ewallet": "e-wallet.png",
+    "e-wallet": "e-wallet.png",
+
+    "games": "games.png",
+    "game": "games.png",
+
+    "aktivasi-voucher": "aktivasi-voucher.png",
+    "voucher-aktivasi": "aktivasi-voucher.png",
+
+    "paket-sms-telpon": "paket-sms-telpon.png",
+    "sms-telpon": "paket-sms-telpon.png",
+    "sms": "paket-sms-telpon.png",
+    "telpon": "paket-sms-telpon.png",
+
+    "tv": "tv.png",
+    "tv-kabel": "tv.png",
+
+    "masa-aktif": "masa-aktif.png",
+
+    "aktivasi-perdana": "aktivasi-perdana.png",
+    "perdana": "aktivasi-perdana.png",
+
+    "voucher": "voucher.png",
+
+    "gas": "gas.png",
+    "pdam": "gas.png",
+
+    "bpjs": "bpjs.png",
+
+    "zakat-donasi": "zakat-donasi.png",
+    "zakat": "zakat-donasi.png",
+    "donasi": "zakat-donasi.png",
+
+    "voucher-game": "voucher-game.png",
+
+    "voucher-belanja": "voucher-belanja.png",
+
+    "tiket-kereta": "tiket-kereta.png",
+    "kereta": "tiket-kereta.png",
+
+    "tiket-pesawat": "tiket-pesawat.png",
+    "pesawat": "tiket-pesawat.png",
+
+    "template-media-sosial": "template-media-sosial.png",
+
+    "ebook-template": "ebook-template.png",
+    "ebook": "ebook-template.png",
+
+    "musik-digital": "musik-digital.png",
+    "musik": "musik-digital.png",
+
+    "desain-digital": "desain-digital.png",
+    "desain": "desain-digital.png",
+
+    "software-tools": "software-tools.png",
+    "software": "software-tools.png",
+
+    "preset-lightroom": "preset-lightroom.png",
+    "lightroom": "preset-lightroom.png",
+    "lightroom-preset": "preset-lightroom.png"
+};
+
+function getBayoraServiceIcon(id, service) {
+
+    const normalizedId =
+        String(id || "")
+            .trim()
+            .toLowerCase();
+
+    if (BAYORA_SERVICE_ICONS[normalizedId]) {
+        return BAYORA_SERVICE_ICONS[normalizedId];
+    }
+
+    const title =
+        String(service?.title || "")
+            .trim()
+            .toLowerCase();
+
+    const titleMap = [
+        ["preset", "preset-lightroom.png"],
+        ["lightroom", "preset-lightroom.png"],
+        ["paket data", "paket-data.png"],
+        ["pulsa", "pulsa.png"],
+        ["token pln", "token-pln.png"],
+        ["tagihan pln", "token-pln.png"],
+        ["e-wallet", "e-wallet.png"],
+        ["ewallet", "e-wallet.png"],
+        ["games", "games.png"],
+        ["voucher game", "voucher-game.png"],
+        ["voucher belanja", "voucher-belanja.png"],
+        ["aktivasi voucher", "aktivasi-voucher.png"],
+        ["masa aktif", "masa-aktif.png"],
+        ["aktivasi perdana", "aktivasi-perdana.png"],
+        ["paket sms", "paket-sms-telpon.png"],
+        ["paket telpon", "paket-sms-telpon.png"],
+        ["tv", "tv.png"],
+        ["gas", "gas.png"],
+        ["bpjs", "bpjs.png"],
+        ["zakat", "zakat-donasi.png"],
+        ["donasi", "zakat-donasi.png"],
+        ["tiket kereta", "tiket-kereta.png"],
+        ["tiket pesawat", "tiket-pesawat.png"],
+        ["template media sosial", "template-media-sosial.png"],
+        ["e-book", "ebook-template.png"],
+        ["ebook", "ebook-template.png"],
+        ["musik", "musik-digital.png"],
+        ["desain", "desain-digital.png"],
+        ["software", "software-tools.png"]
+    ];
+
+    for (const [keyword, icon] of titleMap) {
+        if (title.includes(keyword)) {
+            return icon;
+        }
+    }
+
+    return null;
+}
+
+function getBayoraServiceIconHTML(id, service) {
+
+    const iconFile =
+        getBayoraServiceIcon(id, service);
+
+    if (!iconFile) {
+        return service?.icon || "📦";
+    }
+
+    return `
+        <img
+            class="bayora-service-icon-image${iconFile === "preset-lightroom.png" ? " bayora-lightroom-icon" : ""}"
+            src="/assets/bayora-icons/${iconFile}"
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+        >
+    `;
+}
+
+
     function renderCards(list) {
 
         if (!list.length) {
@@ -762,7 +916,7 @@ function renderCustomerServices() {
                     .replace(/'/g, "\\\'");
 
             const icon =
-                service.icon || "📦";
+                getBayoraServiceIconHTML(id, service);
 
             const title =
                 service.title || "Layanan";

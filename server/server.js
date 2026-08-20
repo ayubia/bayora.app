@@ -3808,27 +3808,121 @@ async function sendDigitalProductEmail(transactionId) {
                     "BAYORA — Produk Lightroom Kamu Sudah Siap ✨",
 
                 html: `
-                    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717">
-                        <h2>Pesanan kamu sudah siap ✨</h2>
+                    <div style="margin:0;padding:0;background:#F2F1E4;font-family:Arial,Helvetica,sans-serif;color:#332019;">
+                        <div style="max-width:620px;margin:0 auto;padding:42px 20px;">
 
-                        <p>
-                            Pembayaran berhasil diterima.
-                            Berikut file produk Lightroom yang kamu beli.
-                        </p>
+                            <div style="background:#FFFFFF;border:1px solid #E8E1D8;border-radius:20px;overflow:hidden;">
 
-                        <p>
-                            <strong>Perangkat:</strong>
-                            ${device}
-                        </p>
+                                <!-- BAYORA HEADER -->
+                                <div style="padding:36px 32px 30px;text-align:center;border-bottom:1px solid #EEE7DE;">
+                                    <div style="font-size:25px;font-weight:700;letter-spacing:4px;color:#332019;">
+                                        BAYORA
+                                    </div>
 
-                        <p>
-                            File ZIP preset dan PDF panduan
-                            sudah dilampirkan pada email ini.
-                        </p>
+                                    <div style="margin-top:9px;font-size:10px;font-weight:600;letter-spacing:2px;color:#9A877D;">
+                                        LIGHTROOM PRESETS
+                                    </div>
+                                </div>
 
-                        <p>
-                            Terima kasih sudah berbelanja di BAYORA.
-                        </p>
+                                <!-- CONTENT -->
+                                <div style="padding:38px 34px 36px;">
+
+                                    <div style="font-size:25px;font-weight:600;line-height:1.35;color:#332019;margin-bottom:16px;">
+                                        Pesanan kamu sudah siap ✨
+                                    </div>
+
+                                    <p style="font-size:15px;line-height:1.8;color:#6F625C;margin:0 0 28px;">
+                                        Terima kasih telah memilih <strong style="color:#332019;">BAYORA</strong>.
+                                        Pembayaran kamu telah berhasil dikonfirmasi.
+                                        Produk Lightroom yang kamu pesan kini sudah siap digunakan.
+                                    </p>
+
+                                    <!-- ORDER DETAILS -->
+                                    <div style="background:#F7F3EE;border:1px solid #EEE5DC;border-radius:14px;padding:22px 22px;margin-bottom:28px;">
+
+                                        <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;color:#A08F85;margin-bottom:14px;">
+                                            DETAIL PESANAN
+                                        </div>
+
+                                        <div style="font-size:14px;line-height:1.7;color:#6F625C;">
+                                            <span>Perangkat</span>
+                                            <strong style="float:right;color:#332019;">
+                                                ${device}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+
+                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0 0 25px;">
+                                        File preset dan panduan penggunaan untuk perangkat yang kamu pilih
+                                        telah kami lampirkan dalam email ini.
+                                    </p>
+
+                                    <!-- INCLUDED FILES -->
+                                    <div style="border-top:1px solid #EEE7DE;border-bottom:1px solid #EEE7DE;padding:22px 0;margin-bottom:27px;">
+
+                                        <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;color:#A08F85;margin-bottom:16px;">
+                                            ISI PESANAN
+                                        </div>
+
+                                        <div style="font-size:14px;line-height:2;color:#6F625C;">
+                                            <div>
+                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:700;letter-spacing:1px;color:#332019;">
+                                                    ZIP
+                                                </span>
+                                                File preset Lightroom
+                                            </div>
+
+                                            <div>
+                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:700;letter-spacing:1px;color:#332019;">
+                                                    PDF
+                                                </span>
+                                                Panduan penggunaan
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0 0 25px;">
+                                        Silakan download dan simpan file tersebut dengan baik
+                                        agar dapat digunakan kembali kapan saja.
+                                    </p>
+
+                                    <div style="background:#EDD8D0;border-radius:12px;padding:18px 20px;margin-bottom:28px;">
+                                        <div style="font-size:13px;line-height:1.7;color:#5E463C;">
+                                            Mengalami kendala dengan file kamu?
+                                            Silakan hubungi <strong>BAYORA Support</strong>.
+                                            Kami akan dengan senang hati membantu.
+                                        </div>
+                                    </div>
+
+                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0;">
+                                        Terima kasih sudah menjadi bagian dari <strong style="color:#332019;">BAYORA</strong> 🤍
+                                    </p>
+
+                                    <div style="margin-top:28px;font-size:14px;line-height:1.7;color:#6F625C;">
+                                        Dengan hangat,<br>
+                                        <strong style="color:#332019;letter-spacing:1px;">BAYORA</strong>
+                                    </div>
+
+                                </div>
+
+                                <!-- FOOTER -->
+                                <div style="padding:24px 30px;background:#FAF8F5;text-align:center;border-top:1px solid #EEE7DE;">
+
+                                    <div style="font-size:11px;color:#9A877D;line-height:1.7;">
+                                        © BAYORA · Lightroom Presets
+                                    </div>
+
+                                    <div style="margin-top:6px;font-size:10px;color:#B3A59D;letter-spacing:.4px;">
+                                        Create. Edit. Express yourself.
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
                     </div>
                 `,
 

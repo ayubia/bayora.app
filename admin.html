@@ -2113,6 +2113,94 @@ body.bayora-view-admins > main > .stats {
                 </small>
             </div>
 
+
+            <div
+                class="catalog-form-group"
+                id="productDevicePdfGroup"
+                style="display:none;"
+            >
+
+                <label>PDF Panduan Perangkat</label>
+
+                <div class="catalog-form-group">
+                    <label>iOS</label>
+
+                    <input
+                        type="file"
+                        id="productPdfIosUpload"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="productPdfIos"
+                    >
+
+                    <small id="productPdfIosStatus">
+                        PDF panduan untuk iPhone / iPad.
+                    </small>
+                </div>
+
+                <div class="catalog-form-group">
+                    <label>Android</label>
+
+                    <input
+                        type="file"
+                        id="productPdfAndroidUpload"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="productPdfAndroid"
+                    >
+
+                    <small id="productPdfAndroidStatus">
+                        PDF panduan untuk Android.
+                    </small>
+                </div>
+
+                <div class="catalog-form-group">
+                    <label>Mac</label>
+
+                    <input
+                        type="file"
+                        id="productPdfMacUpload"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="productPdfMac"
+                    >
+
+                    <small id="productPdfMacStatus">
+                        PDF panduan untuk Mac.
+                    </small>
+                </div>
+
+                <div class="catalog-form-group">
+                    <label>Windows</label>
+
+                    <input
+                        type="file"
+                        id="productPdfWindowsUpload"
+                        accept=".pdf,application/pdf"
+                    >
+
+                    <input
+                        type="hidden"
+                        id="productPdfWindows"
+                    >
+
+                    <small id="productPdfWindowsStatus">
+                        PDF panduan untuk Windows.
+                    </small>
+                </div>
+
+            </div>
+
+
             <div class="catalog-form-group">
                 <label>Nama Produk</label>
 
@@ -4484,6 +4572,9 @@ function updateProductDigitalFields() {
     const digitalFileGroup =
         document.getElementById("productDigitalFileGroup");
 
+    const devicePdfGroup =
+        document.getElementById("productDevicePdfGroup");
+
     const beforeGroup =
         document.getElementById("productBeforeGroup");
 
@@ -4508,6 +4599,11 @@ function updateProductDigitalFields() {
 
     if (digitalFileGroup) {
         digitalFileGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (devicePdfGroup) {
+        devicePdfGroup.style.display =
             isDigital ? "" : "none";
     }
 
@@ -4686,6 +4782,26 @@ function editProduct(id) {
         "productDigitalFile"
     ).value =
         product.digital_file || "";
+
+    document.getElementById(
+        "productPdfIos"
+    ).value =
+        product.pdf_ios || "";
+
+    document.getElementById(
+        "productPdfAndroid"
+    ).value =
+        product.pdf_android || "";
+
+    document.getElementById(
+        "productPdfMac"
+    ).value =
+        product.pdf_mac || "";
+
+    document.getElementById(
+        "productPdfWindows"
+    ).value =
+        product.pdf_windows || "";
 
     document.getElementById(
         "productBeforeImage"
@@ -4874,6 +4990,34 @@ async function saveProduct(event) {
             isDigital
                 ? document.getElementById(
                     "productDigitalFile"
+                ).value.trim()
+                : null,
+
+        pdf_ios:
+            isDigital
+                ? document.getElementById(
+                    "productPdfIos"
+                ).value.trim()
+                : null,
+
+        pdf_android:
+            isDigital
+                ? document.getElementById(
+                    "productPdfAndroid"
+                ).value.trim()
+                : null,
+
+        pdf_mac:
+            isDigital
+                ? document.getElementById(
+                    "productPdfMac"
+                ).value.trim()
+                : null,
+
+        pdf_windows:
+            isDigital
+                ? document.getElementById(
+                    "productPdfWindows"
                 ).value.trim()
                 : null,
 
@@ -5600,6 +5744,91 @@ function setupDigitalProductUploadListeners() {
         document.getElementById(
             "productDigitalUpload"
         );
+
+
+    const pdfIosInput =
+        document.getElementById(
+            "productPdfIosUpload"
+        );
+
+    const pdfAndroidInput =
+        document.getElementById(
+            "productPdfAndroidUpload"
+        );
+
+    const pdfMacInput =
+        document.getElementById(
+            "productPdfMacUpload"
+        );
+
+    const pdfWindowsInput =
+        document.getElementById(
+            "productPdfWindowsUpload"
+        );
+
+
+    function setupDevicePdfUpload(
+        input,
+        hiddenId,
+        statusId
+    ) {
+
+        if (!input) {
+            return;
+        }
+
+        input.onchange =
+            () => {
+
+                const promise =
+                    uploadDigitalProductFile(
+                        input,
+                        "/api/products/upload-pdf",
+                        hiddenId,
+                        statusId
+                    );
+
+                window.digitalUploadPromises.push(
+                    promise
+                );
+
+                promise.finally(() => {
+
+                    window.digitalUploadPromises =
+                        window.digitalUploadPromises.filter(
+                            item => item !== promise
+                        );
+
+                });
+
+            };
+
+    }
+
+
+    setupDevicePdfUpload(
+        pdfIosInput,
+        "productPdfIos",
+        "productPdfIosStatus"
+    );
+
+    setupDevicePdfUpload(
+        pdfAndroidInput,
+        "productPdfAndroid",
+        "productPdfAndroidStatus"
+    );
+
+    setupDevicePdfUpload(
+        pdfMacInput,
+        "productPdfMac",
+        "productPdfMacStatus"
+    );
+
+    setupDevicePdfUpload(
+        pdfWindowsInput,
+        "productPdfWindows",
+        "productPdfWindowsStatus"
+    );
 
 
     if (previewInput) {

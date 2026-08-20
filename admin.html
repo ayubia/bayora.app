@@ -4432,6 +4432,14 @@ function renderCatalog() {
                             <button
                                 type="button"
                                 class="catalog-action-button"
+                                onclick="shareService('${escapeCatalog(service.id)}')"
+                            >
+                                Bagikan
+                            </button>
+
+                            <button
+                                type="button"
+                                class="catalog-action-button"
                                 onclick="toggleService('${escapeCatalog(service.id)}')"
                             >
                                 ${
@@ -5625,6 +5633,82 @@ async function saveProduct(event) {
         alert(
             error.message ||
             "Gagal menyimpan produk."
+        );
+
+    }
+
+}
+
+
+async function shareService(id) {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === id
+        );
+
+    if (!service) {
+        alert("Layanan tidak ditemukan.");
+        return;
+    }
+
+    const shareUrl =
+        new URL(
+            `/?service=${encodeURIComponent(service.id)}`,
+            window.location.origin
+        ).href;
+
+    const shareData = {
+        title: service.title || "Layanan BAYORA",
+        text: `Lihat layanan ${service.title || "ini"} di BAYORA.`,
+        url: shareUrl
+    };
+
+    try {
+
+        if (
+            navigator.share &&
+            typeof navigator.share === "function"
+        ) {
+
+            await navigator.share(shareData);
+
+            return;
+        }
+
+    } catch (error) {
+
+        if (error.name === "AbortError") {
+            return;
+        }
+
+        console.warn(
+            "[SHARE SERVICE] Web Share gagal:",
+            error
+        );
+
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(
+            shareUrl
+        );
+
+        alert(
+            "Link layanan berhasil disalin.\n\n" +
+            shareUrl
+        );
+
+    } catch (error) {
+
+        console.error(
+            "[SHARE SERVICE] Clipboard gagal:",
+            error
+        );
+
+        alert(
+            "Gagal membagikan layanan."
         );
 
     }

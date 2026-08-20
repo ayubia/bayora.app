@@ -522,6 +522,46 @@ async function loadCustomerCatalog() {
         renderCustomerServices();
 
         /*
+         * BAYORA — OPEN SHARED SERVICE
+         *
+         * Jika halaman dibuka melalui:
+         * ?service=SERVICE_ID
+         *
+         * buka layanan tersebut langsung.
+         *
+         * Berlaku untuk PPOB maupun Digital.
+         */
+        const sharedServiceId =
+            new URLSearchParams(
+                window.location.search
+            ).get("service");
+
+        if (sharedServiceId) {
+
+            const sharedService =
+                services[sharedServiceId];
+
+            if (sharedService) {
+
+                openService(sharedServiceId);
+
+            } else {
+
+                console.warn(
+                    "[BAYORA SHARE] Layanan tidak ditemukan:",
+                    sharedServiceId
+                );
+
+                showHome();
+
+            }
+
+            return;
+
+        }
+
+
+        /*
          * BAYORA — OPEN SHARED PRODUCT
          *
          * Jika halaman dibuka melalui:

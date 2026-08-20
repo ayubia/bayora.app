@@ -3808,113 +3808,124 @@ async function sendDigitalProductEmail(transactionId) {
                     "BAYORA — Produk Lightroom Kamu Sudah Siap ✨",
 
                 html: `
-                    <div style="margin:0;padding:0;background:#F2F1E4;font-family:Arial,Helvetica,sans-serif;color:#332019;">
-                        <div style="max-width:620px;margin:0 auto;padding:42px 20px;">
+                    <div style="margin:0;padding:0;background:#f5f9ff;font-family:Arial,Helvetica,sans-serif;color:#10244d;">
+                        <div style="max-width:620px;margin:0 auto;padding:40px 20px;">
 
-                            <div style="background:#FFFFFF;border:1px solid #E8E1D8;border-radius:20px;overflow:hidden;">
+                            <div style="background:#ffffff;border:1px solid rgba(20,201,244,.18);border-radius:20px;overflow:hidden;box-shadow:0 20px 55px rgba(6,26,69,.10);">
 
-                                <!-- BAYORA HEADER -->
-                                <div style="padding:36px 32px 30px;text-align:center;border-bottom:1px solid #EEE7DE;">
-                                    <div style="font-size:25px;font-weight:700;letter-spacing:4px;color:#332019;">
+                                <!-- HEADER BAYORA -->
+                                <div style="padding:34px 30px 30px;text-align:center;background:linear-gradient(100deg,#061a45,#0b2c68);">
+
+                                    <div style="font-size:27px;font-weight:900;letter-spacing:-1px;color:#ffffff;">
                                         BAYORA
                                     </div>
 
-                                    <div style="margin-top:9px;font-size:10px;font-weight:600;letter-spacing:2px;color:#9A877D;">
+                                    <div style="margin-top:8px;font-size:10px;font-weight:700;letter-spacing:2px;color:#14c9f4;">
                                         LIGHTROOM PRESETS
                                     </div>
+
+                                    <div style="width:42px;height:4px;border-radius:999px;margin:18px auto 0;background:linear-gradient(90deg,#14c9f4,#1268ff);"></div>
+
                                 </div>
 
                                 <!-- CONTENT -->
                                 <div style="padding:38px 34px 36px;">
 
-                                    <div style="font-size:25px;font-weight:600;line-height:1.35;color:#332019;margin-bottom:16px;">
+                                    <div style="font-size:25px;font-weight:800;line-height:1.3;color:#10244d;margin-bottom:16px;">
                                         Pesanan kamu sudah siap ✨
                                     </div>
 
-                                    <p style="font-size:15px;line-height:1.8;color:#6F625C;margin:0 0 28px;">
-                                        Terima kasih telah memilih <strong style="color:#332019;">BAYORA</strong>.
+                                    <p style="font-size:15px;line-height:1.8;color:#64748b;margin:0 0 28px;">
+                                        Terima kasih telah memilih <strong style="color:#1268ff;">BAYORA</strong>.
                                         Pembayaran kamu telah berhasil dikonfirmasi.
                                         Produk Lightroom yang kamu pesan kini sudah siap digunakan.
                                     </p>
 
-                                    <!-- ORDER DETAILS -->
-                                    <div style="background:#F7F3EE;border:1px solid #EEE5DC;border-radius:14px;padding:22px 22px;margin-bottom:28px;">
+                                    <!-- DETAIL PESANAN -->
+                                    <div style="background:#f5f9ff;border:1px solid rgba(20,201,244,.18);border-radius:16px;padding:22px;margin-bottom:28px;">
 
-                                        <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;color:#A08F85;margin-bottom:14px;">
+                                        <div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#1268ff;margin-bottom:15px;">
                                             DETAIL PESANAN
                                         </div>
 
-                                        <div style="font-size:14px;line-height:1.7;color:#6F625C;">
+                                        <div style="font-size:14px;line-height:1.7;color:#64748b;">
                                             <span>Perangkat</span>
-                                            <strong style="float:right;color:#332019;">
+
+                                            <strong style="float:right;color:#10244d;">
                                                 ${device}
                                             </strong>
                                         </div>
 
                                     </div>
 
-                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0 0 25px;">
+                                    <p style="font-size:14px;line-height:1.8;color:#64748b;margin:0 0 24px;">
                                         File preset dan panduan penggunaan untuk perangkat yang kamu pilih
                                         telah kami lampirkan dalam email ini.
                                     </p>
 
-                                    <!-- INCLUDED FILES -->
-                                    <div style="border-top:1px solid #EEE7DE;border-bottom:1px solid #EEE7DE;padding:22px 0;margin-bottom:27px;">
+                                    <!-- FILE -->
+                                    <div style="border-top:1px solid rgba(20,201,244,.18);border-bottom:1px solid rgba(20,201,244,.18);padding:22px 0;margin-bottom:27px;">
 
-                                        <div style="font-size:10px;font-weight:600;letter-spacing:1.8px;color:#A08F85;margin-bottom:16px;">
+                                        <div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#1268ff;margin-bottom:15px;">
                                             ISI PESANAN
                                         </div>
 
-                                        <div style="font-size:14px;line-height:2;color:#6F625C;">
+                                        <div style="font-size:14px;line-height:2;color:#64748b;">
+
                                             <div>
-                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:700;letter-spacing:1px;color:#332019;">
+                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:900;letter-spacing:1px;color:#1268ff;">
                                                     ZIP
                                                 </span>
                                                 File preset Lightroom
                                             </div>
 
                                             <div>
-                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:700;letter-spacing:1px;color:#332019;">
+                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:900;letter-spacing:1px;color:#1268ff;">
                                                     PDF
                                                 </span>
                                                 Panduan penggunaan
                                             </div>
+
                                         </div>
 
                                     </div>
 
-                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0 0 25px;">
+                                    <p style="font-size:14px;line-height:1.8;color:#64748b;margin:0 0 25px;">
                                         Silakan download dan simpan file tersebut dengan baik
                                         agar dapat digunakan kembali kapan saja.
                                     </p>
 
-                                    <div style="background:#EDD8D0;border-radius:12px;padding:18px 20px;margin-bottom:28px;">
-                                        <div style="font-size:13px;line-height:1.7;color:#5E463C;">
+                                    <!-- SUPPORT -->
+                                    <div style="background:#f5f9ff;border-left:4px solid #ffd21c;border-radius:10px;padding:17px 18px;margin-bottom:28px;">
+
+                                        <div style="font-size:13px;line-height:1.7;color:#64748b;">
                                             Mengalami kendala dengan file kamu?
-                                            Silakan hubungi <strong>BAYORA Support</strong>.
+                                            Silakan hubungi <strong style="color:#10244d;">BAYORA Support</strong>.
                                             Kami akan dengan senang hati membantu.
                                         </div>
+
                                     </div>
 
-                                    <p style="font-size:14px;line-height:1.8;color:#6F625C;margin:0;">
-                                        Terima kasih sudah menjadi bagian dari <strong style="color:#332019;">BAYORA</strong> 🤍
+                                    <p style="font-size:14px;line-height:1.8;color:#64748b;margin:0;">
+                                        Terima kasih sudah menjadi bagian dari
+                                        <strong style="color:#1268ff;">BAYORA</strong> 🤍
                                     </p>
 
-                                    <div style="margin-top:28px;font-size:14px;line-height:1.7;color:#6F625C;">
+                                    <div style="margin-top:28px;font-size:14px;line-height:1.7;color:#64748b;">
                                         Dengan hangat,<br>
-                                        <strong style="color:#332019;letter-spacing:1px;">BAYORA</strong>
+                                        <strong style="color:#10244d;letter-spacing:.5px;">BAYORA</strong>
                                     </div>
 
                                 </div>
 
                                 <!-- FOOTER -->
-                                <div style="padding:24px 30px;background:#FAF8F5;text-align:center;border-top:1px solid #EEE7DE;">
+                                <div style="padding:24px 30px;text-align:center;background:#061a45;">
 
-                                    <div style="font-size:11px;color:#9A877D;line-height:1.7;">
+                                    <div style="font-size:11px;color:#f5f9ff;line-height:1.7;">
                                         © BAYORA · Lightroom Presets
                                     </div>
 
-                                    <div style="margin-top:6px;font-size:10px;color:#B3A59D;letter-spacing:.4px;">
+                                    <div style="margin-top:6px;font-size:10px;color:#14c9f4;letter-spacing:.4px;">
                                         Create. Edit. Express yourself.
                                     </div>
 

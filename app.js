@@ -3639,498 +3639,997 @@ function showDigitalDownloadButton(
     const successPage =
         document.getElementById("successPage");
 
-    const orderSummary =
-        document.getElementById("orderSummary");
-
-    if (!successPage || !orderSummary) {
-
+    if (!successPage) {
         console.warn(
-            "[DIGITAL DOWNLOAD] successPage/orderSummary tidak ditemukan."
+            "[DIGITAL DOWNLOAD] successPage tidak ditemukan."
         );
-
         return;
     }
 
     /*
      * =====================================================
-     * BAYORA — DIGITAL DOWNLOAD FINAL
-     * =====================================================
+     * BAYORA — DIGITAL SUCCESS
+     * REFERENSI:
+     * Konfirmasi Pesanan Digital BAYORA
      *
-     * Pastikan area download selalu menjadi
-     * satu kolom penuh.
+     * Layout dibuat mengikuti tampilan email:
+     * MAIN CARD + SIDEBAR
+     * MOBILE = SINGLE COLUMN
+     * =====================================================
      */
 
-    orderSummary.style.width =
-        "100%";
+    let successBox =
+        successPage.querySelector(".success-box");
 
-    orderSummary.style.maxWidth =
-        "100%";
-
-    orderSummary.style.minWidth =
-        "0";
-
-    orderSummary.style.boxSizing =
-        "border-box";
-
-    orderSummary.style.display =
-        "block";
-
-    orderSummary.style.gridColumn =
-        "1 / -1";
-
-    orderSummary.style.gridRow =
-        "auto";
-
-    orderSummary.style.flex =
-        "0 0 100%";
-
-    orderSummary.style.margin =
-        "0";
-
-    orderSummary.style.padding =
-        "0";
-
-    /*
-     * Jangan membuat container kedua.
-     */
-
-    const existing =
-        document.getElementById(
-            "digitalDownloadContainer"
-        );
-
-    if (existing) {
+    if (!successBox) {
         return;
     }
 
     /*
-     * =====================================================
-     * CONTAINER
-     * =====================================================
+     * Ambil transaksi terbaru agar halaman
+     * mempunyai data yang sama dengan email.
      */
-
-    const container =
-        document.createElement("div");
-
-    container.id =
-        "digitalDownloadContainer";
-
-    container.style.width =
-        "100%";
-
-    container.style.maxWidth =
-        "100%";
-
-    container.style.minWidth =
-        "0";
-
-    container.style.boxSizing =
-        "border-box";
-
-    container.style.margin =
-        "28px 0 0";
-
-    container.style.padding =
-        "24px";
-
-    container.style.background =
-        "#ffffff";
-
-    container.style.border =
-        "1px solid rgba(20,201,244,.18)";
-
-    container.style.borderRadius =
-        "20px";
-
-    container.style.boxShadow =
-        "0 20px 55px rgba(6,26,69,.10)";
-
-    container.style.overflow =
-        "hidden";
-
-    /*
-     * =====================================================
-     * HEADER — mengikuti visual email BAYORA
-     * =====================================================
-     */
-
-    const header =
-        document.createElement("div");
-
-    header.style.margin =
-        "-24px -24px 24px";
-
-    header.style.padding =
-        "28px 24px 24px";
-
-    header.style.textAlign =
-        "center";
-
-    header.style.background =
-        "linear-gradient(100deg,#061a45,#0b2c68)";
-
-    const brand =
-        document.createElement("div");
-
-    brand.textContent =
-        "BAYORA";
-
-    brand.style.fontSize =
-        "22px";
-
-    brand.style.fontWeight =
-        "900";
-
-    brand.style.letterSpacing =
-        "-0.5px";
-
-    brand.style.color =
-        "#ffffff";
-
-    brand.style.marginBottom =
-        "6px";
-
-    const eyebrow =
-        document.createElement("div");
-
-    eyebrow.textContent =
-        "FILE PESANAN";
-
-    eyebrow.style.fontSize =
-        "11px";
-
-    eyebrow.style.fontWeight =
-        "800";
-
-    eyebrow.style.letterSpacing =
-        "2.5px";
-
-    eyebrow.style.color =
-        "#8fe8ff";
-
-    eyebrow.style.marginBottom =
-        "8px";
-
-    const title =
-        document.createElement("div");
-
-    title.textContent =
-        "Produk kamu siap";
-
-    title.style.fontSize =
-        "22px";
-
-    title.style.lineHeight =
-        "1.3";
-
-    title.style.fontWeight =
-        "800";
-
-    title.style.color =
-        "#ffffff";
-
-    header.appendChild(brand);
-    header.appendChild(eyebrow);
-    header.appendChild(title);
-
-    /*
-     * =====================================================
-     * DESCRIPTION
-     * =====================================================
-     */
-
-    const description =
-        document.createElement("p");
-
-    description.textContent =
-        productName
-            ? `${productName} siap digunakan.`
-            : "File produk digital kamu siap digunakan.";
-
-    description.style.margin =
-        "0 0 20px";
-
-    description.style.fontSize =
-        "14px";
-
-    description.style.lineHeight =
-        "1.6";
-
-    description.style.color =
-        "#64748b";
-
-    description.style.textAlign =
-        "center";
-
-    /*
-     * =====================================================
-     * DOWNLOAD ACTIONS
-     * =====================================================
-     */
-
-    const actions =
-        document.createElement("div");
-
-    actions.style.display =
-        "flex";
-
-    actions.style.flexDirection =
-        "column";
-
-    actions.style.gap =
-        "12px";
-
-    actions.style.width =
-        "100%";
-
-    function createDownloadLink(
-        href,
-        titleText,
-        subtitleText,
-        accent
-    ) {
-
-        const link =
-            document.createElement("a");
-
-        link.href =
-            href;
-
-        link.target =
-            "_blank";
-
-        link.rel =
-            "noopener noreferrer";
-
-        link.style.display =
-            "flex";
-
-        link.style.alignItems =
-            "center";
-
-        link.style.justifyContent =
-            "space-between";
-
-        link.style.gap =
-            "14px";
-
-        link.style.width =
-            "100%";
-
-        link.style.minWidth =
-            "0";
-
-        link.style.boxSizing =
-            "border-box";
-
-        link.style.padding =
-            "16px 18px";
-
-        link.style.borderRadius =
-            "16px";
-
-        link.style.textDecoration =
-            "none";
-
-        link.style.background =
-            "#f8fbff";
-
-        link.style.border =
-            "1px solid rgba(20,201,244,.18)";
-
-        link.style.color =
-            "#10244d";
-
-        link.style.transition =
-            "transform .18s ease, box-shadow .18s ease";
-
-        const textWrap =
+    fetch(
+        `/api/transactions/${encodeURIComponent(transactionId)}`
+    )
+    .then(response => response.json())
+    .then(data => {
+
+        if (
+            !data ||
+            !data.success ||
+            !data.transaction
+        ) {
+            throw new Error(
+                "Data transaksi tidak ditemukan."
+            );
+        }
+
+        const transaction =
+            data.transaction;
+
+        /*
+         * =================================================
+         * DATA
+         * =================================================
+         */
+
+        const email =
+            transaction.target ||
+            "email kamu";
+
+        const transactionDate =
+            transaction.createdAt
+                ? new Date(
+                    transaction.createdAt
+                ).toLocaleString(
+                    "id-ID",
+                    {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false
+                    }
+                ) + " WIB"
+                : "-";
+
+        const paymentMethod =
+            transaction.paymentMethod === "xendit"
+                ? "Xendit"
+                : (
+                    transaction.paymentMethod ||
+                    "-"
+                );
+
+        const paymentStatus =
+            transaction.paymentStatus === "PAID"
+                ? "Berhasil"
+                : transaction.paymentStatus;
+
+        const total =
+            Number(
+                transaction.price || 0
+            ).toLocaleString(
+                "id-ID"
+            );
+
+        /*
+         * =================================================
+         * BERSIHKAN DOWNLOAD LAMA
+         * =================================================
+         */
+
+        const old =
+            document.getElementById(
+                "bayoraDigitalSuccessLayout"
+            );
+
+        if (old) {
+            old.remove();
+        }
+
+        /*
+         * =================================================
+         * STYLE
+         * =================================================
+         */
+
+        const styleId =
+            "bayoraDigitalSuccessEmailStyle";
+
+        const oldStyle =
+            document.getElementById(styleId);
+
+        if (oldStyle) {
+            oldStyle.remove();
+        }
+
+        const style =
+            document.createElement("style");
+
+        style.id = styleId;
+
+        style.textContent = `
+
+            #successPage.bayora-digital-success {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 42px 5% 70px !important;
+                background: #f5f9ff !important;
+            }
+
+            #bayoraDigitalSuccessLayout {
+                width: 100%;
+                max-width: 1100px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    280px;
+                gap: 24px;
+                align-items: start;
+                box-sizing: border-box;
+            }
+
+            #bayoraDigitalMainCard {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+                background: #ffffff;
+                border: 1px solid #e1ebf7;
+                border-radius: 18px;
+                padding: 30px;
+                box-shadow:
+                    0 18px 45px
+                    rgba(23,70,130,.08);
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-success-icon {
+                width: 62px;
+                height: 62px;
+                margin: 0 auto 18px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background:
+                    linear-gradient(
+                        135deg,
+                        #1769ff,
+                        #16c7ff
+                    );
+                color: #ffffff;
+                font-size: 28px;
+                box-shadow:
+                    0 12px 28px
+                    rgba(23,105,255,.22);
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-demo {
+                width: fit-content;
+                margin: 0 auto 16px;
+                padding: 6px 14px;
+                border-radius: 999px;
+                background: #f1f6ff;
+                border: 1px solid #d7e5ff;
+                color: #1769ff;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 2px;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-success-title {
+                margin: 0;
+                text-align: center;
+                color: #16264b;
+                font-size: 34px;
+                line-height: 1.15;
+                letter-spacing: -1px;
+                font-weight: 800;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-success-description {
+                max-width: 620px;
+                margin: 16px auto 28px;
+                text-align: center;
+                color: #64748b;
+                font-size: 15px;
+                line-height: 1.65;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-divider {
+                height: 1px;
+                background: #e5edf7;
+                margin: 0 0 26px;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-section-title {
+                margin: 0 0 8px;
+                color: #16264b;
+                font-size: 13px;
+                font-weight: 800;
+                letter-spacing: .5px;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-section-description {
+                margin: 0 0 14px;
+                color: #64748b;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-summary {
+                padding: 0 0 25px;
+                margin-bottom: 25px;
+                border-bottom: 1px solid #e5edf7;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-summary-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 20px;
+                padding: 7px 0;
+                color: #344563;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-summary-value {
+                text-align: right;
+                color: #16264b;
+                font-weight: 700;
+                overflow-wrap: anywhere;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-paid {
+                display: inline-flex;
+                padding: 4px 9px;
+                border-radius: 999px;
+                background: #e7f8ec;
+                color: #159447;
+                font-size: 11px;
+                font-weight: 800;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-downloads {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-download-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+                padding: 12px;
+                border: 1px solid #e1eaf5;
+                border-radius: 12px;
+                background: #ffffff;
+                box-shadow:
+                    0 7px 18px
+                    rgba(23,70,130,.05);
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-file-icon {
+                width: 46px;
+                height: 46px;
+                flex: 0 0 46px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 10px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        #1769ff,
+                        #16c7ff
+                    );
+                color: #ffffff;
+                font-size: 10px;
+                font-weight: 900;
+                box-shadow:
+                    0 7px 16px
+                    rgba(23,105,255,.18);
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-file-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-file-title {
+                color: #16264b;
+                font-size: 13px;
+                font-weight: 800;
+                line-height: 1.35;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-file-meta {
+                margin-top: 3px;
+                color: #64748b;
+                font-size: 11px;
+                line-height: 1.45;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-download-button {
+                flex: 0 0 auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                min-width: 100px;
+                padding: 9px 13px;
+                border-radius: 9px;
+                border: 1px solid #8ab4ff;
+                background: #ffffff;
+                color: #1769ff;
+                text-decoration: none;
+                font-size: 11px;
+                font-weight: 800;
+                box-sizing: border-box;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-email-notice {
+                margin-top: 14px;
+                padding: 13px 14px;
+                border: 1px solid #f3d889;
+                border-left: 4px solid #ffc928;
+                border-radius: 10px;
+                background: #fffdf5;
+                color: #344563;
+                font-size: 12px;
+                line-height: 1.55;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-email-notice strong {
+                color: #16264b;
+            }
+
+            #bayoraDigitalSuccessLayout
+            .bayora-home-button {
+                width: 100%;
+                margin-top: 20px;
+                padding: 13px 18px;
+                border: 0;
+                border-radius: 9px;
+                background:
+                    linear-gradient(
+                        100deg,
+                        #1769ff,
+                        #16c7ff
+                    );
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow:
+                    0 10px 22px
+                    rgba(23,105,255,.18);
+            }
+
+            #bayoraDigitalSidebar {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                min-width: 0;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-side-card {
+                padding: 24px 20px;
+                background: #ffffff;
+                border: 1px solid #e1ebf7;
+                border-radius: 14px;
+                box-shadow:
+                    0 14px 32px
+                    rgba(23,70,130,.07);
+                text-align: center;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-side-title {
+                margin: 0 0 18px;
+                color: #16264b;
+                font-size: 12px;
+                font-weight: 800;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-side-icon {
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 14px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #eef5ff;
+                color: #1769ff;
+                font-size: 21px;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-side-text {
+                margin: 0;
+                color: #64748b;
+                font-size: 12px;
+                line-height: 1.7;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-contact {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 14px;
+                padding: 9px 13px;
+                border-radius: 999px;
+                background: #f1f6ff;
+                border: 1px solid #d8e6ff;
+                color: #1769ff;
+                font-size: 11px;
+                font-weight: 800;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-security-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                text-align: left;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-security-list li {
+                position: relative;
+                padding-left: 18px;
+                margin: 10px 0;
+                color: #52627d;
+                font-size: 11px;
+                line-height: 1.5;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-security-list li::before {
+                content: "✓";
+                position: absolute;
+                left: 0;
+                color: #1769ff;
+                font-weight: 900;
+            }
+
+            #bayoraDigitalSidebar
+            .bayora-side-brand {
+                margin-top: 18px;
+                color: #1769ff;
+                font-size: 14px;
+                font-weight: 900;
+            }
+
+            @media (max-width: 760px) {
+
+                #successPage.bayora-digital-success {
+                    padding:
+                        24px 14px 45px !important;
+                }
+
+                #bayoraDigitalSuccessLayout {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+
+                #bayoraDigitalMainCard {
+                    padding: 22px 16px;
+                    border-radius: 18px;
+                }
+
+                #bayoraDigitalSuccessLayout
+                .bayora-success-title {
+                    font-size: 30px;
+                }
+
+                #bayoraDigitalSuccessLayout
+                .bayora-success-description {
+                    font-size: 14px;
+                }
+
+                #bayoraDigitalSuccessLayout
+                .bayora-summary-row {
+                    align-items: flex-start;
+                }
+
+                #bayoraDigitalSuccessLayout
+                .bayora-download-item {
+                    align-items: flex-start;
+                    flex-wrap: wrap;
+                }
+
+                #bayoraDigitalSuccessLayout
+                .bayora-download-button {
+                    width: 100%;
+                    flex-basis: 100%;
+                }
+
+                #bayoraDigitalSidebar {
+                    width: 100%;
+                }
+            }
+
+        `;
+
+        document.head.appendChild(style);
+
+        /*
+         * =================================================
+         * BUILD MAIN CARD
+         * =================================================
+         */
+
+        const layout =
             document.createElement("div");
 
-        textWrap.style.minWidth =
-            "0";
+        layout.id =
+            "bayoraDigitalSuccessLayout";
 
-        textWrap.style.flex =
-            "1";
+        const main =
+            document.createElement("div");
+
+        main.id =
+            "bayoraDigitalMainCard";
+
+        const icon =
+            document.createElement("div");
+
+        icon.className =
+            "bayora-success-icon";
+
+        icon.textContent =
+            "✓";
+
+        const demo =
+            document.createElement("div");
+
+        demo.className =
+            "bayora-demo";
+
+        demo.textContent =
+            "DEMO";
+
+        /*
+         * DEMO hanya mengikuti referensi email.
+         * Tidak mengubah status transaksi.
+         */
 
         const title =
-            document.createElement("div");
+            document.createElement("h2");
+
+        title.className =
+            "bayora-success-title";
 
         title.textContent =
-            titleText;
+            "Pesanan diterima";
 
-        title.style.fontSize =
-            "15px";
+        const description =
+            document.createElement("p");
 
-        title.style.fontWeight =
-            "800";
+        description.className =
+            "bayora-success-description";
 
-        title.style.lineHeight =
-            "1.35";
+        description.innerHTML =
+            "Pembayaran berhasil. Terima kasih " +
+            "telah berbelanja di BAYORA.<br>" +
+            "Detail pesanan Anda tersedia di bawah ini.";
 
-        title.style.color =
-            "#10244d";
-
-        const subtitle =
+        const divider =
             document.createElement("div");
 
-        subtitle.textContent =
-            subtitleText;
+        divider.className =
+            "bayora-divider";
 
-        subtitle.style.marginTop =
-            "4px";
+        /*
+         * =================================================
+         * RINGKASAN PESANAN
+         * =================================================
+         */
 
-        subtitle.style.fontSize =
-            "13px";
+        const summary =
+            document.createElement("section");
 
-        subtitle.style.lineHeight =
-            "1.45";
+        summary.className =
+            "bayora-summary";
 
-        subtitle.style.color =
-            "#64748b";
+        summary.innerHTML = `
+            <h3 class="bayora-section-title">
+                RINGKASAN PESANAN
+            </h3>
 
-        textWrap.appendChild(title);
-        textWrap.appendChild(subtitle);
+            <div class="bayora-summary-row">
+                <span>ID Transaksi</span>
+                <span class="bayora-summary-value">
+                    ${transaction.transactionId || transactionId}
+                </span>
+            </div>
 
-        const arrow =
-            document.createElement("span");
+            <div class="bayora-summary-row">
+                <span>Tanggal</span>
+                <span class="bayora-summary-value">
+                    ${transactionDate}
+                </span>
+            </div>
 
-        arrow.textContent =
-            "↓";
+            <div class="bayora-summary-row">
+                <span>Metode Pembayaran</span>
+                <span class="bayora-summary-value">
+                    ${paymentMethod}
+                </span>
+            </div>
 
-        arrow.style.flex =
-            "0 0 auto";
+            <div class="bayora-summary-row">
+                <span>Status Pembayaran</span>
+                <span class="bayora-summary-value">
+                    <span class="bayora-paid">
+                        ${paymentStatus}
+                    </span>
+                </span>
+            </div>
 
-        arrow.style.width =
-            "38px";
+            <div class="bayora-summary-row">
+                <span>Total Pembayaran</span>
+                <span class="bayora-summary-value">
+                    Rp${total}
+                </span>
+            </div>
+        `;
 
-        arrow.style.height =
-            "38px";
+        /*
+         * =================================================
+         * FILE PESANAN
+         * =================================================
+         */
 
-        arrow.style.display =
-            "flex";
+        const filesSection =
+            document.createElement("section");
 
-        arrow.style.alignItems =
-            "center";
+        filesSection.innerHTML = `
+            <h3 class="bayora-section-title">
+                FILE PESANAN
+            </h3>
 
-        arrow.style.justifyContent =
-            "center";
+            <p class="bayora-section-description">
+                File produk digital yang Anda beli:
+            </p>
+        `;
 
-        arrow.style.borderRadius =
-            "12px";
+        const downloads =
+            document.createElement("div");
 
-        arrow.style.background =
-            accent;
+        downloads.className =
+            "bayora-downloads";
 
-        arrow.style.color =
-            "#ffffff";
+        const preset =
+            document.createElement("div");
 
-        arrow.style.fontSize =
-            "20px";
+        preset.className =
+            "bayora-download-item";
 
-        arrow.style.fontWeight =
-            "800";
+        preset.innerHTML = `
+            <div class="bayora-file-icon">
+                ZIP
+            </div>
 
-        link.appendChild(textWrap);
-        link.appendChild(arrow);
+            <div class="bayora-file-info">
+                <div class="bayora-file-title">
+                    Download Preset
+                </div>
 
-        return link;
-    }
+                <div class="bayora-file-meta">
+                    File ZIP<br>
+                    Lightroom Preset
+                </div>
+            </div>
+        `;
 
-    /*
-     * Preset
-     */
+        const presetLink =
+            document.createElement("a");
 
-    const presetLink =
-        createDownloadLink(
+        presetLink.className =
+            "bayora-download-button";
+
+        presetLink.href =
             `/api/digital-products/download/${encodeURIComponent(
                 transactionId
-            )}`,
-            "Download Preset",
-            "File ZIP Lightroom",
-            "#3167f5"
+            )}`;
+
+        presetLink.target =
+            "_blank";
+
+        presetLink.rel =
+            "noopener";
+
+        presetLink.innerHTML =
+            "↓&nbsp; Download";
+
+        preset.appendChild(
+            presetLink
         );
 
-    /*
-     * Panduan
-     */
+        const guide =
+            document.createElement("div");
 
-    const guideLink =
-        createDownloadLink(
+        guide.className =
+            "bayora-download-item";
+
+        guide.innerHTML = `
+            <div class="bayora-file-icon">
+                PDF
+            </div>
+
+            <div class="bayora-file-info">
+                <div class="bayora-file-title">
+                    Download Panduan
+                </div>
+
+                <div class="bayora-file-meta">
+                    Panduan penggunaan<br>
+                    sesuai perangkat
+                </div>
+            </div>
+        `;
+
+        const guideLink =
+            document.createElement("a");
+
+        guideLink.className =
+            "bayora-download-button";
+
+        guideLink.href =
             `/api/digital-products/download-guide/${encodeURIComponent(
                 transactionId
-            )}`,
-            "Download Panduan",
-            "Panduan penggunaan sesuai perangkat",
-            "#0b2c68"
+            )}`;
+
+        guideLink.target =
+            "_blank";
+
+        guideLink.rel =
+            "noopener";
+
+        guideLink.innerHTML =
+            "↓&nbsp; Download";
+
+        guide.appendChild(
+            guideLink
         );
 
-    actions.appendChild(presetLink);
-    actions.appendChild(guideLink);
+        downloads.appendChild(
+            preset
+        );
 
-    /*
-     * =====================================================
-     * EMAIL NOTICE
-     * =====================================================
-     *
-     * Hanya tampilan browser.
-     * Email delivery TIDAK disentuh.
-     */
+        downloads.appendChild(
+            guide
+        );
 
-    const emailNotice =
-        document.createElement("div");
+        filesSection.appendChild(
+            downloads
+        );
 
-    emailNotice.style.margin =
-        "18px 0 0";
+        /*
+         * =================================================
+         * EMAIL NOTICE
+         * =================================================
+         */
 
-    emailNotice.style.padding =
-        "14px 16px";
+        const emailNotice =
+            document.createElement("div");
 
-    emailNotice.style.boxSizing =
-        "border-box";
+        emailNotice.className =
+            "bayora-email-notice";
 
-    emailNotice.style.width =
-        "100%";
+        emailNotice.innerHTML =
+            "File pesanan juga telah dikirim ke email " +
+            "<strong>" +
+            email +
+            "</strong> sebagai cadangan.";
 
-    emailNotice.style.borderRadius =
-        "14px";
+        /*
+         * =================================================
+         * HOME BUTTON
+         * =================================================
+         */
 
-    emailNotice.style.background =
-        "#fffaf0";
+        const homeButton =
+            document.createElement("button");
 
-    emailNotice.style.borderLeft =
-        "4px solid #f5c842";
+        homeButton.className =
+            "bayora-home-button";
 
-    emailNotice.style.color =
-        "#64748b";
+        homeButton.type =
+            "button";
 
-    emailNotice.style.fontSize =
-        "13px";
+        homeButton.textContent =
+            "⌂  Kembali ke Beranda";
 
-    emailNotice.style.lineHeight =
-        "1.6";
+        homeButton.onclick =
+            () => showHome();
 
-    emailNotice.textContent =
-        "File pesanan juga telah dikirim ke email kamu sebagai cadangan.";
+        /*
+         * =================================================
+         * MAIN CARD
+         * =================================================
+         */
 
-    /*
-     * =====================================================
-     * ASSEMBLY
-     * =====================================================
-     */
+        main.appendChild(icon);
+        main.appendChild(demo);
+        main.appendChild(title);
+        main.appendChild(description);
+        main.appendChild(divider);
+        main.appendChild(summary);
+        main.appendChild(filesSection);
+        main.appendChild(emailNotice);
+        main.appendChild(homeButton);
 
-    container.appendChild(header);
-    container.appendChild(description);
-    container.appendChild(actions);
-    container.appendChild(emailNotice);
+        /*
+         * =================================================
+         * SIDEBAR
+         * =================================================
+         */
 
-    /*
-     * KUNCI:
-     * download berada di dalam orderSummary.
-     */
+        const sidebar =
+            document.createElement("aside");
 
-    orderSummary.appendChild(container);
+        sidebar.id =
+            "bayoraDigitalSidebar";
+
+        sidebar.innerHTML = `
+
+            <div class="bayora-side-card">
+
+                <h3 class="bayora-side-title">
+                    BUTUH BANTUAN?
+                </h3>
+
+                <div class="bayora-side-icon">
+                    ♧
+                </div>
+
+                <p class="bayora-side-text">
+                    Jika mengalami kendala saat
+                    download atau file tidak dapat
+                    dibuka, silakan hubungi kami.
+                </p>
+
+                <div class="bayora-contact">
+                    💬 &nbsp; Hubungi Admin
+                </div>
+
+            </div>
+
+            <div class="bayora-side-card">
+
+                <h3 class="bayora-side-title">
+                    KEAMANAN TRANSAKSI
+                </h3>
+
+                <div class="bayora-side-icon">
+                    ♢
+                </div>
+
+                <ul class="bayora-security-list">
+                    <li>
+                        Transaksi aman & terenkripsi
+                    </li>
+
+                    <li>
+                        Pembayaran diproses oleh
+                        Xendit
+                    </li>
+
+                    <li>
+                        Data Anda 100% aman
+                    </li>
+
+                    <li>
+                        Garansi uang kembali
+                    </li>
+                </ul>
+
+                <div class="bayora-side-brand">
+                    BAYORA
+                </div>
+
+            </div>
+        `;
+
+        layout.appendChild(main);
+        layout.appendChild(sidebar);
+
+        /*
+         * =================================================
+         * REPLACE SUCCESS CONTENT
+         * =================================================
+         */
+
+        successBox.innerHTML = "";
+
+        successBox.style.cssText =
+            "display:block;" +
+            "width:100%;" +
+            "max-width:none;" +
+            "padding:0;" +
+            "margin:0;" +
+            "background:transparent;" +
+            "border:0;" +
+            "box-shadow:none;";
+
+        successBox.appendChild(
+            layout
+        );
+
+        successPage.classList.add(
+            "bayora-digital-success"
+        );
+
+        console.log(
+            "[BAYORA DIGITAL SUCCESS] " +
+            "Layout disamakan dengan referensi email."
+        );
+
+    })
+    .catch(error => {
+
+        console.error(
+            "[BAYORA DIGITAL SUCCESS]",
+            error
+        );
+
+    });
 }
+
 
 
 /* =========================================================
@@ -4223,9 +4722,265 @@ function showDigitalDownloadButton(
 })();
 
 
+
+
+/* =====================================================
+ * BAYORA — DIGITAL SUCCESS LAYOUT FIX
+ * ===================================================== */
+
+(function fixBayoraDigitalSuccessLayout() {
+
+    function applyDigitalSuccessLayout() {
+
+        const successPage =
+            document.getElementById("successPage");
+
+        const successBox =
+            successPage
+                ? successPage.querySelector(".success-box")
+                : null;
+
+        const orderSummary =
+            document.getElementById("orderSummary");
+
+        if (
+            !successPage ||
+            !successBox ||
+            !orderSummary
+        ) {
+            return;
+        }
+
+        /*
+         * =================================================
+         * SUCCESS PAGE
+         * =================================================
+         *
+         * Desktop:
+         *   success card
+         *       ↓
+         *   download card
+         *
+         * Mobile:
+         *   tetap satu kolom
+         */
+
+        successPage.style.display =
+            "flex";
+
+        successPage.style.flexDirection =
+            "column";
+
+        successPage.style.alignItems =
+            "center";
+
+        successPage.style.justifyContent =
+            "flex-start";
+
+        successPage.style.width =
+            "100%";
+
+        successPage.style.boxSizing =
+            "border-box";
+
+        /*
+         * SUCCESS CARD
+         */
+
+        successBox.style.width =
+            "100%";
+
+        successBox.style.maxWidth =
+            "560px";
+
+        successBox.style.boxSizing =
+            "border-box";
+
+        /*
+         * ORDER SUMMARY
+         */
+
+        orderSummary.style.display =
+            "block";
+
+        orderSummary.style.width =
+            "100%";
+
+        orderSummary.style.maxWidth =
+            "560px";
+
+        orderSummary.style.minWidth =
+            "0";
+
+        orderSummary.style.boxSizing =
+            "border-box";
+
+        orderSummary.style.flex =
+            "0 1 auto";
+
+        orderSummary.style.margin =
+            "24px 0 0";
+
+        /*
+         * Pastikan tidak diperlakukan
+         * sebagai grid/flex column terpisah.
+         */
+
+        orderSummary.style.gridColumn =
+            "auto";
+
+        orderSummary.style.gridRow =
+            "auto";
+
+        /*
+         * DOWNLOAD CONTAINER
+         */
+
+        const download =
+            document.getElementById(
+                "digitalDownloadContainer"
+            );
+
+        if (download) {
+
+            download.style.width =
+                "100%";
+
+            download.style.maxWidth =
+                "100%";
+
+            download.style.minWidth =
+                "0";
+
+            download.style.boxSizing =
+                "border-box";
+
+            download.style.margin =
+                "0";
+
+        }
+
+        /*
+         * RESPONSIVE
+         */
+
+        if (
+            window.matchMedia(
+                "(max-width: 700px)"
+            ).matches
+        ) {
+
+            successPage.style.padding =
+                "40px 16px";
+
+            successBox.style.width =
+                "100%";
+
+            successBox.style.maxWidth =
+                "560px";
+
+            orderSummary.style.width =
+                "100%";
+
+            orderSummary.style.maxWidth =
+                "560px";
+
+        }
+
+    }
+
+
+    /*
+     * Jalankan sekarang
+     */
+
+    applyDigitalSuccessLayout();
+
+
+    /*
+     * Jalankan lagi setelah DOM berubah.
+     * Flow pembayaran memang membuat
+     * orderSummary secara dinamis.
+     */
+
+    const observer =
+        new MutationObserver(() => {
+
+            if (
+                document.getElementById(
+                    "digitalDownloadContainer"
+                )
+            ) {
+                applyDigitalSuccessLayout();
+            }
+
+        });
+
+    observer.observe(
+        document.body,
+        {
+            childList: true,
+            subtree: true
+        }
+    );
+
+
+    /*
+     * Responsive saat ukuran layar berubah.
+     */
+
+    window.addEventListener(
+        "resize",
+        applyDigitalSuccessLayout
+    );
+
+})();
+
+
 async function checkTransactionStatus(transactionId) {
 
     try {
+
+        /*
+         * =================================================
+         * BAYORA — XENDIT DIGITAL AUTO SYNC
+         * =================================================
+         *
+         * Khusus transaksi DIGITAL-* dengan pembayaran
+         * Xendit. Server akan mengecek Payment Session
+         * langsung ke Xendit sebelum membaca status lokal.
+         *
+         * Tidak menyentuh transaksi PPOB.
+         */
+
+        if (
+            String(transactionId || "")
+                .startsWith("DIGITAL-")
+        ) {
+
+            try {
+
+                await fetch(
+                    `/api/transactions/${encodeURIComponent(transactionId)}/sync-xendit`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+            } catch (syncError) {
+
+                console.warn(
+                    "[XENDIT DIGITAL SYNC]",
+                    syncError
+                );
+
+            }
+
+        }
 
         const response = await fetch(
             `/api/transactions/${encodeURIComponent(transactionId)}`
@@ -4400,6 +5155,148 @@ async function handleXenditReturn() {
     }
 
     successPage.classList.remove("page-hidden");
+
+    /*
+     * =====================================================
+     * BAYORA — XENDIT RETURN DIGITAL
+     * =====================================================
+     *
+     * Setelah kembali dari Xendit, halaman success harus
+     * langsung memeriksa transaksi berdasarkan transactionId.
+     *
+     * Khusus produk digital guest:
+     * - tidak membutuhkan login
+     * - transaction tetap dapat dibaca lewat endpoint publik
+     * - status pembayaran diverifikasi server
+     * - download hanya muncul setelah paymentStatus = PAID
+     */
+
+    if (payment === "success") {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/transactions/" +
+                    encodeURIComponent(transactionId)
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                data.success &&
+                data.transaction
+            ) {
+
+                const transaction =
+                    data.transaction;
+
+                const isDigital =
+                    transaction.productType === "digital";
+
+                if (isDigital) {
+
+                    const successBox =
+                        successPage.querySelector(
+                            ".success-box"
+                        );
+
+                    if (successBox) {
+
+                        /*
+                         * Buat area status jika belum ada.
+                         */
+                        let statusElement =
+                            document.getElementById(
+                                "transactionStatus"
+                            );
+
+                        if (!statusElement) {
+
+                            statusElement =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            statusElement.id =
+                                "transactionStatus";
+
+                            statusElement.style.marginTop =
+                                "14px";
+
+                            statusElement.style.fontWeight =
+                                "700";
+
+                            statusElement.style.color =
+                                "#1769ff";
+
+                            successBox.appendChild(
+                                statusElement
+                            );
+                        }
+
+                        statusElement.textContent =
+                            "MEMERIKSA PEMBAYARAN";
+
+                        /*
+                         * Buat orderSummary agar
+                         * showDigitalDownloadButton()
+                         * mempunyai tempat untuk menampilkan
+                         * file digital.
+                         */
+                        let orderSummary =
+                            document.getElementById(
+                                "orderSummary"
+                            );
+
+                        if (!orderSummary) {
+
+                            orderSummary =
+                                document.createElement(
+                                    "div"
+                                );
+
+                            orderSummary.id =
+                                "orderSummary";
+
+                            orderSummary.className =
+                                "order-summary";
+
+                            successBox.appendChild(
+                                orderSummary
+                            );
+                        }
+
+                        /*
+                         * Mulai verifikasi transaksi.
+                         *
+                         * Fungsi ini akan:
+                         * PENDING → polling
+                         * PAID    → tampilkan download
+                         * EXPIRED → tampilkan kedaluwarsa
+                         */
+                        checkTransactionStatus(
+                            transactionId
+                        );
+
+                    }
+
+                    return;
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[XENDIT RETURN DIGITAL]",
+                error
+            );
+
+        }
+
+    }
 
     if (payment === "cancel") {
 

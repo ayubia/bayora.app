@@ -208,6 +208,143 @@ console.log("[DATABASE] DB PATH:", dbPath);
 
 const db = new Database(dbPath);
 
+/* BAYORA_SECURE_DIGITAL_TOKEN_HELPER */
+
+function createDigitalDownloadToken() {
+
+    return crypto
+        .randomBytes(32)
+        .toString("hex");
+
+}
+
+function hashDigitalDownloadToken(token) {
+
+    return crypto
+        .createHash("sha256")
+        .update(String(token))
+        .digest("hex");
+
+}
+
+function createOrRefreshDigitalDownloadToken(
+    transactionId
+) {
+
+    const token =
+        createDigitalDownloadToken();
+
+    const tokenHash =
+        hashDigitalDownloadToken(token);
+
+    const now =
+        new Date();
+
+    const expires =
+        new Date(
+            now.getTime() +
+            1000 * 60 * 60 * 24 * 30
+        );
+
+    db.prepare(`
+        INSERT INTO digital_download_tokens (
+            transaction_id,
+            token_hash,
+            created_at,
+            expires_at,
+            download_count
+        )
+        VALUES (?, ?, ?, ?, 0)
+
+        ON CONFLICT(transaction_id)
+        DO UPDATE SET
+            token_hash = excluded.token_hash,
+            created_at = excluded.created_at,
+            expires_at = excluded.expires_at
+    `).run(
+        transactionId,
+        tokenHash,
+        now.toISOString(),
+        expires.toISOString()
+    );
+
+    return token;
+}
+
+function verifyDigitalDownloadToken(
+    transactionId,
+    token
+) {
+
+    if (
+        !transactionId ||
+        !token
+    ) {
+        return false;
+    }
+
+    const row =
+        db.prepare(`
+            SELECT
+                transaction_id AS transactionId,
+                token_hash AS tokenHash,
+                expires_at AS expiresAt
+            FROM digital_download_tokens
+            WHERE transaction_id = ?
+            LIMIT 1
+        `).get(transactionId);
+
+    if (!row) {
+        return false;
+    }
+
+    if (
+        row.expiresAt &&
+        Date.now() >=
+        new Date(row.expiresAt).getTime()
+    ) {
+        return false;
+    }
+
+    const suppliedHash =
+        hashDigitalDownloadToken(token);
+
+    return crypto.timingSafeEqual(
+        Buffer.from(row.tokenHash, "hex"),
+        Buffer.from(suppliedHash, "hex")
+    );
+}
+
+function registerDigitalDownload(
+    transactionId
+) {
+
+    db.prepare(`
+        UPDATE digital_download_tokens
+        SET download_count =
+            download_count + 1
+        WHERE transaction_id = ?
+    `).run(transactionId);
+
+}
+
+
+
+/* BAYORA_SECURE_DIGITAL_DOWNLOAD_TABLE */
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS digital_download_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id TEXT NOT NULL UNIQUE,
+        token_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT,
+        download_count INTEGER NOT NULL DEFAULT 0
+    )
+`);
+
+
+
 db.pragma("journal_mode = WAL");
 
 db.exec(`
@@ -1599,19 +1736,6 @@ app.post("/api/digital-transactions", (req, res) => {
 
     try {
 
-        const currentUser =
-            getCurrentUser(req);
-
-        if (!currentUser) {
-
-            return res.status(401).json({
-                success: false,
-                error: "Silakan login terlebih dahulu."
-            });
-
-        }
-
-
         const {
             service,
             productIds,
@@ -1887,7 +2011,7 @@ app.post("/api/digital-transactions", (req, res) => {
                 `).run({
 
                     userId:
-                        currentUser.id,
+                        null,
 
                     transactionId,
 
@@ -2544,6 +2668,283 @@ app.delete("/api/transactions", requireRoles("owner"), (req, res) => {
     }
 
 });
+
+
+
+/* =========================================================
+   XENDIT — SYNC PAYMENT SESSION STATUS
+   Khusus transaksi Xendit.
+   Tidak mengubah flow PPOB / Digiflazz.
+========================================================= */
+
+app.post(
+    "/api/transactions/:id/sync-xendit",
+    async (req, res) => {
+
+        try {
+
+            const transactionId =
+                String(req.params.id || "").trim();
+
+            if (!transactionId) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Transaction ID wajib diisi."
+                });
+
+            }
+
+            /*
+             * Hanya transaksi DIGITAL-* yang boleh
+             * menggunakan endpoint ini.
+             */
+            if (!transactionId.startsWith("DIGITAL-")) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "Sync Xendit hanya untuk transaksi digital."
+                });
+
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        id,
+                        transaction_id AS transactionId,
+                        payment_method AS paymentMethod,
+                        payment_status AS paymentStatus,
+                        status,
+                        payment_session_id AS paymentSessionId,
+                        payment_request_id AS paymentRequestId
+                    FROM transactions
+                    WHERE transaction_id = ?
+                `).get(transactionId);
+
+            if (!transaction) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Transaksi tidak ditemukan."
+                });
+
+            }
+
+            /*
+             * Pastikan benar-benar Xendit.
+             */
+            if (
+                String(transaction.paymentMethod || "")
+                    .toLowerCase() !== "xendit"
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "Transaksi bukan pembayaran Xendit."
+                });
+
+            }
+
+            /*
+             * Sudah PAID tidak perlu request ke Xendit lagi.
+             */
+            if (
+                transaction.paymentStatus === "PAID"
+            ) {
+
+                return res.json({
+                    success: true,
+                    changed: false,
+                    paymentStatus: "PAID",
+                    status: transaction.status
+                });
+
+            }
+
+            if (!transaction.paymentSessionId) {
+
+                return res.status(409).json({
+                    success: false,
+                    error:
+                        "payment_session_id belum tersedia."
+                });
+
+            }
+
+            if (!process.env.XENDIT_SECRET_KEY) {
+
+                console.error(
+                    "[XENDIT SYNC] XENDIT_SECRET_KEY belum tersedia."
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    error:
+                        "XENDIT_SECRET_KEY belum tersedia."
+                });
+
+            }
+
+            /*
+             * Ambil status Payment Session langsung
+             * dari Xendit.
+             *
+             * Endpoint resmi:
+             * GET /sessions/{session_id}
+             */
+            const response =
+                await axios.get(
+                    "https://api.xendit.co/sessions/" +
+                    encodeURIComponent(
+                        transaction.paymentSessionId
+                    ),
+                    {
+                        auth: {
+                            username:
+                                process.env.XENDIT_SECRET_KEY,
+                            password: ""
+                        },
+                        timeout: 15000
+                    }
+                );
+
+            const session =
+                response.data || {};
+
+            const sessionStatus =
+                String(
+                    session.status || ""
+                ).toUpperCase();
+
+            console.log(
+                "[XENDIT SYNC]",
+                {
+                    transactionId,
+                    paymentSessionId:
+                        transaction.paymentSessionId,
+                    sessionStatus
+                }
+            );
+
+            /*
+             * Payment Session COMPLETED =
+             * pembayaran berhasil.
+             */
+            if (
+                sessionStatus === "COMPLETED"
+            ) {
+
+                const paymentRequestId =
+                    session.payment_request_id ||
+                    transaction.paymentRequestId ||
+                    null;
+
+                const update =
+                    db.prepare(`
+                        UPDATE transactions
+                        SET
+                            status = 'SUCCESS',
+                            payment_status = 'PAID',
+                            payment_session_id = COALESCE(
+                                payment_session_id,
+                                ?
+                            ),
+                            payment_request_id = COALESCE(
+                                payment_request_id,
+                                ?
+                            ),
+                            paid_at = COALESCE(
+                                paid_at,
+                                CURRENT_TIMESTAMP
+                            ),
+                            processed_at = COALESCE(
+                                processed_at,
+                                CURRENT_TIMESTAMP
+                            )
+                        WHERE transaction_id = ?
+                          AND payment_method = 'xendit'
+                          AND payment_status != 'PAID'
+                    `).run(
+                        transaction.paymentSessionId,
+                        paymentRequestId,
+                        transactionId
+                    );
+
+                console.log(
+                    "[XENDIT SYNC] PAYMENT PAID:",
+                    {
+                        transactionId,
+                        changes: update.changes
+                    }
+                );
+
+                return res.json({
+                    success: true,
+                    changed: update.changes > 0,
+                    paymentStatus: "PAID",
+                    status: "SUCCESS"
+                });
+
+            }
+
+            /*
+             * Session masih aktif / belum selesai.
+             */
+            if (
+                sessionStatus === "ACTIVE" ||
+                sessionStatus === "PENDING" ||
+                sessionStatus === ""
+            ) {
+
+                return res.json({
+                    success: true,
+                    changed: false,
+                    paymentStatus: "PENDING",
+                    status: "PENDING",
+                    xenditStatus:
+                        sessionStatus || "UNKNOWN"
+                });
+
+            }
+
+            /*
+             * Jangan mengubah transaksi menjadi FAILED
+             * sembarangan. Status final selain COMPLETED
+             * dilaporkan ke frontend.
+             */
+            return res.json({
+                success: true,
+                changed: false,
+                paymentStatus:
+                    transaction.paymentStatus,
+                status:
+                    transaction.status,
+                xenditStatus:
+                    sessionStatus
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[XENDIT SYNC ERROR]",
+                error.response?.data ||
+                error.message ||
+                error
+            );
+
+            return res.status(502).json({
+                success: false,
+                error:
+                    "Gagal memeriksa status pembayaran Xendit."
+            });
+
+        }
+
+    }
+);
 
 
 /* =========================

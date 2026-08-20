@@ -6666,6 +6666,242 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
 
 
 /* =========================
+   DUPLICATE DIGITAL SERVICE
+========================= */
+
+app.post("/api/services/:id/duplicate", requireCatalogManager, (req, res) => {
+
+    try {
+
+        const sourceId =
+            String(req.params.id || "").trim();
+
+        if (!sourceId) {
+            return res.status(400).json({
+                success: false,
+                error: "ID layanan tidak valid."
+            });
+        }
+
+        const source =
+            db.prepare(`
+                SELECT *
+                FROM services
+                WHERE id = ?
+            `).get(sourceId);
+
+        if (!source) {
+            return res.status(404).json({
+                success: false,
+                error: "Layanan tidak ditemukan."
+            });
+        }
+
+        /*
+         * PPOB tidak boleh diduplikat.
+         * Katalog PPOB berasal dari sinkronisasi Digiflazz.
+         */
+        if (source.type !== "digital") {
+            return res.status(400).json({
+                success: false,
+                error: "Layanan PPOB tidak dapat diduplikat."
+            });
+        }
+
+        /*
+         * Buat ID layanan digital baru yang unik.
+         */
+        const baseServiceId =
+            `${source.id}-copy`;
+
+        let newServiceId =
+            baseServiceId;
+
+        let serviceCounter = 2;
+
+        while (
+            db.prepare(`
+                SELECT 1
+                FROM services
+                WHERE id = ?
+            `).get(newServiceId)
+        ) {
+            newServiceId =
+                `${baseServiceId}-${serviceCounter}`;
+
+            serviceCounter++;
+        }
+
+        /*
+         * Ambil produk digital dari layanan asli.
+         */
+        const sourceProducts =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE service_id = ?
+                  AND product_type = 'digital'
+                ORDER BY sort_order ASC, name ASC
+            `).all(sourceId);
+
+        /*
+         * Satu transaksi database:
+         * layanan + seluruh produk digital.
+         */
+        db.transaction(() => {
+
+            db.prepare(`
+                INSERT INTO services (
+                    id,
+                    title,
+                    icon,
+                    description,
+                    label,
+                    placeholder,
+                    active,
+                    sort_order,
+                    type,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                newServiceId,
+                `${source.title} Copy`,
+                source.icon,
+                source.description,
+                source.label,
+                source.placeholder,
+                source.active,
+                source.sort_order,
+                "digital",
+                catalogNow()
+            );
+
+            const insertProduct =
+                db.prepare(`
+                    INSERT INTO products (
+                        id,
+                        service_id,
+                        operator,
+                        name,
+                        price,
+                        info,
+                        active,
+                        sort_order,
+                        created_at,
+                        cost_price,
+                        margin,
+                        digiflazz_sku,
+                        product_type,
+                        preview_image,
+                        digital_file,
+                        before_image,
+                        after_image,
+                        gallery_images,
+                        mood,
+                        pdf_ios,
+                        pdf_android,
+                        pdf_mac,
+                        pdf_windows
+                    )
+                    VALUES (
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    )
+                `);
+
+            for (const product of sourceProducts) {
+
+                const baseProductId =
+                    `${product.id}-copy`;
+
+                let newProductId =
+                    baseProductId;
+
+                let productCounter = 2;
+
+                while (
+                    db.prepare(`
+                        SELECT 1
+                        FROM products
+                        WHERE id = ?
+                    `).get(newProductId)
+                ) {
+                    newProductId =
+                        `${baseProductId}-${productCounter}`;
+
+                    productCounter++;
+                }
+
+                insertProduct.run(
+                    newProductId,
+                    newServiceId,
+                    product.operator,
+                    product.name,
+                    product.price,
+                    product.info,
+                    product.active,
+                    product.sort_order,
+                    catalogNow(),
+                    product.cost_price,
+                    product.margin,
+                    product.digiflazz_sku,
+                    product.product_type,
+                    product.preview_image,
+                    product.digital_file,
+                    product.before_image,
+                    product.after_image,
+                    product.gallery_images,
+                    product.mood,
+                    product.pdf_ios,
+                    product.pdf_android,
+                    product.pdf_mac,
+                    product.pdf_windows
+                );
+
+            }
+
+        })();
+
+        const service =
+            db.prepare(`
+                SELECT *
+                FROM services
+                WHERE id = ?
+            `).get(newServiceId);
+
+        const products =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE service_id = ?
+                ORDER BY sort_order ASC, name ASC
+            `).all(newServiceId);
+
+        return res.status(201).json({
+            success: true,
+            service,
+            products
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[DUPLICATE DIGITAL SERVICE]",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menduplikat layanan digital."
+        });
+
+    }
+
+});
+
+
+/* =========================
    UPDATE SERVICE
 ========================= */
 
@@ -6991,6 +7227,128 @@ app.post("/api/products", requireCatalogManager, (req, res) => {
         return res.status(500).json({
             success: false,
             error: "Gagal menambahkan produk."
+        });
+
+    }
+
+});
+
+
+/* =========================
+   DUPLICATE PRODUCT
+========================= */
+
+app.post("/api/products/:id/duplicate", requireCatalogManager, (req, res) => {
+
+    try {
+
+        const sourceId =
+            String(req.params.id || "").trim();
+
+        if (!sourceId) {
+            return res.status(400).json({
+                success: false,
+                error: "ID produk tidak valid."
+            });
+        }
+
+        const source =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+            `).get(sourceId);
+
+        if (!source) {
+            return res.status(404).json({
+                success: false,
+                error: "Produk tidak ditemukan."
+            });
+        }
+
+        /*
+         * Buat ID baru yang unik.
+         * Seluruh data produk asli tetap dipertahankan.
+         */
+        const baseId =
+            `${source.id}-copy`;
+
+        let newId =
+            baseId;
+
+        let counter = 2;
+
+        while (
+            db.prepare(`
+                SELECT 1
+                FROM products
+                WHERE id = ?
+            `).get(newId)
+        ) {
+            newId =
+                `${baseId}-${counter}`;
+
+            counter++;
+        }
+
+        const columns =
+            Object.keys(source)
+                .filter(column =>
+                    column !== "id" &&
+                    column !== "created_at"
+                );
+
+        const values =
+            columns.map(column =>
+                source[column]
+            );
+
+        const placeholders =
+            columns.map(() => "?").join(", ");
+
+        const insert =
+            db.prepare(`
+                INSERT INTO products (
+                    id,
+                    ${columns.join(", ")},
+                    created_at
+                )
+                VALUES (
+                    ?,
+                    ${placeholders},
+                    ?
+                )
+            `);
+
+        insert.run(
+            newId,
+            ...values,
+            catalogNow()
+        );
+
+        const product =
+            db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+            `).get(newId);
+
+        return res.status(201).json({
+            success: true,
+            message: "Produk berhasil diduplikat.",
+            product
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[DUPLICATE PRODUCT]",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal menduplikat produk."
         });
 
     }

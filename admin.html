@@ -4297,6 +4297,31 @@ function renderCatalog() {
                                     Edit
                                 </button>
 
+                                <button
+                                    type="button"
+                                    class="catalog-action-button"
+                                    onclick="duplicateProduct('${escapeCatalog(product.id)}')"
+                                >
+                                    Duplikat
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="catalog-action-button"
+                                    onclick="shareProduct('${escapeCatalog(product.id)}')"
+                                >
+                                    Bagikan
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="catalog-action-button"
+                                    onclick="deleteProduct('${escapeCatalog(product.id)}')"
+                                >
+                                    Hapus
+                                </button>
+
+
                             </div>
 
                         `).join("")
@@ -4355,6 +4380,20 @@ function renderCatalog() {
                             >
                                 Edit Layanan
                             </button>
+
+                            ${
+                                service.type === "digital"
+                                    ? `
+                            <button
+                                type="button"
+                                class="catalog-action-button"
+                                onclick="duplicateService('${escapeCatalog(service.id)}')"
+                            >
+                                Duplikat
+                            </button>
+                                    `
+                                    : ""
+                            }
 
                             <button
                                 type="button"
@@ -4852,6 +4891,81 @@ async function toggleService(id) {
         alert(
             error.message ||
             "Gagal mengubah status layanan."
+        );
+
+    }
+
+}
+
+
+async function duplicateService(id) {
+
+    const service =
+        catalogData.services.find(
+            item => item.id === id
+        );
+
+    if (!service) {
+        alert("Layanan tidak ditemukan.");
+        return;
+    }
+
+    /*
+     * PPOB tidak boleh diduplikat.
+     * Pengamanan utama tetap berada di backend.
+     */
+    if (service.type !== "digital") {
+        alert(
+            "Layanan PPOB tidak dapat diduplikat."
+        );
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            `Duplikat layanan "${service.title}"?\n\n` +
+            "Semua produk digital di dalam layanan ini juga akan diduplikat."
+        );
+
+    if (!confirmed) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/services/${encodeURIComponent(id)}/duplicate`,
+                {
+                    method: "POST"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal menduplikat layanan."
+            );
+        }
+
+        await loadCatalog();
+
+        alert(
+            `Layanan berhasil diduplikat.\n\n` +
+            `ID baru: ${data.service.id}`
+        );
+
+    } catch (error) {
+
+        console.error(
+            "[DUPLICATE SERVICE]",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Gagal menduplikat layanan."
         );
 
     }
@@ -5477,6 +5591,146 @@ async function saveProduct(event) {
         alert(
             error.message ||
             "Gagal menyimpan produk."
+        );
+
+    }
+
+}
+
+
+async function shareProduct(id) {
+
+    const product =
+        catalogData.products.find(
+            item => item.id === id
+        );
+
+    if (!product) {
+        alert("Produk tidak ditemukan.");
+        return;
+    }
+
+    const shareUrl =
+        new URL(
+            `/?product=${encodeURIComponent(product.id)}`,
+            window.location.origin
+        ).href;
+
+    const shareData = {
+        title: product.name || "Produk BAYORA",
+        text: `Lihat ${product.name || "produk ini"} di BAYORA.`,
+        url: shareUrl
+    };
+
+    try {
+
+        if (
+            navigator.share &&
+            typeof navigator.share === "function"
+        ) {
+
+            await navigator.share(shareData);
+
+            return;
+        }
+
+    } catch (error) {
+
+        if (error.name === "AbortError") {
+            return;
+        }
+
+        console.warn(
+            "[SHARE PRODUCT] Web Share gagal:",
+            error
+        );
+
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(
+            shareUrl
+        );
+
+        alert(
+            "Link produk berhasil disalin.\n\n" +
+            shareUrl
+        );
+
+    } catch (error) {
+
+        console.error(
+            "[SHARE PRODUCT] Clipboard gagal:",
+            error
+        );
+
+        window.prompt(
+            "Salin link produk ini:",
+            shareUrl
+        );
+
+    }
+
+}
+
+
+async function duplicateProduct(id) {
+
+    const product =
+        catalogData.products.find(
+            item => item.id === id
+        );
+
+    if (!product) {
+        alert("Produk tidak ditemukan.");
+        return;
+    }
+
+    if (
+        !confirm(
+            `Duplikat produk "${product.name}"?`
+        )
+    ) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/products/${encodeURIComponent(id)}/duplicate`,
+                {
+                    method: "POST"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal menduplikat produk."
+            );
+        }
+
+        alert(
+            `Produk berhasil diduplikat.\n\nID baru: ${data.product.id}`
+        );
+
+        await loadCatalog();
+
+    } catch (error) {
+
+        console.error(
+            "[DUPLICATE PRODUCT]",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Gagal menduplikat produk."
         );
 
     }

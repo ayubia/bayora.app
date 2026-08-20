@@ -3763,6 +3763,7 @@ async function sendDigitalProductEmail(transactionId) {
               AND (
                     delivery_status IS NULL
                     OR delivery_status = 'PENDING'
+                    OR delivery_status = 'FAILED'
               )
         `).run(transactionId);
 

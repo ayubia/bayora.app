@@ -2755,11 +2755,20 @@ app.post(
                 transaction.paymentStatus === "PAID"
             ) {
 
+                const downloadToken =
+                    String(transaction.transactionId || "")
+                        .startsWith("DIGITAL-")
+                        ? createOrRefreshDigitalDownloadToken(
+                            transaction.transactionId
+                        )
+                        : null;
+
                 return res.json({
                     success: true,
                     changed: false,
                     paymentStatus: "PAID",
-                    status: transaction.status
+                    status: transaction.status,
+                    downloadToken
                 });
 
             }
@@ -2881,11 +2890,20 @@ app.post(
                     }
                 );
 
+                const downloadToken =
+                    String(transactionId || "")
+                        .startsWith("DIGITAL-")
+                        ? createOrRefreshDigitalDownloadToken(
+                            transactionId
+                        )
+                        : null;
+
                 return res.json({
                     success: true,
                     changed: update.changes > 0,
                     paymentStatus: "PAID",
-                    status: "SUCCESS"
+                    status: "SUCCESS",
+                    downloadToken
                 });
 
             }
@@ -2965,6 +2983,7 @@ app.get("/api/transactions/:id", (req, res) => {
                 t.operator,
                 t.product_id AS productId,
                 t.product_name AS productName,
+                t.device AS device,
                 t.price,
                 t.payment_method AS paymentMethod,
                 t.status,
@@ -3858,6 +3877,7 @@ async function refundXenditTransaction(transactionId) {
    delivery sebelumnya gagal.
 ========================================================== */
 
+
 app.post("/api/digital/retry-delivery/:transactionId", async (req, res) => {
 
     try {
@@ -3975,7 +3995,9 @@ app.post("/api/digital/retry-delivery/:transactionId", async (req, res) => {
    Hanya dijalankan setelah pembayaran PAID.
 ========================================================== */
 
-async function sendDigitalProductEmail(transactionId) {
+async function sendDigitalProductEmail(
+    transactionId
+) {
 
     const resendApiKey =
         process.env.RESEND_API_KEY;
@@ -4002,6 +4024,7 @@ async function sendDigitalProductEmail(transactionId) {
                 t.payment_status,
                 t.delivery_status,
                 t.customer_email,
+                t.product_name,
                 t.device
             FROM transactions t
             WHERE t.transaction_id = ?
@@ -4214,6 +4237,41 @@ async function sendDigitalProductEmail(transactionId) {
             transaction.device ||
             "perangkat yang dipilih";
 
+        const downloadToken =
+            createOrRefreshDigitalDownloadToken(
+                transactionId
+            );
+
+        const publicBaseUrl =
+            String(
+                process.env.PUBLIC_BASE_URL ||
+                process.env.APP_URL ||
+                ""
+            )
+            .trim()
+            .replace(/\/+$/, "");
+
+        if (!publicBaseUrl) {
+            throw new Error(
+                "PUBLIC_BASE_URL atau APP_URL belum dikonfigurasi."
+            );
+        }
+
+        const presetDownloadUrl =
+            publicBaseUrl +
+            "/api/digital-products/email-download/" +
+            encodeURIComponent(transactionId) +
+            "?token=" +
+            encodeURIComponent(downloadToken);
+
+        const guideDownloadUrl =
+            publicBaseUrl +
+            "/api/digital-products/email-guide-download/" +
+            encodeURIComponent(transactionId) +
+            "?token=" +
+            encodeURIComponent(downloadToken);
+
+
         const result =
             await resend.emails.send({
 
@@ -4268,6 +4326,14 @@ async function sendDigitalProductEmail(transactionId) {
                                         </div>
 
                                         <div style="font-size:14px;line-height:1.7;color:#64748b;">
+                                            <span>Produk</span>
+
+                                            <strong style="float:right;color:#10244d;">
+                                                ${transaction.product_name || "Lightroom Preset"}
+                                            </strong>
+                                        </div>
+
+                                        <div style="margin-top:10px;font-size:14px;line-height:1.7;color:#64748b;">
                                             <span>Perangkat</span>
 
                                             <strong style="float:right;color:#10244d;">
@@ -4279,32 +4345,59 @@ async function sendDigitalProductEmail(transactionId) {
 
                                     <p style="font-size:14px;line-height:1.8;color:#64748b;margin:0 0 24px;">
                                         File preset dan panduan penggunaan untuk perangkat yang kamu pilih
-                                        telah kami lampirkan dalam email ini.
+                                        sudah siap untuk di-download melalui tombol di bawah.
                                     </p>
 
-                                    <!-- FILE -->
+                                    <!-- FILE DOWNLOAD -->
                                     <div style="border-top:1px solid rgba(20,201,244,.18);border-bottom:1px solid rgba(20,201,244,.18);padding:22px 0;margin-bottom:27px;">
 
-                                        <div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#1268ff;margin-bottom:15px;">
-                                            ISI PESANAN
+                                        <div style="font-size:10px;font-weight:800;letter-spacing:1.7px;color:#1268ff;margin-bottom:18px;">
+                                            FILE PESANAN
                                         </div>
 
-                                        <div style="font-size:14px;line-height:2;color:#64748b;">
+                                        <a
+                                            href="${presetDownloadUrl}"
+                                            style="
+                                                display:block;
+                                                width:100%;
+                                                box-sizing:border-box;
+                                                padding:14px 20px;
+                                                margin-bottom:12px;
+                                                background:#1268ff;
+                                                color:#ffffff;
+                                                text-decoration:none;
+                                                text-align:center;
+                                                border-radius:10px;
+                                                font-size:14px;
+                                                font-weight:800;
+                                            "
+                                        >
+                                            ↓&nbsp; Download Preset
+                                        </a>
 
-                                            <div>
-                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:900;letter-spacing:1px;color:#1268ff;">
-                                                    ZIP
-                                                </span>
-                                                File preset Lightroom
-                                            </div>
+                                        <a
+                                            href="${guideDownloadUrl}"
+                                            style="
+                                                display:block;
+                                                width:100%;
+                                                box-sizing:border-box;
+                                                padding:14px 20px;
+                                                background:#ffffff;
+                                                color:#1268ff;
+                                                text-decoration:none;
+                                                text-align:center;
+                                                border:1px solid #1268ff;
+                                                border-radius:10px;
+                                                font-size:14px;
+                                                font-weight:800;
+                                            "
+                                        >
+                                            ↓&nbsp; Download Panduan
+                                        </a>
 
-                                            <div>
-                                                <span style="display:inline-block;width:45px;font-size:10px;font-weight:900;letter-spacing:1px;color:#1268ff;">
-                                                    PDF
-                                                </span>
-                                                Panduan penggunaan
-                                            </div>
-
+                                        <div style="margin-top:13px;font-size:12px;line-height:1.6;color:#94a3b8;text-align:center;">
+                                            File tidak dilampirkan langsung.
+                                            Gunakan tombol di atas untuk mengunduh file kamu.
                                         </div>
 
                                     </div>
@@ -4340,7 +4433,8 @@ async function sendDigitalProductEmail(transactionId) {
                                 <!-- FOOTER -->
                                 <div style="padding:24px 30px;text-align:center;background:#061a45;">
 
-                                    <div style="font-size:11px;color:#f5f9ff;line-height:1.7;">
+                                    
+<div style="font-size:11px;color:#f5f9ff;line-height:1.7;">
                                         © BAYORA · Lightroom Presets
                                     </div>
 
@@ -4356,7 +4450,6 @@ async function sendDigitalProductEmail(transactionId) {
                     </div>
                 `,
 
-                attachments
             });
 
         if (result?.error) {
@@ -4379,15 +4472,28 @@ async function sendDigitalProductEmail(transactionId) {
             transaction.customer_email
         );
 
+        console.log(
+            "[RESEND EMAIL ID]",
+            result?.data?.id ||
+            result?.id ||
+            "ID TIDAK TERSEDIA"
+        );
+
+        console.log(
+            "[RESEND EMAIL TO]",
+            transaction.customer_email
+        );
+
+        console.log(
+            "[RESEND EMAIL FROM]",
+            fromEmail
+        );
+
         return {
             success: true,
             delivery_status: "SENT",
             email:
-                transaction.customer_email,
-            attachments:
-                attachments.map(
-                    item => item.filename
-                )
+                transaction.customer_email
         };
 
     } catch (error) {
@@ -5344,20 +5450,241 @@ app.post(
    DIGITAL PRODUCT DOWNLOAD
 ========================= */
 
+
+/*
+ * =========================================================
+ * BAYORA — EMAIL DOWNLOAD ENDPOINT
+ * =========================================================
+ *
+ * Dipakai oleh tombol download di email.
+ * Tidak menggunakan Authorization header karena link email
+ * tidak dapat mengirim Bearer header seperti frontend.
+ *
+ * Token tetap diverifikasi menggunakan helper token yang sama.
+ */
+
+app.get(
+    "/api/digital-products/email-download/:transactionId",
+    (req, res) => {
+
+        try {
+
+            const transactionId =
+                String(
+                    req.params.transactionId || ""
+                ).trim();
+
+            const downloadToken =
+                String(
+                    req.query.token || ""
+                ).trim();
+
+            if (
+                !transactionId ||
+                !downloadToken ||
+                !verifyDigitalDownloadToken(
+                    transactionId,
+                    downloadToken
+                )
+            ) {
+
+                return res.status(401).send(
+                    "Link download tidak valid atau sudah kedaluwarsa."
+                );
+
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        t.transaction_id,
+                        t.payment_status,
+                        t.service,
+                        t.product_name
+                    FROM transactions t
+                    WHERE t.transaction_id = ?
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (!transaction) {
+
+                return res.status(404).send(
+                    "Transaksi tidak ditemukan."
+                );
+
+            }
+
+            if (
+                transaction.payment_status !==
+                "PAID"
+            ) {
+
+                return res.status(403).send(
+                    "Pembayaran belum dikonfirmasi."
+                );
+
+            }
+
+            if (
+                transaction.service !==
+                "lightroom-preset"
+            ) {
+
+                return res.status(400).send(
+                    "Download email ini hanya tersedia untuk Lightroom Preset."
+                );
+
+            }
+
+            const item =
+                db.prepare(`
+                    SELECT
+                        digital_file
+                    FROM digital_transaction_items
+                    WHERE transaction_id = ?
+                    ORDER BY id ASC
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (
+                !item ||
+                !item.digital_file
+            ) {
+
+                return res.status(404).send(
+                    "File preset belum tersedia."
+                );
+
+            }
+
+            const digitalStorageRoot =
+                process.env.NODE_ENV === "production"
+                    ? "/data"
+                    : path.join(__dirname, "..");
+
+            const relativeFile =
+                String(
+                    item.digital_file
+                )
+                .replace(/^\/+/, "");
+
+            const filePath =
+                path.resolve(
+                    digitalStorageRoot,
+                    relativeFile
+                );
+
+            const digitalRoot =
+                path.resolve(
+                    path.join(
+                        digitalStorageRoot,
+                        "uploads",
+                        "digital",
+                        "files"
+                    )
+                );
+
+            if (
+                filePath !== digitalRoot &&
+                !filePath.startsWith(
+                    digitalRoot + path.sep
+                )
+            ) {
+
+                return res.status(400).send(
+                    "Lokasi file tidak valid."
+                );
+
+            }
+
+            const safeProductName =
+                String(
+                    transaction.product_name ||
+                    "DIGITAL"
+                )
+                .trim()
+                .replace(/[<>:"/\\|?*]+/g, "")
+                .replace(/\s+/g, "-")
+                .toUpperCase();
+
+            let downloadFileName =
+                "BAYORA-" +
+                safeProductName +
+                ".zip";
+
+            if (
+                !safeProductName.endsWith(
+                    "-PRESET"
+                )
+            ) {
+
+                downloadFileName =
+                    "BAYORA-" +
+                    safeProductName +
+                    "-PRESET.zip";
+
+            }
+
+            return res.download(
+                filePath,
+                downloadFileName,
+                error => {
+
+                    if (error) {
+
+                        console.error(
+                            "[EMAIL DIGITAL DOWNLOAD]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[EMAIL DIGITAL DOWNLOAD]",
+                error
+            );
+
+            return res.status(500).send(
+                "Download gagal."
+            );
+
+        }
+
+    }
+);
+
 app.get(
     "/api/digital-products/download/:transactionId",
     (req, res) => {
 
         try {
 
-            const currentUser =
-                getCurrentUser(req);
+            const downloadToken =
+                String(
+                    req.headers.authorization || ""
+                )
+                .replace(/^Bearer\s+/i, "")
+                .trim();
 
-            if (!currentUser) {
+            if (
+                !downloadToken ||
+                !verifyDigitalDownloadToken(
+                    String(
+                        req.params.transactionId || ""
+                    ).trim(),
+                    downloadToken
+                )
+            ) {
 
                 return res.status(401).json({
                     success: false,
-                    error: "Silakan login terlebih dahulu."
+                    error:
+                        "Akses download tidak valid atau sudah kedaluwarsa."
                 });
 
             }
@@ -5379,12 +5706,17 @@ app.get(
             const transaction =
                 db.prepare(`
                     SELECT
-                        transaction_id,
-                        user_id,
-                        payment_status,
-                        product_name
-                    FROM transactions
-                    WHERE transaction_id = ?
+                        t.transaction_id,
+                        t.user_id,
+                        t.payment_status,
+                        t.product_id,
+                        t.product_name,
+                        t.service,
+                        p.service_id
+                    FROM transactions t
+                    LEFT JOIN products p
+                        ON p.id = t.product_id
+                    WHERE t.transaction_id = ?
                     LIMIT 1
                 `).get(transactionId);
 
@@ -5393,19 +5725,6 @@ app.get(
                 return res.status(404).json({
                     success: false,
                     error: "Transaksi tidak ditemukan."
-                });
-
-            }
-
-            if (
-                Number(transaction.user_id) !==
-                Number(currentUser.id)
-            ) {
-
-                return res.status(403).json({
-                    success: false,
-                    error:
-                        "Kamu tidak memiliki akses ke transaksi ini."
                 });
 
             }
@@ -5534,9 +5853,45 @@ app.get(
              */
             if (files.length === 1) {
 
+                /*
+                 * =================================================
+                 * BAYORA — LIGHTROOM PRESET DOWNLOAD NAME
+                 * =================================================
+                 *
+                 * Khusus service lightroom-preset.
+                 * Layanan digital lainnya tetap memakai
+                 * nama file lama.
+                 */
+
+                let downloadFileName =
+                    files[0].name + ".zip";
+
+                if (
+                    transaction.service ===
+                    "lightroom-preset"
+                ) {
+
+                    const safeProductName =
+                        String(
+                            transaction.product_name ||
+                            files[0].name ||
+                            "DIGITAL"
+                        )
+                        .trim()
+                        .replace(/[<>:"/\\|?*]+/g, "")
+                        .replace(/\s+/g, "-")
+                        .toUpperCase();
+
+                    downloadFileName =
+                        "BAYORA-PRESET-" +
+                        safeProductName +
+                        ".zip";
+
+                }
+
                 return res.download(
                     files[0].path,
-                    files[0].name + ".zip",
+                    downloadFileName,
                     error => {
 
                         if (error) {
@@ -5654,20 +6009,250 @@ app.get(
    DIGITAL PRODUCT GUIDE DOWNLOAD
 ========================= */
 
+/*
+ * =========================================================
+ * BAYORA — EMAIL GUIDE DOWNLOAD ENDPOINT
+ * =========================================================
+ *
+ * Secure download panduan dari email.
+ * Token menggunakan digital_download_tokens yang sama.
+ */
+
+app.get(
+    "/api/digital-products/email-guide-download/:transactionId",
+    (req, res) => {
+
+        try {
+
+            const transactionId =
+                String(
+                    req.params.transactionId || ""
+                ).trim();
+
+            const downloadToken =
+                String(
+                    req.query.token || ""
+                ).trim();
+
+            if (
+                !transactionId ||
+                !downloadToken ||
+                !verifyDigitalDownloadToken(
+                    transactionId,
+                    downloadToken
+                )
+            ) {
+
+                return res.status(401).send(
+                    "Link download tidak valid atau sudah kedaluwarsa."
+                );
+
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        t.transaction_id,
+                        t.payment_status,
+                        t.service,
+                        t.device,
+                        t.product_name
+                    FROM transactions t
+                    WHERE t.transaction_id = ?
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (!transaction) {
+
+                return res.status(404).send(
+                    "Transaksi tidak ditemukan."
+                );
+
+            }
+
+            if (
+                transaction.payment_status !==
+                "PAID"
+            ) {
+
+                return res.status(403).send(
+                    "Pembayaran belum dikonfirmasi."
+                );
+
+            }
+
+            if (
+                transaction.service !==
+                "lightroom-preset"
+            ) {
+
+                return res.status(400).send(
+                    "Download panduan ini hanya tersedia untuk Lightroom Preset."
+                );
+
+            }
+
+            const item =
+                db.prepare(`
+                    SELECT
+                        device_file
+                    FROM digital_transaction_items
+                    WHERE transaction_id = ?
+                    ORDER BY id ASC
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (
+                !item ||
+                !item.device_file
+            ) {
+
+                return res.status(404).send(
+                    "File panduan belum tersedia."
+                );
+
+            }
+
+            const digitalStorageRoot =
+                process.env.NODE_ENV === "production"
+                    ? "/data"
+                    : path.join(__dirname, "..");
+
+            const relativeFile =
+                String(
+                    item.device_file
+                )
+                .replace(/^\/+/, "");
+
+            const filePath =
+                path.resolve(
+                    digitalStorageRoot,
+                    relativeFile
+                );
+
+            const digitalRoot =
+                path.resolve(
+                    path.join(
+                        digitalStorageRoot,
+                        "uploads",
+                        "digital",
+                        "files"
+                    )
+                );
+
+            if (
+                filePath === digitalRoot ||
+                !filePath.startsWith(
+                    digitalRoot + path.sep
+                )
+            ) {
+
+                return res.status(400).send(
+                    "Lokasi file panduan tidak valid."
+                );
+
+            }
+
+            if (!fs.existsSync(filePath)) {
+
+                return res.status(404).send(
+                    "File panduan belum tersedia."
+                );
+
+            }
+
+            let deviceName =
+                String(
+                    transaction.device || ""
+                )
+                .trim()
+                .toLowerCase();
+
+            if (deviceName === "ios") {
+                deviceName = "IOS";
+            } else if (
+                deviceName === "android"
+            ) {
+                deviceName = "ANDROID";
+            } else if (
+                deviceName === "macos" ||
+                deviceName === "mac"
+            ) {
+                deviceName = "MACOS";
+            } else if (
+                deviceName === "windows"
+            ) {
+                deviceName = "WINDOWS";
+            } else {
+                deviceName = "DEVICE";
+            }
+
+            const downloadFileName =
+                "BAYORA-" +
+                deviceName +
+                "-PANDUAN.pdf";
+
+            return res.download(
+                filePath,
+                downloadFileName,
+                error => {
+
+                    if (error) {
+
+                        console.error(
+                            "[EMAIL GUIDE DOWNLOAD]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[EMAIL GUIDE DOWNLOAD]",
+                error
+            );
+
+            return res.status(500).send(
+                "Download panduan gagal."
+            );
+
+        }
+
+    }
+);
+
+
 app.get(
     "/api/digital-products/download-guide/:transactionId",
     (req, res) => {
 
         try {
 
-            const currentUser =
-                getCurrentUser(req);
+            const downloadToken =
+                String(
+                    req.headers.authorization || ""
+                )
+                .replace(/^Bearer\s+/i, "")
+                .trim();
 
-            if (!currentUser) {
+            if (
+                !downloadToken ||
+                !verifyDigitalDownloadToken(
+                    String(
+                        req.params.transactionId || ""
+                    ).trim(),
+                    downloadToken
+                )
+            ) {
 
                 return res.status(401).json({
                     success: false,
-                    error: "Silakan login terlebih dahulu."
+                    error:
+                        "Akses download tidak valid atau sudah kedaluwarsa."
                 });
 
             }
@@ -5693,8 +6278,11 @@ app.get(
                         t.user_id,
                         t.payment_status,
                         t.product_id,
+                        t.service,
+                        t.device,
                         p.name AS product_name,
-                        p.product_type
+                        p.product_type,
+                        p.service_id
                     FROM transactions t
                     LEFT JOIN products p
                         ON p.id = t.product_id
@@ -5707,18 +6295,6 @@ app.get(
                 return res.status(404).json({
                     success: false,
                     error: "Transaksi tidak ditemukan."
-                });
-
-            }
-
-            if (
-                Number(transaction.user_id) !==
-                Number(currentUser.id)
-            ) {
-
-                return res.status(403).json({
-                    success: false,
-                    error: "Kamu tidak memiliki akses ke transaksi ini."
                 });
 
             }
@@ -5811,9 +6387,69 @@ app.get(
 
             }
 
+            /*
+             * =================================================
+             * BAYORA — LIGHTROOM GUIDE DOWNLOAD NAME
+             * =================================================
+             *
+             * Khusus service lightroom-preset.
+             * Nama perangkat ditentukan dari file panduan
+             * yang dipilih saat transaksi.
+             */
+
+            let guideDownloadName =
+                transaction.product_name +
+                " - Panduan.pdf";
+
+            if (
+                transaction.service_id ===
+                "lightroom-preset"
+            ) {
+
+                const device =
+                    String(
+                        transaction.device || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                let deviceName = "DEVICE";
+
+                if (device === "ios") {
+
+                    deviceName = "IOS";
+
+                } else if (
+                    device === "android"
+                ) {
+
+                    deviceName = "ANDROID";
+
+                } else if (
+                    device === "macos" ||
+                    device === "mac"
+                ) {
+
+                    deviceName = "MACOS";
+
+                } else if (
+                    device === "windows"
+                ) {
+
+                    deviceName = "WINDOWS";
+
+                }
+
+                guideDownloadName =
+                    "BAYORA-PANDUAN-" +
+                    deviceName +
+                    ".pdf";
+
+            }
+
             return res.download(
                 filePath,
-                transaction.product_name + " - Panduan.pdf",
+                guideDownloadName,
                 error => {
 
                     if (error) {

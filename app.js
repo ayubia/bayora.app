@@ -3633,7 +3633,8 @@ async function processPayment() {
 
 function showDigitalDownloadButton(
     transactionId,
-    productName
+    productName,
+    downloadToken
 ) {
 
     const successPage =
@@ -3811,7 +3812,7 @@ function showDigitalDownloadButton(
             .bayora-success-icon {
                 width: 62px;
                 height: 62px;
-                margin: 0 auto 18px;
+                margin: 0 auto 12px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -3846,6 +3847,7 @@ function showDigitalDownloadButton(
             #bayoraDigitalSuccessLayout
             .bayora-success-title {
                 margin: 0;
+                padding-top: 0;
                 text-align: center;
                 color: #16264b;
                 font-size: 34px;
@@ -4239,7 +4241,7 @@ function showDigitalDownloadButton(
             "bayora-demo";
 
         demo.textContent =
-            "DEMO";
+            "";
 
         /*
          * DEMO hanya mengikuti referensi email.
@@ -4386,14 +4388,129 @@ function showDigitalDownloadButton(
                 transactionId
             )}`;
 
-        presetLink.target =
-            "_blank";
+        presetLink.dataset.downloadUrl =
+            presetLink.href;
 
-        presetLink.rel =
-            "noopener";
+        presetLink.removeAttribute("target");
+        presetLink.removeAttribute("rel");
 
         presetLink.innerHTML =
             "↓&nbsp; Download";
+
+        presetLink.addEventListener(
+            "click",
+            async event => {
+
+                event.preventDefault();
+
+                if (!downloadToken) {
+
+                    alert(
+                        "Token download tidak tersedia. Silakan muat ulang halaman."
+                    );
+
+                    return;
+                }
+
+                const originalText =
+                    presetLink.innerHTML;
+
+                presetLink.innerHTML =
+                    "MENYIAPKAN DOWNLOAD...";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            presetLink.dataset.downloadUrl,
+                            {
+                                method: "GET",
+                                headers: {
+                                    Authorization:
+                                        "Bearer " +
+                                        downloadToken
+                                },
+                                cache: "no-store"
+                            }
+                        );
+
+                    if (!response.ok) {
+
+                        let message =
+                            "Download gagal.";
+
+                        try {
+
+                            const data =
+                                await response.json();
+
+                            if (data && data.error) {
+                                message = data.error;
+                            }
+
+                        } catch (_) {}
+
+                        throw new Error(message);
+                    }
+
+                    const blob =
+                        await response.blob();
+
+                    const blobUrl =
+                        URL.createObjectURL(blob);
+
+                    const temp =
+                        document.createElement("a");
+
+                    temp.href = blobUrl;
+                      const safeProductName =
+                          String(
+                              transaction.productName ||
+                              productName ||
+                              "DIGITAL"
+                          )
+                          .trim()
+                          .replace(/[<>:"/\\|?*]+/g, "")
+                          .replace(/\s+/g, "-")
+                          .toUpperCase();
+
+                      const presetProductName =
+                          safeProductName.endsWith("-PRESET")
+                              ? safeProductName
+                              : safeProductName + "-PRESET";
+
+                      temp.download =
+                          "BAYORA-" +
+                          presetProductName +
+                          ".zip";
+
+                    document.body.appendChild(temp);
+                    temp.click();
+                    temp.remove();
+
+                    URL.revokeObjectURL(blobUrl);
+
+                } catch (error) {
+
+                    console.error(
+                        "[BAYORA PRESET DOWNLOAD]",
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        "Download gagal."
+                    );
+
+                } finally {
+
+                    presetLink.innerHTML =
+                        originalText;
+
+                }
+
+            }
+        );
 
         preset.appendChild(
             presetLink
@@ -4433,14 +4550,140 @@ function showDigitalDownloadButton(
                 transactionId
             )}`;
 
-        guideLink.target =
-            "_blank";
+        guideLink.dataset.downloadUrl =
+            guideLink.href;
 
-        guideLink.rel =
-            "noopener";
+        guideLink.removeAttribute("target");
+        guideLink.removeAttribute("rel");
 
         guideLink.innerHTML =
             "↓&nbsp; Download";
+
+        guideLink.addEventListener(
+            "click",
+            async event => {
+
+                event.preventDefault();
+
+                if (!downloadToken) {
+
+                    alert(
+                        "Token download tidak tersedia. Silakan muat ulang halaman."
+                    );
+
+                    return;
+                }
+
+                const originalText =
+                    guideLink.innerHTML;
+
+                guideLink.innerHTML =
+                    "MENYIAPKAN DOWNLOAD...";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            guideLink.dataset.downloadUrl,
+                            {
+                                method: "GET",
+                                headers: {
+                                    Authorization:
+                                        "Bearer " +
+                                        downloadToken
+                                },
+                                cache: "no-store"
+                            }
+                        );
+
+                    if (!response.ok) {
+
+                        let message =
+                            "Download gagal.";
+
+                        try {
+
+                            const data =
+                                await response.json();
+
+                            if (data && data.error) {
+                                message = data.error;
+                            }
+
+                        } catch (_) {}
+
+                        throw new Error(message);
+                    }
+
+                    const blob =
+                        await response.blob();
+
+                    const blobUrl =
+                        URL.createObjectURL(blob);
+
+                    const temp =
+                        document.createElement("a");
+
+                    temp.href = blobUrl;
+                      let deviceName =
+                          String(
+                              transaction.device ||
+                              ""
+                          )
+                          .trim()
+                          .toLowerCase();
+
+                      if (deviceName === "ios") {
+                          deviceName = "IOS";
+                      } else if (
+                          deviceName === "android"
+                      ) {
+                          deviceName = "ANDROID";
+                      } else if (
+                          deviceName === "macos" ||
+                          deviceName === "mac"
+                      ) {
+                          deviceName = "MACOS";
+                      } else if (
+                          deviceName === "windows"
+                      ) {
+                          deviceName = "WINDOWS";
+                      } else {
+                          deviceName = "DEVICE";
+                      }
+
+                      temp.download =
+                          "BAYORA-" +
+                          deviceName +
+                          "-PANDUAN.pdf";
+
+                    document.body.appendChild(temp);
+                    temp.click();
+                    temp.remove();
+
+                    URL.revokeObjectURL(blobUrl);
+
+                } catch (error) {
+
+                    console.error(
+                        "[BAYORA GUIDE DOWNLOAD]",
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        "Download gagal."
+                    );
+
+                } finally {
+
+                    guideLink.innerHTML =
+                        originalText;
+
+                }
+
+            }
+        );
 
         guide.appendChild(
             guideLink
@@ -4543,9 +4786,14 @@ function showDigitalDownloadButton(
                     dibuka, silakan hubungi kami.
                 </p>
 
-                <div class="bayora-contact">
+                <a
+                    class="bayora-contact"
+                    href="https://wa.me/6285128045458"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
                     💬 &nbsp; Hubungi Admin
-                </div>
+                </a>
 
             </div>
 
@@ -4574,7 +4822,7 @@ function showDigitalDownloadButton(
                     </li>
 
                     <li>
-                        Garansi uang kembali
+                        Akses produk setelah pembayaran berhasil
                     </li>
                 </ul>
 
@@ -4960,16 +5208,27 @@ async function checkTransactionStatus(transactionId) {
 
             try {
 
-                await fetch(
-                    `/api/transactions/${encodeURIComponent(transactionId)}/sync-xendit`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type":
-                                "application/json"
+                const syncResponse =
+                    await fetch(
+                        `/api/transactions/${encodeURIComponent(transactionId)}/sync-xendit`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
                         }
-                    }
-                );
+                    );
+
+                const syncData =
+                    await syncResponse.json();
+
+                if (syncData?.downloadToken) {
+
+                    window.BAYORA_DIGITAL_DOWNLOAD_TOKEN =
+                        syncData.downloadToken;
+
+                }
 
             } catch (syncError) {
 
@@ -5028,7 +5287,8 @@ async function checkTransactionStatus(transactionId) {
 
                 showDigitalDownloadButton(
                     transactionId,
-                    transaction.productName
+                    transaction.productName,
+                    window.BAYORA_DIGITAL_DOWNLOAD_TOKEN || null
                 );
 
                 return;
@@ -5355,7 +5615,8 @@ async function handleXenditReturn() {
 
                 showDigitalDownloadButton(
                     transaction.transactionId,
-                    transaction.productName
+                    transaction.productName,
+                    window.BAYORA_DIGITAL_DOWNLOAD_TOKEN || null
                 );
 
                 return;

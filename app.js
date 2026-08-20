@@ -3626,48 +3626,413 @@ function showDigitalDownloadButton(
         "digitalDownloadContainer";
 
     container.style.marginTop =
-        "20px";
+        "28px";
+
+    container.style.padding =
+        "0";
 
     container.style.textAlign =
+        "left";
+
+    container.style.background =
+        "#ffffff";
+
+    container.style.border =
+        "1px solid rgba(20,201,244,.18)";
+
+    container.style.borderRadius =
+        "20px";
+
+    container.style.overflow =
+        "hidden";
+
+    container.style.boxShadow =
+        "0 20px 55px rgba(6,26,69,.10)";
+
+    const header =
+        document.createElement("div");
+
+    header.style.padding =
+        "28px 26px 24px";
+
+    header.style.textAlign =
         "center";
 
+    header.style.background =
+        "linear-gradient(100deg,#061a45,#0b2c68)";
+
+    const brand =
+        document.createElement("div");
+
+    brand.textContent =
+        "BAYORA";
+
+    brand.style.fontSize =
+        "24px";
+
+    brand.style.fontWeight =
+        "900";
+
+    brand.style.letterSpacing =
+        "-.5px";
+
+    brand.style.color =
+        "#ffffff";
+
+    const subtitle =
+        document.createElement("div");
+
+    subtitle.textContent =
+        "LIGHTROOM PRESETS";
+
+    subtitle.style.marginTop =
+        "7px";
+
+    subtitle.style.fontSize =
+        "9px";
+
+    subtitle.style.fontWeight =
+        "700";
+
+    subtitle.style.letterSpacing =
+        "2px";
+
+    subtitle.style.color =
+        "#14c9f4";
+
+    header.appendChild(brand);
+    header.appendChild(subtitle);
+
+    const content =
+        document.createElement("div");
+
+    content.style.padding =
+        "30px 26px 28px";
+
     const title =
-        document.createElement("p");
+        document.createElement("div");
 
     title.textContent =
-        productName
-            ? `Produk ${productName} siap didownload.`
-            : "Produk digital kamu siap didownload.";
+        "Pembayaran berhasil ✨";
+
+    title.style.fontSize =
+        "24px";
+
+    title.style.fontWeight =
+        "800";
+
+    title.style.lineHeight =
+        "1.3";
+
+    title.style.color =
+        "#10244d";
 
     title.style.marginBottom =
         "12px";
 
-    const button =
-        document.createElement("a");
+    const description =
+        document.createElement("p");
 
-    button.href =
+    description.textContent =
+        productName
+            ? `Terima kasih telah membeli ${productName} di BAYORA. Produk kamu sudah siap untuk didownload.`
+            : "Terima kasih telah berbelanja di BAYORA. Produk kamu sudah siap untuk didownload.";
+
+    description.style.margin =
+        "0 0 24px";
+
+    description.style.fontSize =
+        "14px";
+
+    description.style.lineHeight =
+        "1.8";
+
+    description.style.color =
+        "#64748b";
+
+    const filesTitle =
+        document.createElement("div");
+
+    filesTitle.textContent =
+        "FILE PESANAN";
+
+    filesTitle.style.fontSize =
+        "10px";
+
+    filesTitle.style.fontWeight =
+        "800";
+
+    filesTitle.style.letterSpacing =
+        "1.7px";
+
+    filesTitle.style.color =
+        "#1268ff";
+
+    filesTitle.style.marginBottom =
+        "14px";
+
+    const files =
+        document.createElement("div");
+
+    files.style.display =
+        "flex";
+
+    files.style.flexDirection =
+        "column";
+
+    files.style.gap =
+        "12px";
+
+    function createDownloadButton(
+        label,
+        descriptionText,
+        url
+    ) {
+
+        const link =
+            document.createElement("a");
+
+        link.href =
+            url;
+
+        link.setAttribute(
+            "download",
+            ""
+        );
+
+        link.style.display =
+            "flex";
+
+        link.style.alignItems =
+            "center";
+
+        link.style.justifyContent =
+            "space-between";
+
+        link.style.gap =
+            "16px";
+
+        link.style.padding =
+            "15px 17px";
+
+        link.style.borderRadius =
+            "14px";
+
+        link.style.textDecoration =
+            "none";
+
+        link.style.background =
+            "#f5f9ff";
+
+        link.style.border =
+            "1px solid rgba(20,201,244,.18)";
+
+        link.style.cursor =
+            "pointer";
+
+        const left =
+            document.createElement("div");
+
+        const name =
+            document.createElement("div");
+
+        name.textContent =
+            label;
+
+        name.style.fontSize =
+            "14px";
+
+        name.style.fontWeight =
+            "800";
+
+        name.style.color =
+            "#10244d";
+
+        const detail =
+            document.createElement("div");
+
+        detail.textContent =
+            descriptionText;
+
+        detail.style.marginTop =
+            "3px";
+
+        detail.style.fontSize =
+            "12px";
+
+        detail.style.color =
+            "#64748b";
+
+        left.appendChild(name);
+        left.appendChild(detail);
+
+        const arrow =
+            document.createElement("span");
+
+        arrow.textContent =
+            "↓";
+
+        arrow.style.display =
+            "flex";
+
+        arrow.style.alignItems =
+            "center";
+
+        arrow.style.justifyContent =
+            "center";
+
+        arrow.style.width =
+            "38px";
+
+        arrow.style.height =
+            "38px";
+
+        arrow.style.flexShrink =
+            "0";
+
+        arrow.style.borderRadius =
+            "10px";
+
+        arrow.style.color =
+            "#ffffff";
+
+        arrow.style.fontSize =
+            "19px";
+
+        arrow.style.fontWeight =
+            "800";
+
+        arrow.style.background =
+            "linear-gradient(100deg,#1268ff,#14c9f4)";
+
+        link.appendChild(left);
+        link.appendChild(arrow);
+
+        return link;
+    }
+
+    const zipUrl =
         `/api/digital-products/download/${encodeURIComponent(transactionId)}`;
 
-    button.textContent =
-        "Download Produk";
+    const guideUrl =
+        `/api/digital-products/download-guide/${encodeURIComponent(transactionId)}`;
 
-    button.setAttribute(
-        "download",
-        ""
+    files.appendChild(
+        createDownloadButton(
+            "Download Preset",
+            "File ZIP Lightroom",
+            zipUrl
+        )
     );
 
-    button.style.display =
-        "inline-block";
+    files.appendChild(
+        createDownloadButton(
+            "Download Panduan",
+            "Panduan penggunaan sesuai perangkat",
+            guideUrl
+        )
+    );
 
-    button.style.textDecoration =
-        "none";
+    const emailNote =
+        document.createElement("div");
 
-    button.style.cursor =
-        "pointer";
+    emailNote.style.marginTop =
+        "22px";
 
-    container.appendChild(title);
+    emailNote.style.padding =
+        "15px 17px";
 
-    container.appendChild(button);
+    emailNote.style.borderRadius =
+        "12px";
+
+    emailNote.style.background =
+        "#f5f9ff";
+
+    emailNote.style.borderLeft =
+        "4px solid #ffd21c";
+
+    emailNote.style.fontSize =
+        "13px";
+
+    emailNote.style.lineHeight =
+        "1.7";
+
+    emailNote.style.color =
+        "#64748b";
+
+    emailNote.textContent =
+        "File pesanan juga telah dikirim ke email kamu sebagai cadangan.";
+
+    const closing =
+        document.createElement("p");
+
+    closing.style.margin =
+        "24px 0 0";
+
+    closing.style.fontSize =
+        "13px";
+
+    closing.style.lineHeight =
+        "1.7";
+
+    closing.style.color =
+        "#64748b";
+
+    closing.innerHTML =
+        'Terima kasih sudah menjadi bagian dari <strong style="color:#1268ff;">BAYORA</strong> 🤍';
+
+    content.appendChild(title);
+    content.appendChild(description);
+    content.appendChild(filesTitle);
+    content.appendChild(files);
+    content.appendChild(emailNote);
+    content.appendChild(closing);
+
+    const footer =
+        document.createElement("div");
+
+    footer.style.padding =
+        "18px 24px";
+
+    footer.style.textAlign =
+        "center";
+
+    footer.style.background =
+        "#061a45";
+
+    const footerText =
+        document.createElement("div");
+
+    footerText.textContent =
+        "© BAYORA · Lightroom Presets";
+
+    footerText.style.fontSize =
+        "10px";
+
+    footerText.style.color =
+        "#f5f9ff";
+
+    const footerSub =
+        document.createElement("div");
+
+    footerSub.textContent =
+        "Create. Edit. Express yourself.";
+
+    footerSub.style.marginTop =
+        "5px";
+
+    footerSub.style.fontSize =
+        "9px";
+
+    footerSub.style.color =
+        "#14c9f4";
+
+    footer.appendChild(footerText);
+    footer.appendChild(footerSub);
+
+    container.appendChild(header);
+    container.appendChild(content);
+    container.appendChild(footer);
 
     successPage.appendChild(container);
 

@@ -5110,6 +5110,202 @@ app.get(
 
 
 /* =========================
+   DIGITAL PRODUCT GUIDE DOWNLOAD
+========================= */
+
+app.get(
+    "/api/digital-products/download-guide/:transactionId",
+    (req, res) => {
+
+        try {
+
+            const currentUser =
+                getCurrentUser(req);
+
+            if (!currentUser) {
+
+                return res.status(401).json({
+                    success: false,
+                    error: "Silakan login terlebih dahulu."
+                });
+
+            }
+
+            const transactionId =
+                String(
+                    req.params.transactionId || ""
+                ).trim();
+
+            if (!transactionId) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "ID transaksi tidak valid."
+                });
+
+            }
+
+            const transaction =
+                db.prepare(`
+                    SELECT
+                        t.transaction_id,
+                        t.user_id,
+                        t.payment_status,
+                        t.product_id,
+                        p.name AS product_name,
+                        p.product_type
+                    FROM transactions t
+                    LEFT JOIN products p
+                        ON p.id = t.product_id
+                    WHERE t.transaction_id = ?
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (!transaction) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Transaksi tidak ditemukan."
+                });
+
+            }
+
+            if (
+                Number(transaction.user_id) !==
+                Number(currentUser.id)
+            ) {
+
+                return res.status(403).json({
+                    success: false,
+                    error: "Kamu tidak memiliki akses ke transaksi ini."
+                });
+
+            }
+
+            if (
+                transaction.payment_status !==
+                "PAID"
+            ) {
+
+                return res.status(403).json({
+                    success: false,
+                    error: "Pembayaran belum dikonfirmasi."
+                });
+
+            }
+
+            if (
+                transaction.product_type !==
+                "digital"
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Transaksi ini bukan produk digital."
+                });
+
+            }
+
+            const item =
+                db.prepare(`
+                    SELECT
+                        device_file
+                    FROM digital_transaction_items
+                    WHERE transaction_id = ?
+                    LIMIT 1
+                `).get(transactionId);
+
+            if (!item || !item.device_file) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Panduan penggunaan belum tersedia."
+                });
+
+            }
+
+            const digitalStorageRoot =
+                process.env.NODE_ENV === "production"
+                    ? "/data"
+                    : path.join(__dirname, "..");
+
+            const relativeFile =
+                String(
+                    item.device_file
+                )
+                .replace(/^\/+/, "");
+
+            const filePath =
+                path.resolve(
+                    digitalStorageRoot,
+                    relativeFile
+                );
+
+            const digitalRoot =
+                path.resolve(
+                    path.join(
+                        digitalStorageRoot,
+                        "uploads",
+                        "digital",
+                        "files"
+                    )
+                );
+
+            if (
+                filePath !== digitalRoot &&
+                !filePath.startsWith(
+                    digitalRoot + path.sep
+                )
+            ) {
+
+                console.error(
+                    "[DIGITAL GUIDE DOWNLOAD] Path tidak aman:",
+                    item.device_file
+                );
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Lokasi file panduan tidak valid."
+                });
+
+            }
+
+            return res.download(
+                filePath,
+                transaction.product_name + " - Panduan.pdf",
+                error => {
+
+                    if (error) {
+
+                        console.error(
+                            "[DIGITAL GUIDE DOWNLOAD]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[DIGITAL GUIDE DOWNLOAD ERROR]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal menyediakan file panduan."
+            });
+
+        }
+
+    }
+);
+
+
+/* =========================
    CATALOG API
 ========================= */
 

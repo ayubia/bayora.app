@@ -1681,17 +1681,17 @@ app.post("/api/transactions", (req, res) => {
                 t.id,
                 t.transaction_id AS transactionId,
                 t.reference,
-                service,
-                target,
-                operator,
-                product_id AS productId,
-                product_name AS productName,
-                price,
-                payment_method AS paymentMethod,
-                status,
-                payment_status AS paymentStatus,
+                t.service,
+                t.target,
+                t.operator,
+                t.product_id AS productId,
+                t.product_name AS productName,
+                t.price,
+                t.payment_method AS paymentMethod,
+                t.status,
+                t.payment_status AS paymentStatus,
                 p.product_type AS productType,
-                created_at AS createdAt
+                t.created_at AS createdAt
             FROM transactions t
             LEFT JOIN products p
                 ON p.id = t.product_id

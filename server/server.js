@@ -1295,6 +1295,18 @@ app.use(
     )
 );
 
+/*
+ * DIGITAL PRODUCT PREVIEW
+ *
+ * Preview gambar boleh diakses public.
+ * File ZIP/PDF tetap private dan hanya
+ * dikirim melalui endpoint download terproteksi.
+ */
+app.use(
+    "/uploads/digital/preview",
+    express.static(digitalPreviewDir)
+);
+
 
 
 /* =========================

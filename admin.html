@@ -5219,6 +5219,49 @@ function updateServiceTypeFields() {
 }
 
 
+function updateServiceIconPreview(icon) {
+
+    const preview =
+        document.getElementById(
+            "serviceIconPreview"
+        );
+
+    if (!preview) {
+        return;
+    }
+
+    const value =
+        String(icon || "").trim();
+
+    preview.innerHTML = "";
+
+    if (
+        value.startsWith("/assets/") ||
+        value.startsWith("http://") ||
+        value.startsWith("https://")
+    ) {
+
+        const image =
+            document.createElement("img");
+
+        image.src = value;
+        image.alt = "";
+
+        image.style.width = "42px";
+        image.style.height = "42px";
+        image.style.objectFit = "contain";
+        image.style.display = "block";
+
+        preview.appendChild(image);
+
+        return;
+    }
+
+    preview.textContent =
+        value || "📦";
+}
+
+
 function openServiceModal(serviceId = "") {
 
     const service =
@@ -5262,12 +5305,19 @@ function openServiceModal(serviceId = "") {
             ? service.title
             : "";
 
-    document.getElementById(
-        "serviceIcon"
-    ).value =
+    const serviceIconValue =
         service
             ? service.icon
             : "📦";
+
+    document.getElementById(
+        "serviceIcon"
+    ).value =
+        serviceIconValue;
+
+    updateServiceIconPreview(
+        serviceIconValue
+    );
 
     document.getElementById(
         "serviceDescription"
@@ -5354,6 +5404,10 @@ function openNewCatalogServiceModal() {
     document.getElementById(
         "serviceIcon"
     ).value = "📦";
+
+    updateServiceIconPreview(
+        "📦"
+    );
 
     document.getElementById(
         "serviceDescription"

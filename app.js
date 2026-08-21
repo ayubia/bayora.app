@@ -1772,73 +1772,35 @@ function openService(serviceId) {
 
         const bayoraIcon =
             getBayoraServiceIconGlobal(
-                currentService,
+                serviceId,
                 service
             );
 
         if (bayoraIcon) {
 
+            const iconString =
+                String(bayoraIcon).trim();
+
+            const iconSrc =
+                iconString.startsWith("/") ||
+                iconString.startsWith("http://") ||
+                iconString.startsWith("https://")
+                    ? iconString
+                    : "/assets/bayora-icons/" + iconString;
+
             formIcon.innerHTML = `
                 <img
-                    src="${
-                        String(bayoraIcon).startsWith("/") ||
-                        String(bayoraIcon).startsWith("http://") ||
-                        String(bayoraIcon).startsWith("https://")
-                            ? bayoraIcon
-                            : `/assets/bayora-icons/${bayoraIcon}`
-                    }"
+                    class="bayora-digital-service-icon"
+                    src="${iconSrc.replace(/"/g, "&quot;")}"
                     alt=""
                     aria-hidden="true"
                     draggable="false"
-                    style="
-                        width:56px;
-                        height:56px;
-                        object-fit:contain;
-                        display:block;
-                        margin:auto;
-                    "
                 >
             `;
 
         } else {
 
-            const serviceIcon =
-                getBayoraServiceIconGlobal(
-                    serviceId,
-                    service
-                );
-
-            if (
-                serviceIcon &&
-                (
-                    String(serviceIcon).startsWith("/") ||
-                    String(serviceIcon).startsWith("http://") ||
-                    String(serviceIcon).startsWith("https://")
-                )
-            ) {
-
-                formIcon.innerHTML = `
-                    <img
-                        src="${String(serviceIcon).replace(/"/g, "&quot;")}"
-                        alt=""
-                        aria-hidden="true"
-                        draggable="false"
-                        style="
-                            width:56px;
-                            height:56px;
-                            object-fit:contain;
-                            display:block;
-                            margin:auto;
-                        "
-                    >
-                `;
-
-            } else {
-
-                formIcon.textContent =
-                    serviceIcon || "📦";
-
-            }
+            formIcon.innerHTML = "";
 
         }
 

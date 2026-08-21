@@ -7644,3 +7644,68 @@ body {
     }
 
 }
+
+
+/* BAYORA DIGITAL ICON RESPONSIVE FINAL */
+
+#formIcon,
+.digital-form-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+#formIcon .bayora-digital-service-icon,
+.digital-form-icon .bayora-digital-service-icon {
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+}
+
+@media (max-width: 768px) {
+
+    #formIcon,
+    .digital-form-icon {
+        width: 64px !important;
+        height: 64px !important;
+
+        min-width: 64px !important;
+        min-height: 64px !important;
+
+        max-width: 64px !important;
+        max-height: 64px !important;
+    }
+
+}
+
+@media (min-width: 769px) {
+
+    #formIcon,
+    .digital-form-icon {
+        width: 72px !important;
+        height: 72px !important;
+
+        min-width: 72px !important;
+        min-height: 72px !important;
+
+        max-width: 72px !important;
+        max-height: 72px !important;
+    }
+
+}

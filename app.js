@@ -1552,53 +1552,29 @@ function openService(serviceId) {
 
             if (digitalIcon) {
 
-                if (
-                    String(digitalIcon).startsWith("/") ||
-                    String(digitalIcon).startsWith("http://") ||
-                    String(digitalIcon).startsWith("https://")
-                ) {
+                const iconString =
+                    String(digitalIcon).trim();
 
-                    digitalServiceIcon.innerHTML = `
-                        <img
-                            src="${String(digitalIcon).replace(/"/g, "&quot;")}"
-                            alt=""
-                            aria-hidden="true"
-                            draggable="false"
-                            style="
-                                width:56px;
-                                height:56px;
-                                object-fit:contain;
-                                display:block;
-                                margin:auto;
-                            "
-                        >
-                    `;
+                const iconSrc =
+                    iconString.startsWith("/") ||
+                    iconString.startsWith("http://") ||
+                    iconString.startsWith("https://")
+                        ? iconString
+                        : "/assets/bayora-icons/" + iconString;
 
-                } else {
-
-                    digitalServiceIcon.innerHTML = `
-                        <img
-                            src="/assets/bayora-icons/${String(digitalIcon).replace(/"/g, "&quot;")}"
-                            alt=""
-                            aria-hidden="true"
-                            draggable="false"
-                            style="
-                                width:56px;
-                                height:56px;
-                                object-fit:contain;
-                                display:block;
-                                margin:auto;
-                            "
-                        >
-                    `;
-
-                }
+                digitalServiceIcon.innerHTML = `
+                    <img
+                        class="bayora-digital-service-icon"
+                        src="${iconSrc.replace(/"/g, "&quot;")}"
+                        alt=""
+                        aria-hidden="true"
+                        draggable="false"
+                    >
+                `;
 
             } else {
 
-                digitalServiceIcon.textContent =
-                    service.icon ||
-                    "✨";
+                digitalServiceIcon.innerHTML = "";
 
             }
 

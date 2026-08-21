@@ -1553,6 +1553,54 @@ body.bayora-view-admins > main > .stats {
 </style>
 
 
+<style id="bayora-transaction-split-style">
+
+.transaction-split-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px 0;
+    flex-wrap: wrap;
+}
+
+.transaction-split-tab {
+    border: 1px solid #dbe5f5;
+    background: #fff;
+    color: #64748b;
+    border-radius: 10px;
+    padding: 9px 15px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.transaction-split-tab:hover {
+    background: #f8fbff;
+}
+
+.transaction-split-tab.active {
+    background: #eaf3ff;
+    border-color: #bcd8ff;
+    color: #1769ff;
+}
+
+@media (max-width: 700px) {
+
+    .transaction-split-tabs {
+        padding: 12px 12px 0;
+        gap: 6px;
+    }
+
+    .transaction-split-tab {
+        flex: 1 1 auto;
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+
+}
+
+</style>
+
+
 <style id="admin-preview-slide-style">
 
 .preview-footer {
@@ -2462,6 +2510,35 @@ body.bayora-view-admins > main > .stats {
         </div>
 
 
+        <div class="transaction-split-tabs">
+
+            <button
+                type="button"
+                class="transaction-split-tab active"
+                data-transaction-type="ALL"
+            >
+                Semua
+            </button>
+
+            <button
+                type="button"
+                class="transaction-split-tab"
+                data-transaction-type="PPOB"
+            >
+                PPOB
+            </button>
+
+            <button
+                type="button"
+                class="transaction-split-tab"
+                data-transaction-type="DIGITAL"
+            >
+                Produk Digital
+            </button>
+
+        </div>
+
+
         <div class="transaction-tools">
 
             <input
@@ -2471,6 +2548,15 @@ body.bayora-view-admins > main > .stats {
                 placeholder="Cari ID, nomor tujuan, produk..."
                 autocomplete="off"
             >
+
+            <select
+                id="transactionServiceFilter"
+                class="transaction-filter"
+            >
+                <option value="ALL">
+                    Semua layanan
+                </option>
+            </select>
 
             <select
                 id="transactionFilter"
@@ -3209,6 +3295,224 @@ body.bayora-view-admins > main > .stats {
     }
 
 
+
+    let transactionTypeFilter = "ALL";
+
+
+    function getTransactionType(item) {
+
+        const transactionId =
+            String(item.transactionId || "")
+                .trim()
+                .toUpperCase();
+
+        if (
+            transactionId.startsWith("DIGITAL-")
+        ) {
+            return "DIGITAL";
+        }
+
+        return "PPOB";
+
+    }
+
+
+    function updateTransactionServiceFilter() {
+
+        const serviceSelect =
+            document.getElementById(
+                "transactionServiceFilter"
+            );
+
+        if (!serviceSelect) {
+            return;
+        }
+
+        const previousValue =
+            serviceSelect.value || "ALL";
+
+        const services =
+            Array.isArray(
+                catalogData?.services
+            )
+                ? catalogData.services
+                : [];
+
+        const scopedServices =
+            services
+                .filter(service => {
+
+                    if (
+                        !service ||
+                        service.active === 0
+                    ) {
+                        return false;
+                    }
+
+                    if (
+                        transactionTypeFilter ===
+                        "PPOB"
+                    ) {
+                        return (
+                            service.type !==
+                            "digital"
+                        );
+                    }
+
+                    if (
+                        transactionTypeFilter ===
+                        "DIGITAL"
+                    ) {
+                        return (
+                            service.type ===
+                            "digital"
+                        );
+                    }
+
+                    return true;
+
+                })
+                .sort(
+                    (a, b) =>
+                        String(a.title || "")
+                            .localeCompare(
+                                String(b.title || ""),
+                                "id"
+                            )
+                );
+
+
+        serviceSelect.innerHTML = `
+            <option value="ALL">
+                Semua layanan
+            </option>
+
+            ${scopedServices.map(service => {
+
+                const id =
+                    String(
+                        service.id || ""
+                    )
+                    .replace(/&/g, "&amp;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                const title =
+                    String(
+                        service.title ||
+                        service.id ||
+                        ""
+                    )
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+
+                return `
+                    <option value="${id}">
+                        ${title}
+                    </option>
+                `;
+
+            }).join("")}
+        `;
+
+
+        if (
+            previousValue === "ALL" ||
+            scopedServices.some(
+                service =>
+                    String(service.id || "") ===
+                    previousValue
+            )
+        ) {
+            serviceSelect.value =
+                previousValue;
+        } else {
+            serviceSelect.value = "ALL";
+        }
+
+    }
+
+
+    function setupTransactionSplit() {
+
+        document
+            .querySelectorAll(
+                ".transaction-split-tab"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        transactionTypeFilter =
+                            button.dataset
+                                .transactionType ||
+                            "ALL";
+
+
+                        document
+                            .querySelectorAll(
+                                ".transaction-split-tab"
+                            )
+                            .forEach(tab => {
+
+                                tab.classList.remove(
+                                    "active"
+                                );
+
+                            });
+
+
+                        button.classList.add(
+                            "active"
+                        );
+
+
+                        updateTransactionServiceFilter();
+
+
+                        if (
+                            typeof loadTransactions ===
+                            "function"
+                        ) {
+                            loadTransactions();
+                        }
+
+                    }
+                );
+
+            });
+
+
+        const serviceFilter =
+            document.getElementById(
+                "transactionServiceFilter"
+            );
+
+        if (serviceFilter) {
+
+            serviceFilter.addEventListener(
+                "change",
+                () => {
+
+                    if (
+                        typeof loadTransactions ===
+                        "function"
+                    ) {
+                        loadTransactions();
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+
     async function loadTransactions() {
 
         try {
@@ -3286,6 +3590,21 @@ const data =
             const statusFilter =
                 filterInput?.value || "ALL";
 
+
+            if (
+                typeof catalogData !== "undefined" &&
+                Array.isArray(catalogData.services)
+            ) {
+                updateTransactionServiceFilter();
+            }
+
+
+            const serviceFilter =
+                document.getElementById(
+                    "transactionServiceFilter"
+                )?.value || "ALL";
+
+
             const filtered =
                 transactions.filter(item => {
 
@@ -3309,7 +3628,28 @@ const data =
                         statusFilter === "ALL" ||
                         item.status === statusFilter;
 
-                    return matchesSearch && matchesStatus;
+
+                    const matchesType =
+                        transactionTypeFilter ===
+                            "ALL" ||
+                        getTransactionType(item) ===
+                            transactionTypeFilter;
+
+
+                    const matchesService =
+                        serviceFilter === "ALL" ||
+                        String(
+                            item.service || ""
+                        ).trim() ===
+                            serviceFilter;
+
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus &&
+                        matchesType &&
+                        matchesService
+                    );
                 });
 
             const tbody =
@@ -3453,6 +3793,7 @@ const data =
 
 
     setupTransactionMonths();
+    setupTransactionSplit();
     loadTransactions();
 
     setInterval(() => {

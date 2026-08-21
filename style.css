@@ -4953,13 +4953,6 @@ footer{
     }
 }
 
-cd ~/ppobku
-node --check server/server.js
-
-cd ~/ppobku
-git add style.css
-git commit -m "Improve desktop service card layout"
-git push origin main
 /* ============================================================
    BAYORA — FINAL SERVICE CATEGORY LAYOUT
    Desktop : 4 kolom

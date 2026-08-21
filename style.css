@@ -7702,3 +7702,12 @@ body {
     }
 
 }
+
+/* BAYORA — RAPATKAN JUDUL DAN KATALOG LIGHTROOM */
+.digital-catalog-header {
+    margin-top: 4px !important;
+}
+
+.digital-catalog-header h3 {
+    margin-top: 0 !important;
+}

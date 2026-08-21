@@ -6691,6 +6691,7 @@ app.get("/api/catalog", (req, res) => {
                 title,
                 icon,
                 description,
+                short_description,
                 label,
                 placeholder,
                 active,

@@ -441,6 +441,7 @@ async function loadCustomerCatalog() {
                 title: service.title,
                 icon: service.icon,
                 description: service.description,
+                short_description: service.short_description || "",
                 label: service.label,
                 placeholder: service.placeholder,
                 type: service.type || "ppob"

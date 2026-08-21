@@ -1011,7 +1011,9 @@ function getBayoraServiceIconHTML(id, service) {
                 service.title || "Layanan";
 
             const description =
-                service.description || "";
+                service.short_description ||
+                service.description ||
+                "";
 
             return `
                 <div
@@ -1588,6 +1590,7 @@ function openService(serviceId) {
 
         if (digitalServiceDescription) {
             digitalServiceDescription.textContent =
+                service.short_description ||
                 service.description ||
                 "";
         }

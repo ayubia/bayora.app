@@ -2028,6 +2028,31 @@ body.bayora-view-admins > main > .stats {
 
             <div
                 class="catalog-form-group"
+                id="serviceShortDescriptionGroup"
+                style="display:none;"
+            >
+                <label>Deskripsi Singkat</label>
+
+                <textarea
+                    id="serviceShortDescription"
+                    placeholder="Contoh: Preset Lightroom aesthetic untuk foto yang clean dan elegan."
+                    maxlength="180"
+                ></textarea>
+
+                <small
+                    style="
+                        display:block;
+                        margin-top:6px;
+                        opacity:.65;
+                    "
+                >
+                    Digunakan sebagai deskripsi singkat Produk Digital.
+                    Maksimal 180 karakter.
+                </small>
+            </div>
+
+            <div
+                class="catalog-form-group"
                 id="serviceTargetLabelGroup"
             >
                 <label>Label Nomor Tujuan</label>
@@ -5148,6 +5173,11 @@ function updateServiceTypeFields() {
             "servicePlaceholderGroup"
         );
 
+    const shortDescriptionGroup =
+        document.getElementById(
+            "serviceShortDescriptionGroup"
+        );
+
     const serviceLabel =
         document.getElementById(
             "serviceLabel"
@@ -5169,6 +5199,11 @@ function updateServiceTypeFields() {
     if (placeholderGroup) {
         placeholderGroup.style.display =
             isDigital ? "none" : "";
+    }
+
+    if (shortDescriptionGroup) {
+        shortDescriptionGroup.style.display =
+            isDigital ? "" : "none";
     }
 
     if (serviceLabel) {
@@ -5239,6 +5274,13 @@ function openServiceModal(serviceId = "") {
     ).value =
         service
             ? service.description
+            : "";
+
+    document.getElementById(
+        "serviceShortDescription"
+    ).value =
+        service
+            ? (service.short_description || "")
             : "";
 
     document.getElementById(
@@ -5315,6 +5357,10 @@ function openNewCatalogServiceModal() {
 
     document.getElementById(
         "serviceDescription"
+    ).value = "";
+
+    document.getElementById(
+        "serviceShortDescription"
     ).value = "";
 
     document.getElementById(
@@ -5577,6 +5623,11 @@ async function saveService(event) {
         description:
             document.getElementById(
                 "serviceDescription"
+            ).value.trim(),
+
+        short_description:
+            document.getElementById(
+                "serviceShortDescription"
             ).value.trim(),
 
         label:

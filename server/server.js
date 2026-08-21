@@ -6733,6 +6733,7 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
             title,
             icon,
             description,
+            short_description,
             label,
             placeholder,
             active,
@@ -6779,6 +6780,7 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
                 title,
                 icon,
                 description,
+                short_description,
                 label,
                 placeholder,
                 active,
@@ -6786,12 +6788,13 @@ app.post("/api/services", requireCatalogManager, (req, res) => {
                 type,
                 created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             serviceId,
             String(title).trim(),
             icon || "📦",
             description || "",
+            short_description || "",
             label || "Nomor Tujuan",
             placeholder || "",
             active === false ? 0 : 1,
@@ -7095,6 +7098,7 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
             title,
             icon,
             description,
+            short_description,
             label,
             placeholder,
             active,
@@ -7115,6 +7119,7 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
                 title = ?,
                 icon = ?,
                 description = ?,
+                short_description = ?,
                 label = ?,
                 placeholder = ?,
                 active = ?,
@@ -7133,6 +7138,10 @@ app.put("/api/services/:id", requireCatalogManager, (req, res) => {
             description !== undefined
                 ? description
                 : existing.description,
+
+            short_description !== undefined
+                ? String(short_description).trim()
+                : (existing.short_description || ""),
 
             label !== undefined
                 ? label

@@ -1481,8 +1481,45 @@ function openService(serviceId) {
             );
 
         if (icon) {
-            icon.textContent =
-                service.icon || "✨";
+
+            const serviceIcon =
+                getBayoraServiceIconGlobal(
+                    serviceId,
+                    service
+                );
+
+            if (
+                serviceIcon &&
+                (
+                    String(serviceIcon).startsWith("/") ||
+                    String(serviceIcon).startsWith("http://") ||
+                    String(serviceIcon).startsWith("https://")
+                )
+            ) {
+
+                icon.innerHTML = `
+                    <img
+                        src="${String(serviceIcon).replace(/"/g, "&quot;")}"
+                        alt=""
+                        aria-hidden="true"
+                        draggable="false"
+                        style="
+                            width:56px;
+                            height:56px;
+                            object-fit:contain;
+                            display:block;
+                            margin:auto;
+                        "
+                    >
+                `;
+
+            } else {
+
+                icon.textContent =
+                    serviceIcon || "✨";
+
+            }
+
         }
 
         if (title) {
@@ -1508,7 +1545,7 @@ function openService(serviceId) {
         if (digitalServiceIcon) {
 
             const digitalIcon =
-                getBayoraServiceIcon(
+                getBayoraServiceIconGlobal(
                     currentService,
                     service
                 );
@@ -1789,8 +1826,43 @@ function openService(serviceId) {
 
         } else {
 
-            formIcon.textContent =
-                service.icon || "📦";
+            const serviceIcon =
+                getBayoraServiceIconGlobal(
+                    serviceId,
+                    service
+                );
+
+            if (
+                serviceIcon &&
+                (
+                    String(serviceIcon).startsWith("/") ||
+                    String(serviceIcon).startsWith("http://") ||
+                    String(serviceIcon).startsWith("https://")
+                )
+            ) {
+
+                formIcon.innerHTML = `
+                    <img
+                        src="${String(serviceIcon).replace(/"/g, "&quot;")}"
+                        alt=""
+                        aria-hidden="true"
+                        draggable="false"
+                        style="
+                            width:56px;
+                            height:56px;
+                            object-fit:contain;
+                            display:block;
+                            margin:auto;
+                        "
+                    >
+                `;
+
+            } else {
+
+                formIcon.textContent =
+                    serviceIcon || "📦";
+
+            }
 
         }
 

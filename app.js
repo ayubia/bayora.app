@@ -519,6 +519,18 @@ async function loadCustomerCatalog() {
         services = apiServices;
         products = apiProducts;
 
+        console.log(
+            "[BAYORA ICON DEBUG]",
+            Object.entries(services).map(
+                ([id, service]) => ({
+                    id,
+                    title: service.title,
+                    type: service.type,
+                    icon: service.icon
+                })
+            )
+        );
+
         renderCustomerServices();
 
         /*
@@ -821,19 +833,53 @@ const BAYORA_SERVICE_ICONS = {
 
 function getBayoraServiceIcon(id, service) {
 
+    /*
+     * PRIORITAS ICON BAYORA
+     *
+     * 1. Icon custom yang disimpan di database
+     * 2. Icon BAYORA bawaan berdasarkan ID
+     * 3. Icon BAYORA berdasarkan judul
+     * 4. null -> fallback emoji
+     */
+
+    const customIcon =
+        String(
+            service?.icon || ""
+        ).trim();
+
+    /*
+     * Jika admin sudah mengupload icon,
+     * gunakan icon tersebut.
+     */
+    if (
+        customIcon.startsWith("/") ||
+        customIcon.startsWith("http://") ||
+        customIcon.startsWith("https://")
+    ) {
+
+        return customIcon;
+
+    }
+
+
     const normalizedId =
         String(id || "")
             .trim()
             .toLowerCase();
 
+
     if (BAYORA_SERVICE_ICONS[normalizedId]) {
+
         return BAYORA_SERVICE_ICONS[normalizedId];
+
     }
+
 
     const title =
         String(service?.title || "")
             .trim()
             .toLowerCase();
+
 
     const titleMap = [
         ["preset", "preset-lightroom.png"],
@@ -867,35 +913,54 @@ function getBayoraServiceIcon(id, service) {
         ["software", "software-tools.png"]
     ];
 
+
     for (const [keyword, icon] of titleMap) {
+
         if (title.includes(keyword)) {
             return icon;
         }
+
     }
 
+
     return null;
+
 }
+
+
 function getBayoraServiceIconHTML(id, service) {
 
-    const iconFile =
+    const iconValue =
         getBayoraServiceIcon(
             id,
             service
         );
 
+    if (!iconValue) {
+        return "📦";
+    }
+
+    const iconString =
+        String(iconValue).trim();
+
     /*
-     * Jika mapping BAYORA tersedia,
-     * SELALU gunakan PNG BAYORA.
+     * Custom icon dari database sudah berupa
+     * path lengkap:
      *
-     * Icon dari database/emoji tidak
-     * boleh menggantikan icon PNG.
+     * /assets/bayora-icons/xxxxx.png
+     *
+     * Jangan tambahkan folder lagi.
      */
-    if (iconFile) {
+    if (
+        iconString.startsWith("/") ||
+        iconString.startsWith("http://") ||
+        iconString.startsWith("https://")
+    ) {
 
         return `
             <img
-                class="bayora-service-icon-image${iconFile === "preset-lightroom.png" ? " bayora-lightroom-icon" : ""}"
-                src="/assets/bayora-icons/${iconFile}"
+                class="bayora-service-icon-image"
+                src="${iconString.replace(/"/g, "&quot;")}"
                 alt=""
                 aria-hidden="true"
                 draggable="false"
@@ -905,10 +970,18 @@ function getBayoraServiceIconHTML(id, service) {
     }
 
     /*
-     * Fallback hanya untuk layanan yang
-     * belum memiliki mapping icon.
+     * Icon bawaan BAYORA hanya berupa nama file.
      */
-    return service?.icon || "📦";
+    return `
+        <img
+            class="bayora-service-icon-image${iconString === "preset-lightroom.png" ? " bayora-lightroom-icon" : ""}"
+            src="/assets/bayora-icons/${iconString}"
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+        >
+    `;
+
 }
 
 
@@ -1118,6 +1191,111 @@ function showHome() {
 }
 
 
+
+/* =========================================================
+   BAYORA — GLOBAL SERVICE ICON HELPER
+   Dipakai oleh openService() yang berada di global scope.
+========================================================= */
+
+function getBayoraServiceIconGlobal(id, service) {
+
+    const customIcon =
+        String(
+            service?.icon || ""
+        ).trim();
+
+    /*
+     * Custom uploaded icon.
+     */
+    if (
+        customIcon.startsWith("/") ||
+        customIcon.startsWith("http://") ||
+        customIcon.startsWith("https://")
+    ) {
+
+        return customIcon;
+
+    }
+
+    /*
+     * Fallback icon BAYORA berdasarkan ID.
+     *
+     * BAYORA_SERVICE_ICONS berada di scope yang sama
+     * dengan helper lama, sehingga jangan bergantung
+     * pada helper lama dari scope tersebut.
+     */
+    const normalizedId =
+        String(id || "")
+            .trim()
+            .toLowerCase();
+
+    if (
+        typeof BAYORA_SERVICE_ICONS !== "undefined" &&
+        BAYORA_SERVICE_ICONS[normalizedId]
+    ) {
+
+        return BAYORA_SERVICE_ICONS[normalizedId];
+
+    }
+
+    /*
+     * Fallback berdasarkan judul.
+     */
+    const title =
+        String(service?.title || "")
+            .trim()
+            .toLowerCase();
+
+    const titleMap = [
+        ["preset", "preset-lightroom.png"],
+        ["lightroom", "preset-lightroom.png"],
+        ["paket data", "paket-data.png"],
+        ["pulsa", "pulsa.png"],
+        ["token pln", "token-pln.png"],
+        ["tagihan pln", "tagihan-pln.png"],
+        ["e-wallet", "e-wallet.png"],
+        ["ewallet", "e-wallet.png"],
+        ["games", "games.png"],
+        ["voucher game", "voucher-game.png"],
+        ["voucher belanja", "voucher-belanja.png"],
+        ["aktivasi voucher", "aktivasi-voucher.png"],
+        ["masa aktif", "masa-aktif.png"],
+        ["aktivasi perdana", "aktivasi-perdana.png"],
+        ["paket sms", "paket-sms-telpon.png"],
+        ["paket telpon", "paket-sms-telpon.png"],
+        ["tv", "tv.png"],
+        ["gas", "gas.png"],
+        ["bpjs", "bpjs.png"],
+        ["zakat", "zakat-donasi.png"],
+        ["donasi", "zakat-donasi.png"],
+        ["tiket kereta", "tiket-kereta.png"],
+        ["tiket pesawat", "tiket-pesawat.png"],
+        ["template media sosial", "template-media-sosial.png"],
+        ["e-book", "ebook-template.png"],
+        ["ebook", "ebook-template.png"],
+        ["musik", "musik-digital.png"],
+        ["desain", "desain-digital.png"],
+        ["software", "software-tools.png"]
+    ];
+
+    for (const [keyword, icon] of titleMap) {
+
+        if (title.includes(keyword)) {
+            return icon;
+        }
+
+    }
+
+    return null;
+}
+
+
+/* =========================================================
+   END GLOBAL SERVICE ICON HELPER
+========================================================= */
+
+
+
 function openService(serviceId) {
 
     const service = services[serviceId];
@@ -1125,6 +1303,19 @@ function openService(serviceId) {
     if (!service) {
         return;
     }
+
+    console.log(
+        "[BAYORA OPEN SERVICE]",
+        {
+            serviceId,
+            title: service.title,
+            type: service.type,
+            productCount:
+                products[serviceId]
+                    ? products[serviceId].length
+                    : 0
+        }
+    );
 
     currentService = serviceId;
 
@@ -1505,9 +1696,49 @@ function openService(serviceId) {
     }
 
 
-    document
-        .getElementById("formIcon")
-        .textContent = service.icon;
+    const formIcon =
+        document.getElementById("formIcon");
+
+    if (formIcon) {
+
+        const bayoraIcon =
+            getBayoraServiceIconGlobal(
+                currentService,
+                service
+            );
+
+        if (bayoraIcon) {
+
+            formIcon.innerHTML = `
+                <img
+                    src="${
+                        String(bayoraIcon).startsWith("/") ||
+                        String(bayoraIcon).startsWith("http://") ||
+                        String(bayoraIcon).startsWith("https://")
+                            ? bayoraIcon
+                            : `/assets/bayora-icons/${bayoraIcon}`
+                    }"
+                    alt=""
+                    aria-hidden="true"
+                    draggable="false"
+                    style="
+                        width:56px;
+                        height:56px;
+                        object-fit:contain;
+                        display:block;
+                        margin:auto;
+                    "
+                >
+            `;
+
+        } else {
+
+            formIcon.textContent =
+                service.icon || "📦";
+
+        }
+
+    }
 
     document
         .getElementById("formTitle")

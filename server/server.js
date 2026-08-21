@@ -2316,6 +2316,169 @@ app.get("/api/transactions", requireAdminStaff, (req, res) => {
 });
 
 
+
+/* =========================
+   BAYORA SERVICE ICON UPLOAD
+========================= */
+
+const bayoraIconDir =
+    path.join(
+        __dirname,
+        "..",
+        "assets",
+        "bayora-icons"
+    );
+
+fs.mkdirSync(
+    bayoraIconDir,
+    { recursive: true }
+);
+
+const bayoraIconStorage =
+    multer.diskStorage({
+
+        destination:
+            (req, file, cb) => {
+
+                cb(
+                    null,
+                    bayoraIconDir
+                );
+
+            },
+
+        filename:
+            (req, file, cb) => {
+
+                const extension =
+                    path.extname(
+                        file.originalname
+                    ).toLowerCase();
+
+                const serviceId =
+                    String(
+                        req.body.serviceId ||
+                        req.query.serviceId ||
+                        "service"
+                    )
+                        .trim()
+                        .toLowerCase()
+                        .replace(
+                            /[^a-z0-9_-]/g,
+                            "-"
+                        );
+
+                const filename =
+                    `${serviceId}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}${extension}`;
+
+                cb(
+                    null,
+                    filename
+                );
+
+            }
+
+    });
+
+const uploadBayoraIcon =
+    multer({
+
+        storage:
+            bayoraIconStorage,
+
+        limits: {
+            fileSize:
+                5 * 1024 * 1024
+        },
+
+        fileFilter:
+            (req, file, cb) => {
+
+                const allowed =
+                    [
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp"
+                    ];
+
+                if (
+                    allowed.includes(
+                        file.mimetype
+                    )
+                ) {
+
+                    cb(
+                        null,
+                        true
+                    );
+
+                    return;
+
+                }
+
+                cb(
+                    new Error(
+                        "Icon hanya boleh JPG, PNG, atau WEBP."
+                    )
+                );
+
+            }
+
+    });
+
+app.post(
+    "/api/services/upload-icon",
+    requireCatalogManager,
+    (req, res) => {
+
+        uploadBayoraIcon.single("file")(
+            req,
+            res,
+            error => {
+
+                if (error) {
+
+                    console.error(
+                        "[UPLOAD SERVICE ICON]",
+                        error
+                    );
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            error.message ||
+                            "Gagal mengupload icon."
+                    });
+
+                }
+
+                if (!req.file) {
+
+                    return res.status(400).json({
+                        success: false,
+                        error:
+                            "File icon belum dipilih."
+                    });
+
+                }
+
+                const publicPath =
+                    `/assets/bayora-icons/${req.file.filename}`;
+
+                return res.json({
+                    success: true,
+                    path: publicPath,
+                    filename: req.file.filename
+                });
+
+            }
+
+        );
+
+    }
+);
+
+
 /* =========================
    DIGITAL PRODUCT UPLOAD API
 ========================= */
@@ -8822,7 +8985,6 @@ function syncDigiflazzCatalogFromCache() {
         ON CONFLICT(id)
         DO UPDATE SET
             title = excluded.title,
-            icon = excluded.icon,
             description = excluded.description,
             label = excluded.label,
             placeholder = excluded.placeholder,

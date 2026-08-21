@@ -1506,9 +1506,65 @@ function openService(serviceId) {
             );
 
         if (digitalServiceIcon) {
-            digitalServiceIcon.textContent =
-                service.icon ||
-                "✨";
+
+            const digitalIcon =
+                getBayoraServiceIcon(
+                    currentService,
+                    service
+                );
+
+            if (digitalIcon) {
+
+                if (
+                    String(digitalIcon).startsWith("/") ||
+                    String(digitalIcon).startsWith("http://") ||
+                    String(digitalIcon).startsWith("https://")
+                ) {
+
+                    digitalServiceIcon.innerHTML = `
+                        <img
+                            src="${String(digitalIcon).replace(/"/g, "&quot;")}"
+                            alt=""
+                            aria-hidden="true"
+                            draggable="false"
+                            style="
+                                width:56px;
+                                height:56px;
+                                object-fit:contain;
+                                display:block;
+                                margin:auto;
+                            "
+                        >
+                    `;
+
+                } else {
+
+                    digitalServiceIcon.innerHTML = `
+                        <img
+                            src="/assets/bayora-icons/${String(digitalIcon).replace(/"/g, "&quot;")}"
+                            alt=""
+                            aria-hidden="true"
+                            draggable="false"
+                            style="
+                                width:56px;
+                                height:56px;
+                                object-fit:contain;
+                                display:block;
+                                margin:auto;
+                            "
+                        >
+                    `;
+
+                }
+
+            } else {
+
+                digitalServiceIcon.textContent =
+                    service.icon ||
+                    "✨";
+
+            }
+
         }
 
         if (digitalServiceTitle) {

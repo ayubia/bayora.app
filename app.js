@@ -747,17 +747,20 @@ const BAYORA_SERVICE_ICONS = {
 
     "pulsa": "pulsa.png",
 
-    "data": "paket-data.png",
+    "data": "internet.png",
     "paket-data": "paket-data.png",
+    "internet": "internet.png",
 
     "pln-token": "token-pln.png",
     "token-pln": "token-pln.png",
 
-    "pln-bill": "token-pln.png",
-    "tagihan-pln": "token-pln.png",
+    "pln-bill": "tagihan-pln.png",
+    "tagihan-pln": "tagihan-pln.png",
 
     "ewallet": "e-wallet.png",
     "e-wallet": "e-wallet.png",
+
+    "bpjs": "bpjs.png",
 
     "games": "games.png",
     "game": "games.png",
@@ -770,20 +773,20 @@ const BAYORA_SERVICE_ICONS = {
     "sms": "paket-sms-telpon.png",
     "telpon": "paket-sms-telpon.png",
 
-    "tv": "tv.png",
-    "tv-kabel": "tv.png",
+    "tv": "tv-streaming.png",
+    "tv-kabel": "tv-streaming.png",
+    "tv-streaming": "tv-streaming.png",
 
     "masa-aktif": "masa-aktif.png",
 
     "aktivasi-perdana": "aktivasi-perdana.png",
     "perdana": "aktivasi-perdana.png",
 
-    "voucher": "voucher.png",
+    "voucher": "voucher-digital.png",
+    "voucher-digital": "voucher-digital.png",
 
     "gas": "gas.png",
     "pdam": "gas.png",
-
-    "bpjs": "bpjs.png",
 
     "zakat-donasi": "zakat-donasi.png",
     "zakat": "zakat-donasi.png",
@@ -807,16 +810,14 @@ const BAYORA_SERVICE_ICONS = {
     "musik-digital": "musik-digital.png",
     "musik": "musik-digital.png",
 
-    "desain-digital": "desain-digital.png",
-    "desain": "desain-digital.png",
-
     "software-tools": "software-tools.png",
     "software": "software-tools.png",
 
     "preset-lightroom": "preset-lightroom.png",
     "lightroom": "preset-lightroom.png",
     "lightroom-preset": "preset-lightroom.png"
-};
+
+}
 
 function getBayoraServiceIcon(id, service) {
 
@@ -972,7 +973,11 @@ function getBayoraServiceIconHTML(id, service) {
                 onclick="setCustomerServiceCategory('ppob')"
             >
                 <span class="customer-service-tab-icon">
-                    🧾
+                    <img
+                        src="/assets/bayora-icons/layanan-ppob.png"
+                        alt=""
+                        aria-hidden="true"
+                    >
                 </span>
 
                 <span>
@@ -993,7 +998,11 @@ function getBayoraServiceIconHTML(id, service) {
                 onclick="setCustomerServiceCategory('digital')"
             >
                 <span class="customer-service-tab-icon">
-                    ✨
+                    <img
+                        src="/assets/bayora-icons/produk-digital.png"
+                        alt=""
+                        aria-hidden="true"
+                    >
                 </span>
 
                 <span>

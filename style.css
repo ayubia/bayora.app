@@ -7488,3 +7488,91 @@ body {
 .service-icon .bayora-lightroom-icon {
     transform: scale(1.18);
 }
+
+/* =========================================================
+   FIX — CATEGORY COLLECTION ICON
+   Layanan PPOB / Produk Digital
+   ========================================================= */
+
+.customer-service-tab .customer-service-tab-icon {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    flex: 0 0 52px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.customer-service-tab .customer-service-tab-icon img {
+    width: 52px !important;
+    height: 52px !important;
+
+    max-width: 52px !important;
+    max-height: 52px !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    display: block !important;
+    position: relative !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    transform: none !important;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+    .customer-service-tab .customer-service-tab-icon {
+        width: 46px !important;
+        height: 46px !important;
+        min-width: 46px !important;
+        max-width: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+
+        flex-basis: 46px !important;
+    }
+
+    .customer-service-tab .customer-service-tab-icon img {
+        width: 46px !important;
+        height: 46px !important;
+        max-width: 46px !important;
+        max-height: 46px !important;
+    }
+}
+
+/* HP kecil */
+@media (max-width: 390px) {
+
+    .customer-service-tab .customer-service-tab-icon {
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        min-height: 42px !important;
+        max-height: 42px !important;
+
+        flex-basis: 42px !important;
+    }
+
+    .customer-service-tab .customer-service-tab-icon img {
+        width: 42px !important;
+        height: 42px !important;
+        max-width: 42px !important;
+        max-height: 42px !important;
+    }
+}

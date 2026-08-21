@@ -1433,6 +1433,23 @@ app.use(
 );
 
 /*
+ * BAYORA SERVICE ICON
+ *
+ * Production:
+ * /assets/bayora-icons/*
+ *       -> /data/uploads/bayora-icons/*
+ *
+ * Local:
+ * static assets tetap dilayani oleh express.static utama.
+ */
+if (process.env.NODE_ENV === "production") {
+    app.use(
+        "/assets/bayora-icons",
+        express.static(bayoraIconDir)
+    );
+}
+
+/*
  * DIGITAL PRODUCT PREVIEW
  *
  * Preview gambar boleh diakses public.
@@ -2322,12 +2339,14 @@ app.get("/api/transactions", requireAdminStaff, (req, res) => {
 ========================= */
 
 const bayoraIconDir =
-    path.join(
-        __dirname,
-        "..",
-        "assets",
-        "bayora-icons"
-    );
+    process.env.NODE_ENV === "production"
+        ? "/data/uploads/bayora-icons"
+        : path.join(
+            __dirname,
+            "..",
+            "assets",
+            "bayora-icons"
+        );
 
 fs.mkdirSync(
     bayoraIconDir,

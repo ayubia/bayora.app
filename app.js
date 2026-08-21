@@ -841,7 +841,7 @@ function getBayoraServiceIcon(id, service) {
         ["paket data", "paket-data.png"],
         ["pulsa", "pulsa.png"],
         ["token pln", "token-pln.png"],
-        ["tagihan pln", "token-pln.png"],
+        ["tagihan pln", "tagihan-pln.png"],
         ["e-wallet", "e-wallet.png"],
         ["ewallet", "e-wallet.png"],
         ["games", "games.png"],
@@ -875,25 +875,40 @@ function getBayoraServiceIcon(id, service) {
 
     return null;
 }
-
 function getBayoraServiceIconHTML(id, service) {
 
     const iconFile =
-        getBayoraServiceIcon(id, service);
+        getBayoraServiceIcon(
+            id,
+            service
+        );
 
-    if (!iconFile) {
-        return service?.icon || "📦";
+    /*
+     * Jika mapping BAYORA tersedia,
+     * SELALU gunakan PNG BAYORA.
+     *
+     * Icon dari database/emoji tidak
+     * boleh menggantikan icon PNG.
+     */
+    if (iconFile) {
+
+        return `
+            <img
+                class="bayora-service-icon-image${iconFile === "preset-lightroom.png" ? " bayora-lightroom-icon" : ""}"
+                src="/assets/bayora-icons/${iconFile}"
+                alt=""
+                aria-hidden="true"
+                draggable="false"
+            >
+        `;
+
     }
 
-    return `
-        <img
-            class="bayora-service-icon-image${iconFile === "preset-lightroom.png" ? " bayora-lightroom-icon" : ""}"
-            src="/assets/bayora-icons/${iconFile}"
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-        >
-    `;
+    /*
+     * Fallback hanya untuk layanan yang
+     * belum memiliki mapping icon.
+     */
+    return service?.icon || "📦";
 }
 
 

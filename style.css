@@ -7576,3 +7576,22 @@ body {
         max-height: 42px !important;
     }
 }
+
+/* =========================================================
+   BAYORA — ICON HEADER HALAMAN LAYANAN
+   Hanya untuk icon setelah layanan dibuka.
+   Tidak mengubah service-card.
+========================================================= */
+
+#formIcon .bayora-service-icon-image,
+.digital-form-icon .bayora-service-icon-image {
+    width: 56px;
+    height: 56px;
+    max-width: 56px;
+    max-height: 56px;
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    user-select: none;
+    -webkit-user-drag: none;
+}

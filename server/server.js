@@ -1441,11 +1441,15 @@ app.use(
  *
  * Local:
  * static assets tetap dilayani oleh express.static utama.
+ *
+ * Route ini menggunakan path langsung agar tidak
+ * bergantung pada bayoraIconDir yang dideklarasikan
+ * setelah static middleware utama.
  */
 if (process.env.NODE_ENV === "production") {
     app.use(
         "/assets/bayora-icons",
-        express.static(bayoraIconDir)
+        express.static("/data/uploads/bayora-icons")
     );
 }
 

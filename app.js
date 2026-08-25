@@ -3020,6 +3020,45 @@ function renderCheckout() {
 
     let price = 0;
 
+    /*
+     * BAYORA — SERVICE ICON
+     *
+     * Icon layanan bisa berupa:
+     * 1. Path gambar: /assets/bayora-icons/xxx.png
+     * 2. URL penuh: https://...
+     * 3. Emoji lama: 📱 ⚡ 💰
+     *
+     * Path/URL harus dirender sebagai <img>,
+     * bukan sebagai teks.
+     */
+    const serviceIconValue =
+        String(
+            service?.icon || ""
+        ).trim();
+
+    const serviceIconIsImage =
+        serviceIconValue.startsWith("/") ||
+        serviceIconValue.startsWith("http://") ||
+        serviceIconValue.startsWith("https://") ||
+        /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(
+            serviceIconValue
+        );
+
+    const serviceIconHtml =
+        serviceIconIsImage
+            ? `
+                <img
+                    src="${serviceIconValue}"
+                    alt=""
+                    class="checkout-service-icon"
+                >
+            `
+            : `
+                <span class="checkout-service-icon-emoji">
+                    ${serviceIconValue}
+                </span>
+            `;
+
 
     if (currentProduct) {
 
@@ -3082,9 +3121,14 @@ function renderCheckout() {
                     Layanan
                 </span>
 
-                <strong>
-                    ${service.icon}
-                    ${service.title}
+                <strong class="checkout-service-value">
+
+                    ${serviceIconHtml}
+
+                    <span>
+                        ${service.title}
+                    </span>
+
                 </strong>
 
             </div>
@@ -3519,7 +3563,6 @@ function renderDigitalCheckout() {
         return;
     }
 
-
     const total =
         selectedDigitalProducts.reduce(
             (sum, product) =>
@@ -3530,26 +3573,60 @@ function renderDigitalCheckout() {
             0
         );
 
-
     const productRows =
         selectedDigitalProducts
-            .map(product => `
-                <div class="checkout-row">
+            .map(product => {
 
-                    <span>
-                        ${product.name}
-                    </span>
+                const image =
+                    String(
+                        product.previewImage || ""
+                    ).trim();
 
-                    <strong>
-                        ${formatDigitalProductPrice(
-                            product.price
-                        )}
-                    </strong>
+                const imageHtml = image
+                    ? `
+                        <img
+                            src="${image}"
+                            alt=""
+                            class="digital-checkout-product-image"
+                            loading="lazy"
+                        >
+                    `
+                    : `
+                        <span
+                            class="digital-checkout-product-placeholder"
+                        >
+                            PRESET
+                        </span>
+                    `;
 
-                </div>
-            `)
+                return `
+                    <div class="checkout-row digital-checkout-product-row">
+
+                        <span>
+                            <span class="digital-checkout-product">
+
+                                <span class="digital-checkout-product-thumb">
+                                    ${imageHtml}
+                                </span>
+
+                                <span class="digital-checkout-product-name">
+                                    ${product.name}
+                                </span>
+
+                            </span>
+                        </span>
+
+                        <strong>
+                            ${formatDigitalProductPrice(
+                                product.price
+                            )}
+                        </strong>
+
+                    </div>
+                `;
+
+            })
             .join("");
-
 
     summary.innerHTML = `
 
@@ -3566,9 +3643,7 @@ function renderDigitalCheckout() {
 
         </div>
 
-
         ${productRows}
-
 
         <div class="checkout-row">
 
@@ -3582,7 +3657,6 @@ function renderDigitalCheckout() {
 
         </div>
 
-
         <div class="checkout-row">
 
             <span>
@@ -3595,7 +3669,6 @@ function renderDigitalCheckout() {
 
         </div>
 
-
         <div class="checkout-row">
 
             <span>
@@ -3607,7 +3680,6 @@ function renderDigitalCheckout() {
             </strong>
 
         </div>
-
 
         <div class="
             checkout-row
@@ -3627,7 +3699,6 @@ function renderDigitalCheckout() {
     `;
 
 }
-
 
 
 function goToDigitalCheckout() {

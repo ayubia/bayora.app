@@ -2399,6 +2399,141 @@ footer a{
         </form>
 
 
+        <!-- ==================================================
+             SMM FLOW
+        ================================================== -->
+
+        <div
+            id="smmFlowWrapper"
+            class="smm-flow-wrapper page-hidden"
+        >
+
+            <div class="form-header">
+
+                <div
+                    id="smmFormIcon"
+                    class="large-icon"
+                >
+                    📱
+                </div>
+
+                <p class="eyebrow">
+                    SOSIAL MEDIA
+                </p>
+
+                <h2 id="smmFormTitle">
+                    Layanan SMM
+                </h2>
+
+                <p id="smmFormDescription">
+                    Tingkatkan jangkauan dan engagement media sosial Anda.
+                </p>
+
+            </div>
+
+
+            <div class="smm-service-info">
+
+                <div class="smm-service-info-row">
+                    <span>Platform</span>
+                    <strong id="smmPlatform">—</strong>
+                </div>
+
+                <div class="smm-service-info-row">
+                    <span>Harga</span>
+                    <strong id="smmPricePerThousand">—</strong>
+                </div>
+
+                <div class="smm-service-info-row">
+                    <span>Batas order</span>
+                    <strong id="smmQuantityRange">—</strong>
+                </div>
+
+                <div
+                    id="smmFeatures"
+                    class="smm-features"
+                ></div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="smmTarget">
+                    Target / Link
+                </label>
+
+                <input
+                    type="url"
+                    id="smmTarget"
+                    placeholder="https://instagram.com/..."
+                    autocomplete="off"
+                >
+
+                <small
+                    id="smmTargetHint"
+                    class="smm-input-hint"
+                >
+                    Masukkan link target yang ingin diproses.
+                </small>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="smmQuantity">
+                    Jumlah
+                </label>
+
+                <input
+                    type="number"
+                    id="smmQuantity"
+                    min="1"
+                    step="1"
+                    placeholder="Masukkan jumlah"
+                    inputmode="numeric"
+                >
+
+                <small
+                    id="smmQuantityHint"
+                    class="smm-input-hint"
+                >
+                    —
+                </small>
+
+            </div>
+
+
+            <div class="summary">
+
+                <div>
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="smmTotal">
+                        Rp0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="smmContinueButton"
+                class="submit-button"
+                onclick="prepareSmmOrder()"
+            >
+                Lanjut ke Pembayaran
+            </button>
+
+        </div>
+
+
     </div>
 
 </section>

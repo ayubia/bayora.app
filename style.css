@@ -821,6 +821,70 @@ body {
 
 
 /* =========================
+   SMM FLOW
+========================= */
+
+.smm-flow-wrapper {
+    width: 100%;
+}
+
+.smm-service-info {
+    margin-bottom: 27px;
+    padding: 20px;
+    border: 1px solid #e8e5df;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.smm-service-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.smm-service-info-row + .smm-service-info-row {
+    border-top: 1px solid #eeeae3;
+}
+
+.smm-service-info-row span {
+    color: #777;
+    font-size: 13px;
+}
+
+.smm-service-info-row strong {
+    font-size: 14px;
+    text-align: right;
+}
+
+.smm-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.smm-service-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #f1eee8;
+    color: #625b51;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.smm-input-hint {
+    display: block;
+    margin-top: 7px;
+    color: #999;
+    font-size: 11px;
+}
+
+
+/* =========================
    CHECKOUT
 ========================= */
 

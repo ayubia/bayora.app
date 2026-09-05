@@ -4887,6 +4887,142 @@ app.post("/api/webhooks/xendit", async (req, res) => {
             const reference =
                 data.reference_id;
 
+            /*
+             * =====================================================
+             * SMM XENDIT WEBHOOK
+             * =====================================================
+             *
+             * Order SMM menggunakan reference_id:
+             * SMM-xxxxxxxx
+             *
+             * SMM diproses melalui tabel smm_orders.
+             * Jangan pernah diteruskan ke Digiflazz.
+             *
+             * Tahap ini hanya menandai pembayaran sebagai PAID.
+             * BELUM mengirim order ke Sosmedly.
+             */
+
+            if (
+                String(reference || "")
+                    .toUpperCase()
+                    .startsWith("SMM-")
+            ) {
+
+                const smmOrder =
+                    db.prepare(`
+                        SELECT
+                            o.id,
+                            o.order_id AS orderId,
+                            o.user_id AS userId,
+                            o.service_id AS serviceId,
+                            o.target,
+                            o.quantity,
+                            o.price,
+                            o.status,
+                            s.name AS serviceName
+                        FROM smm_orders o
+                        INNER JOIN smm_services s
+                            ON s.id = o.service_id
+                        WHERE o.order_id = ?
+                    `).get(reference);
+
+                if (!smmOrder) {
+
+                    console.warn(
+                        "[SMM_WEBHOOK_HANDLED] Order SMM tidak ditemukan:",
+                        reference
+                    );
+
+                    return res.status(404).json({
+                        success: false,
+                        error: "Order SMM tidak ditemukan."
+                    });
+
+                }
+
+                /*
+                 * Idempotency:
+                 * jika webhook Xendit dikirim ulang setelah PAID,
+                 * jangan melakukan proses tambahan.
+                 */
+                if (
+                    smmOrder.status === "PAID" ||
+                    smmOrder.status === "PROCESSING" ||
+                    smmOrder.status === "COMPLETED"
+                ) {
+
+                    return res.json({
+                        success: true,
+                        event,
+                        order_id:
+                            smmOrder.orderId,
+                        smm: {
+                            skipped: true,
+                            reason:
+                                "SMM_ORDER_SUDAH_DIBAYAR"
+                        }
+                    });
+
+                }
+
+                db.prepare(`
+                    UPDATE smm_orders
+                    SET
+                        status = 'PAID',
+                        updated_at = ?
+                    WHERE order_id = ?
+                      AND status = 'PENDING_PAYMENT'
+                `).run(
+                    new Date().toISOString(),
+                    smmOrder.orderId
+                );
+
+                console.log(
+                    "[SMM_WEBHOOK_HANDLED]",
+                    JSON.stringify({
+                        orderId:
+                            smmOrder.orderId,
+                        serviceId:
+                            smmOrder.serviceId,
+                        serviceName:
+                            smmOrder.serviceName,
+                        target:
+                            smmOrder.target,
+                        quantity:
+                            smmOrder.quantity,
+                        price:
+                            smmOrder.price,
+                        status:
+                            "PAID"
+                    }, null, 2)
+                );
+
+                /*
+                 * PENTING:
+                 * Tidak ada pemanggilan:
+                 *
+                 * sendTransactionToDigiflazz()
+                 *
+                 * dan tidak ada:
+                 *
+                 * callSosmedly("add", ...)
+                 *
+                 * pada tahap ini.
+                 */
+
+                return res.json({
+                    success: true,
+                    event,
+                    order_id:
+                        smmOrder.orderId,
+                    smm: {
+                        success: true,
+                        status: "PAID",
+                        providerOrderCreated: false
+                    }
+                });
+            }
+
             if (!reference) {
 
                 return res.status(400).json({
@@ -5348,6 +5484,564 @@ app.post("/api/webhooks/digiflazz", (req, res) => {
             error: "Callback Digiflazz gagal diproses."
         });
     }
+});
+
+
+
+/* ==========================================================
+   SMM — CREATE LOCAL ORDER
+   Tahap 1:
+   - Validasi service
+   - Validasi quantity
+   - Hitung harga server-side
+   - Simpan ke smm_orders
+   - TIDAK mengirim order ke provider
+========================================================== */
+
+app.post("/api/smm/transactions", (req, res) => {
+
+    try {
+
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+
+            return res.status(401).json({
+                success: false,
+                error: "Silakan login terlebih dahulu."
+            });
+
+        }
+
+        const {
+            serviceId,
+            target,
+            quantity
+        } = req.body || {};
+
+        const numericServiceId =
+            Number(serviceId);
+
+        const numericQuantity =
+            Number(quantity);
+
+        const cleanTarget =
+            String(target || "").trim();
+
+        if (
+            !Number.isInteger(numericServiceId) ||
+            numericServiceId <= 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Layanan SMM tidak valid."
+            });
+
+        }
+
+        if (!cleanTarget) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Target wajib diisi."
+            });
+
+        }
+
+        if (
+            !Number.isInteger(numericQuantity) ||
+            numericQuantity <= 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Quantity harus berupa angka bulat lebih dari 0."
+            });
+
+        }
+
+        /*
+         * Harga SELALU diambil dari database.
+         * Frontend tidak mengirim price.
+         */
+        const service = db.prepare(`
+            SELECT
+                id,
+                provider_id AS providerId,
+                provider_service_id AS providerServiceId,
+                platform,
+                category,
+                name,
+                description,
+                price,
+                min_quantity AS minQuantity,
+                max_quantity AS maxQuantity,
+                refill,
+                cancel,
+                active
+            FROM smm_services
+            WHERE id = ?
+        `).get(numericServiceId);
+
+        if (!service) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Layanan SMM tidak ditemukan."
+            });
+
+        }
+
+        if (Number(service.active) !== 1) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Layanan SMM belum tersedia."
+            });
+
+        }
+
+        const minQuantity =
+            Number(service.minQuantity);
+
+        const maxQuantity =
+            Number(service.maxQuantity);
+
+        const pricePerThousand =
+            Number(service.price);
+
+        if (
+            !Number.isInteger(minQuantity) ||
+            !Number.isInteger(maxQuantity) ||
+            minQuantity < 1 ||
+            maxQuantity < minQuantity
+        ) {
+
+            return res.status(500).json({
+                success: false,
+                error: "Konfigurasi quantity layanan tidak valid."
+            });
+
+        }
+
+        if (
+            !Number.isFinite(pricePerThousand) ||
+            pricePerThousand < 0
+        ) {
+
+            return res.status(500).json({
+                success: false,
+                error: "Harga layanan SMM tidak valid."
+            });
+
+        }
+
+        if (numericQuantity < minQuantity) {
+
+            return res.status(400).json({
+                success: false,
+                error:
+                    `Minimum quantity untuk layanan ini adalah ${minQuantity}.`
+            });
+
+        }
+
+        if (numericQuantity > maxQuantity) {
+
+            return res.status(400).json({
+                success: false,
+                error:
+                    `Maximum quantity untuk layanan ini adalah ${maxQuantity}.`
+            });
+
+        }
+
+        /*
+         * Sosmedly menggunakan rate per 1.000.
+         *
+         * Contoh:
+         * price = 325000
+         * quantity = 100
+         *
+         * 325000 / 1000 * 100
+         * = 32500
+         */
+        const totalPrice =
+            Math.ceil(
+                (pricePerThousand / 1000) *
+                numericQuantity
+            );
+
+        if (
+            !Number.isSafeInteger(totalPrice) ||
+            totalPrice < 0
+        ) {
+
+            return res.status(400).json({
+                success: false,
+                error: "Total harga tidak valid."
+            });
+
+        }
+
+        const now =
+            new Date().toISOString();
+
+        const orderId =
+            "SMM-" +
+            Date.now() +
+            "-" +
+            crypto
+                .randomBytes(4)
+                .toString("hex")
+                .toUpperCase();
+
+        db.prepare(`
+            INSERT INTO smm_orders (
+                order_id,
+                user_id,
+                service_id,
+                target,
+                quantity,
+                price,
+                provider_order_id,
+                status,
+                start_count,
+                remains,
+                created_at,
+                updated_at
+            )
+            VALUES (
+                @orderId,
+                @userId,
+                @serviceId,
+                @target,
+                @quantity,
+                @price,
+                NULL,
+                'PENDING_PAYMENT',
+                NULL,
+                @quantity,
+                @createdAt,
+                @updatedAt
+            )
+        `).run({
+            orderId,
+            userId: currentUser.id,
+            serviceId: numericServiceId,
+            target: cleanTarget,
+            quantity: numericQuantity,
+            price: totalPrice,
+            createdAt: now,
+            updatedAt: now
+        });
+
+        const order = db.prepare(`
+            SELECT
+                o.id,
+                o.order_id AS orderId,
+                o.user_id AS userId,
+                o.service_id AS serviceId,
+                s.provider_service_id AS providerServiceId,
+                s.platform,
+                s.category,
+                s.name AS serviceName,
+                o.target,
+                o.quantity,
+                s.price AS pricePerThousand,
+                o.price,
+                o.status,
+                o.created_at AS createdAt,
+                o.updated_at AS updatedAt
+            FROM smm_orders o
+            INNER JOIN smm_services s
+                ON s.id = o.service_id
+            WHERE o.order_id = ?
+        `).get(orderId);
+
+        console.log("");
+        console.log("==============================");
+        console.log("SMM ORDER TERSIMPAN");
+        console.log(order);
+        console.log("==============================");
+        console.log("");
+
+        return res.status(201).json({
+            success: true,
+            message: "Order SMM berhasil dibuat.",
+            order
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[SMM TRANSACTION ERROR]",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal membuat order SMM."
+        });
+
+    }
+
+});
+
+
+
+/* ==========================================================
+   XENDIT PAYMENT — SMM
+   Khusus order SMM.
+   Tidak menggunakan tabel transactions PPOB.
+   Tidak mengirim order ke provider SMM.
+========================================================== */
+
+app.post("/api/payments/xendit-smm", async (req, res) => {
+
+    try {
+
+        const currentUser = getCurrentUser(req);
+
+        if (!currentUser) {
+
+            return res.status(401).json({
+                success: false,
+                error: "Silakan login terlebih dahulu."
+            });
+
+        }
+
+        const {
+            orderId,
+            customerEmail,
+            customerName
+        } = req.body || {};
+
+        const cleanOrderId =
+            String(orderId || "").trim();
+
+        if (!cleanOrderId) {
+
+            return res.status(400).json({
+                success: false,
+                error: "orderId wajib diisi."
+            });
+
+        }
+
+        const order = db.prepare(`
+            SELECT
+                o.id,
+                o.order_id AS orderId,
+                o.user_id AS userId,
+                o.service_id AS serviceId,
+                o.target,
+                o.quantity,
+                o.price,
+                o.status,
+                s.name AS serviceName
+            FROM smm_orders o
+            INNER JOIN smm_services s
+                ON s.id = o.service_id
+            WHERE o.order_id = ?
+        `).get(cleanOrderId);
+
+        if (!order) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Order SMM tidak ditemukan."
+            });
+
+        }
+
+        if (
+            order.userId !== null &&
+            Number(order.userId) !== Number(currentUser.id)
+        ) {
+
+            return res.status(403).json({
+                success: false,
+                error: "Order SMM bukan milik akun ini."
+            });
+
+        }
+
+        if (order.status !== "PENDING_PAYMENT") {
+
+            return res.status(400).json({
+                success: false,
+                error:
+                    "Order SMM tidak berada dalam status pembayaran."
+            });
+
+        }
+
+        const amount =
+            Number(order.price);
+
+        if (
+            !Number.isSafeInteger(amount) ||
+            amount < 0
+        ) {
+
+            return res.status(500).json({
+                success: false,
+                error: "Nominal pembayaran SMM tidak valid."
+            });
+
+        }
+
+        if (!process.env.XENDIT_SECRET_KEY) {
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "XENDIT_SECRET_KEY belum tersedia."
+            });
+
+        }
+
+        const response =
+            await axios.post(
+                "https://api.xendit.co/sessions",
+                {
+                    reference_id:
+                        order.orderId,
+
+                    session_type: "PAY",
+
+                    mode: "PAYMENT_LINK",
+
+                    amount,
+
+                    currency: "IDR",
+
+                    country: "ID",
+
+                    locale: "id",
+
+                    success_return_url:
+                        process.env.PUBLIC_BASE_URL.replace(/\/$/, "") +
+                        "/?payment=smm-success&orderId=" +
+                        encodeURIComponent(order.orderId),
+
+                    cancel_return_url:
+                        process.env.PUBLIC_BASE_URL.replace(/\/$/, "") +
+                        "/?payment=smm-cancel&orderId=" +
+                        encodeURIComponent(order.orderId),
+
+                    customer: {
+                        reference_id:
+                            "CUST-" +
+                            crypto.randomUUID(),
+
+                        type: "INDIVIDUAL",
+
+                        email:
+                            customerEmail ||
+                            "customer@example.com",
+
+                        individual_detail: {
+                            given_names:
+                                customerName ||
+                                "Pelanggan"
+                        }
+                    }
+                },
+                {
+                    auth: {
+                        username:
+                            process.env.XENDIT_SECRET_KEY,
+
+                        password: ""
+                    },
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    timeout: 30000
+                }
+            );
+
+        const paymentSessionId =
+            response.data?.payment_session_id ||
+            null;
+
+        const paymentUrl =
+            response.data?.payment_link_url ||
+            null;
+
+        const paymentRequestId =
+            response.data?.payment_request_id ||
+            null;
+
+        if (!paymentSessionId || !paymentUrl) {
+
+            console.error(
+                "[SMM XENDIT] Response tidak lengkap:",
+                response.data
+            );
+
+            return res.status(502).json({
+                success: false,
+                error:
+                    "Xendit tidak mengembalikan payment session yang valid."
+            });
+
+        }
+
+        /*
+         * Simpan metadata Xendit.
+         *
+         * smm_orders belum memiliki kolom payment_session_id,
+         * sehingga untuk tahap ini metadata pembayaran disimpan
+         * pada memory log saja.
+         *
+         * Status order tetap PENDING_PAYMENT sampai webhook.
+         */
+
+        console.log(
+            "[SMM XENDIT PAYMENT]",
+            JSON.stringify({
+                orderId: order.orderId,
+                amount,
+                paymentSessionId,
+                paymentRequestId,
+                paymentUrl
+            }, null, 2)
+        );
+
+        return res.json({
+            success: true,
+            orderId: order.orderId,
+            paymentSessionId,
+            paymentRequestId,
+            paymentUrl,
+            amount
+        });
+
+    } catch (error) {
+
+        console.error(
+            "[SMM XENDIT ERROR]",
+            error.response?.data ||
+            error.message ||
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error:
+                "Gagal membuat pembayaran SMM."
+        });
+
+    }
+
 });
 
 
@@ -6803,7 +7497,7 @@ app.get("/api/catalog", (req, res) => {
                 title,
                 icon,
                 description,
-                short_description,
+                '' AS short_description,
                 label,
                 placeholder,
                 active,
@@ -6843,8 +7537,6 @@ app.get("/api/catalog", (req, res) => {
         });
 
     } catch (error) {
-
-        console.error(error);
 
         return res.status(500).json({
             success: false,
@@ -10755,6 +11447,792 @@ app.get("/api/digiflazz/cache", (req, res) => {
     }
 
 });
+
+
+
+/* ==========================================================
+   SMM PROVIDER — SOSMEDLY
+   API key hanya dari environment variable.
+   Belum mengirim order.
+========================================================== */
+
+function getSosmedlyConfig() {
+    const apiUrl =
+        String(
+            process.env.SOSMEDLY_API_URL ||
+            "https://api.sosmedly.com/api/v2"
+        ).trim();
+
+    const apiKey =
+        String(
+            process.env.SOSMEDLY_API_KEY ||
+            ""
+        ).trim();
+
+    return {
+        apiUrl,
+        apiKey
+    };
+}
+
+
+async function callSosmedly(action, extraParams = {}) {
+
+    const {
+        apiUrl,
+        apiKey
+    } = getSosmedlyConfig();
+
+    if (!apiKey) {
+        const error =
+            new Error(
+                "SOSMEDLY_API_KEY belum dikonfigurasi."
+            );
+
+        error.code =
+            "SOSMEDLY_API_KEY_MISSING";
+
+        throw error;
+    }
+
+    const params =
+        new URLSearchParams();
+
+    params.set("key", apiKey);
+    params.set("action", action);
+
+    Object.entries(extraParams).forEach(
+        ([key, value]) => {
+
+            if (
+                value !== undefined &&
+                value !== null
+            ) {
+                params.set(
+                    key,
+                    String(value)
+                );
+            }
+
+        }
+    );
+
+    const response =
+        await axios.post(
+            apiUrl,
+            params,
+            {
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+                timeout: 30000
+            }
+        );
+
+    return response.data;
+}
+
+
+/*
+ * Provider info untuk Admin.
+ * API key sengaja tidak pernah dikembalikan.
+ */
+app.get(
+    "/api/admin/smm/provider",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const provider =
+                db.prepare(`
+                    SELECT
+                        id,
+                        name,
+                        api_url AS apiUrl,
+                        active,
+                        created_at AS createdAt
+                    FROM smm_providers
+                    WHERE LOWER(name) = 'sosmedly'
+                    ORDER BY id ASC
+                    LIMIT 1
+                `).get();
+
+            return res.json({
+                success: true,
+                configured:
+                    Boolean(provider),
+                provider:
+                    provider || null,
+                apiKeyConfigured:
+                    Boolean(
+                        process.env.SOSMEDLY_API_KEY
+                    )
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[SMM PROVIDER GET]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "Gagal mengambil konfigurasi provider."
+            });
+
+        }
+
+    }
+);
+
+
+/*
+ * Membuat / memperbarui konfigurasi provider Sosmedly.
+ * API key tetap berada di .env.
+ */
+app.post(
+    "/api/admin/smm/provider/sosmedly/setup",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const {
+                apiUrl,
+                active
+            } = req.body || {};
+
+            const normalizedApiUrl =
+                String(
+                    apiUrl ||
+                    process.env.SOSMEDLY_API_URL ||
+                    "https://api.sosmedly.com/api/v2"
+                ).trim();
+
+            if (!normalizedApiUrl) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "API URL Sosmedly wajib diisi."
+                });
+
+            }
+
+            const now =
+                catalogNow();
+
+            const existing =
+                db.prepare(`
+                    SELECT id
+                    FROM smm_providers
+                    WHERE LOWER(name) = 'sosmedly'
+                    LIMIT 1
+                `).get();
+
+            let providerId;
+
+            if (existing) {
+
+                db.prepare(`
+                    UPDATE smm_providers
+                    SET
+                        api_url = ?,
+                        active = ?,
+                        created_at = created_at
+                    WHERE id = ?
+                `).run(
+                    normalizedApiUrl,
+                    active === false ? 0 : 1,
+                    existing.id
+                );
+
+                providerId =
+                    existing.id;
+
+            } else {
+
+                const result =
+                    db.prepare(`
+                        INSERT INTO smm_providers (
+                            name,
+                            api_url,
+                            api_key,
+                            active,
+                            created_at
+                        )
+                        VALUES (?, ?, NULL, ?, ?)
+                    `).run(
+                        "Sosmedly",
+                        normalizedApiUrl,
+                        active === false ? 0 : 1,
+                        now
+                    );
+
+                providerId =
+                    result.lastInsertRowid;
+
+            }
+
+            const provider =
+                db.prepare(`
+                    SELECT
+                        id,
+                        name,
+                        api_url AS apiUrl,
+                        active,
+                        created_at AS createdAt
+                    FROM smm_providers
+                    WHERE id = ?
+                `).get(providerId);
+
+            return res.json({
+                success: true,
+                provider,
+                apiKeyConfigured:
+                    Boolean(
+                        process.env.SOSMEDLY_API_KEY
+                    )
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[SMM PROVIDER SETUP]",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                error:
+                    "Gagal menyimpan konfigurasi provider."
+            });
+
+        }
+
+    }
+);
+
+
+/*
+ * Test koneksi — hanya balance.
+ * Tidak membuat order.
+ */
+app.post(
+    "/api/admin/smm/provider/sosmedly/test",
+    requireCatalogManager,
+    async (req, res) => {
+
+        try {
+
+            const data =
+                await callSosmedly(
+                    "balance"
+                );
+
+            return res.json({
+                success: true,
+                provider: "Sosmedly",
+                connected: true,
+                balance:
+                    data?.balance ?? null,
+                currency:
+                    data?.currency ?? "IDR"
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY TEST]",
+                error.response?.data ||
+                error.message
+            );
+
+            return res.status(502).json({
+                success: false,
+                connected: false,
+                error:
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Koneksi ke Sosmedly gagal."
+            });
+
+        }
+
+    }
+);
+
+
+/*
+ * Cek saldo provider.
+ */
+app.get(
+    "/api/admin/smm/provider/sosmedly/balance",
+    requireCatalogManager,
+    async (req, res) => {
+
+        try {
+
+            const data =
+                await callSosmedly(
+                    "balance"
+                );
+
+            return res.json({
+                success: true,
+                provider: "Sosmedly",
+                balance:
+                    data?.balance ?? null,
+                currency:
+                    data?.currency ?? "IDR"
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY BALANCE]",
+                error.response?.data ||
+                error.message
+            );
+
+            return res.status(502).json({
+                success: false,
+                error:
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Gagal mengambil saldo Sosmedly."
+            });
+
+        }
+
+    }
+);
+
+
+/*
+ * Ambil katalog layanan provider.
+ * Read-only — belum melakukan sinkronisasi ke database BAYORA.
+ */
+app.get(
+    "/api/admin/smm/provider/sosmedly/services",
+    requireCatalogManager,
+    async (req, res) => {
+
+        try {
+
+            const data =
+                await callSosmedly(
+                    "services"
+                );
+
+            const services =
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.services)
+                        ? data.services
+                        : [];
+
+            return res.json({
+                success: true,
+                provider: "Sosmedly",
+                count: services.length,
+                services
+            });
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY SERVICES]",
+                error.response?.data ||
+                error.message
+            );
+
+            return res.status(502).json({
+                success: false,
+                error:
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Gagal mengambil katalog Sosmedly."
+            });
+
+        }
+
+    }
+);
+
+
+
+/*
+ * Import katalog Sosmedly ke database BAYORA.
+ *
+ * Catatan:
+ * - rate Sosmedly adalah harga per 1.000 unit.
+ * - layanan BARU selalu dibuat inactive terlebih dahulu.
+ * - harga jual layanan baru dihitung dari rate + margin.
+ * - layanan yang sudah ada tidak menimpa price/active.
+ * - tidak membuat order.
+ */
+app.post(
+    "/api/admin/smm/provider/sosmedly/import",
+    requireCatalogManager,
+    async (req, res) => {
+
+        try {
+
+            const rawMargin =
+                req.body?.marginPercent;
+
+            const marginPercent =
+                Number(rawMargin);
+
+            if (
+                !Number.isFinite(marginPercent) ||
+                marginPercent < 0 ||
+                marginPercent > 10000
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        "Margin harus berupa angka antara 0 sampai 10000 persen."
+                });
+
+            }
+
+
+            const data =
+                await callSosmedly(
+                    "services"
+                );
+
+
+            const providerServices =
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.services)
+                        ? data.services
+                        : [];
+
+
+            if (!providerServices.length) {
+
+                return res.status(502).json({
+                    success: false,
+                    error:
+                        "Sosmedly tidak mengembalikan katalog layanan."
+                });
+
+            }
+
+
+            /*
+             * Pastikan provider Sosmedly ada di database.
+             * API key sengaja tidak disimpan di database.
+             */
+            const existingProvider =
+                db.prepare(`
+                    SELECT id
+                    FROM smm_providers
+                    WHERE LOWER(name) = 'sosmedly'
+                    LIMIT 1
+                `).get();
+
+
+            let providerId;
+
+
+            if (existingProvider) {
+
+                providerId =
+                    existingProvider.id;
+
+            } else {
+
+                const now =
+                    catalogNow();
+
+                const result =
+                    db.prepare(`
+                        INSERT INTO smm_providers (
+                            name,
+                            api_url,
+                            api_key,
+                            active,
+                            created_at
+                        )
+                        VALUES (?, ?, NULL, 1, ?)
+                    `).run(
+                        "Sosmedly",
+                        getSosmedlyConfig().apiUrl,
+                        now
+                    );
+
+                providerId =
+                    result.lastInsertRowid;
+
+            }
+
+
+            let created = 0;
+            let updated = 0;
+            let skipped = 0;
+
+
+            const importTransaction =
+                db.transaction(() => {
+
+                    for (const item of providerServices) {
+
+                        const providerServiceId =
+                            String(
+                                item?.service ??
+                                item?.service_id ??
+                                ""
+                            ).trim();
+
+
+                        const name =
+                            String(
+                                item?.name ??
+                                ""
+                            ).trim();
+
+
+                        const platform =
+                            String(
+                                item?.category ??
+                                item?.platform ??
+                                ""
+                            ).trim().toLowerCase();
+
+
+                        const category =
+                            String(
+                                item?.type ??
+                                item?.category ??
+                                "general"
+                            ).trim();
+
+
+                        const description =
+                            String(
+                                item?.description ??
+                                ""
+                            ).trim();
+
+
+                        const rate =
+                            Number(item?.rate);
+
+
+                        const minQuantity =
+                            Number(item?.min);
+
+
+                        const maxQuantity =
+                            Number(item?.max);
+
+
+                        const refill =
+                            item?.refill
+                                ? 1
+                                : 0;
+
+
+                        const cancel =
+                            item?.cancel
+                                ? 1
+                                : 0;
+
+
+                        if (
+                            !providerServiceId ||
+                            !name ||
+                            !platform ||
+                            !Number.isFinite(rate) ||
+                            rate < 0 ||
+                            !Number.isInteger(minQuantity) ||
+                            minQuantity < 1 ||
+                            !Number.isInteger(maxQuantity) ||
+                            maxQuantity < minQuantity
+                        ) {
+
+                            skipped++;
+                            continue;
+
+                        }
+
+
+                        /*
+                         * Harga jual hanya untuk layanan BARU.
+                         * Pembulatan ke rupiah penuh.
+                         */
+                        const calculatedPrice =
+                            Math.ceil(
+                                rate *
+                                (
+                                    1 +
+                                    marginPercent / 100
+                                )
+                            );
+
+
+                        const existing =
+                            db.prepare(`
+                                SELECT
+                                    id,
+                                    price,
+                                    active
+                                FROM smm_services
+                                WHERE provider_id = ?
+                                  AND provider_service_id = ?
+                                LIMIT 1
+                            `).get(
+                                providerId,
+                                providerServiceId
+                            );
+
+
+                        if (existing) {
+
+                            /*
+                             * Jangan menimpa harga jual atau status
+                             * aktif yang sudah diatur admin.
+                             */
+                            db.prepare(`
+                                UPDATE smm_services
+                                SET
+                                    platform = ?,
+                                    category = ?,
+                                    name = ?,
+                                    description = ?,
+                                    min_quantity = ?,
+                                    max_quantity = ?,
+                                    refill = ?,
+                                    cancel = ?,
+                                    updated_at = ?
+                                WHERE id = ?
+                            `).run(
+                                platform,
+                                category,
+                                name,
+                                description,
+                                minQuantity,
+                                maxQuantity,
+                                refill,
+                                cancel,
+                                catalogNow(),
+                                existing.id
+                            );
+
+                            updated++;
+
+                            continue;
+
+                        }
+
+
+                        /*
+                         * Layanan baru:
+                         * - harga berdasarkan margin
+                         * - inactive agar tidak langsung dijual
+                         */
+                        db.prepare(`
+                            INSERT INTO smm_services (
+                                provider_id,
+                                provider_service_id,
+                                platform,
+                                category,
+                                name,
+                                description,
+                                price,
+                                min_quantity,
+                                max_quantity,
+                                refill,
+                                cancel,
+                                active,
+                                created_at,
+                                updated_at
+                            )
+                            VALUES (
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                                ?, ?, 0, ?, ?
+                            )
+                        `).run(
+                            providerId,
+                            providerServiceId,
+                            platform,
+                            category,
+                            name,
+                            description,
+                            calculatedPrice,
+                            minQuantity,
+                            maxQuantity,
+                            refill,
+                            cancel,
+                            catalogNow(),
+                            catalogNow()
+                        );
+
+                        created++;
+
+                    }
+
+                });
+
+
+            importTransaction();
+
+
+            const total =
+                db.prepare(`
+                    SELECT COUNT(*) AS count
+                    FROM smm_services
+                    WHERE provider_id = ?
+                `).get(providerId).count;
+
+
+            return res.json({
+                success: true,
+                provider: "Sosmedly",
+                marginPercent,
+                sourceCount: providerServices.length,
+                created,
+                updated,
+                skipped,
+                totalProviderServices: Number(total)
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY IMPORT]",
+                error.response?.data ||
+                error.message
+            );
+
+
+            return res.status(502).json({
+                success: false,
+                error:
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Gagal mengimpor katalog Sosmedly."
+            });
+
+        }
+
+    }
+);
 
 
 /* =========================

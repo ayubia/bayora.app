@@ -3283,6 +3283,315 @@ body.bayora-view-admins > main > .stats {
     </div>
 
 
+    <!-- ====================================================
+         SMM PROVIDER
+    ===================================================== -->
+
+    <div
+        id="smmProviderCard"
+        style="
+            margin:20px 0;
+            padding:20px;
+            border:1px solid #e7ebf3;
+            border-radius:18px;
+            background:#ffffff;
+        "
+    >
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:16px;
+                flex-wrap:wrap;
+            "
+        >
+
+            <div>
+
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        font-size:18px;
+                        font-weight:700;
+                        color:#17213a;
+                    "
+                >
+                    <span
+                        style="
+                            width:10px;
+                            height:10px;
+                            border-radius:50%;
+                            background:#cbd2df;
+                            display:inline-block;
+                        "
+                        id="smmProviderStatusDot"
+                    ></span>
+
+                    <span>Sosmedly</span>
+                </div>
+
+                <div
+                    id="smmProviderStatus"
+                    style="
+                        margin-top:5px;
+                        color:#7b8497;
+                        font-size:13px;
+                    "
+                >
+                    Memeriksa konfigurasi provider...
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    gap:8px;
+                    flex-wrap:wrap;
+                "
+            >
+
+                <button
+                    type="button"
+                    id="smmSosmedlyTestButton"
+                    style="
+                        border:0;
+                        border-radius:10px;
+                        padding:10px 14px;
+                        background:#111827;
+                        color:#fff;
+                        cursor:pointer;
+                        font-weight:600;
+                    "
+                >
+                    Test Koneksi
+                </button>
+
+                <button
+                    type="button"
+                    id="smmSosmedlyBalanceButton"
+                    style="
+                        border:1px solid #dfe4ec;
+                        border-radius:10px;
+                        padding:10px 14px;
+                        background:#fff;
+                        color:#202938;
+                        cursor:pointer;
+                        font-weight:600;
+                    "
+                >
+                    Cek Saldo
+                </button>
+
+                <button
+                    type="button"
+                    id="smmSosmedlyCatalogButton"
+                    style="
+                        border:1px solid #dfe4ec;
+                        border-radius:10px;
+                        padding:10px 14px;
+                        background:#fff;
+                        color:#202938;
+                        cursor:pointer;
+                        font-weight:600;
+                    "
+                >
+                    Import Katalog
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:repeat(3,minmax(0,1fr));
+                gap:12px;
+                margin-top:18px;
+            "
+        >
+
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Saldo Provider
+                </div>
+
+                <strong
+                    id="smmSosmedlyBalance"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    —
+                </strong>
+            </div>
+
+
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Mata Uang
+                </div>
+
+                <strong
+                    id="smmSosmedlyCurrency"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    —
+                </strong>
+            </div>
+
+
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Layanan Provider
+                </div>
+
+                <strong
+                    id="smmSosmedlyCatalogCount"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    —
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                margin-top:14px;
+                flex-wrap:wrap;
+            "
+        >
+
+            <label
+                for="smmSosmedlyMargin"
+                style="
+                    font-size:13px;
+                    color:#667085;
+                    font-weight:600;
+                "
+            >
+                Margin harga jual
+            </label>
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:6px;
+                "
+            >
+
+                <input
+                    type="number"
+                    id="smmSosmedlyMargin"
+                    min="0"
+                    max="10000"
+                    step="0.1"
+                    placeholder="contoh 30"
+                    style="
+                        width:130px;
+                        padding:9px 11px;
+                        border:1px solid #dfe4ec;
+                        border-radius:10px;
+                        outline:none;
+                        font-size:13px;
+                        box-sizing:border-box;
+                    "
+                >
+
+                <span
+                    style="
+                        font-size:13px;
+                        color:#667085;
+                    "
+                >
+                    %
+                </span>
+
+            </div>
+
+            <span
+                style="
+                    font-size:12px;
+                    color:#98a2b3;
+                "
+            >
+                Layanan baru akan diimpor nonaktif.
+            </span>
+
+        </div>
+
+
+        <div
+            id="smmSosmedlyMessage"
+            style="
+                margin-top:12px;
+                font-size:13px;
+                color:#7b8497;
+            "
+        ></div>
+
+    </div>
+
+
     <div class="smm-summary">
 
         <div class="smm-summary-card">
@@ -4685,9 +4994,537 @@ body.bayora-view-admins > main > .stats {
     }
 
 
+    /* ======================================================
+       SOSMEDLY PROVIDER
+    ====================================================== */
+
+    function setSmmSosmedlyMessage(message, error = false) {
+
+        const element =
+            $("smmSosmedlyMessage");
+
+        if (!element) return;
+
+        element.textContent =
+            String(message || "");
+
+        element.style.color =
+            error
+                ? "#c0392b"
+                : "#667085";
+    }
+
+
+    function setSmmSosmedlyStatus(
+        text,
+        connected = false
+    ) {
+
+        const status =
+            $("smmProviderStatus");
+
+        const dot =
+            $("smmProviderStatusDot");
+
+        if (status) {
+            status.textContent =
+                text || "";
+        }
+
+        if (dot) {
+            dot.style.background =
+                connected
+                    ? "#22c55e"
+                    : "#cbd2df";
+        }
+    }
+
+
+    async function loadSmmSosmedlyProvider() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/smm/provider",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal memuat provider Sosmedly."
+                );
+
+            }
+
+
+            if (!data.apiKeyConfigured) {
+
+                setSmmSosmedlyStatus(
+                    "API key Sosmedly belum dikonfigurasi.",
+                    false
+                );
+
+                setSmmSosmedlyMessage(
+                    "Tambahkan SOSMEDLY_API_KEY di .env server."
+                );
+
+                return;
+
+            }
+
+
+            setSmmSosmedlyStatus(
+                "API key terkonfigurasi. Siap diuji.",
+                false
+            );
+
+
+            if (data.provider?.active) {
+
+                setSmmSosmedlyStatus(
+                    "Provider Sosmedly aktif.",
+                    false
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY PROVIDER]",
+                error
+            );
+
+            setSmmSosmedlyStatus(
+                error.message ||
+                "Gagal memuat provider Sosmedly.",
+                false
+            );
+
+        }
+
+    }
+
+
+    async function testSmmSosmedlyConnection() {
+
+        const button =
+            $("smmSosmedlyTestButton");
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Menguji...";
+        }
+
+
+        setSmmSosmedlyMessage(
+            "Menghubungkan ke Sosmedly..."
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/smm/provider/sosmedly/test",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Koneksi Sosmedly gagal."
+                );
+
+            }
+
+
+            setSmmSosmedlyStatus(
+                "Terhubung ke Sosmedly.",
+                true
+            );
+
+
+            const balance =
+                data.balance ?? "0";
+
+            const currency =
+                data.currency || "IDR";
+
+
+            if ($("smmSosmedlyBalance")) {
+                $("smmSosmedlyBalance").textContent =
+                    `${currency} ${Number(balance).toLocaleString("id-ID")}`;
+            }
+
+
+            if ($("smmSosmedlyCurrency")) {
+                $("smmSosmedlyCurrency").textContent =
+                    currency;
+            }
+
+
+            setSmmSosmedlyMessage(
+                "Test koneksi berhasil. Tidak ada order yang dibuat."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY TEST]",
+                error
+            );
+
+            setSmmSosmedlyStatus(
+                "Tidak terhubung.",
+                false
+            );
+
+            setSmmSosmedlyMessage(
+                error.message ||
+                "Koneksi Sosmedly gagal.",
+                true
+            );
+
+        } finally {
+
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Test Koneksi";
+            }
+
+        }
+
+    }
+
+
+    async function loadSmmSosmedlyBalance() {
+
+        const button =
+            $("smmSosmedlyBalanceButton");
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Memuat...";
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/smm/provider/sosmedly/balance",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal mengambil saldo Sosmedly."
+                );
+
+            }
+
+
+            const balance =
+                data.balance ?? "0";
+
+            const currency =
+                data.currency || "IDR";
+
+
+            if ($("smmSosmedlyBalance")) {
+                $("smmSosmedlyBalance").textContent =
+                    `${currency} ${Number(balance).toLocaleString("id-ID")}`;
+            }
+
+
+            if ($("smmSosmedlyCurrency")) {
+                $("smmSosmedlyCurrency").textContent =
+                    currency;
+            }
+
+
+            setSmmSosmedlyStatus(
+                "Saldo berhasil diperbarui.",
+                true
+            );
+
+
+            setSmmSosmedlyMessage(
+                "Saldo provider berhasil diperbarui."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY BALANCE]",
+                error
+            );
+
+            setSmmSosmedlyMessage(
+                error.message ||
+                "Gagal mengambil saldo.",
+                true
+            );
+
+        } finally {
+
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Cek Saldo";
+            }
+
+        }
+
+    }
+
+
+    async function loadSmmSosmedlyCatalog() {
+
+        const button =
+            $("smmSosmedlyCatalogButton");
+
+        const marginInput =
+            $("smmSosmedlyMargin");
+
+
+        const margin =
+            Number(
+                marginInput?.value
+            );
+
+
+        if (
+            !Number.isFinite(margin) ||
+            margin < 0 ||
+            margin > 10000
+        ) {
+
+            alert(
+                "Masukkan margin harga jual terlebih dahulu.\n\n" +
+                "Contoh: 30 untuk margin +30%."
+            );
+
+            if (marginInput) {
+                marginInput.focus();
+            }
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                `Import katalog Sosmedly dengan margin ${margin}%?\n\n` +
+                "Layanan baru akan dibuat NONAKTIF terlebih dahulu.\n" +
+                "Harga layanan yang sudah ada tidak akan ditimpa.\n\n" +
+                "Lanjutkan?"
+            );
+
+
+        if (!confirmed) return;
+
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Mengimpor...";
+        }
+
+
+        setSmmSosmedlyMessage(
+            "Mengambil dan mengimpor katalog Sosmedly..."
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/smm/provider/sosmedly/import",
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body:
+                            JSON.stringify({
+                                marginPercent: margin
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal mengimpor katalog Sosmedly."
+                );
+
+            }
+
+
+            if ($("smmSosmedlyCatalogCount")) {
+
+                $("smmSosmedlyCatalogCount").textContent =
+                    Number(
+                        data.totalProviderServices || 0
+                    ).toLocaleString("id-ID");
+
+            }
+
+
+            setSmmSosmedlyStatus(
+                `Katalog tersinkronisasi (${Number(data.sourceCount || 0).toLocaleString("id-ID")} layanan).`,
+                true
+            );
+
+
+            setSmmSosmedlyMessage(
+                `Import selesai: ${Number(data.created || 0).toLocaleString("id-ID")} baru, ` +
+                `${Number(data.updated || 0).toLocaleString("id-ID")} diperbarui, ` +
+                `${Number(data.skipped || 0).toLocaleString("id-ID")} dilewati. ` +
+                "Layanan baru tetap nonaktif."
+            );
+
+
+            await loadSmmServices();
+
+
+        } catch (error) {
+
+            console.error(
+                "[SOSMEDLY IMPORT]",
+                error
+            );
+
+
+            setSmmSosmedlyMessage(
+                error.message ||
+                "Gagal mengimpor katalog.",
+                true
+            );
+
+        } finally {
+
+            if (button) {
+                button.disabled = false;
+                button.textContent = "Import Katalog";
+            }
+
+        }
+
+    }
+
+
+    function setupSmmSosmedlyProvider() {
+
+        if (!$("smmProviderCard")) return;
+
+
+        const testButton =
+            $("smmSosmedlyTestButton");
+
+        if (testButton) {
+
+            testButton.addEventListener(
+                "click",
+                testSmmSosmedlyConnection
+            );
+
+        }
+
+
+        const balanceButton =
+            $("smmSosmedlyBalanceButton");
+
+        if (balanceButton) {
+
+            balanceButton.addEventListener(
+                "click",
+                loadSmmSosmedlyBalance
+            );
+
+        }
+
+
+        const catalogButton =
+            $("smmSosmedlyCatalogButton");
+
+        if (catalogButton) {
+
+            catalogButton.addEventListener(
+                "click",
+                loadSmmSosmedlyCatalog
+            );
+
+        }
+
+
+        loadSmmSosmedlyProvider();
+
+    }
+
+
     function setupSmmPanel() {
 
         if (!$("smmPanel")) return;
+
+
+        setupSmmSosmedlyProvider();
 
 
         const addButton =

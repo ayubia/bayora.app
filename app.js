@@ -711,7 +711,102 @@ async function loadCustomerCatalog() {
  * kalau request gagal.
  */
 
+let smmServices = [];
+
+
+async function loadSmmServices() {
+
+    try {
+
+        const response =
+            await fetch("/api/smm/services");
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.error ||
+                "Gagal mengambil layanan SMM."
+            );
+        }
+
+
+        smmServices =
+            (data.services || [])
+                .filter(service =>
+                    Number(service.active ?? 1)
+                )
+                .map(service => ({
+                    id: service.id,
+                    title:
+                        service.name ||
+                        "Layanan SMM",
+                    name:
+                        service.name ||
+                        "Layanan SMM",
+                    platform:
+                        service.platform ||
+                        "",
+                    category:
+                        service.category ||
+                        "general",
+                    description:
+                        service.description ||
+                        "",
+                    price:
+                        Number(service.price) || 0,
+                    minQuantity:
+                        Number(service.minQuantity) || 1,
+                    maxQuantity:
+                        Number(service.maxQuantity) || 1,
+                    refill:
+                        Number(service.refill) === 1 ||
+                        service.refill === true,
+                    cancel:
+                        Number(service.cancel) === 1 ||
+                        service.cancel === true,
+                    type: "smm"
+                }));
+
+
+        console.log(
+            "[SMM] Katalog customer berhasil dimuat:",
+            smmServices.length,
+            "layanan"
+        );
+
+
+        if (
+            typeof customerServiceCategory !==
+            "undefined" &&
+            customerServiceCategory === "smm"
+        ) {
+            renderCustomerServices();
+        }
+
+
+    } catch (error) {
+
+        /*
+         * Jangan mengganggu PPOB/Digital
+         * jika katalog SMM gagal dimuat.
+         */
+
+        console.warn(
+            "[SMM] Katalog gagal dimuat:",
+            error
+        );
+
+        smmServices = [];
+
+    }
+
+}
+
+
 loadCustomerCatalog();
+loadSmmServices();
 
 
 let customerServiceCategory = "ppob";
@@ -722,7 +817,9 @@ function setCustomerServiceCategory(category) {
     customerServiceCategory =
         category === "digital"
             ? "digital"
-            : "ppob";
+            : category === "smm"
+                ? "smm"
+                : "ppob";
 
     renderCustomerServices();
 
@@ -1042,14 +1139,126 @@ function getBayoraServiceIconHTML(id, service) {
     }
 
 
+    function renderSmmCards(list) {
+
+        if (!Array.isArray(list) || !list.length) {
+
+            return `
+                <div class="customer-service-empty">
+                    Belum ada layanan SMM tersedia.
+                </div>
+            `;
+
+        }
+
+        return list.map((service) => {
+
+            const safeId =
+                String(service.id ?? "")
+                    .replace(/\\/g, "\\\\")
+                    .replace(/'/g, "\\'");
+
+            const title =
+                service.name ||
+                service.title ||
+                "Layanan SMM";
+
+            const platform =
+                service.platform ||
+                "Sosial Media";
+
+            const category =
+                service.category ||
+                "";
+
+            const price =
+                Number(service.price) || 0;
+
+            const min =
+                Number(service.minQuantity) || 1;
+
+            const max =
+                Number(service.maxQuantity) || 1;
+
+            const badges = [];
+
+            if (service.refill) {
+                badges.push("Refill");
+            }
+
+            if (service.cancel) {
+                badges.push("Cancel");
+            }
+
+            return `
+                <div
+                    class="service-card smm-service-card"
+                    onclick="openSmmService('${safeId}')"
+                >
+
+                    <div class="service-icon smm-service-icon">
+                        📱
+                    </div>
+
+                    <div>
+                        <div class="service-title">
+                            ${title}
+                        </div>
+
+                        <div class="service-description">
+                            ${platform}${category ? " • " + category : ""}
+                        </div>
+
+                        <div class="smm-service-price">
+                            ${formatRupiah(price)}
+                            <small>/ 1.000</small>
+                        </div>
+
+                        <div class="smm-service-meta">
+                            Min ${min.toLocaleString("id-ID")}
+                            ·
+                            Max ${max.toLocaleString("id-ID")}
+                        </div>
+
+                        ${
+                            badges.length
+                                ? `
+                                    <div class="smm-service-badges">
+                                        ${badges.map(
+                                            badge =>
+                                                `<span class="smm-service-badge">${badge}</span>`
+                                        ).join("")}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join("");
+
+    }
+
+
     const isPpob =
         customerServiceCategory === "ppob";
+
+    const isDigital =
+        customerServiceCategory === "digital";
+
+    const isSmm =
+        customerServiceCategory === "smm";
 
 
     const activeServices =
         isPpob
             ? ppobServices
-            : digitalServices;
+            : isDigital
+                ? digitalServices
+                : smmServices;
 
 
     grid.innerHTML = `
@@ -1084,7 +1293,7 @@ function getBayoraServiceIconHTML(id, service) {
             <button
                 type="button"
                 class="customer-service-tab ${
-                    !isPpob ? "active" : ""
+                    isDigital ? "active" : ""
                 }"
                 onclick="setCustomerServiceCategory('digital')"
             >
@@ -1105,6 +1314,27 @@ function getBayoraServiceIconHTML(id, service) {
 
             </button>
 
+
+            <button
+                type="button"
+                class="customer-service-tab ${
+                    isSmm ? "active" : ""
+                }"
+                onclick="setCustomerServiceCategory('smm')"
+            >
+                <span class="customer-service-tab-icon">
+                    📱
+                </span>
+
+                <span>
+                    <strong>SMM</strong>
+                    <small>
+                        Sosial media & engagement
+                    </small>
+                </span>
+
+            </button>
+
         </div>
 
 
@@ -1118,7 +1348,9 @@ function getBayoraServiceIconHTML(id, service) {
                         ${
                             isPpob
                                 ? "Layanan PPOB"
-                                : "Produk Digital"
+                                : isDigital
+                                    ? "Produk Digital"
+                                    : "Layanan SMM"
                         }
                     </h2>
 
@@ -1126,7 +1358,9 @@ function getBayoraServiceIconHTML(id, service) {
                         ${
                             isPpob
                                 ? "Penuhi kebutuhan pembayaran dan layanan sehari-hari."
-                                : "Produk digital pilihan untuk kebutuhan kreatif dan sehari-hari."
+                                : isDigital
+                                    ? "Produk digital pilihan untuk kebutuhan kreatif dan sehari-hari."
+                                    : "Tingkatkan jangkauan dan engagement media sosial Anda."
                         }
                     </p>
 
@@ -1137,7 +1371,11 @@ function getBayoraServiceIconHTML(id, service) {
 
             <div class="service-section-grid">
 
-                ${renderCards(activeServices)}
+                ${
+                    isSmm
+                        ? renderSmmCards(activeServices)
+                        : renderCards(activeServices)
+                }
 
             </div>
 
@@ -1299,6 +1537,348 @@ function getBayoraServiceIconGlobal(id, service) {
 
 
 
+let currentSmmService = null;
+
+
+function getSmmServiceById(serviceId) {
+
+    return (smmServices || []).find(
+        service =>
+            String(service.id) === String(serviceId)
+    ) || null;
+
+}
+
+
+function updateSmmTotal() {
+
+    if (!currentSmmService) {
+        return;
+    }
+
+    const quantityInput =
+        document.getElementById("smmQuantity");
+
+    const totalElement =
+        document.getElementById("smmTotal");
+
+    if (!quantityInput || !totalElement) {
+        return;
+    }
+
+    const quantity =
+        Number(quantityInput.value) || 0;
+
+    const pricePerThousand =
+        Number(currentSmmService.price) || 0;
+
+    const total =
+        Math.ceil(
+            (pricePerThousand / 1000) * quantity
+        );
+
+    totalElement.textContent =
+        formatRupiah(total);
+
+}
+
+
+function openSmmService(serviceId) {
+
+    const service =
+        getSmmServiceById(serviceId);
+
+    if (!service) {
+
+        console.warn(
+            "[SMM] Layanan tidak ditemukan:",
+            serviceId
+        );
+
+        return;
+
+    }
+
+    currentSmmService = service;
+
+    const wrapper =
+        document.getElementById(
+            "smmFlowWrapper"
+        );
+
+    const digitalWrapper =
+        document.getElementById(
+            "digitalFlowWrapper"
+        );
+
+    const formHeader =
+        document.querySelector(
+            "#servicePage .ppob-form-header"
+        );
+
+    if (digitalWrapper) {
+        digitalWrapper.style.display = "none";
+    }
+
+    if (formHeader) {
+        formHeader.style.display = "none";
+    }
+
+    if (wrapper) {
+        wrapper.classList.remove("page-hidden");
+    }
+
+
+    const icon =
+        document.getElementById(
+            "smmFormIcon"
+        );
+
+    const title =
+        document.getElementById(
+            "smmFormTitle"
+        );
+
+    const description =
+        document.getElementById(
+            "smmFormDescription"
+        );
+
+    const platform =
+        document.getElementById(
+            "smmPlatform"
+        );
+
+    const price =
+        document.getElementById(
+            "smmPricePerThousand"
+        );
+
+    const range =
+        document.getElementById(
+            "smmQuantityRange"
+        );
+
+    const quantityInput =
+        document.getElementById(
+            "smmQuantity"
+        );
+
+    const quantityHint =
+        document.getElementById(
+            "smmQuantityHint"
+        );
+
+    const targetInput =
+        document.getElementById(
+            "smmTarget"
+        );
+
+    const targetHint =
+        document.getElementById(
+            "smmTargetHint"
+        );
+
+    const features =
+        document.getElementById(
+            "smmFeatures"
+        );
+
+
+    if (icon) {
+        icon.textContent = "📱";
+    }
+
+    if (title) {
+        title.textContent =
+            service.name ||
+            service.title ||
+            "Layanan SMM";
+    }
+
+    if (description) {
+        description.textContent =
+            service.description ||
+            "Tingkatkan jangkauan dan engagement media sosial Anda.";
+    }
+
+    if (platform) {
+        platform.textContent =
+            service.platform ||
+            "Sosial Media";
+    }
+
+    if (price) {
+        price.textContent =
+            formatRupiah(
+                Number(service.price) || 0
+            ) + " / 1.000";
+    }
+
+    if (range) {
+        range.textContent =
+            Number(service.minQuantity).toLocaleString("id-ID") +
+            " – " +
+            Number(service.maxQuantity).toLocaleString("id-ID");
+    }
+
+
+    if (quantityInput) {
+
+        quantityInput.value =
+            Number(service.minQuantity) || 1;
+
+        quantityInput.min =
+            Number(service.minQuantity) || 1;
+
+        quantityInput.max =
+            Number(service.maxQuantity) || 1;
+
+    }
+
+
+    if (quantityHint) {
+        quantityHint.textContent =
+            "Minimum " +
+            Number(service.minQuantity).toLocaleString("id-ID") +
+            " · Maksimum " +
+            Number(service.maxQuantity).toLocaleString("id-ID");
+    }
+
+
+    if (targetInput) {
+        targetInput.value = "";
+    }
+
+
+    if (targetHint) {
+
+        targetHint.textContent =
+            service.platform
+                ? "Masukkan link target " +
+                  service.platform +
+                  " yang ingin diproses."
+                : "Masukkan link target yang ingin diproses.";
+
+    }
+
+
+    if (features) {
+
+        const items = [];
+
+        if (service.refill) {
+            items.push("Refill tersedia");
+        }
+
+        if (service.cancel) {
+            items.push("Cancel tersedia");
+        }
+
+        features.innerHTML =
+            items.length
+                ? items.map(
+                    item =>
+                        `<span class="smm-service-badge">${item}</span>`
+                  ).join("")
+                : "";
+
+    }
+
+
+    updateSmmTotal();
+
+    if (quantityInput) {
+
+        quantityInput.oninput =
+            updateSmmTotal;
+
+        quantityInput.onchange =
+            updateSmmTotal;
+
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+function prepareSmmOrder() {
+
+    if (!currentSmmService) {
+        return;
+    }
+
+    const target =
+        document
+            .getElementById("smmTarget")
+            ?.value
+            .trim();
+
+    const quantity =
+        Number(
+            document
+                .getElementById("smmQuantity")
+                ?.value
+        );
+
+    const min =
+        Number(
+            currentSmmService.minQuantity
+        ) || 1;
+
+    const max =
+        Number(
+            currentSmmService.maxQuantity
+        ) || 1;
+
+    if (!target) {
+
+        alert(
+            "Masukkan link atau target terlebih dahulu."
+        );
+
+        return;
+
+    }
+
+    if (!quantity || quantity < min || quantity > max) {
+
+        alert(
+            "Jumlah harus antara " +
+            min.toLocaleString("id-ID") +
+            " dan " +
+            max.toLocaleString("id-ID") +
+            "."
+        );
+
+        return;
+
+    }
+
+    updateSmmTotal();
+
+    console.log(
+        "[SMM] Data order siap:",
+        {
+            serviceId: currentSmmService.id,
+            service: currentSmmService.name,
+            target,
+            quantity
+        }
+    );
+
+    alert(
+        "Data SMM sudah valid. Checkout SMM akan kita sambungkan pada tahap berikutnya."
+    );
+
+}
+
+
 function openService(serviceId) {
 
     const service = services[serviceId];
@@ -1345,6 +1925,15 @@ function openService(serviceId) {
     currentProduct = null;
     currentTarget = "";
     currentOperator = "";
+
+    const smmFlowWrapper =
+        document.getElementById("smmFlowWrapper");
+
+    if (smmFlowWrapper) {
+        smmFlowWrapper.classList.add("page-hidden");
+    }
+
+    currentSmmService = null;
 
     /*
      * Reset state digital setiap kali layanan dibuka.

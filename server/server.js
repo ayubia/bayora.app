@@ -11121,7 +11121,18 @@ app.post("/api/digiflazz/sync-price-list", async (req, res) => {
 
         console.log(
             "[DIGIFLAZZ PRICE LIST RESPONSE]",
-            JSON.stringify(response.data, null, 2)
+            JSON.stringify({
+                success: response.data?.success ?? null,
+                product_count: Array.isArray(response.data?.data)
+                    ? response.data.data.length
+                    : 0,
+                rc: Array.isArray(response.data?.data)
+                    ? null
+                    : response.data?.data?.rc || null,
+                message: Array.isArray(response.data?.data)
+                    ? null
+                    : response.data?.data?.message || null
+            })
         );
 
         /*

@@ -847,6 +847,88 @@ db.exec(`
         ON user_sessions(user_id);
 `);
 
+/* ==========================================================
+   SMM DATABASE MIGRATION
+
+   Membuat tabel SMM otomatis saat BAYORA startup.
+   Tidak menghapus atau mengubah data PPOB yang sudah ada.
+========================================================== */
+
+db.exec(
+    [
+        'CREATE TABLE IF NOT EXISTS smm_providers (',
+        '    id INTEGER PRIMARY KEY AUTOINCREMENT,',
+        '    name TEXT NOT NULL,',
+        '    api_url TEXT,',
+        '    api_key TEXT,',
+        '    active INTEGER NOT NULL DEFAULT 1,',
+        '    created_at TEXT NOT NULL',
+        ');',
+
+        'CREATE TABLE IF NOT EXISTS smm_services (',
+        '    id INTEGER PRIMARY KEY AUTOINCREMENT,',
+        '    provider_id INTEGER,',
+        '    provider_service_id TEXT,',
+        '    platform TEXT NOT NULL,',
+        '    category TEXT NOT NULL,',
+        '    name TEXT NOT NULL,',
+        '    description TEXT,',
+        '    price INTEGER NOT NULL DEFAULT 0,',
+        '    min_quantity INTEGER NOT NULL DEFAULT 1,',
+        '    max_quantity INTEGER NOT NULL DEFAULT 1000,',
+        '    refill INTEGER NOT NULL DEFAULT 0,',
+        '    cancel INTEGER NOT NULL DEFAULT 0,',
+        '    active INTEGER NOT NULL DEFAULT 1,',
+        '    created_at TEXT NOT NULL,',
+        '    updated_at TEXT NOT NULL,',
+        '    FOREIGN KEY (provider_id)',
+        '        REFERENCES smm_providers(id)',
+        '        ON DELETE SET NULL',
+        ');',
+
+        'CREATE TABLE IF NOT EXISTS smm_orders (',
+        '    id INTEGER PRIMARY KEY AUTOINCREMENT,',
+        '    order_id TEXT NOT NULL UNIQUE,',
+        '    user_id INTEGER,',
+        '    service_id INTEGER NOT NULL,',
+        '    target TEXT NOT NULL,',
+        '    quantity INTEGER NOT NULL,',
+        '    price INTEGER NOT NULL DEFAULT 0,',
+        '    provider_order_id TEXT,',
+        '    status TEXT NOT NULL DEFAULT "PENDING",',
+        '    start_count INTEGER,',
+        '    remains INTEGER,',
+        '    created_at TEXT NOT NULL,',
+        '    updated_at TEXT NOT NULL,',
+        '    FOREIGN KEY (user_id)',
+        '        REFERENCES users(id)',
+        '        ON DELETE SET NULL,',
+        '    FOREIGN KEY (service_id)',
+        '        REFERENCES smm_services(id)',
+        ');',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_services_platform',
+        '    ON smm_services(platform);',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_services_category',
+        '    ON smm_services(category);',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_services_active',
+        '    ON smm_services(active);',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_orders_user',
+        '    ON smm_orders(user_id);',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_orders_service',
+        '    ON smm_orders(service_id);',
+
+        'CREATE INDEX IF NOT EXISTS idx_smm_orders_status',
+        '    ON smm_orders(status);'
+    ].join('\n')
+);
+
+console.log('[DB MIGRATION] Tabel SMM berhasil dibuat/diverifikasi.');
+
 function hashPassword(password) {
     const salt = crypto.randomBytes(16).toString("hex");
 
@@ -6772,6 +6854,648 @@ app.get("/api/catalog", (req, res) => {
     }
 
 });
+
+
+/* ==========================================================
+   SMM PANEL API — SERVICES
+   Read-only.
+   Belum terhubung ke provider.
+========================================================== */
+
+app.get("/api/smm/services", (req, res) => {
+
+    try {
+
+        const platform =
+            String(req.query.platform || "").trim().toLowerCase();
+
+        const category =
+            String(req.query.category || "").trim().toLowerCase();
+
+        let sql = `
+            SELECT
+                id,
+                provider_id AS providerId,
+                provider_service_id AS providerServiceId,
+                platform,
+                category,
+                name,
+                description,
+                price,
+                min_quantity AS minQuantity,
+                max_quantity AS maxQuantity,
+                refill,
+                cancel,
+                active,
+                created_at AS createdAt,
+                updated_at AS updatedAt
+            FROM smm_services
+            WHERE active = 1
+        `;
+
+        const params = [];
+
+        if (platform) {
+            sql += " AND LOWER(platform) = ?";
+            params.push(platform);
+        }
+
+        if (category) {
+            sql += " AND LOWER(category) = ?";
+            params.push(category);
+        }
+
+        sql += " ORDER BY platform ASC, category ASC, name ASC";
+
+        const services =
+            db.prepare(sql).all(...params);
+
+        return res.json({
+            success: true,
+            count: services.length,
+            services
+        });
+
+    } catch (error) {
+
+        console.error("[SMM SERVICES]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengambil layanan SMM."
+        });
+
+    }
+
+});
+
+
+app.get("/api/smm/services/:id", (req, res) => {
+
+    try {
+
+        const id =
+            Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0) {
+
+            return res.status(400).json({
+                success: false,
+                error: "ID layanan SMM tidak valid."
+            });
+
+        }
+
+        const service =
+            db.prepare(`
+                SELECT
+                    id,
+                    provider_id AS providerId,
+                    provider_service_id AS providerServiceId,
+                    platform,
+                    category,
+                    name,
+                    description,
+                    price,
+                    min_quantity AS minQuantity,
+                    max_quantity AS maxQuantity,
+                    refill,
+                    cancel,
+                    active,
+                    created_at AS createdAt,
+                    updated_at AS updatedAt
+                FROM smm_services
+                WHERE id = ?
+                  AND active = 1
+                LIMIT 1
+            `).get(id);
+
+        if (!service) {
+
+            return res.status(404).json({
+                success: false,
+                error: "Layanan SMM tidak ditemukan."
+            });
+
+        }
+
+        return res.json({
+            success: true,
+            service
+        });
+
+    } catch (error) {
+
+        console.error("[SMM SERVICE]", error);
+
+        return res.status(500).json({
+            success: false,
+            error: "Gagal mengambil layanan SMM."
+        });
+
+    }
+
+});
+
+
+/* ==========================================================
+   SMM ADMIN API — SERVICES
+   Owner + Admin.
+   Provider belum diperlukan.
+========================================================== */
+
+app.get(
+    "/api/admin/smm/services",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const services = db.prepare(`
+                SELECT
+                    id,
+                    provider_id AS providerId,
+                    provider_service_id AS providerServiceId,
+                    platform,
+                    category,
+                    name,
+                    description,
+                    price,
+                    min_quantity AS minQuantity,
+                    max_quantity AS maxQuantity,
+                    refill,
+                    cancel,
+                    active,
+                    created_at AS createdAt,
+                    updated_at AS updatedAt
+                FROM smm_services
+                ORDER BY
+                    platform ASC,
+                    category ASC,
+                    name ASC
+            `).all();
+
+            return res.json({
+                success: true,
+                count: services.length,
+                services
+            });
+
+        } catch (error) {
+
+            console.error("[ADMIN SMM SERVICES]", error);
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal mengambil layanan SMM."
+            });
+
+        }
+
+    }
+);
+
+
+app.post(
+    "/api/admin/smm/services",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const {
+                providerId,
+                providerServiceId,
+                platform,
+                category,
+                name,
+                description,
+                price,
+                minQuantity,
+                maxQuantity,
+                refill,
+                cancel,
+                active
+            } = req.body;
+
+            const normalizedPlatform =
+                String(platform || "").trim().toLowerCase();
+
+            const normalizedCategory =
+                String(category || "").trim();
+
+            const normalizedName =
+                String(name || "").trim();
+
+            if (
+                !normalizedPlatform ||
+                !normalizedCategory ||
+                !normalizedName
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Platform, kategori, dan nama layanan wajib diisi."
+                });
+
+            }
+
+            const numericPrice = Number(price);
+            const numericMin = Number(minQuantity);
+            const numericMax = Number(maxQuantity);
+
+            if (
+                !Number.isFinite(numericPrice) ||
+                numericPrice < 0
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Harga layanan tidak valid."
+                });
+
+            }
+
+            if (
+                !Number.isInteger(numericMin) ||
+                numericMin < 1
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Minimal quantity tidak valid."
+                });
+
+            }
+
+            if (
+                !Number.isInteger(numericMax) ||
+                numericMax < numericMin
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Maksimal quantity tidak valid."
+                });
+
+            }
+
+            const now = catalogNow();
+
+            const result = db.prepare(`
+                INSERT INTO smm_services (
+                    provider_id,
+                    provider_service_id,
+                    platform,
+                    category,
+                    name,
+                    description,
+                    price,
+                    min_quantity,
+                    max_quantity,
+                    refill,
+                    cancel,
+                    active,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                providerId || null,
+                providerServiceId
+                    ? String(providerServiceId).trim()
+                    : null,
+                normalizedPlatform,
+                normalizedCategory,
+                normalizedName,
+                String(description || "").trim(),
+                numericPrice,
+                numericMin,
+                numericMax,
+                refill ? 1 : 0,
+                cancel ? 1 : 0,
+                active === false ? 0 : 1,
+                now,
+                now
+            );
+
+            const service = db.prepare(`
+                SELECT
+                    id,
+                    provider_id AS providerId,
+                    provider_service_id AS providerServiceId,
+                    platform,
+                    category,
+                    name,
+                    description,
+                    price,
+                    min_quantity AS minQuantity,
+                    max_quantity AS maxQuantity,
+                    refill,
+                    cancel,
+                    active,
+                    created_at AS createdAt,
+                    updated_at AS updatedAt
+                FROM smm_services
+                WHERE id = ?
+            `).get(result.lastInsertRowid);
+
+            return res.status(201).json({
+                success: true,
+                service
+            });
+
+        } catch (error) {
+
+            console.error("[ADMIN SMM CREATE]", error);
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal menambahkan layanan SMM."
+            });
+
+        }
+
+    }
+);
+
+
+app.put(
+    "/api/admin/smm/services/:id",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const id =
+                Number(req.params.id);
+
+            if (!Number.isInteger(id) || id <= 0) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "ID layanan SMM tidak valid."
+                });
+
+            }
+
+            const existing = db.prepare(`
+                SELECT *
+                FROM smm_services
+                WHERE id = ?
+            `).get(id);
+
+            if (!existing) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Layanan SMM tidak ditemukan."
+                });
+
+            }
+
+            const {
+                providerId,
+                providerServiceId,
+                platform,
+                category,
+                name,
+                description,
+                price,
+                minQuantity,
+                maxQuantity,
+                refill,
+                cancel,
+                active
+            } = req.body;
+
+            const nextPlatform =
+                platform === undefined
+                    ? existing.platform
+                    : String(platform).trim().toLowerCase();
+
+            const nextCategory =
+                category === undefined
+                    ? existing.category
+                    : String(category).trim();
+
+            const nextName =
+                name === undefined
+                    ? existing.name
+                    : String(name).trim();
+
+            const nextPrice =
+                price === undefined
+                    ? existing.price
+                    : Number(price);
+
+            const nextMin =
+                minQuantity === undefined
+                    ? existing.min_quantity
+                    : Number(minQuantity);
+
+            const nextMax =
+                maxQuantity === undefined
+                    ? existing.max_quantity
+                    : Number(maxQuantity);
+
+            if (!nextPlatform || !nextCategory || !nextName) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Platform, kategori, dan nama layanan wajib diisi."
+                });
+
+            }
+
+            if (
+                !Number.isFinite(nextPrice) ||
+                nextPrice < 0
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Harga layanan tidak valid."
+                });
+
+            }
+
+            if (
+                !Number.isInteger(nextMin) ||
+                nextMin < 1 ||
+                !Number.isInteger(nextMax) ||
+                nextMax < nextMin
+            ) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Rentang quantity tidak valid."
+                });
+
+            }
+
+            db.prepare(`
+                UPDATE smm_services
+                SET
+                    provider_id = ?,
+                    provider_service_id = ?,
+                    platform = ?,
+                    category = ?,
+                    name = ?,
+                    description = ?,
+                    price = ?,
+                    min_quantity = ?,
+                    max_quantity = ?,
+                    refill = ?,
+                    cancel = ?,
+                    active = ?,
+                    updated_at = ?
+                WHERE id = ?
+            `).run(
+                providerId === undefined
+                    ? existing.provider_id
+                    : providerId || null,
+                providerServiceId === undefined
+                    ? existing.provider_service_id
+                    : providerServiceId
+                        ? String(providerServiceId).trim()
+                        : null,
+                nextPlatform,
+                nextCategory,
+                nextName,
+                description === undefined
+                    ? existing.description
+                    : String(description).trim(),
+                nextPrice,
+                nextMin,
+                nextMax,
+                refill === undefined
+                    ? existing.refill
+                    : refill ? 1 : 0,
+                cancel === undefined
+                    ? existing.cancel
+                    : cancel ? 1 : 0,
+                active === undefined
+                    ? existing.active
+                    : active ? 1 : 0,
+                catalogNow(),
+                id
+            );
+
+            const service = db.prepare(`
+                SELECT
+                    id,
+                    provider_id AS providerId,
+                    provider_service_id AS providerServiceId,
+                    platform,
+                    category,
+                    name,
+                    description,
+                    price,
+                    min_quantity AS minQuantity,
+                    max_quantity AS maxQuantity,
+                    refill,
+                    cancel,
+                    active,
+                    created_at AS createdAt,
+                    updated_at AS updatedAt
+                FROM smm_services
+                WHERE id = ?
+            `).get(id);
+
+            return res.json({
+                success: true,
+                service
+            });
+
+        } catch (error) {
+
+            console.error("[ADMIN SMM UPDATE]", error);
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal memperbarui layanan SMM."
+            });
+
+        }
+
+    }
+);
+
+
+app.delete(
+    "/api/admin/smm/services/:id",
+    requireCatalogManager,
+    (req, res) => {
+
+        try {
+
+            const id =
+                Number(req.params.id);
+
+            if (!Number.isInteger(id) || id <= 0) {
+
+                return res.status(400).json({
+                    success: false,
+                    error: "ID layanan SMM tidak valid."
+                });
+
+            }
+
+            const existing = db.prepare(`
+                SELECT id
+                FROM smm_services
+                WHERE id = ?
+            `).get(id);
+
+            if (!existing) {
+
+                return res.status(404).json({
+                    success: false,
+                    error: "Layanan SMM tidak ditemukan."
+                });
+
+            }
+
+            const orderCount = db.prepare(`
+                SELECT COUNT(*) AS count
+                FROM smm_orders
+                WHERE service_id = ?
+            `).get(id);
+
+            if (Number(orderCount.count) > 0) {
+
+                return res.status(409).json({
+                    success: false,
+                    error:
+                        "Layanan sudah memiliki order dan tidak dapat dihapus. Nonaktifkan layanan saja."
+                });
+
+            }
+
+            db.prepare(`
+                DELETE FROM smm_services
+                WHERE id = ?
+            `).run(id);
+
+            return res.json({
+                success: true,
+                message: "Layanan SMM berhasil dihapus."
+            });
+
+        } catch (error) {
+
+            console.error("[ADMIN SMM DELETE]", error);
+
+            return res.status(500).json({
+                success: false,
+                error: "Gagal menghapus layanan SMM."
+            });
+
+        }
+
+    }
+);
 
 
 /* =========================

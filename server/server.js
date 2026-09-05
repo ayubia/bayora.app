@@ -3009,6 +3009,20 @@ app.post(
             const session =
                 response.data || {};
 
+            console.log(
+                "[XENDIT CHANNEL CHECK]",
+                {
+                    paymentSessionId:
+                        transaction.paymentSessionId,
+                    status:
+                        session.status || null,
+                    allowedPaymentChannels:
+                        session.allowed_payment_channels || null,
+                    paymentRequestId:
+                        session.payment_request_id || null
+                }
+            );
+
             const sessionStatus =
                 String(
                     session.status || ""
@@ -5337,6 +5351,22 @@ app.post("/api/payments/xendit", async (req, res) => {
                     "Content-Type": "application/json"
                 }
             }
+        );
+
+        console.log(
+            "[XENDIT SESSION RESPONSE CHECK]",
+            JSON.stringify({
+                paymentSessionId:
+                    response.data?.payment_session_id || null,
+                paymentUrl:
+                    response.data?.payment_link_url || null,
+                status:
+                    response.data?.status || null,
+                allowedPaymentChannels:
+                    response.data?.allowed_payment_channels || null,
+                paymentRequestId:
+                    response.data?.payment_request_id || null
+            }, null, 2)
         );
 
         db.prepare(`

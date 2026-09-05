@@ -927,6 +927,39 @@ db.exec(
     ].join('\n')
 );
 
+/* ==========================================================
+   SMM ICON MIGRATION
+   Menambahkan kolom icon tanpa mengganggu data SMM lama.
+========================================================== */
+
+try {
+    const smmColumns = db
+        .prepare("PRAGMA table_info(smm_services)")
+        .all();
+
+    const hasSmmIconColumn =
+        smmColumns.some(column => column.name === "icon");
+
+    if (!hasSmmIconColumn) {
+        db.exec(
+            "ALTER TABLE smm_services ADD COLUMN icon TEXT"
+        );
+
+        console.log(
+            "[DB MIGRATION] Kolom icon SMM berhasil ditambahkan."
+        );
+    } else {
+        console.log(
+            "[DB MIGRATION] Kolom icon SMM sudah tersedia."
+        );
+    }
+} catch (error) {
+    console.error(
+        "[DB MIGRATION] Gagal menambahkan kolom icon SMM:",
+        error
+    );
+}
+
 console.log('[DB MIGRATION] Tabel SMM berhasil dibuat/diverifikasi.');
 
 function hashPassword(password) {
@@ -7573,6 +7606,7 @@ app.get("/api/smm/services", (req, res) => {
                 category,
                 name,
                 description,
+                icon,
                 price,
                 min_quantity AS minQuantity,
                 max_quantity AS maxQuantity,
@@ -7648,6 +7682,7 @@ app.get("/api/smm/services/:id", (req, res) => {
                     category,
                     name,
                     description,
+                    icon,
                     price,
                     min_quantity AS minQuantity,
                     max_quantity AS maxQuantity,
@@ -7712,6 +7747,7 @@ app.get(
                     category,
                     name,
                     description,
+                    icon,
                     price,
                     min_quantity AS minQuantity,
                     max_quantity AS maxQuantity,
@@ -7762,6 +7798,7 @@ app.post(
                 category,
                 name,
                 description,
+                icon,
                 price,
                 minQuantity,
                 maxQuantity,
@@ -7842,6 +7879,7 @@ app.post(
                     category,
                     name,
                     description,
+                    icon,
                     price,
                     min_quantity,
                     max_quantity,
@@ -7851,7 +7889,7 @@ app.post(
                     created_at,
                     updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
                 providerId || null,
                 providerServiceId
@@ -7861,6 +7899,7 @@ app.post(
                 normalizedCategory,
                 normalizedName,
                 String(description || "").trim(),
+                icon ? String(icon).trim() : null,
                 numericPrice,
                 numericMin,
                 numericMax,
@@ -7880,6 +7919,7 @@ app.post(
                     category,
                     name,
                     description,
+                    icon,
                     price,
                     min_quantity AS minQuantity,
                     max_quantity AS maxQuantity,
@@ -7953,6 +7993,7 @@ app.put(
                 category,
                 name,
                 description,
+                icon,
                 price,
                 minQuantity,
                 maxQuantity,
@@ -8035,6 +8076,7 @@ app.put(
                     category = ?,
                     name = ?,
                     description = ?,
+                    icon = ?,
                     price = ?,
                     min_quantity = ?,
                     max_quantity = ?,
@@ -8058,6 +8100,9 @@ app.put(
                 description === undefined
                     ? existing.description
                     : String(description).trim(),
+                icon === undefined
+                    ? existing.icon
+                    : (icon ? String(icon).trim() : null),
                 nextPrice,
                 nextMin,
                 nextMax,
@@ -8083,6 +8128,7 @@ app.put(
                     category,
                     name,
                     description,
+                    icon,
                     price,
                     min_quantity AS minQuantity,
                     max_quantity AS maxQuantity,

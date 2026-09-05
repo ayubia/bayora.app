@@ -754,6 +754,9 @@ async function loadSmmServices() {
                     description:
                         service.description ||
                         "",
+                    icon:
+                        service.icon ||
+                        "",
                     price:
                         Number(service.price) || 0,
                     minQuantity:
@@ -810,6 +813,70 @@ loadSmmServices();
 
 
 let customerServiceCategory = "ppob";
+
+/* =========================================================
+   SMM CATALOG NAVIGATION
+   ========================================================= */
+
+let smmNavigation = {
+    platform: null,
+    category: null
+};
+
+
+function resetSmmNavigation() {
+
+    smmNavigation = {
+        platform: null,
+        category: null
+    };
+
+}
+
+
+function openSmmPlatform(platform) {
+
+    smmNavigation.platform =
+        String(platform || "")
+            .trim()
+            .toLowerCase();
+
+    smmNavigation.category = null;
+
+    renderCustomerServices();
+
+}
+
+
+function openSmmCategory(category) {
+
+    smmNavigation.category =
+        String(category || "")
+            .trim()
+            .toLowerCase();
+
+    renderCustomerServices();
+
+}
+
+
+function backSmmNavigation() {
+
+    if (smmNavigation.category) {
+
+        smmNavigation.category = null;
+
+    } else if (smmNavigation.platform) {
+
+        smmNavigation.platform = null;
+
+    }
+
+    renderCustomerServices();
+
+}
+
+
 
 
 function setCustomerServiceCategory(category) {
@@ -1151,44 +1218,359 @@ function getBayoraServiceIconHTML(id, service) {
 
         }
 
-        return list.map((service) => {
+
+        /*
+         * =====================================================
+         * HELPER
+         * =====================================================
+         */
+
+        function label(value) {
+
+            const text =
+                String(value || "")
+                    .trim()
+                    .replace(/[-_]+/g, " ");
+
+            if (!text) {
+                return "Lainnya";
+            }
+
+            return text
+                .split(/\s+/)
+                .map(word =>
+                    word.charAt(0).toUpperCase() +
+                    word.slice(1).toLowerCase()
+                )
+                .join(" ");
+
+        }
+
+
+        function platformIcon(value) {
+
+            const key =
+                String(value || "")
+                    .trim()
+                    .toLowerCase();
+
+            const icons = {
+                instagram: "📸",
+                tiktok: "🎵",
+                facebook: "📘",
+                youtube: "▶️",
+                telegram: "✈️",
+                twitter: "𝕏",
+                x: "𝕏",
+                threads: "🧵",
+                linkedin: "💼"
+            };
+
+            return icons[key] || "📱";
+
+        }
+
+
+        function smmCustomIcon(service, fallback) {
+
+            const icon =
+                String(service?.icon || "").trim();
+
+            if (
+                icon.startsWith("/assets/") ||
+                icon.startsWith("http://") ||
+                icon.startsWith("https://")
+            ) {
+
+                const safeIcon =
+                    icon.replace(/"/g, "&quot;");
+
+                return `
+                    <img
+                        src="${safeIcon}"
+                        alt=""
+                        style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                            display:block;
+                            border-radius:inherit;
+                        "
+                    >
+                `;
+
+            }
+
+            return icon || fallback;
+
+        }
+
+
+        function categoryIcon(value) {
+
+            const key =
+                String(value || "")
+                    .trim()
+                    .toLowerCase();
+
+            const icons = {
+                followers: "👥",
+                follower: "👥",
+                likes: "❤️",
+                like: "❤️",
+                views: "▶️",
+                view: "▶️",
+                comments: "💬",
+                comment: "💬",
+                subscribers: "🔔",
+                subscriber: "🔔",
+                members: "👥",
+                member: "👥",
+                shares: "🔄",
+                share: "🔄",
+                saves: "🔖",
+                save: "🔖",
+                reactions: "👍",
+                reaction: "👍"
+            };
+
+            return icons[key] || "✨";
+
+        }
+
+
+        /*
+         * =====================================================
+         * LEVEL 1
+         * PLATFORM
+         * =====================================================
+         */
+
+        if (!smmNavigation.platform) {
+
+            const platformMap = new Map();
+
+            list.forEach(service => {
+
+                const key =
+                    String(service.platform || "other")
+                        .trim()
+                        .toLowerCase();
+
+                if (!platformMap.has(key)) {
+                    platformMap.set(key, service);
+                }
+
+            });
+
+
+            return [...platformMap.entries()]
+                .map(([key, service]) => {
+
+                    const name =
+                        label(service.platform || key);
+
+
+                    return `
+                        <div
+                            class="service-card smm-service-card"
+                            onclick="openSmmPlatform('${key.replace(/'/g, "\\'")}')"
+                        >
+
+                            <div class="service-icon smm-service-icon">
+                                ${smmCustomIcon(service, platformIcon(key))}
+                            </div>
+
+                            <div>
+
+                                <div class="service-title">
+                                    ${name}
+                                </div>
+
+                                <div class="service-description">
+                                    Layanan ${name}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+        }
+
+
+        /*
+         * =====================================================
+         * LEVEL 2
+         * KATEGORI
+         * =====================================================
+         */
+
+        if (!smmNavigation.category) {
+
+            const platformServices =
+                list.filter(service =>
+                    String(service.platform || "")
+                        .trim()
+                        .toLowerCase() ===
+                    smmNavigation.platform
+                );
+
+
+            if (!platformServices.length) {
+
+                return `
+                    <div class="customer-service-empty">
+                        Belum ada layanan untuk platform ini.
+                    </div>
+                `;
+
+            }
+
+
+            const categoryMap = new Map();
+
+            platformServices.forEach(service => {
+
+                const key =
+                    String(service.category || "general")
+                        .trim()
+                        .toLowerCase();
+
+                if (!categoryMap.has(key)) {
+                    categoryMap.set(key, service);
+                }
+
+            });
+
+
+            return [...categoryMap.entries()]
+                .map(([key, service]) => {
+
+                    const count =
+                        platformServices.filter(item =>
+                            String(item.category || "general")
+                                .trim()
+                                .toLowerCase() === key
+                        ).length;
+
+
+                    return `
+                        <div
+                            class="service-card smm-service-card"
+                            onclick="openSmmCategory('${key.replace(/'/g, "\\'")}')"
+                        >
+
+                            <div class="service-icon smm-service-icon">
+                                ${smmCustomIcon(
+                                    platformServices.find(item =>
+                                        String(item.icon || "").trim()
+                                    ),
+                                    platformIcon(smmNavigation.platform)
+                                )}
+                            </div>
+
+                            <div>
+
+                                <div class="service-title">
+                                    ${label(service.category || key)}
+                                </div>
+
+                                <div class="service-description">
+                                    ${count} layanan tersedia
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+        }
+
+
+        /*
+         * =====================================================
+         * LEVEL 3
+         * LAYANAN
+         * =====================================================
+         */
+
+        const services =
+            list.filter(service => {
+
+                const servicePlatform =
+                    String(service.platform || "")
+                        .trim()
+                        .toLowerCase();
+
+                const serviceCategory =
+                    String(service.category || "general")
+                        .trim()
+                        .toLowerCase();
+
+                return (
+                    servicePlatform === smmNavigation.platform &&
+                    serviceCategory === smmNavigation.category
+                );
+
+            });
+
+
+        if (!services.length) {
+
+            return `
+                <div class="customer-service-empty">
+                    Belum ada layanan untuk kategori ini.
+                </div>
+            `;
+
+        }
+
+
+        return services.map(service => {
 
             const safeId =
                 String(service.id ?? "")
                     .replace(/\\/g, "\\\\")
                     .replace(/'/g, "\\'");
 
+
             const title =
                 service.name ||
                 service.title ||
                 "Layanan SMM";
 
-            const platform =
-                service.platform ||
-                "Sosial Media";
-
-            const category =
-                service.category ||
-                "";
 
             const price =
                 Number(service.price) || 0;
 
+
             const min =
                 Number(service.minQuantity) || 1;
+
 
             const max =
                 Number(service.maxQuantity) || 1;
 
+
             const badges = [];
+
 
             if (service.refill) {
                 badges.push("Refill");
             }
 
+
             if (service.cancel) {
                 badges.push("Cancel");
             }
+
 
             return `
                 <div
@@ -1197,16 +1579,22 @@ function getBayoraServiceIconHTML(id, service) {
                 >
 
                     <div class="service-icon smm-service-icon">
-                        📱
+                        ${smmCustomIcon(
+                            service,
+                            platformIcon(smmNavigation.platform)
+                        )}
                     </div>
 
                     <div>
+
                         <div class="service-title">
                             ${title}
                         </div>
 
                         <div class="service-description">
-                            ${platform}${category ? " • " + category : ""}
+                            ${label(service.platform)}
+                            •
+                            ${label(service.category)}
                         </div>
 
                         <div class="smm-service-price">
@@ -1644,6 +2032,59 @@ function openSmmService(serviceId) {
         formHeader.style.display = "none";
     }
 
+    /*
+     * Sembunyikan flow PPOB lama saat detail SMM dibuka.
+     * Elemen ini akan dikembalikan oleh openService()
+     * saat pengguna kembali membuka layanan PPOB.
+     */
+    const ppobTargetGroup =
+        document
+            .getElementById("targetNumber")
+            ?.closest(".input-group");
+
+    const ppobOperatorGroup =
+        document.getElementById("operatorGroup");
+
+    const ppobProductGrid =
+        document.getElementById("productGrid");
+
+    const ppobProductGroup =
+        ppobProductGrid
+            ?.closest(".input-group");
+
+    const ppobPrice =
+        document.getElementById("price");
+
+    const ppobPriceSummary =
+        ppobPrice?.closest(".summary");
+
+    const ppobSubmitButton =
+        document
+            .getElementById("transactionForm")
+            ?.querySelector(
+                'button[type="submit"]'
+            );
+
+    if (ppobTargetGroup) {
+        ppobTargetGroup.style.display = "none";
+    }
+
+    if (ppobOperatorGroup) {
+        ppobOperatorGroup.style.display = "none";
+    }
+
+    if (ppobProductGroup) {
+        ppobProductGroup.style.display = "none";
+    }
+
+    if (ppobPriceSummary) {
+        ppobPriceSummary.style.display = "none";
+    }
+
+    if (ppobSubmitButton) {
+        ppobSubmitButton.style.display = "none";
+    }
+
     if (wrapper) {
         wrapper.classList.remove("page-hidden");
     }
@@ -1706,7 +2147,39 @@ function openSmmService(serviceId) {
 
 
     if (icon) {
-        icon.textContent = "📱";
+
+        const smmIcon =
+            String(service.icon || "").trim();
+
+        if (
+            smmIcon.startsWith("/") ||
+            smmIcon.startsWith("http://") ||
+            smmIcon.startsWith("https://")
+        ) {
+
+            icon.innerHTML = `
+                <img
+                    src="${smmIcon.replace(/"/g, "&quot;")}"
+                    alt=""
+                    aria-hidden="true"
+                    draggable="false"
+                    style="
+                        width:56px;
+                        height:56px;
+                        object-fit:contain;
+                        display:block;
+                        margin:auto;
+                    "
+                >
+            `;
+
+        } else {
+
+            icon.textContent =
+                smmIcon || "📱";
+
+        }
+
     }
 
     if (title) {
@@ -1827,7 +2300,7 @@ function openSmmService(serviceId) {
 }
 
 
-function prepareSmmOrder() {
+async function prepareSmmOrder() {
 
     if (!currentSmmService) {
         return;
@@ -1880,24 +2353,179 @@ function prepareSmmOrder() {
 
     }
 
-    updateSmmTotal();
+    const button =
+        document
+            .getElementById("smmPaymentButton");
 
-    console.log(
-        "[SMM] Data order siap:",
-        {
-            serviceId: currentSmmService.id,
-            service: currentSmmService.name,
-            target,
-            quantity
+    const originalButtonText =
+        button
+            ? button.textContent
+            : "";
+
+    try {
+
+        if (button) {
+            button.disabled = true;
+            button.textContent =
+                "Mempersiapkan pembayaran...";
         }
-    );
 
-    alert(
-        "Data SMM sudah valid. Checkout SMM akan kita sambungkan pada tahap berikutnya."
-    );
+        /*
+         * =====================================================
+         * STEP 1
+         * Buat order SMM lokal.
+         *
+         * Harga TIDAK dikirim dari frontend.
+         * Server menghitung harga berdasarkan database.
+         * =====================================================
+         */
+
+        const orderResponse =
+            await fetch(
+                "/api/smm/transactions",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        serviceId:
+                            currentSmmService.id,
+
+                        target,
+
+                        quantity
+                    })
+                }
+            );
+
+        const orderData =
+            await orderResponse.json();
+
+        if (
+            !orderResponse.ok ||
+            !orderData.success ||
+            !orderData.order?.orderId
+        ) {
+
+            throw new Error(
+                orderData.error ||
+                "Gagal membuat order SMM."
+            );
+
+        }
+
+        const order =
+            orderData.order;
+
+        console.log(
+            "[SMM] Order berhasil dibuat:",
+            order
+        );
+
+
+        /*
+         * =====================================================
+         * STEP 2
+         * Buat Xendit Payment Session.
+         * =====================================================
+         */
+
+        if (button) {
+            button.textContent =
+                "Membuka pembayaran...";
+        }
+
+        const xenditResponse =
+            await fetch(
+                "/api/payments/xendit-smm",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        orderId:
+                            order.orderId,
+
+                        customerEmail:
+                            "customer@example.com",
+
+                        customerName:
+                            "Pelanggan BAYORA"
+                    })
+                }
+            );
+
+        const xenditData =
+            await xenditResponse.json();
+
+        if (
+            !xenditResponse.ok ||
+            !xenditData.success ||
+            !xenditData.paymentUrl
+        ) {
+
+            throw new Error(
+                xenditData.error ||
+                "Gagal membuat pembayaran Xendit."
+            );
+
+        }
+
+        console.log(
+            "[SMM] Xendit payment siap:",
+            {
+                orderId:
+                    xenditData.orderId,
+
+                paymentSessionId:
+                    xenditData.paymentSessionId,
+
+                paymentRequestId:
+                    xenditData.paymentRequestId
+            }
+        );
+
+
+        /*
+         * =====================================================
+         * STEP 3
+         * Redirect ke halaman pembayaran Xendit.
+         * =====================================================
+         */
+
+        window.location.href =
+            xenditData.paymentUrl;
+
+    } catch (error) {
+
+        console.error(
+            "[SMM PAYMENT ERROR]",
+            error
+        );
+
+        alert(
+            error?.message ||
+            "Gagal mempersiapkan pembayaran SMM."
+        );
+
+        if (button) {
+            button.disabled = false;
+            button.textContent =
+                originalButtonText ||
+                "Lakukan Pembayaran";
+        }
+
+    }
 
 }
-
 
 function openService(serviceId) {
 

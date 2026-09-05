@@ -3774,6 +3774,51 @@ body.bayora-view-admins > main > .stats {
                 </div>
 
 
+                <div class="smm-form-group smm-form-full">
+                    <label>
+                        Icon Layanan
+                    </label>
+
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div
+                            id="smmIconPreview"
+                            style="
+                                width:64px;
+                                height:64px;
+                                border-radius:16px;
+                                border:1px solid #e5e7eb;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                overflow:hidden;
+                                background:#f8fafc;
+                                font-size:28px;
+                            "
+                        >
+                            📦
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <input
+                                type="hidden"
+                                id="smmIcon"
+                                value=""
+                            >
+
+                            <input
+                                type="file"
+                                id="smmIconFile"
+                                accept="image/png,image/jpeg,image/webp"
+                            >
+
+                            <small style="color:#64748b;">
+                                PNG, JPG, atau WEBP · maksimal 5 MB
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="smm-form-group">
                     <label for="smmPrice">
                         Harga
@@ -4556,6 +4601,137 @@ body.bayora-view-admins > main > .stats {
     }
 
 
+    function updateSmmIconPreview(icon) {
+
+        const preview = $("smmIconPreview");
+
+        if (!preview) return;
+
+        const value = String(icon || "").trim();
+
+        if (
+            value.startsWith("/assets/") ||
+            value.startsWith("http://") ||
+            value.startsWith("https://")
+        ) {
+
+            preview.innerHTML = `
+                <img
+                    src="${value}"
+                    alt="Icon"
+                    style="
+                        width:100%;
+                        height:100%;
+                        object-fit:cover;
+                        display:block;
+                    "
+                >
+            `;
+
+        } else {
+
+            preview.textContent = value || "📦";
+
+        }
+
+    }
+
+
+    function bindSmmIconUpload() {
+
+        const input = $("smmIconFile");
+
+        if (!input || input.dataset.bound === "1") return;
+
+        input.dataset.bound = "1";
+
+        input.addEventListener("change", async () => {
+
+            const file = input.files && input.files[0];
+
+            if (!file) return;
+
+            const maxSize = 5 * 1024 * 1024;
+
+            if (file.size > maxSize) {
+
+                alert("Ukuran icon maksimal 5 MB.");
+
+                input.value = "";
+
+                return;
+
+            }
+
+            const allowedTypes = [
+                "image/png",
+                "image/jpeg",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+
+                alert("Icon harus berupa PNG, JPG, atau WEBP.");
+
+                input.value = "";
+
+                return;
+
+            }
+
+            const formData = new FormData();
+
+            formData.append("file", file);
+
+            try {
+
+                input.disabled = true;
+
+                const response = await fetch(
+                    "/api/services/upload-icon",
+                    {
+                        method: "POST",
+                        body: formData,
+                        credentials: "include"
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success || !data.path) {
+
+                    throw new Error(
+                        data.error || "Gagal mengupload icon."
+                    );
+
+                }
+
+                $("smmIcon").value = data.path;
+
+                updateSmmIconPreview(data.path);
+
+            } catch (error) {
+
+                console.error("[SMM ICON UPLOAD]", error);
+
+                alert(
+                    error.message ||
+                    "Gagal mengupload icon."
+                );
+
+                input.value = "";
+
+            } finally {
+
+                input.disabled = false;
+
+            }
+
+        });
+
+    }
+
+
     function resetSmmForm() {
 
         smmEditingId = null;
@@ -4579,6 +4755,16 @@ body.bayora-view-admins > main > .stats {
         if ($("smmDescription")) {
             $("smmDescription").value = "";
         }
+
+        if ($("smmIcon")) {
+            $("smmIcon").value = "";
+        }
+
+        if ($("smmIconFile")) {
+            $("smmIconFile").value = "";
+        }
+
+        updateSmmIconPreview("📦");
 
         if ($("smmPrice")) {
             $("smmPrice").value = "";
@@ -4682,6 +4868,13 @@ body.bayora-view-admins > main > .stats {
         $("smmDescription").value =
             service.description || "";
 
+        $("smmIcon").value =
+            service.icon || "";
+
+        updateSmmIconPreview(
+            service.icon || "📦"
+        );
+
         $("smmPrice").value =
             service.price ?? "";
 
@@ -4751,6 +4944,9 @@ body.bayora-view-admins > main > .stats {
 
             description:
                 $("smmDescription").value.trim(),
+
+            icon:
+                $("smmIcon").value.trim(),
 
             price:
                 Number($("smmPrice").value),
@@ -5525,6 +5721,8 @@ body.bayora-view-admins > main > .stats {
 
 
         setupSmmSosmedlyProvider();
+
+        bindSmmIconUpload();
 
 
         const addButton =

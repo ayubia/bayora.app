@@ -1209,32 +1209,19 @@ function getBayoraServiceIconHTML(id, service) {
     function renderSmmCards(list) {
 
         if (!Array.isArray(list) || !list.length) {
-
             return `
                 <div class="customer-service-empty">
                     Belum ada layanan SMM tersedia.
                 </div>
             `;
-
         }
 
-
-        /*
-         * =====================================================
-         * HELPER
-         * =====================================================
-         */
-
         function label(value) {
+            const text = String(value || "")
+                .trim()
+                .replace(/[-_]+/g, " ");
 
-            const text =
-                String(value || "")
-                    .trim()
-                    .replace(/[-_]+/g, " ");
-
-            if (!text) {
-                return "Lainnya";
-            }
+            if (!text) return "Lainnya";
 
             return text
                 .split(/\s+/)
@@ -1243,16 +1230,12 @@ function getBayoraServiceIconHTML(id, service) {
                     word.slice(1).toLowerCase()
                 )
                 .join(" ");
-
         }
 
-
         function platformIcon(value) {
-
-            const key =
-                String(value || "")
-                    .trim()
-                    .toLowerCase();
+            const key = String(value || "")
+                .trim()
+                .toLowerCase();
 
             const icons = {
                 instagram: "📸",
@@ -1263,27 +1246,64 @@ function getBayoraServiceIconHTML(id, service) {
                 twitter: "𝕏",
                 x: "𝕏",
                 threads: "🧵",
-                linkedin: "💼"
+                linkedin: "💼",
+                spotify: "🎧"
             };
 
             return icons[key] || "📱";
-
         }
 
+        function categoryIcon(value) {
+            const key = String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/[-_]+/g, " ");
+
+            const icons = {
+                followers: "👥",
+                follower: "👥",
+                likes: "❤️",
+                like: "❤️",
+                views: "▶️",
+                view: "▶️",
+                comments: "💬",
+                comment: "💬",
+                "custom comments": "✏️",
+                subscribers: "🔔",
+                subscriber: "🔔",
+                members: "👥",
+                member: "👥",
+                shares: "🔄",
+                share: "🔄",
+                saves: "🔖",
+                save: "🔖",
+                reactions: "👍",
+                reaction: "👍",
+                "reels views": "🎬",
+                reels_views: "🎬",
+                "story views": "👁️",
+                story_views: "👁️",
+                plays: "▶️",
+                "live views": "🔴",
+                live_views: "🔴",
+                "poll votes": "📊",
+                poll_votes: "📊",
+                "watch time": "⏱️",
+                watch_time: "⏱️"
+            };
+
+            return icons[key] || "✨";
+        }
 
         function smmCustomIcon(service, fallback) {
-
-            const icon =
-                String(service?.icon || "").trim();
+            const icon = String(service?.icon || "").trim();
 
             if (
                 icon.startsWith("/assets/") ||
                 icon.startsWith("http://") ||
                 icon.startsWith("https://")
             ) {
-
-                const safeIcon =
-                    icon.replace(/"/g, "&quot;");
+                const safeIcon = icon.replace(/"/g, "&quot;");
 
                 return `
                     <img
@@ -1298,51 +1318,20 @@ function getBayoraServiceIconHTML(id, service) {
                         "
                     >
                 `;
-
             }
 
             return icon || fallback;
-
         }
 
-
-        function categoryIcon(value) {
-
-            const key =
-                String(value || "")
-                    .trim()
-                    .toLowerCase();
-
-            const icons = {
-                followers: "👥",
-                follower: "👥",
-                likes: "❤️",
-                like: "❤️",
-                views: "▶️",
-                view: "▶️",
-                comments: "💬",
-                comment: "💬",
-                subscribers: "🔔",
-                subscriber: "🔔",
-                members: "👥",
-                member: "👥",
-                shares: "🔄",
-                share: "🔄",
-                saves: "🔖",
-                save: "🔖",
-                reactions: "👍",
-                reaction: "👍"
-            };
-
-            return icons[key] || "✨";
-
+        function safeAttr(value) {
+            return String(value ?? "")
+                .replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'");
         }
-
 
         /*
          * =====================================================
-         * LEVEL 1
-         * PLATFORM
+         * LEVEL 1 — PLATFORM
          * =====================================================
          */
 
@@ -1351,94 +1340,115 @@ function getBayoraServiceIconHTML(id, service) {
             const platformMap = new Map();
 
             list.forEach(service => {
-
-                const key =
-                    String(service.platform || "other")
-                        .trim()
-                        .toLowerCase();
+                const key = String(service.platform || "other")
+                    .trim()
+                    .toLowerCase();
 
                 if (!platformMap.has(key)) {
-                    platformMap.set(key, service);
+                    platformMap.set(key, {
+                        platform: service.platform || key,
+                        service
+                    });
                 }
-
             });
 
+            const platformOrder = [
+                "instagram",
+                "tiktok",
+                "facebook",
+                "youtube",
+                "telegram",
+                "x",
+                "twitter",
+                "threads",
+                "linkedin",
+                "spotify"
+            ];
 
-            return [...platformMap.entries()]
-                .map(([key, service]) => {
+            const entries = [...platformMap.entries()]
+                .sort((a, b) => {
+                    const ai = platformOrder.indexOf(a[0]);
+                    const bi = platformOrder.indexOf(b[0]);
 
-                    const name =
-                        label(service.platform || key);
+                    if (ai === -1 && bi === -1) {
+                        return a[0].localeCompare(b[0]);
+                    }
 
+                    if (ai === -1) return 1;
+                    if (bi === -1) return -1;
 
-                    return `
-                        <div
-                            class="service-card smm-service-card"
-                            onclick="openSmmPlatform('${key.replace(/'/g, "\\'")}')"
-                        >
+                    return ai - bi;
+                });
 
-                            <div class="service-icon smm-service-icon">
-                                ${smmCustomIcon(service, platformIcon(key))}
-                            </div>
+            return entries.map(([key, data]) => {
 
-                            <div>
+                const platformServices = list.filter(service =>
+                    String(service.platform || "")
+                        .trim()
+                        .toLowerCase() === key
+                );
 
-                                <div class="service-title">
-                                    ${name}
-                                </div>
+                const name = label(data.platform || key);
+                const count = platformServices.length;
 
-                                <div class="service-description">
-                                    Layanan ${name}
-                                </div>
+                return `
+                    <div
+                        class="service-card smm-service-card"
+                        onclick="openSmmPlatform('${safeAttr(key)}')"
+                    >
 
-                            </div>
-
+                        <div class="service-icon smm-service-icon">
+                            ${smmCustomIcon(
+                                data.service,
+                                platformIcon(key)
+                            )}
                         </div>
-                    `;
 
-                })
-                .join("");
+                        <div>
+                            <div class="service-title">
+                                ${name}
+                            </div>
 
+                            <div class="service-description">
+                                ${count} layanan tersedia
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
         }
-
 
         /*
          * =====================================================
-         * LEVEL 2
-         * KATEGORI
+         * LEVEL 2 — CATEGORY
          * =====================================================
          */
 
         if (!smmNavigation.category) {
 
-            const platformServices =
-                list.filter(service =>
-                    String(service.platform || "")
-                        .trim()
-                        .toLowerCase() ===
-                    smmNavigation.platform
-                );
-
+            const platformServices = list.filter(service =>
+                String(service.platform || "")
+                    .trim()
+                    .toLowerCase() === smmNavigation.platform
+            );
 
             if (!platformServices.length) {
-
                 return `
                     <div class="customer-service-empty">
                         Belum ada layanan untuk platform ini.
                     </div>
                 `;
-
             }
-
 
             const categoryMap = new Map();
 
             platformServices.forEach(service => {
 
-                const key =
-                    String(service.category || "general")
-                        .trim()
-                        .toLowerCase();
+                const key = String(service.category || "general")
+                    .trim()
+                    .toLowerCase();
 
                 if (!categoryMap.has(key)) {
                     categoryMap.set(key, service);
@@ -1446,131 +1456,124 @@ function getBayoraServiceIconHTML(id, service) {
 
             });
 
+            const categoryOrder = [
+                "followers",
+                "subscribers",
+                "members",
+                "likes",
+                "views",
+                "reels_views",
+                "story_views",
+                "comments",
+                "custom comments",
+                "shares",
+                "saves",
+                "reactions",
+                "plays",
+                "live_views",
+                "poll_votes",
+                "watch_time"
+            ];
 
-            return [...categoryMap.entries()]
-                .map(([key, service]) => {
+            const entries = [...categoryMap.entries()]
+                .sort((a, b) => {
+                    const ai = categoryOrder.indexOf(a[0]);
+                    const bi = categoryOrder.indexOf(b[0]);
 
-                    const count =
-                        platformServices.filter(item =>
-                            String(item.category || "general")
-                                .trim()
-                                .toLowerCase() === key
-                        ).length;
+                    if (ai === -1 && bi === -1) {
+                        return label(a[0]).localeCompare(label(b[0]));
+                    }
 
+                    if (ai === -1) return 1;
+                    if (bi === -1) return -1;
 
-                    return `
-                        <div
-                            class="service-card smm-service-card"
-                            onclick="openSmmCategory('${key.replace(/'/g, "\\'")}')"
-                        >
+                    return ai - bi;
+                });
 
-                            <div class="service-icon smm-service-icon">
-                                ${smmCustomIcon(
-                                    platformServices.find(item =>
-                                        String(item.icon || "").trim()
-                                    ),
-                                    platformIcon(smmNavigation.platform)
-                                )}
-                            </div>
+            return entries.map(([key, service]) => {
 
-                            <div>
+                const count = platformServices.filter(item =>
+                    String(item.category || "general")
+                        .trim()
+                        .toLowerCase() === key
+                ).length;
 
-                                <div class="service-title">
-                                    ${label(service.category || key)}
-                                </div>
+                return `
+                    <div
+                        class="service-card smm-service-card"
+                        onclick="openSmmCategory('${safeAttr(key)}')"
+                    >
 
-                                <div class="service-description">
-                                    ${count} layanan tersedia
-                                </div>
-
-                            </div>
-
+                        <div class="service-icon smm-service-icon">
+                            ${categoryIcon(key)}
                         </div>
-                    `;
 
-                })
-                .join("");
+                        <div>
+                            <div class="service-title">
+                                ${label(service.category || key)}
+                            </div>
 
+                            <div class="service-description">
+                                ${count} layanan tersedia
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+
+            }).join("");
         }
-
 
         /*
          * =====================================================
-         * LEVEL 3
-         * LAYANAN
+         * LEVEL 3 — SERVICES
          * =====================================================
          */
 
-        const services =
-            list.filter(service => {
+        const services = list.filter(service => {
 
-                const servicePlatform =
-                    String(service.platform || "")
-                        .trim()
-                        .toLowerCase();
+            const servicePlatform = String(service.platform || "")
+                .trim()
+                .toLowerCase();
 
-                const serviceCategory =
-                    String(service.category || "general")
-                        .trim()
-                        .toLowerCase();
+            const serviceCategory = String(service.category || "general")
+                .trim()
+                .toLowerCase();
 
-                return (
-                    servicePlatform === smmNavigation.platform &&
-                    serviceCategory === smmNavigation.category
-                );
+            return (
+                servicePlatform === smmNavigation.platform &&
+                serviceCategory === smmNavigation.category
+            );
 
-            });
-
+        });
 
         if (!services.length) {
-
             return `
                 <div class="customer-service-empty">
                     Belum ada layanan untuk kategori ini.
                 </div>
             `;
-
         }
-
 
         return services.map(service => {
 
-            const safeId =
-                String(service.id ?? "")
-                    .replace(/\\/g, "\\\\")
-                    .replace(/'/g, "\\'");
-
+            const safeId = String(service.id ?? "")
+                .replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'");
 
             const title =
                 service.name ||
                 service.title ||
                 "Layanan SMM";
 
-
-            const price =
-                Number(service.price) || 0;
-
-
-            const min =
-                Number(service.minQuantity) || 1;
-
-
-            const max =
-                Number(service.maxQuantity) || 1;
-
+            const price = Number(service.price) || 0;
+            const min = Number(service.minQuantity) || 1;
+            const max = Number(service.maxQuantity) || 1;
 
             const badges = [];
 
-
-            if (service.refill) {
-                badges.push("Refill");
-            }
-
-
-            if (service.cancel) {
-                badges.push("Cancel");
-            }
-
+            if (service.refill) badges.push("Refill");
+            if (service.cancel) badges.push("Cancel");
 
             return `
                 <div
@@ -1627,7 +1630,6 @@ function getBayoraServiceIconHTML(id, service) {
             `;
 
         }).join("");
-
     }
 
 

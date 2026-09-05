@@ -1702,6 +1702,462 @@ body.bayora-view-admins > main > .stats {
     <link rel="icon" href="/favicon.ico?v=bayora" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=bayora">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=bayora">
+
+<style>
+/* ==========================================================
+   BAYORA SMM PANEL UI
+========================================================== */
+
+.smm-panel {
+    padding: 24px;
+}
+
+.smm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.smm-header-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.smm-header-description {
+    margin-top: 5px;
+    color: #888;
+    font-size: 13px;
+}
+
+.smm-add-button,
+.smm-refresh-button,
+.smm-edit-button,
+.smm-toggle-button,
+.smm-delete-button,
+.smm-cancel-button,
+.smm-submit-button {
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+.smm-add-button {
+    background: #171717;
+    color: #fff;
+    padding: 11px 15px;
+    font-size: 13px;
+}
+
+.smm-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.smm-summary-card {
+    padding: 16px;
+    border: 1px solid #ece9e3;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.smm-summary-card span {
+    display: block;
+    color: #888;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.smm-summary-card strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 23px;
+    line-height: 1;
+}
+
+.smm-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.smm-filter,
+.smm-search {
+    height: 42px;
+    border: 1px solid #e5e2dc;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.smm-filter {
+    min-width: 170px;
+}
+
+.smm-search {
+    flex: 1;
+    min-width: 180px;
+}
+
+.smm-filter:focus,
+.smm-search:focus {
+    border-color: #aaa;
+}
+
+.smm-refresh-button {
+    height: 42px;
+    padding: 0 14px;
+    background: #f3f1ec;
+    color: #222;
+}
+
+.smm-services {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.smm-service-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #ece9e3;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.smm-service-card.is-inactive {
+    opacity: .62;
+}
+
+.smm-service-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.smm-service-platform {
+    margin-bottom: 4px;
+    color: #888;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.smm-service-name {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.smm-service-category {
+    margin-top: 4px;
+    color: #777;
+    font-size: 12px;
+}
+
+.smm-status {
+    flex: 0 0 auto;
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.smm-status.active {
+    background: #edf7ef;
+    color: #28733b;
+}
+
+.smm-status.inactive {
+    background: #f3f1ec;
+    color: #777;
+}
+
+.smm-service-description {
+    min-height: 38px;
+    margin-top: 14px;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.smm-service-meta {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f0eee9;
+}
+
+.smm-service-meta div {
+    min-width: 0;
+}
+
+.smm-service-meta span {
+    display: block;
+    color: #999;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.smm-service-meta strong {
+    display: block;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.smm-service-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 16px;
+}
+
+.smm-service-actions button {
+    padding: 8px 10px;
+    font-size: 11px;
+}
+
+.smm-edit-button {
+    background: #171717;
+    color: #fff;
+}
+
+.smm-toggle-button {
+    background: #f3f1ec;
+    color: #222;
+}
+
+.smm-delete-button {
+    margin-left: auto;
+    background: #fff;
+    color: #a33;
+    border: 1px solid #ead7d7 !important;
+}
+
+.smm-empty {
+    grid-column: 1 / -1;
+    padding: 45px 20px;
+    border: 1px dashed #ddd8d0;
+    border-radius: 14px;
+    color: #999;
+    text-align: center;
+    font-size: 13px;
+}
+
+.smm-error {
+    color: #a33;
+}
+
+.smm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,.35);
+}
+
+.smm-modal-overlay.open {
+    display: flex;
+}
+
+.smm-modal {
+    width: min(760px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+.smm-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 20px 22px;
+    border-bottom: 1px solid #eee;
+}
+
+.smm-modal-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.smm-modal-subtitle {
+    margin-top: 4px;
+    color: #888;
+    font-size: 12px;
+}
+
+.smm-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f1ec;
+    cursor: pointer;
+    font-size: 19px;
+}
+
+.smm-form {
+    padding: 22px;
+}
+
+.smm-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.smm-form-full {
+    grid-column: 1 / -1;
+}
+
+.smm-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.smm-form-group input,
+.smm-form-group select,
+.smm-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #e2dfd9;
+    border-radius: 10px;
+    padding: 10px 11px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.smm-form-group textarea {
+    resize: vertical;
+}
+
+.smm-form-group input:focus,
+.smm-form-group select:focus,
+.smm-form-group textarea:focus {
+    border-color: #aaa;
+}
+
+.smm-form-error {
+    min-height: 18px;
+    margin-top: 14px;
+    color: #a33;
+    font-size: 12px;
+}
+
+.smm-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.smm-cancel-button {
+    padding: 10px 14px;
+    background: #f3f1ec;
+    color: #222;
+}
+
+.smm-submit-button {
+    padding: 10px 15px;
+    background: #171717;
+    color: #fff;
+}
+
+@media (max-width: 800px) {
+
+    .smm-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .smm-services {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .smm-panel {
+        padding: 16px;
+    }
+
+    .smm-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .smm-add-button {
+        width: 100%;
+    }
+
+    .smm-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .smm-filter,
+    .smm-search,
+    .smm-refresh-button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .smm-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .smm-service-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .smm-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .smm-form-full {
+        grid-column: auto;
+    }
+
+    .smm-service-actions {
+        flex-wrap: wrap;
+    }
+
+    .smm-delete-button {
+        margin-left: 0;
+    }
+
+}
+</style>
+
 </head>
 
 
@@ -1792,6 +2248,24 @@ body.bayora-view-admins > main > .stats {
         >
             <span>▧</span>
             <span>Layanan & Produk</span>
+        </button>
+
+
+        <div
+            class="bayora-sidebar-label"
+            id="smmSidebarLabel"
+        >
+            SMM PANEL
+        </div>
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            data-admin-view="smm"
+            id="smmNavButton"
+        >
+            <span>◎</span>
+            <span>SMM Panel</span>
         </button>
 
 
@@ -2711,7 +3185,7 @@ body.bayora-view-admins > main > .stats {
     </div>
 
 
-        
+
 
 </section>
 
@@ -2770,6 +3244,369 @@ body.bayora-view-admins > main > .stats {
             id="catalogDrawerBody"
             class="admin-drawer-body"
         ></div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ========================================================
+     SMM PANEL
+========================================================= -->
+
+<section
+    class="panel smm-panel"
+    id="smmPanel"
+>
+
+    <div class="smm-header">
+
+        <div>
+            <div class="smm-header-title">
+                SMM Panel
+            </div>
+
+            <div class="smm-header-description">
+                Kelola layanan social media marketing BAYORA.
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="smm-add-button"
+            id="smmAddButton"
+        >
+            + Tambah Layanan
+        </button>
+
+    </div>
+
+
+    <div class="smm-summary">
+
+        <div class="smm-summary-card">
+            <span>Total Layanan</span>
+            <strong id="smmTotalServices">0</strong>
+        </div>
+
+        <div class="smm-summary-card">
+            <span>Layanan Aktif</span>
+            <strong id="smmActiveServices">0</strong>
+        </div>
+
+        <div class="smm-summary-card">
+            <span>Instagram</span>
+            <strong id="smmInstagramServices">0</strong>
+        </div>
+
+        <div class="smm-summary-card">
+            <span>TikTok</span>
+            <strong id="smmTiktokServices">0</strong>
+        </div>
+
+    </div>
+
+
+    <div class="smm-toolbar">
+
+        <select
+            id="smmPlatformFilter"
+            class="smm-filter"
+        >
+            <option value="">Semua Platform</option>
+            <option value="instagram">Instagram</option>
+            <option value="tiktok">TikTok</option>
+            <option value="youtube">YouTube</option>
+            <option value="facebook">Facebook</option>
+            <option value="telegram">Telegram</option>
+            <option value="x">X</option>
+        </select>
+
+        <input
+            type="search"
+            id="smmSearch"
+            class="smm-search"
+            placeholder="Cari layanan SMM..."
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            class="smm-refresh-button"
+            id="smmRefreshButton"
+        >
+            ↻ Refresh
+        </button>
+
+    </div>
+
+
+    <div
+        id="smmServices"
+        class="smm-services"
+    >
+        <div class="smm-empty">
+            Memuat layanan SMM...
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     MODAL SMM
+========================================================= -->
+
+<div
+    class="smm-modal-overlay"
+    id="smmModal"
+>
+
+    <div class="smm-modal">
+
+        <div class="smm-modal-header">
+
+            <div>
+                <div
+                    class="smm-modal-title"
+                    id="smmModalTitle"
+                >
+                    Tambah Layanan SMM
+                </div>
+
+                <div class="smm-modal-subtitle">
+                    Atur detail layanan yang tersedia.
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="smm-modal-close"
+                id="smmModalClose"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form
+            id="smmForm"
+            class="smm-form"
+        >
+
+            <input
+                type="hidden"
+                id="smmServiceId"
+            >
+
+
+            <div class="smm-form-grid">
+
+                <div class="smm-form-group">
+                    <label for="smmPlatform">
+                        Platform
+                    </label>
+
+                    <select id="smmPlatform" required>
+                        <option value="">Pilih platform</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="x">X</option>
+                    </select>
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmCategory">
+                        Kategori
+                    </label>
+
+                    <input
+                        id="smmCategory"
+                        type="text"
+                        required
+                        maxlength="100"
+                        placeholder="Followers / Likes / Views"
+                    >
+                </div>
+
+
+                <div class="smm-form-group smm-form-full">
+                    <label for="smmName">
+                        Nama Layanan
+                    </label>
+
+                    <input
+                        id="smmName"
+                        type="text"
+                        required
+                        maxlength="200"
+                        placeholder="Instagram Followers Indonesia"
+                    >
+                </div>
+
+
+                <div class="smm-form-group smm-form-full">
+                    <label for="smmDescription">
+                        Deskripsi
+                    </label>
+
+                    <textarea
+                        id="smmDescription"
+                        rows="3"
+                        maxlength="1000"
+                        placeholder="Deskripsi layanan..."
+                    ></textarea>
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmPrice">
+                        Harga
+                    </label>
+
+                    <input
+                        id="smmPrice"
+                        type="number"
+                        min="0"
+                        step="1"
+                        required
+                        placeholder="10000"
+                    >
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmMinQuantity">
+                        Minimum
+                    </label>
+
+                    <input
+                        id="smmMinQuantity"
+                        type="number"
+                        min="1"
+                        step="1"
+                        required
+                        placeholder="10"
+                    >
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmMaxQuantity">
+                        Maximum
+                    </label>
+
+                    <input
+                        id="smmMaxQuantity"
+                        type="number"
+                        min="1"
+                        step="1"
+                        required
+                        placeholder="10000"
+                    >
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmProviderId">
+                        Provider ID
+                    </label>
+
+                    <input
+                        id="smmProviderId"
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="Opsional"
+                    >
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmProviderServiceId">
+                        Provider Service ID
+                    </label>
+
+                    <input
+                        id="smmProviderServiceId"
+                        type="text"
+                        maxlength="100"
+                        placeholder="Opsional"
+                    >
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmRefill">
+                        Refill
+                    </label>
+
+                    <select id="smmRefill">
+                        <option value="0">Tidak</option>
+                        <option value="1">Ya</option>
+                    </select>
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmCancel">
+                        Cancel
+                    </label>
+
+                    <select id="smmCancel">
+                        <option value="0">Tidak</option>
+                        <option value="1">Ya</option>
+                    </select>
+                </div>
+
+
+                <div class="smm-form-group">
+                    <label for="smmActive">
+                        Status
+                    </label>
+
+                    <select id="smmActive">
+                        <option value="1">Aktif</option>
+                        <option value="0">Nonaktif</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div
+                class="smm-form-error"
+                id="smmFormError"
+            ></div>
+
+
+            <div class="smm-form-actions">
+
+                <button
+                    type="button"
+                    class="smm-cancel-button"
+                    id="smmCancelButton"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="smm-submit-button"
+                    id="smmSubmitButton"
+                >
+                    Simpan Layanan
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 
@@ -2974,6 +3811,1018 @@ body.bayora-view-admins > main > .stats {
 
 
 </main>
+
+
+<script>
+/* ==========================================================
+   BAYORA ADMIN - SMM PANEL
+========================================================== */
+
+(function () {
+
+    let smmServices = [];
+    let smmEditingId = null;
+
+    const $ = (id) => document.getElementById(id);
+
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    function formatSmmPrice(value) {
+
+        const number = Number(value || 0);
+
+        return new Intl.NumberFormat(
+            "id-ID",
+            {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0
+            }
+        ).format(number);
+
+    }
+
+
+    function platformLabel(platform) {
+
+        const labels = {
+            instagram: "Instagram",
+            tiktok: "TikTok",
+            youtube: "YouTube",
+            facebook: "Facebook",
+            telegram: "Telegram",
+            x: "X"
+        };
+
+        return labels[String(platform || "").toLowerCase()]
+            || platform
+            || "-";
+
+    }
+
+
+    function renderSmmSummary() {
+
+        const total =
+            smmServices.length;
+
+        const active =
+            smmServices.filter(
+                service => Number(service.active) === 1
+            ).length;
+
+        const instagram =
+            smmServices.filter(
+                service =>
+                    String(service.platform).toLowerCase()
+                    === "instagram"
+            ).length;
+
+        const tiktok =
+            smmServices.filter(
+                service =>
+                    String(service.platform).toLowerCase()
+                    === "tiktok"
+            ).length;
+
+
+        if ($("smmTotalServices")) {
+            $("smmTotalServices").textContent = total;
+        }
+
+        if ($("smmActiveServices")) {
+            $("smmActiveServices").textContent = active;
+        }
+
+        if ($("smmInstagramServices")) {
+            $("smmInstagramServices").textContent = instagram;
+        }
+
+        if ($("smmTiktokServices")) {
+            $("smmTiktokServices").textContent = tiktok;
+        }
+
+    }
+
+
+    function renderSmmServices() {
+
+        const container =
+            $("smmServices");
+
+        if (!container) return;
+
+
+        const search =
+            String(
+                $("smmSearch")?.value || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const platform =
+            String(
+                $("smmPlatformFilter")?.value || ""
+            )
+            .toLowerCase();
+
+
+        const filtered =
+            smmServices.filter(service => {
+
+                const matchesPlatform =
+                    !platform ||
+                    String(service.platform || "")
+                        .toLowerCase() === platform;
+
+
+                const haystack = [
+                    service.name,
+                    service.description,
+                    service.category,
+                    service.platform
+                ]
+                    .map(value =>
+                        String(value || "").toLowerCase()
+                    )
+                    .join(" ");
+
+
+                const matchesSearch =
+                    !search ||
+                    haystack.includes(search);
+
+
+                return matchesPlatform &&
+                    matchesSearch;
+
+            });
+
+
+        if (!filtered.length) {
+
+            container.innerHTML = `
+                <div class="smm-empty">
+                    Tidak ada layanan SMM.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            filtered.map(service => {
+
+                const active =
+                    Number(service.active) === 1;
+
+
+                return `
+                    <div
+                        class="smm-service-card ${active ? "" : "is-inactive"}"
+                    >
+
+                        <div class="smm-service-top">
+
+                            <div>
+                                <div class="smm-service-platform">
+                                    ${escapeHtml(
+                                        platformLabel(service.platform)
+                                    )}
+                                </div>
+
+                                <div class="smm-service-name">
+                                    ${escapeHtml(
+                                        service.name
+                                    )}
+                                </div>
+
+                                <div class="smm-service-category">
+                                    ${escapeHtml(
+                                        service.category
+                                    )}
+                                </div>
+                            </div>
+
+                            <span
+                                class="smm-status ${active ? "active" : "inactive"}"
+                            >
+                                ${active ? "Aktif" : "Nonaktif"}
+                            </span>
+
+                        </div>
+
+
+                        <div class="smm-service-description">
+                            ${escapeHtml(
+                                service.description ||
+                                "Tidak ada deskripsi."
+                            )}
+                        </div>
+
+
+                        <div class="smm-service-meta">
+
+                            <div>
+                                <span>Harga</span>
+                                <strong>
+                                    ${formatSmmPrice(service.price)}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Min</span>
+                                <strong>
+                                    ${escapeHtml(
+                                        service.minQuantity
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Max</span>
+                                <strong>
+                                    ${escapeHtml(
+                                        service.maxQuantity
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Provider</span>
+                                <strong>
+                                    ${escapeHtml(
+                                        service.providerServiceId ||
+                                        "-"
+                                    )}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="smm-service-actions">
+
+                            <button
+                                type="button"
+                                class="smm-edit-button"
+                                data-smm-edit="${service.id}"
+                            >
+                                Edit
+                            </button>
+
+                            <button
+                                type="button"
+                                class="smm-toggle-button"
+                                data-smm-toggle="${service.id}"
+                            >
+                                ${active ? "Nonaktifkan" : "Aktifkan"}
+                            </button>
+
+                            <button
+                                type="button"
+                                class="smm-delete-button"
+                                data-smm-delete="${service.id}"
+                            >
+                                Hapus
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+
+        container
+            .querySelectorAll("[data-smm-edit]")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        openSmmEdit(
+                            Number(
+                                button.dataset.smmEdit
+                            )
+                        );
+
+                    }
+                );
+
+            });
+
+
+        container
+            .querySelectorAll("[data-smm-toggle]")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        toggleSmmService(
+                            Number(
+                                button.dataset.smmToggle
+                            )
+                        );
+
+                    }
+                );
+
+            });
+
+
+        container
+            .querySelectorAll("[data-smm-delete]")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        deleteSmmService(
+                            Number(
+                                button.dataset.smmDelete
+                            )
+                        );
+
+                    }
+                );
+
+            });
+
+    }
+
+
+    async function loadSmmServices() {
+
+        const container =
+            $("smmServices");
+
+        if (!container) return;
+
+
+        container.innerHTML = `
+            <div class="smm-empty">
+                Memuat layanan SMM...
+            </div>
+        `;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/admin/smm/services",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal memuat layanan SMM."
+                );
+
+            }
+
+
+            smmServices =
+                Array.isArray(data.services)
+                    ? data.services
+                    : [];
+
+
+            renderSmmSummary();
+            renderSmmServices();
+
+        } catch (error) {
+
+            console.error(
+                "[SMM LOAD]",
+                error
+            );
+
+
+            container.innerHTML = `
+                <div class="smm-empty smm-error">
+                    ${escapeHtml(
+                        error.message ||
+                        "Gagal memuat layanan SMM."
+                    )}
+                </div>
+            `;
+
+        }
+
+    }
+
+
+    function resetSmmForm() {
+
+        smmEditingId = null;
+
+        if ($("smmServiceId")) {
+            $("smmServiceId").value = "";
+        }
+
+        if ($("smmPlatform")) {
+            $("smmPlatform").value = "";
+        }
+
+        if ($("smmCategory")) {
+            $("smmCategory").value = "";
+        }
+
+        if ($("smmName")) {
+            $("smmName").value = "";
+        }
+
+        if ($("smmDescription")) {
+            $("smmDescription").value = "";
+        }
+
+        if ($("smmPrice")) {
+            $("smmPrice").value = "";
+        }
+
+        if ($("smmMinQuantity")) {
+            $("smmMinQuantity").value = "";
+        }
+
+        if ($("smmMaxQuantity")) {
+            $("smmMaxQuantity").value = "";
+        }
+
+        if ($("smmProviderId")) {
+            $("smmProviderId").value = "";
+        }
+
+        if ($("smmProviderServiceId")) {
+            $("smmProviderServiceId").value = "";
+        }
+
+        if ($("smmRefill")) {
+            $("smmRefill").value = "0";
+        }
+
+        if ($("smmCancel")) {
+            $("smmCancel").value = "0";
+        }
+
+        if ($("smmActive")) {
+            $("smmActive").value = "1";
+        }
+
+        if ($("smmModalTitle")) {
+            $("smmModalTitle").textContent =
+                "Tambah Layanan SMM";
+        }
+
+        if ($("smmFormError")) {
+            $("smmFormError").textContent = "";
+        }
+
+    }
+
+
+    function openSmmModal() {
+
+        resetSmmForm();
+
+        const modal =
+            $("smmModal");
+
+        if (modal) {
+            modal.classList.add("open");
+        }
+
+    }
+
+
+    function closeSmmModal() {
+
+        const modal =
+            $("smmModal");
+
+        if (modal) {
+            modal.classList.remove("open");
+        }
+
+        resetSmmForm();
+
+    }
+
+
+    function openSmmEdit(id) {
+
+        const service =
+            smmServices.find(
+                item => Number(item.id) === Number(id)
+            );
+
+
+        if (!service) return;
+
+
+        smmEditingId =
+            Number(service.id);
+
+
+        $("smmServiceId").value =
+            service.id || "";
+
+        $("smmPlatform").value =
+            service.platform || "";
+
+        $("smmCategory").value =
+            service.category || "";
+
+        $("smmName").value =
+            service.name || "";
+
+        $("smmDescription").value =
+            service.description || "";
+
+        $("smmPrice").value =
+            service.price ?? "";
+
+        $("smmMinQuantity").value =
+            service.minQuantity ?? "";
+
+        $("smmMaxQuantity").value =
+            service.maxQuantity ?? "";
+
+        $("smmProviderId").value =
+            service.providerId ?? "";
+
+        $("smmProviderServiceId").value =
+            service.providerServiceId || "";
+
+        $("smmRefill").value =
+            Number(service.refill) === 1
+                ? "1"
+                : "0";
+
+        $("smmCancel").value =
+            Number(service.cancel) === 1
+                ? "1"
+                : "0";
+
+        $("smmActive").value =
+            Number(service.active) === 1
+                ? "1"
+                : "0";
+
+
+        $("smmModalTitle").textContent =
+            "Edit Layanan SMM";
+
+
+        $("smmFormError").textContent = "";
+
+
+        $("smmModal").classList.add("open");
+
+    }
+
+
+    async function saveSmmService(event) {
+
+        event.preventDefault();
+
+
+        const errorBox =
+            $("smmFormError");
+
+        if (errorBox) {
+            errorBox.textContent = "";
+        }
+
+
+        const payload = {
+
+            platform:
+                $("smmPlatform").value.trim(),
+
+            category:
+                $("smmCategory").value.trim(),
+
+            name:
+                $("smmName").value.trim(),
+
+            description:
+                $("smmDescription").value.trim(),
+
+            price:
+                Number($("smmPrice").value),
+
+            minQuantity:
+                Number($("smmMinQuantity").value),
+
+            maxQuantity:
+                Number($("smmMaxQuantity").value),
+
+            providerId:
+                $("smmProviderId").value
+                    ? Number($("smmProviderId").value)
+                    : null,
+
+            providerServiceId:
+                $("smmProviderServiceId").value.trim(),
+
+            refill:
+                Number($("smmRefill").value) === 1,
+
+            cancel:
+                Number($("smmCancel").value) === 1,
+
+            active:
+                Number($("smmActive").value) === 1
+
+        };
+
+
+        try {
+
+            const editing =
+                Number.isFinite(smmEditingId) &&
+                smmEditingId > 0;
+
+
+            const url =
+                editing
+                    ? `/api/admin/smm/services/${smmEditingId}`
+                    : "/api/admin/smm/services";
+
+
+            const method =
+                editing
+                    ? "PUT"
+                    : "POST";
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method,
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body:
+                            JSON.stringify(payload)
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal menyimpan layanan SMM."
+                );
+
+            }
+
+
+            closeSmmModal();
+
+            await loadSmmServices();
+
+        } catch (error) {
+
+            console.error(
+                "[SMM SAVE]",
+                error
+            );
+
+
+            if (errorBox) {
+                errorBox.textContent =
+                    error.message ||
+                    "Gagal menyimpan layanan SMM.";
+            }
+
+        }
+
+    }
+
+
+    async function toggleSmmService(id) {
+
+        const service =
+            smmServices.find(
+                item => Number(item.id) === Number(id)
+            );
+
+
+        if (!service) return;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/admin/smm/services/${id}`,
+                    {
+                        method: "PUT",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body:
+                            JSON.stringify({
+                                active:
+                                    Number(service.active) === 1
+                                        ? 0
+                                        : 1
+                            })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal mengubah status layanan."
+                );
+
+            }
+
+
+            await loadSmmServices();
+
+        } catch (error) {
+
+            console.error(
+                "[SMM TOGGLE]",
+                error
+            );
+
+            alert(
+                error.message ||
+                "Gagal mengubah status layanan."
+            );
+
+        }
+
+    }
+
+
+    async function deleteSmmService(id) {
+
+        const service =
+            smmServices.find(
+                item => Number(item.id) === Number(id)
+            );
+
+
+        if (!service) return;
+
+
+        const confirmed =
+            window.confirm(
+                `Hapus layanan "${service.name}"?`
+            );
+
+
+        if (!confirmed) return;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/api/admin/smm/services/${id}`,
+                    {
+                        method: "DELETE",
+                        credentials: "include"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Gagal menghapus layanan."
+                );
+
+            }
+
+
+            await loadSmmServices();
+
+        } catch (error) {
+
+            console.error(
+                "[SMM DELETE]",
+                error
+            );
+
+            alert(
+                error.message ||
+                "Gagal menghapus layanan."
+            );
+
+        }
+
+    }
+
+
+    function setupSmmPanel() {
+
+        if (!$("smmPanel")) return;
+
+
+        const addButton =
+            $("smmAddButton");
+
+        if (addButton) {
+
+            addButton.addEventListener(
+                "click",
+                openSmmModal
+            );
+
+        }
+
+
+        const refreshButton =
+            $("smmRefreshButton");
+
+        if (refreshButton) {
+
+            refreshButton.addEventListener(
+                "click",
+                loadSmmServices
+            );
+
+        }
+
+
+        const search =
+            $("smmSearch");
+
+        if (search) {
+
+            search.addEventListener(
+                "input",
+                renderSmmServices
+            );
+
+        }
+
+
+        const platform =
+            $("smmPlatformFilter");
+
+        if (platform) {
+
+            platform.addEventListener(
+                "change",
+                renderSmmServices
+            );
+
+        }
+
+
+        const form =
+            $("smmForm");
+
+        if (form) {
+
+            form.addEventListener(
+                "submit",
+                saveSmmService
+            );
+
+        }
+
+
+        const closeButton =
+            $("smmModalClose");
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                closeSmmModal
+            );
+
+        }
+
+
+        const cancelButton =
+            $("smmCancelButton");
+
+        if (cancelButton) {
+
+            cancelButton.addEventListener(
+                "click",
+                closeSmmModal
+            );
+
+        }
+
+
+        const modal =
+            $("smmModal");
+
+        if (modal) {
+
+            modal.addEventListener(
+                "click",
+                function (event) {
+
+                    if (event.target === modal) {
+                        closeSmmModal();
+                    }
+
+                }
+            );
+
+        }
+
+
+        loadSmmServices();
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupSmmPanel
+        );
+
+    } else {
+
+        setupSmmPanel();
+
+    }
+
+})();
+</script>
 
 
 
@@ -9060,6 +10909,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 ".catalog-panel"
             );
 
+        const smm =
+            main.querySelector(
+                "#smmPanel"
+            );
+
         const admins =
             main.querySelector(
                 "#adminManagementPanel"
@@ -9125,6 +10979,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 "catalog";
         }
 
+        if (smm) {
+            smm.dataset.bayoraView =
+                "smm";
+        }
+
         if (admins) {
             admins.dataset.bayoraView =
                 "admins";
@@ -9140,6 +10999,7 @@ document.addEventListener("DOMContentLoaded", function () {
             dashboardHeading,
             transactions,
             catalog,
+            smm,
             admins
         ].filter(Boolean);
 

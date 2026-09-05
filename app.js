@@ -1601,6 +1601,26 @@ function openSmmService(serviceId) {
 
     currentSmmService = service;
 
+    saveBayoraPage(
+        "service:smm:" + serviceId
+    );
+
+    document
+        .getElementById("homePage")
+        .classList.add("page-hidden");
+
+    document
+        .getElementById("servicePage")
+        .classList.remove("page-hidden");
+
+    document
+        .getElementById("checkoutPage")
+        .classList.add("page-hidden");
+
+    document
+        .getElementById("successPage")
+        .classList.add("page-hidden");
+
     const wrapper =
         document.getElementById(
             "smmFlowWrapper"

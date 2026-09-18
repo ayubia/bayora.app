@@ -4484,8 +4484,9 @@ async function sendDigitalProductEmailWorker(
 
     console.log(
       "[DIGITAL DELIVERY] Email berhasil dikirim:",
-      transactionId,
-      transaction.customerEmail
+      JSON.stringify({
+        transactionId
+      })
     );
 
     console.log(

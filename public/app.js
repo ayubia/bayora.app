@@ -5091,6 +5091,16 @@ async function processDigitalPayment() {
         const transaction =
             data.transaction;
 
+        const guestAccessToken =
+            data.guestAccessToken || null;
+
+        if (guestAccessToken) {
+            setDigitalGuestAccessToken(
+                transaction.transactionId,
+                guestAccessToken
+            );
+        }
+
         button.textContent =
             "Membuka pembayaran...";
 
@@ -5118,7 +5128,10 @@ async function processDigitalPayment() {
                             digitalCustomerEmail,
 
                         customerWhatsapp:
-                            digitalCustomerWhatsapp
+                            digitalCustomerWhatsapp,
+
+                        guestAccessToken:
+                            guestAccessToken
 
                     })
                 }
@@ -5560,8 +5573,8 @@ function showDigitalDownloadButton(
      * Ambil transaksi terbaru agar halaman
      * mempunyai data yang sama dengan email.
      */
-    fetch(
-        `/api/transactions/${encodeURIComponent(transactionId)}`
+    fetchBayoraTransaction(
+        transactionId
     )
     .then(response => response.json())
     .then(data => {
@@ -7069,6 +7082,83 @@ function showDigitalDownloadButton(
 })();
 
 
+function setDigitalGuestAccessToken(
+    transactionId,
+    token
+) {
+    if (!transactionId || !token) {
+        return;
+    }
+
+    window.BAYORA_DIGITAL_GUEST_TOKEN =
+        token;
+
+    try {
+        sessionStorage.setItem(
+            `bayoraDigitalGuest:${transactionId}`,
+            token
+        );
+    } catch (_) {
+        // Tetap gunakan token di memory jika
+        // sessionStorage tidak tersedia.
+    }
+}
+
+
+function getDigitalGuestAccessToken(
+    transactionId
+) {
+    if (!transactionId) {
+        return null;
+    }
+
+    try {
+        const storedToken =
+            sessionStorage.getItem(
+                `bayoraDigitalGuest:${transactionId}`
+            );
+
+        if (storedToken) {
+            return storedToken;
+        }
+    } catch (_) {
+        // Fallback ke memory.
+    }
+
+    return (
+        window.BAYORA_DIGITAL_GUEST_TOKEN ||
+        null
+    );
+}
+
+
+async function fetchBayoraTransaction(transactionId) {
+
+    const headers = {};
+
+    const guestAccessToken =
+        String(transactionId || "")
+            .startsWith("DIGITAL-")
+            ? getDigitalGuestAccessToken(
+                transactionId
+              )
+            : null;
+
+    if (guestAccessToken) {
+        headers.Authorization =
+            "Bearer " +
+            guestAccessToken;
+    }
+
+    return fetch(
+        `/api/transactions/${encodeURIComponent(transactionId)}`,
+        {
+            headers
+        }
+    );
+}
+
+
 async function checkTransactionStatus(transactionId) {
 
     try {
@@ -7099,7 +7189,18 @@ async function checkTransactionStatus(transactionId) {
                             method: "POST",
                             headers: {
                                 "Content-Type":
-                                    "application/json"
+                                    "application/json",
+                                ...(getDigitalGuestAccessToken(
+                                    transactionId
+                                )
+                                    ? {
+                                        Authorization:
+                                            "Bearer " +
+                                            getDigitalGuestAccessToken(
+                                                transactionId
+                                            )
+                                      }
+                                    : {})
                             }
                         }
                     );
@@ -7125,9 +7226,10 @@ async function checkTransactionStatus(transactionId) {
 
         }
 
-        const response = await fetch(
-            `/api/transactions/${encodeURIComponent(transactionId)}`
-        );
+        const response =
+            await fetchBayoraTransaction(
+                transactionId
+            );
 
         const data = await response.json();
 
@@ -7260,6 +7362,36 @@ async function handleXenditReturn() {
     const transactionId =
         params.get("transactionId");
 
+    const guestToken =
+        params.get("guestToken");
+
+    if (guestToken) {
+        setDigitalGuestAccessToken(
+            transactionId,
+            guestToken
+        );
+
+        /*
+         * Token hanya diperlukan selama sesi halaman ini.
+         * Setelah dibaca, hapus dari address bar/history
+         * agar capability tidak tertinggal di URL.
+         */
+        const cleanUrl =
+            new URL(window.location.href);
+
+        cleanUrl.searchParams.delete(
+            "guestToken"
+        );
+
+        window.history.replaceState(
+            {},
+            document.title,
+            cleanUrl.pathname +
+            cleanUrl.search +
+            cleanUrl.hash
+        );
+    }
+
     if (
         !transactionId ||
         (
@@ -7320,9 +7452,8 @@ async function handleXenditReturn() {
         try {
 
             const response =
-                await fetch(
-                    "/api/transactions/" +
-                    encodeURIComponent(transactionId)
+                await fetchBayoraTransaction(
+                    transactionId
                 );
 
             const data =
@@ -7468,8 +7599,8 @@ async function handleXenditReturn() {
     try {
 
         const response =
-            await fetch(
-                `/api/transactions/${encodeURIComponent(transactionId)}`
+            await fetchBayoraTransaction(
+                transactionId
             );
 
         const data =

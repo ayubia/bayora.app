@@ -3235,13 +3235,13 @@ export default {
         const transactionId =
           "DIGITAL-" + Date.now();
 
-        const randomBytes =
+        const referenceBytes =
           crypto.getRandomValues(
             new Uint8Array(4)
           );
 
         const reference =
-          Array.from(randomBytes)
+          Array.from(referenceBytes)
             .map(
               byte =>
                 byte
@@ -3258,6 +3258,20 @@ export default {
           products.length === 1
             ? products[0].name
             : `${products[0].name} + ${products.length - 1} preset lainnya`;
+
+        const guestAccessToken =
+          randomBytes(32).toString("hex");
+
+        const guestAccessTokenHash =
+          hashDigitalGuestAccessTokenWorker(
+            guestAccessToken
+          );
+
+        const guestAccessExpiresAt =
+          new Date(
+            Date.now() +
+              1000 * 60 * 60 * 24 * 30
+          ).toISOString();
 
         const statements = [];
 
@@ -3343,6 +3357,25 @@ export default {
           );
         }
 
+        statements.push(
+          env.ppobku_db
+            .prepare(`
+              INSERT INTO digital_guest_access (
+                transaction_id,
+                token_hash,
+                created_at,
+                expires_at
+              )
+              VALUES (?, ?, ?, ?)
+            `)
+            .bind(
+              transactionId,
+              guestAccessTokenHash,
+              createdAt,
+              guestAccessExpiresAt
+            )
+        );
+
         await env.ppobku_db.batch(
           statements
         );
@@ -3374,6 +3407,7 @@ export default {
             message:
               "Transaksi digital berhasil disimpan.",
             transaction,
+            guestAccessToken,
             customer: {
               email,
               whatsapp,
@@ -3626,7 +3660,8 @@ if (
     const {
       transactionId,
       customerEmail,
-      customerWhatsapp
+      customerWhatsapp,
+      guestAccessToken
     } = await request.json();
 
     if (!transactionId) {
@@ -3655,6 +3690,28 @@ if (
         success: false,
         error: "Transaksi digital tidak ditemukan."
       }, 404);
+    }
+
+    const guestAccess =
+      await env.ppobku_db.prepare(`
+        SELECT token_hash AS tokenHash
+        FROM digital_guest_access
+        WHERE transaction_id = ?
+        LIMIT 1
+      `).bind(transactionId).first();
+
+    if (
+      guestAccess &&
+      !(await verifyDigitalGuestAccessTokenWorker(
+        env,
+        transactionId,
+        guestAccessToken
+      ))
+    ) {
+      return json({
+        success: false,
+        error: "Akses transaksi digital tidak valid."
+      }, 401);
     }
 
     if (
@@ -3749,14 +3806,22 @@ if (
             "/?payment=success&transactionId=" +
             encodeURIComponent(
               transactionId
-            ),
+            ) +
+            (guestAccessToken
+              ? "&guestToken=" +
+                encodeURIComponent(guestAccessToken)
+              : ""),
 
           cancel_return_url:
             baseUrl +
             "/?payment=cancel&transactionId=" +
             encodeURIComponent(
               transactionId
-            ),
+            ) +
+            (guestAccessToken
+              ? "&guestToken=" +
+                encodeURIComponent(guestAccessToken)
+              : ""),
 
           customer: {
             reference_id:
@@ -3856,6 +3921,49 @@ if (
 // ==========================================================
 // TRANSACTION STATUS + XENDIT DIGITAL SYNC
 // ==========================================================
+
+/* ==========================================================
+   DIGITAL GUEST ACCESS TOKEN
+========================================================== */
+
+function hashDigitalGuestAccessTokenWorker(token) {
+  return createHash("sha256")
+    .update(String(token))
+    .digest("hex");
+}
+
+async function verifyDigitalGuestAccessTokenWorker(
+  env,
+  transactionId,
+  token
+) {
+  if (!transactionId || !token) return false;
+
+  const row =
+    await env.ppobku_db.prepare(`
+      SELECT
+        token_hash AS tokenHash,
+        expires_at AS expiresAt
+      FROM digital_guest_access
+      WHERE transaction_id = ?
+      LIMIT 1
+    `).bind(transactionId).first();
+
+  if (!row || !row.tokenHash) return false;
+
+  if (
+    row.expiresAt &&
+    Date.now() >= new Date(row.expiresAt).getTime()
+  ) {
+    return false;
+  }
+
+  const suppliedHash =
+    hashDigitalGuestAccessTokenWorker(token);
+
+  return suppliedHash === String(row.tokenHash);
+}
+
 
 function hashDigitalDownloadTokenWorker(token) {
   return createHash("sha256")
@@ -5104,6 +5212,36 @@ if (
       }, 400);
     }
 
+    const guestAuthorization =
+      request.headers.get("Authorization") || "";
+
+    const guestAccessToken =
+      guestAuthorization
+        .replace(/^Bearer\s+/i, "")
+        .trim();
+
+    const guestAccess =
+      await env.ppobku_db.prepare(`
+        SELECT token_hash AS tokenHash
+        FROM digital_guest_access
+        WHERE transaction_id = ?
+        LIMIT 1
+      `).bind(transactionId).first();
+
+    if (
+      guestAccess &&
+      !(await verifyDigitalGuestAccessTokenWorker(
+        env,
+        transactionId,
+        guestAccessToken
+      ))
+    ) {
+      return json({
+        success: false,
+        error: "Akses transaksi digital tidak valid."
+      }, 401);
+    }
+
     const transaction =
       await env.ppobku_db.prepare(`
         SELECT
@@ -5418,6 +5556,46 @@ if (
      * sehingga status transaksi hanya boleh dibaca oleh
      * pemilik transaksi tersebut.
      */
+    if (transaction.productType === "digital") {
+      const guestAccess =
+        await env.ppobku_db.prepare(`
+          SELECT token_hash AS tokenHash
+          FROM digital_guest_access
+          WHERE transaction_id = ?
+          LIMIT 1
+        `).bind(transactionId).first();
+
+      /*
+       * Transaksi DIGITAL baru mempunyai guest-access row
+       * dan wajib membuktikan guest token.
+       *
+       * Transaksi lama tanpa row tetap kompatibel.
+       */
+      if (guestAccess) {
+        const authorization =
+          request.headers.get("Authorization") || "";
+
+        const guestAccessToken =
+          authorization
+            .replace(/^Bearer\s+/i, "")
+            .trim();
+
+        const validGuestAccess =
+          await verifyDigitalGuestAccessTokenWorker(
+            env,
+            transactionId,
+            guestAccessToken
+          );
+
+        if (!validGuestAccess) {
+          return json({
+            success: false,
+            error: "Akses transaksi digital tidak valid."
+          }, 401);
+        }
+      }
+    }
+
     if (transaction.productType !== "digital") {
       const currentUser =
         await getCurrentUser(

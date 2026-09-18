@@ -1713,7 +1713,11 @@ function getBayoraServiceIconHTML(id, service) {
                 onclick="setCustomerServiceCategory('smm')"
             >
                 <span class="customer-service-tab-icon">
-                    📱
+                    <img
+                        src="/assets/bayora-icons/smm.png"
+                        alt=""
+                        aria-hidden="true"
+                    >
                 </span>
 
                 <span>

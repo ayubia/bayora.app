@@ -17,3 +17,12 @@ database/*.db-wal
 server/*.db
 server/*.db-shm
 server/*.db-wal
+
+# Local development / generated data
+backups/
+.wrangler/
+.vscode/
+
+# Local database dumps / runtime uploads
+database/*.sql
+uploads/

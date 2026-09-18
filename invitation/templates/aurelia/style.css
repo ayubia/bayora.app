@@ -1,0 +1,1000 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --paper: #f2eee7;
+  --paper-light: #f8f5f0;
+  --paper-dark: #e7e0d5;
+  --ink: #39352f;
+  --muted: #817a71;
+  --line: rgba(57,53,47,.16);
+  --white: #fffdf9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #d7d2ca;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.invitation {
+  width: min(100%, 680px);
+  margin: auto;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+
+/* ================================
+   MUSIC
+================================ */
+
+.music-control {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 30px;
+  background: rgba(45,42,37,.75);
+  color: white;
+  backdrop-filter: blur(10px);
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.music-icon {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+}
+
+
+/* ================================
+   COVER
+================================ */
+
+.cover {
+  min-height: 100svh;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  color: white;
+}
+
+.cover-photo,
+.closing-photo {
+  position: absolute;
+  inset: 0;
+  background:
+    url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1800&q=92')
+    center / cover no-repeat;
+  transform: scale(1.02);
+}
+
+.cover-shade,
+.closing-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(22,20,17,.08),
+      rgba(22,20,17,.12) 42%,
+      rgba(22,20,17,.68)
+    );
+}
+
+.cover-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 38px 28px 55px;
+  text-align: center;
+}
+
+.cover-top {
+  margin-bottom: 105px;
+}
+
+.cover-top span {
+  font-size: 7px;
+  letter-spacing: 4px;
+}
+
+.cover-names p {
+  margin: 0 0 19px;
+  font-size: 7px;
+  letter-spacing: 4px;
+}
+
+.cover-names h1 {
+  margin: 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(76px, 19vw, 122px);
+  font-weight: 300;
+  line-height: .72;
+  letter-spacing: -4px;
+}
+
+.cover-names h1 i {
+  display: block;
+  margin: 16px 0;
+  font-size: .34em;
+  font-weight: 300;
+  letter-spacing: 0;
+}
+
+.cover-date {
+  margin-top: 28px;
+  font-size: 8px;
+  letter-spacing: 4px;
+}
+
+.guest-box {
+  margin: 55px auto 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.guest-box span {
+  font-size: 7px;
+  opacity: .75;
+}
+
+.guest-box strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.open-invitation {
+  min-width: 190px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.7);
+  background: transparent;
+  color: white;
+  font-size: 7px;
+  letter-spacing: 2.5px;
+  transition: .3s ease;
+}
+
+.open-invitation:hover {
+  background: white;
+  color: var(--ink);
+}
+
+
+/* ================================
+   GENERAL
+================================ */
+
+.invitation-content {
+  overflow: hidden;
+}
+
+.section {
+  padding: 105px 28px;
+}
+
+.section-number {
+  display: block;
+  margin-bottom: 14px;
+  color: #a69d92;
+  font-size: 7px;
+  letter-spacing: 3px;
+}
+
+.eyebrow {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: 3.5px;
+}
+
+.section-heading.left {
+  text-align: left;
+}
+
+.section-heading.center {
+  text-align: center;
+}
+
+.section-heading h2,
+.opening h2,
+.countdown-section h2,
+.stream h2,
+.story-copy h2,
+.rsvp h2,
+.gift h2,
+.wishes h2,
+.instagram h2,
+.closing-content h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  letter-spacing: -.8px;
+  line-height: .88;
+}
+
+.paragraph {
+  max-width: 400px;
+  margin: 26px auto 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 2;
+}
+
+.ornament {
+  margin: 31px 0;
+  color: #9d9285;
+  font-size: 15px;
+}
+
+
+/* ================================
+   OPENING
+================================ */
+
+.opening {
+  padding-top: 125px;
+  padding-bottom: 125px;
+  text-align: center;
+}
+
+.opening h2 {
+  margin: 0;
+  font-size: 57px;
+}
+
+
+/* ================================
+   COUPLE
+================================ */
+
+.couple {
+  background: var(--white);
+}
+
+.couple .section-heading {
+  margin-bottom: 48px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 49px;
+}
+
+.couple-list {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.person {
+  text-align: center;
+}
+
+.person-photo {
+  width: 100%;
+  aspect-ratio: .72;
+  margin-bottom: 21px;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(.78);
+}
+
+.person-male .person-photo {
+  background-image:
+    url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=88');
+}
+
+.person-female .person-photo {
+  background-image:
+    url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=88');
+}
+
+.person-copy > span {
+  font-size: 6px;
+  color: #9b938a;
+  letter-spacing: 2px;
+}
+
+.person-copy h3 {
+  margin: 8px 0 7px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.person-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+.couple-divider {
+  align-self: center;
+  margin-top: -35px;
+}
+
+.couple-divider span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px;
+  font-style: italic;
+}
+
+
+/* ================================
+   EVENTS
+================================ */
+
+.event {
+  background: var(--paper);
+}
+
+.events {
+  max-width: 440px;
+  margin: 55px auto 0;
+}
+
+.event-item {
+  padding: 10px 0 35px;
+  text-align: center;
+}
+
+.event-item:last-child {
+  padding-top: 35px;
+  padding-bottom: 10px;
+}
+
+.event-label {
+  display: block;
+  margin-bottom: 17px;
+  font-size: 7px;
+  letter-spacing: 3px;
+}
+
+.event-item h3 {
+  margin: 0 0 1px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.event-item strong {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 62px;
+  font-weight: 400;
+  line-height: .9;
+}
+
+.event-month {
+  display: block;
+  margin-top: 5px;
+  font-size: 7px;
+  letter-spacing: 3px;
+}
+
+.event-time {
+  margin-top: 21px;
+  font-size: 9px;
+}
+
+.event-item p {
+  margin: 18px 0 22px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+.event-link {
+  display: inline-block;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+
+.event-separator {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #a59b90;
+}
+
+.event-separator::before,
+.event-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.event-separator span {
+  font-size: 10px;
+}
+
+.save-date {
+  display: block;
+  width: 190px;
+  height: 43px;
+  margin: 43px auto 0;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+
+
+/* ================================
+   COUNTDOWN
+================================ */
+
+.countdown-section {
+  text-align: center;
+  background: var(--paper-dark);
+}
+
+.countdown-section h2 {
+  margin: 0;
+  font-size: 56px;
+}
+
+.countdown {
+  max-width: 450px;
+  margin: 45px auto 0;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+}
+
+.countdown > div {
+  border-right: 1px solid var(--line);
+}
+
+.countdown > div:last-child {
+  border-right: 0;
+}
+
+.countdown strong {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.countdown span {
+  display: block;
+  margin-top: 7px;
+  font-size: 6px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+
+/* ================================
+   STREAM
+================================ */
+
+.stream {
+  text-align: center;
+  background: var(--white);
+}
+
+.stream h2 {
+  margin: 0;
+  font-size: 53px;
+}
+
+.dark-button {
+  display: block;
+  width: min(100%, 245px);
+  height: 44px;
+  margin: 33px auto 0;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: white;
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+
+
+/* ================================
+   STORY
+================================ */
+
+.story {
+  background: var(--paper);
+}
+
+.story-photo {
+  width: 100%;
+  height: 510px;
+  background:
+    url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=92')
+    center / cover no-repeat;
+  filter: saturate(.78);
+}
+
+.story-copy {
+  padding: 88px 28px 105px;
+}
+
+.story-copy h2 {
+  margin: 0;
+  font-size: 55px;
+}
+
+.story-line {
+  margin-top: 55px;
+}
+
+.story-line article {
+  position: relative;
+  padding: 0 0 38px 35px;
+  border-left: 1px solid var(--line);
+}
+
+.story-line article:last-child {
+  padding-bottom: 0;
+}
+
+.story-line article::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.story-line span {
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: #999087;
+}
+
+.story-line h3 {
+  margin: 9px 0 8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.story-line p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.9;
+}
+
+
+/* ================================
+   GALLERY
+================================ */
+
+.gallery {
+  background: var(--white);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 5px;
+}
+
+.gallery-photo {
+  aspect-ratio: .78;
+  background-position: center;
+  background-size: cover;
+  filter: saturate(.78);
+}
+
+.photo-1 {
+  background-image: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=88');
+}
+
+.photo-2 {
+  background-image: url('https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?auto=format&fit=crop&w=900&q=88');
+}
+
+.photo-3 {
+  background-image: url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=900&q=88');
+}
+
+.photo-4 {
+  background-image: url('https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=900&q=88');
+}
+
+.photo-5 {
+  background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=88');
+}
+
+.photo-6 {
+  background-image: url('https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=88');
+}
+
+
+/* ================================
+   RSVP
+================================ */
+
+.rsvp {
+  text-align: center;
+}
+
+.rsvp h2 {
+  margin: 0;
+  font-size: 56px;
+}
+
+.rsvp form {
+  max-width: 400px;
+  margin: 45px auto 0;
+  text-align: left;
+}
+
+.rsvp label {
+  display: block;
+  margin-bottom: 17px;
+  color: var(--muted);
+  font-size: 7px;
+  letter-spacing: 1.5px;
+}
+
+.rsvp input,
+.rsvp select,
+.wish-form input,
+.wish-form textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  outline: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 10px;
+}
+
+.rsvp .dark-button,
+.wish-form .dark-button {
+  margin-top: 24px;
+  width: 100%;
+}
+
+
+/* ================================
+   GIFT
+================================ */
+
+.gift {
+  text-align: center;
+  background: var(--paper-dark);
+}
+
+.gift h2 {
+  margin: 0;
+  font-size: 55px;
+}
+
+.gift-card {
+  max-width: 360px;
+  margin: 42px auto 0;
+  padding: 34px 25px;
+  background: rgba(255,255,255,.55);
+}
+
+.gift-card > span {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 7px;
+  letter-spacing: 3px;
+}
+
+.gift-card strong {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.gift-card p {
+  margin: 7px 0 25px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.gift-card button {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 7px;
+  letter-spacing: 1.8px;
+}
+
+
+/* ================================
+   WISHES
+================================ */
+
+.wishes {
+  text-align: center;
+  background: var(--white);
+}
+
+.wishes h2 {
+  margin: 0;
+  font-size: 55px;
+}
+
+.wish-form {
+  max-width: 400px;
+  margin: 40px auto 0;
+}
+
+.wish-form input {
+  text-align: left;
+}
+
+.wish-form textarea {
+  min-height: 100px;
+  resize: vertical;
+  text-align: left;
+}
+
+.wish-list {
+  max-width: 400px;
+  margin: 45px auto 0;
+  text-align: left;
+}
+
+.wish {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.wish strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.wish p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+
+/* ================================
+   INSTAGRAM
+================================ */
+
+.instagram {
+  text-align: center;
+}
+
+.instagram h2 {
+  margin: 0;
+  font-size: 55px;
+}
+
+.hashtag {
+  margin: 32px 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+}
+
+.outline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  height: 43px;
+  border: 1px solid var(--ink);
+  font-size: 7px;
+  letter-spacing: 2px;
+}
+
+
+/* ================================
+   CLOSING
+================================ */
+
+.closing {
+  min-height: 100svh;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  color: white;
+  overflow: hidden;
+}
+
+.closing-photo {
+  background:
+    url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1800&q=92')
+    center / cover no-repeat;
+}
+
+.closing-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 75px 28px 62px;
+  text-align: center;
+}
+
+.closing-content .eyebrow {
+  color: rgba(255,255,255,.78);
+}
+
+.closing-content h2 {
+  margin: 0;
+  font-size: 62px;
+}
+
+.closing-ornament {
+  margin: 28px 0;
+  font-size: 14px;
+}
+
+.closing-names {
+  margin: 0 0 7px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+}
+
+.closing-content > span {
+  font-size: 7px;
+  letter-spacing: 4px;
+}
+
+
+/* ================================
+   DESKTOP
+================================ */
+
+@media (min-width: 681px) {
+
+  .invitation {
+    box-shadow: 0 0 80px rgba(30,26,21,.18);
+  }
+
+  .section {
+    padding-left: 55px;
+    padding-right: 55px;
+  }
+
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 430px) {
+
+  .section {
+    padding-top: 90px;
+    padding-bottom: 90px;
+  }
+
+  .cover-content {
+    padding-bottom: 47px;
+  }
+
+  .cover-top {
+    margin-bottom: 90px;
+  }
+
+  .cover-names h1 {
+    font-size: 77px;
+  }
+
+  .opening h2,
+  .stream h2,
+  .rsvp h2,
+  .gift h2,
+  .wishes h2,
+  .instagram h2 {
+    font-size: 50px;
+  }
+
+  .story-copy h2 {
+    font-size: 50px;
+  }
+
+  .section-heading h2 {
+    font-size: 45px;
+  }
+
+  .couple-list {
+    gap: 7px;
+  }
+
+  .person-copy h3 {
+    font-size: 21px;
+  }
+
+  .person-copy p {
+    font-size: 7px;
+  }
+
+  .countdown strong {
+    font-size: 36px;
+  }
+
+  .story-photo {
+    height: 450px;
+  }
+
+}
+
+@media (max-width: 350px) {
+
+  .section {
+    padding-left: 21px;
+    padding-right: 21px;
+  }
+
+  .cover-names h1 {
+    font-size: 68px;
+  }
+
+  .couple-list {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .person-copy h3 {
+    font-size: 18px;
+  }
+
+}

@@ -7885,3 +7885,1196 @@ body {
     }
 
 }
+
+
+/* ============================================================
+   BAYORA — FINAL CLOUDFLARE LAYOUT OVERRIDE
+   Jangan menghapus CSS sebelumnya.
+   Override ini memastikan layout akhir konsisten.
+============================================================ */
+
+
+/* =========================
+   NAVBAR — DESKTOP
+========================= */
+
+@media (min-width: 701px) {
+
+    header.navbar {
+        width: 100% !important;
+        min-height: 76px !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+
+        box-sizing: border-box !important;
+    }
+
+    header.navbar nav#mainNavbarNav {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+
+        width: auto !important;
+        height: auto !important;
+
+        position: static !important;
+
+        margin-left: auto !important;
+        padding: 0 !important;
+
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+
+        pointer-events: auto !important;
+
+        flex-direction: row !important;
+        gap: 30px !important;
+
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    header.navbar nav#mainNavbarNav .main-nav-link {
+        display: inline-flex !important;
+
+        width: auto !important;
+        min-width: max-content !important;
+        min-height: 44px !important;
+
+        align-items: center !important;
+        justify-content: center !important;
+
+        padding: 0 !important;
+        margin: 0 !important;
+
+        color: #dce9ff !important;
+
+        font-size: 14px !important;
+        font-weight: 600 !important;
+
+        line-height: 1 !important;
+        white-space: nowrap !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    header.navbar .navbar-toggle {
+        display: none !important;
+    }
+}
+
+
+/* =========================
+   SERVICE GRID — DESKTOP
+========================= */
+
+@media (min-width: 769px) {
+
+    #customerServiceGrid.bayora-service-grid {
+
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+
+        gap: 18px !important;
+
+        width: 100% !important;
+
+        box-sizing: border-box !important;
+
+        align-items: stretch !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid .service-card {
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        min-height: 150px !important;
+
+        box-sizing: border-box !important;
+
+        display: grid !important;
+
+        grid-template-columns:
+            62px minmax(0, 1fr) !important;
+
+        grid-template-rows:
+            auto auto !important;
+
+        column-gap: 16px !important;
+
+        align-items: center !important;
+
+        padding: 22px 18px !important;
+
+        text-align: left !important;
+
+        overflow: hidden !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-icon {
+
+        grid-column: 1 !important;
+        grid-row: 1 / 3 !important;
+
+        width: 62px !important;
+        height: 62px !important;
+
+        min-width: 62px !important;
+        min-height: 62px !important;
+
+        margin: 0 !important;
+
+        flex-shrink: 0 !important;
+
+        box-sizing: border-box !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-title {
+
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        margin: 0 0 4px !important;
+        padding: 0 !important;
+
+        text-align: left !important;
+
+        font-size: 17px !important;
+        line-height: 1.25 !important;
+
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-description {
+
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        text-align: left !important;
+
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+}
+
+
+/* =========================
+   MOBILE NAVBAR
+========================= */
+
+@media (max-width: 700px) {
+
+    header.navbar nav#mainNavbarNav {
+        display: flex !important;
+    }
+
+    header.navbar:not(.nav-open)
+    nav#mainNavbarNav {
+
+        opacity: 0 !important;
+        visibility: hidden !important;
+
+        pointer-events: none !important;
+
+        transform: translateY(-8px) !important;
+    }
+
+    header.navbar.nav-open
+    nav#mainNavbarNav {
+
+        opacity: 1 !important;
+        visibility: visible !important;
+
+        pointer-events: auto !important;
+
+        transform: translateY(0) !important;
+    }
+
+    header.navbar nav#mainNavbarNav .main-nav-link {
+
+        display: flex !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        min-height: 48px !important;
+
+        align-items: center !important;
+
+        box-sizing: border-box !important;
+
+        white-space: nowrap !important;
+    }
+
+
+    /* SERVICE GRID MOBILE */
+
+    #customerServiceGrid.bayora-service-grid {
+
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+
+        width: 100% !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid .service-card {
+
+        display: flex !important;
+
+        flex-direction: column !important;
+
+        align-items: center !important;
+
+        justify-content: flex-start !important;
+
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        box-sizing: border-box !important;
+
+        padding: 22px 12px 18px !important;
+
+        text-align: center !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-icon {
+
+        width: 68px !important;
+        height: 68px !important;
+
+        min-width: 68px !important;
+        min-height: 68px !important;
+
+        margin: 0 auto 14px !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-title {
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
+
+        text-align: center !important;
+
+        font-size: 17px !important;
+        line-height: 1.3 !important;
+
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-description {
+
+        width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 6px 0 0 !important;
+
+        text-align: center !important;
+
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+}
+
+
+/* =========================
+   SMALL MOBILE
+========================= */
+
+@media (max-width: 390px) {
+
+    #customerServiceGrid.bayora-service-grid {
+        gap: 10px !important;
+    }
+
+    #customerServiceGrid.bayora-service-grid .service-card {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+    }
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-title {
+        font-size: 16px !important;
+    }
+
+    #customerServiceGrid.bayora-service-grid
+    .service-card .service-description {
+        font-size: 12px !important;
+    }
+}
+
+
+
+/* ============================================================
+   BAYORA — FINAL FIX
+   Struktur:
+   #customerServiceGrid
+     ├── customer-service-tabs
+     └── customer-service-category
+           └── service-section-grid
+============================================================ */
+
+
+/* PARENT UTAMA HARUS VERTIKAL */
+
+#customerServiceGrid {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+
+/* =========================
+   CATEGORY TABS
+========================= */
+
+#customerServiceGrid > .customer-service-tabs {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+
+    gap: 14px !important;
+
+    margin: 0 0 28px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* TAB */
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab {
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 14px !important;
+
+    padding: 18px 22px !important;
+
+    text-align: left !important;
+}
+
+
+/* =========================
+   CATEGORY CONTAINER
+========================= */
+
+#customerServiceGrid > .customer-service-category {
+
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+}
+
+
+/* CATEGORY HEADER */
+
+#customerServiceGrid
+> .customer-service-category
+.customer-service-category-header {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    margin: 0 0 16px !important;
+}
+
+
+/* =========================
+   SERVICE CARD GRID
+========================= */
+
+#customerServiceGrid
+> .customer-service-category
+> .service-section-grid {
+
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr)) !important;
+
+    gap: 18px !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================
+   SERVICE CARD
+========================= */
+
+#customerServiceGrid
+> .customer-service-category
+> .service-section-grid
+> .service-card {
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+}
+
+
+/* TITLE / DESCRIPTION */
+
+#customerServiceGrid
+.service-section-grid
+.service-card
+.service-title {
+
+    min-width: 0 !important;
+
+    white-space: normal !important;
+
+    word-break: normal !important;
+
+    overflow-wrap: break-word !important;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+    #customerServiceGrid
+    > .customer-service-tabs {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 10px !important;
+
+        margin-bottom: 22px !important;
+    }
+
+
+    #customerServiceGrid
+    > .customer-service-category
+    > .service-section-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 12px !important;
+    }
+
+
+    #customerServiceGrid
+    > .customer-service-tabs
+    .customer-service-tab {
+
+        padding: 14px 12px !important;
+
+        gap: 9px !important;
+    }
+
+}
+
+
+@media (max-width: 390px) {
+
+    #customerServiceGrid
+    > .customer-service-tabs {
+
+        gap: 8px !important;
+    }
+
+    #customerServiceGrid
+    > .customer-service-tabs
+    .customer-service-tab {
+
+        padding: 12px 9px !important;
+
+        gap: 7px !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — CUSTOMER SERVICE TABS FIX
+   PPOB / DIGITAL / SMM
+   ========================================================= */
+
+.customer-service-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 24px;
+    padding: 0;
+}
+
+.customer-service-tab {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-width: 0;
+    min-height: 82px;
+    margin: 0;
+    padding: 14px 16px;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #1f2937;
+
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+
+    transition:
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+.customer-service-tab:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.customer-service-tab.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+}
+
+.customer-service-tab-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+    background: #f3f4f6;
+
+    font-size: 22px;
+    line-height: 1;
+}
+
+.customer-service-tab.active .customer-service-tab-icon {
+    background: #dbeafe;
+}
+
+.customer-service-tab-icon img {
+    display: block;
+    width: 30px;
+    height: 30px;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.customer-service-tab > span:last-child {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.customer-service-tab strong {
+    display: block;
+    margin: 0;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.customer-service-tab small {
+    display: block;
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.35;
+}
+
+.customer-service-tab.active strong {
+    color: #1d4ed8;
+}
+
+.customer-service-tab.active small {
+    color: #4b5563;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 767px) {
+
+    .customer-service-tabs {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .customer-service-tab {
+        min-height: 70px;
+        padding: 11px 13px;
+        border-radius: 14px;
+        gap: 11px;
+    }
+
+    .customer-service-tab-icon {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+    }
+
+    .customer-service-tab-icon img {
+        width: 26px;
+        height: 26px;
+    }
+
+    .customer-service-tab strong {
+        font-size: 14px;
+    }
+
+    .customer-service-tab small {
+        font-size: 11px;
+    }
+}
+
+
+/* =========================================================
+   BAYORA — FIX CUSTOMER SERVICE GRID LAYOUT
+   Tabs harus full-width, cards berada di bawah tabs
+   ========================================================= */
+
+#customerServiceGrid {
+    display: block !important;
+    width: 100% !important;
+}
+
+#customerServiceGrid > .customer-service-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    margin: 0 0 24px !important;
+}
+
+#customerServiceGrid > .customer-service-tabs .customer-service-tab {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* Service cards tetap menjadi grid sendiri */
+#customerServiceGrid > .service-card,
+#customerServiceGrid > .bayora-service-card {
+    box-sizing: border-box;
+}
+
+/* Jika kartu layanan memakai grid container yang dibuat JS */
+#customerServiceGrid > .service-grid,
+#customerServiceGrid > .customer-service-grid {
+    width: 100% !important;
+}
+
+
+/* MOBILE */
+@media (max-width: 767px) {
+
+    #customerServiceGrid > .customer-service-tabs {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 20px !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — FINAL CUSTOMER SERVICE LAYOUT
+   Tabs = atas
+   Category + service cards = bawah
+   ========================================================= */
+
+/* Parent HARUS satu kolom */
+section.bayora-services #customerServiceGrid,
+.bayora-services #customerServiceGrid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 0 !important;
+}
+
+/* TAB selalu satu baris penuh */
+section.bayora-services #customerServiceGrid > .customer-service-tabs,
+.bayora-services #customerServiceGrid > .customer-service-tabs {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 0 24px !important;
+}
+
+/* CATEGORY selalu di bawah tab */
+section.bayora-services #customerServiceGrid > .customer-service-category,
+.bayora-services #customerServiceGrid > .customer-service-category {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* GRID KARTU LAYANAN */
+section.bayora-services #customerServiceGrid .service-section-grid,
+.bayora-services #customerServiceGrid .service-section-grid {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* MOBILE */
+@media (max-width: 767px) {
+
+    section.bayora-services #customerServiceGrid,
+    .bayora-services #customerServiceGrid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto !important;
+    }
+
+    section.bayora-services #customerServiceGrid > .customer-service-tabs,
+    .bayora-services #customerServiceGrid > .customer-service-tabs {
+        grid-template-columns: 1fr !important;
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+
+    section.bayora-services #customerServiceGrid > .customer-service-category,
+    .bayora-services #customerServiceGrid > .customer-service-category {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — CUSTOMER SERVICE TABS
+   VISUAL REFINEMENT
+   ========================================================= */
+
+#customerServiceGrid > .customer-service-tabs {
+    gap: 12px !important;
+    margin-bottom: 28px !important;
+}
+
+#customerServiceGrid > .customer-service-tabs .customer-service-tab {
+    min-height: 76px !important;
+    padding: 12px 16px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+
+    border: 1px solid #dbe5f2 !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+
+    box-shadow: 0 4px 12px rgba(20, 50, 100, 0.045) !important;
+
+    transform: none !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab:hover {
+    border-color: #bfdbfe !important;
+    background: #fbfdff !important;
+    box-shadow: 0 6px 16px rgba(20, 50, 100, 0.07) !important;
+    transform: translateY(-1px) !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab.active {
+    border-color: #2583ff !important;
+    background: #eef7ff !important;
+
+    box-shadow:
+        0 5px 16px rgba(37, 131, 255, 0.10) !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab-icon {
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+
+    border-radius: 12px !important;
+    background: #eef8ff !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab.active
+.customer-service-tab-icon {
+    background: #e0f1ff !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab-icon img {
+    width: 28px !important;
+    height: 28px !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab > span:last-child {
+    gap: 3px !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab strong {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+    color: #102957 !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab small {
+    font-size: 11.5px !important;
+    line-height: 1.35 !important;
+    color: #7a8da9 !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab.active strong {
+    color: #1769d3 !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab.active small {
+    color: #6d829f !important;
+}
+
+
+/* =========================================================
+   MOBILE — LEBIH COMPACT
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    #customerServiceGrid > .customer-service-tabs {
+        gap: 8px !important;
+        margin-bottom: 22px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab {
+        min-height: 62px !important;
+        padding: 9px 11px !important;
+        gap: 10px !important;
+        border-radius: 13px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab-icon {
+        flex: 0 0 36px !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab-icon img {
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab strong {
+        font-size: 13px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab small {
+        font-size: 10.5px !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — CUSTOMER TABS
+   LOCK SAME SIZE FOR ALL TABS
+   ========================================================= */
+
+#customerServiceGrid > .customer-service-tabs {
+    align-items: stretch !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab {
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+
+    box-sizing: border-box !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab-icon {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+
+    flex: 0 0 42px !important;
+    box-sizing: border-box !important;
+}
+
+#customerServiceGrid > .customer-service-tabs
+.customer-service-tab-icon img {
+    width: 28px !important;
+    height: 28px !important;
+
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+
+    object-fit: contain !important;
+}
+
+
+/* MOBILE — SEMUA TETAP SAMA */
+
+@media (max-width: 767px) {
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab {
+        height: 62px !important;
+        min-height: 62px !important;
+        max-height: 62px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab-icon {
+        width: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+
+        flex: 0 0 36px !important;
+    }
+
+    #customerServiceGrid > .customer-service-tabs
+    .customer-service-tab-icon img {
+        width: 24px !important;
+        height: 24px !important;
+
+        min-width: 24px !important;
+        min-height: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
+    }
+
+}
+
+
+/* =========================================================
+   BAYORA — SERVICE CARD ICONS
+   Semua icon layanan dibuat seragam & lebih compact
+   ========================================================= */
+
+#customerServiceGrid .service-section-grid .service-card
+.service-icon {
+    width: 64px !important;
+    height: 64px !important;
+
+    min-width: 64px !important;
+    min-height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+}
+
+#customerServiceGrid .service-section-grid .service-card
+.service-icon img {
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+
+    object-fit: contain !important;
+    display: block !important;
+}
+
+
+/* Emoji / icon non-image juga dibuat seragam */
+#customerServiceGrid .service-section-grid .service-card
+.service-icon {
+    font-size: 30px !important;
+    line-height: 1 !important;
+}
+
+
+/* Mobile */
+@media (max-width: 767px) {
+
+    #customerServiceGrid .service-section-grid .service-card
+    .service-icon {
+        width: 58px !important;
+        height: 58px !important;
+
+        min-width: 58px !important;
+        min-height: 58px !important;
+        max-width: 58px !important;
+        max-height: 58px !important;
+
+        border-radius: 16px !important;
+    }
+
+    #customerServiceGrid .service-section-grid .service-card
+    .service-icon img {
+        width: 32px !important;
+        height: 32px !important;
+
+        min-width: 32px !important;
+        min-height: 32px !important;
+        max-width: 32px !important;
+        max-height: 32px !important;
+    }
+
+}
+
+
+/* Service card icons — final size */
+#customerServiceGrid .service-section-grid .service-card
+.service-icon img {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    object-fit: contain !important;
+}
+

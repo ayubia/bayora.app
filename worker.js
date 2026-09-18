@@ -3456,6 +3456,19 @@ export default {
 
 if (url.pathname === "/api/payments/xendit" && request.method === "POST") {
   try {
+    const currentUser =
+      await getCurrentUser(
+        request,
+        env.ppobku_db
+      );
+
+    if (!currentUser) {
+      return json({
+        success: false,
+        error: "Silakan login terlebih dahulu."
+      }, 401);
+    }
+
     const {
       transactionId,
       customerEmail,
@@ -3471,6 +3484,7 @@ if (url.pathname === "/api/payments/xendit" && request.method === "POST") {
 
     const transaction = await env.ppobku_db.prepare(`
       SELECT
+        user_id AS userId,
         transaction_id AS transactionId,
         reference,
         product_name AS productName,
@@ -3484,6 +3498,16 @@ if (url.pathname === "/api/payments/xendit" && request.method === "POST") {
         success: false,
         error: "Transaksi tidak ditemukan."
       }, 404);
+    }
+
+    if (
+      String(transaction.userId) !==
+      String(currentUser.id)
+    ) {
+      return json({
+        success: false,
+        error: "Kamu tidak memiliki akses ke transaksi ini."
+      }, 403);
     }
 
     if (!env.XENDIT_SECRET_KEY) {

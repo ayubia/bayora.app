@@ -5391,6 +5391,7 @@ if (
       await env.ppobku_db.prepare(`
         SELECT
           t.id,
+          t.user_id AS userId,
           t.transaction_id AS transactionId,
           t.reference,
           t.service,
@@ -5429,6 +5430,38 @@ if (
         success: false,
         error: "Transaksi tidak ditemukan."
       }, 404);
+    }
+
+    /*
+     * DIGITAL tetap mendukung guest checkout.
+     *
+     * Transaksi non-digital/PPOB dibuat oleh user login,
+     * sehingga status transaksi hanya boleh dibaca oleh
+     * pemilik transaksi tersebut.
+     */
+    if (transaction.productType !== "digital") {
+      const currentUser =
+        await getCurrentUser(
+          request,
+          env.ppobku_db
+        );
+
+      if (!currentUser) {
+        return json({
+          success: false,
+          error: "Silakan login terlebih dahulu."
+        }, 401);
+      }
+
+      if (
+        String(transaction.userId) !==
+        String(currentUser.id)
+      ) {
+        return json({
+          success: false,
+          error: "Kamu tidak memiliki akses ke transaksi ini."
+        }, 403);
+      }
     }
 
     /*

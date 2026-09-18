@@ -9693,15 +9693,11 @@ async function deleteProduct(id) {
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-        console.log("BAYORA: DOMContentLoaded");
-        console.log("BAYORA: loadCatalog tersedia =", typeof loadCatalog);
-
-        ensureDigiflazzSyncButton();
+ensureDigiflazzSyncButton();
 
         loadCatalog()
             .then(() => {
-                console.log("BAYORA: katalog berhasil dimuat");
-            })
+})
             .catch((error) => {
                 console.error("BAYORA: loadCatalog error:", error);
             });

@@ -519,20 +519,7 @@ async function loadCustomerCatalog() {
 
         services = apiServices;
         products = apiProducts;
-
-        console.log(
-            "[BAYORA ICON DEBUG]",
-            Object.entries(services).map(
-                ([id, service]) => ({
-                    id,
-                    title: service.title,
-                    type: service.type,
-                    icon: service.icon
-                })
-            )
-        );
-
-        renderCustomerServices();
+renderCustomerServices();
 
         /*
          * BAYORA — OPEN SHARED SERVICE
@@ -678,17 +665,7 @@ async function loadCustomerCatalog() {
             restoreBayoraLastPage();
 
         }
-
-        console.log(
-            "Katalog customer berhasil dimuat dari database.",
-            {
-                services: Object.keys(services),
-                products
-            }
-        );
-
-
-    } catch (error) {
+} catch (error) {
 
         /*
          * Jangan merusak website kalau API gagal.
@@ -771,16 +748,7 @@ async function loadSmmServices() {
                         service.cancel === true,
                     type: "smm"
                 }));
-
-
-        console.log(
-            "[SMM] Katalog customer berhasil dimuat:",
-            smmServices.length,
-            "layanan"
-        );
-
-
-        if (
+if (
             typeof customerServiceCategory !==
             "undefined" &&
             customerServiceCategory === "smm"
@@ -2540,21 +2508,7 @@ function openService(serviceId) {
     if (!service) {
         return;
     }
-
-    console.log(
-        "[BAYORA OPEN SERVICE]",
-        {
-            serviceId,
-            title: service.title,
-            type: service.type,
-            productCount:
-                products[serviceId]
-                    ? products[serviceId].length
-                    : 0
-        }
-    );
-
-    currentService = serviceId;
+currentService = serviceId;
 
     saveBayoraPage(
         "service:" + serviceId
@@ -6797,13 +6751,7 @@ function showDigitalDownloadButton(
         successPage.classList.add(
             "bayora-digital-success"
         );
-
-        console.log(
-            "[BAYORA DIGITAL SUCCESS] " +
-            "Layout disamakan dengan referensi email."
-        );
-
-    })
+})
     .catch(error => {
 
         console.error(

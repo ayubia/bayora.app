@@ -3078,10 +3078,7 @@ footer a{
 
                 }, 100);
             }
-
-            console.log("[BAYORA] Transaksi mobile diklik.");
-
-            return;
+return;
         }
 
 
@@ -3102,12 +3099,7 @@ footer a{
                 dropdown.classList.remove("is-open");
                 dropdown.setAttribute("aria-hidden", "true");
             }
-
-
-            console.log("[BAYORA] Logout mobile diklik.");
-
-
-            fetch("/api/auth/logout", {
+fetch("/api/auth/logout", {
                 method: "POST",
                 credentials: "include"
             })
@@ -3166,10 +3158,7 @@ async function bayoraLogoutNow(event) {
         event.preventDefault();
         event.stopPropagation();
     }
-
-    console.log("[BAYORA] Logout diklik.");
-
-    try {
+try {
 
         const response = await fetch(
             "/api/auth/logout",
@@ -3180,10 +3169,7 @@ async function bayoraLogoutNow(event) {
         );
 
         const data = await response.json();
-
-        console.log("[BAYORA] Logout response:", data);
-
-        if (!response.ok || !data.success) {
+if (!response.ok || !data.success) {
             throw new Error(
                 data.error || "Logout gagal."
             );

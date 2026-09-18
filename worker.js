@@ -2054,6 +2054,94 @@ export default {
       url.pathname === "/api/services/upload-icon"
     ) {
       try {
+
+        // ------------------------------------
+        // AUTH ADMIN
+        // ------------------------------------
+
+        const cookieHeader =
+          request.headers.get("Cookie") || "";
+
+        const match =
+          cookieHeader.match(
+            /(?:^|;\s*)bayora_admin_session=([^;]+)/
+          );
+
+        if (!match) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+          }, 401);
+        }
+
+        let sessionToken;
+
+        try {
+          sessionToken =
+            decodeURIComponent(match[1]);
+        } catch {
+          sessionToken = match[1];
+        }
+
+        const sessionHash =
+          hashSessionToken(sessionToken);
+
+        const sessionResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              s.id AS session_id,
+              s.expires_at,
+              a.id,
+              a.username,
+              a.name,
+              a.role,
+              a.active
+            FROM admin_sessions s
+            JOIN admins a
+              ON a.id = s.admin_id
+            WHERE s.token_hash = ?
+            LIMIT 1
+          `).bind(sessionHash).all();
+
+        const admin =
+          sessionResult.results?.[0];
+
+        if (!admin) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin tidak valid."
+          }, 401);
+        }
+
+        if (
+          !admin.active ||
+          new Date(admin.expires_at).getTime() <= Date.now()
+        ) {
+          await env.ppobku_db.prepare(`
+            DELETE FROM admin_sessions
+            WHERE id = ?
+          `).bind(admin.session_id).run();
+
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin sudah expired."
+          }, 401);
+        }
+
+        if (
+          admin.role !== "owner" &&
+          admin.role !== "admin"
+        ) {
+          return json({
+            success: false,
+            error: "Kamu tidak memiliki akses untuk upload file."
+          }, 403);
+        }
+
+
         const formData =
           await request.formData();
 
@@ -2242,6 +2330,94 @@ export default {
         "/api/products/upload-preview"
     ) {
       try {
+
+        // ------------------------------------
+        // AUTH ADMIN
+        // ------------------------------------
+
+        const cookieHeader =
+          request.headers.get("Cookie") || "";
+
+        const match =
+          cookieHeader.match(
+            /(?:^|;\s*)bayora_admin_session=([^;]+)/
+          );
+
+        if (!match) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+          }, 401);
+        }
+
+        let sessionToken;
+
+        try {
+          sessionToken =
+            decodeURIComponent(match[1]);
+        } catch {
+          sessionToken = match[1];
+        }
+
+        const sessionHash =
+          hashSessionToken(sessionToken);
+
+        const sessionResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              s.id AS session_id,
+              s.expires_at,
+              a.id,
+              a.username,
+              a.name,
+              a.role,
+              a.active
+            FROM admin_sessions s
+            JOIN admins a
+              ON a.id = s.admin_id
+            WHERE s.token_hash = ?
+            LIMIT 1
+          `).bind(sessionHash).all();
+
+        const admin =
+          sessionResult.results?.[0];
+
+        if (!admin) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin tidak valid."
+          }, 401);
+        }
+
+        if (
+          !admin.active ||
+          new Date(admin.expires_at).getTime() <= Date.now()
+        ) {
+          await env.ppobku_db.prepare(`
+            DELETE FROM admin_sessions
+            WHERE id = ?
+          `).bind(admin.session_id).run();
+
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin sudah expired."
+          }, 401);
+        }
+
+        if (
+          admin.role !== "owner" &&
+          admin.role !== "admin"
+        ) {
+          return json({
+            success: false,
+            error: "Kamu tidak memiliki akses untuk upload file."
+          }, 403);
+        }
+
+
         const formData =
           await request.formData();
 
@@ -2400,6 +2576,94 @@ export default {
       url.pathname === "/api/products/upload-pdf"
     ) {
       try {
+
+        // ------------------------------------
+        // AUTH ADMIN
+        // ------------------------------------
+
+        const cookieHeader =
+          request.headers.get("Cookie") || "";
+
+        const match =
+          cookieHeader.match(
+            /(?:^|;\s*)bayora_admin_session=([^;]+)/
+          );
+
+        if (!match) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+          }, 401);
+        }
+
+        let sessionToken;
+
+        try {
+          sessionToken =
+            decodeURIComponent(match[1]);
+        } catch {
+          sessionToken = match[1];
+        }
+
+        const sessionHash =
+          hashSessionToken(sessionToken);
+
+        const sessionResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              s.id AS session_id,
+              s.expires_at,
+              a.id,
+              a.username,
+              a.name,
+              a.role,
+              a.active
+            FROM admin_sessions s
+            JOIN admins a
+              ON a.id = s.admin_id
+            WHERE s.token_hash = ?
+            LIMIT 1
+          `).bind(sessionHash).all();
+
+        const admin =
+          sessionResult.results?.[0];
+
+        if (!admin) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin tidak valid."
+          }, 401);
+        }
+
+        if (
+          !admin.active ||
+          new Date(admin.expires_at).getTime() <= Date.now()
+        ) {
+          await env.ppobku_db.prepare(`
+            DELETE FROM admin_sessions
+            WHERE id = ?
+          `).bind(admin.session_id).run();
+
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin sudah expired."
+          }, 401);
+        }
+
+        if (
+          admin.role !== "owner" &&
+          admin.role !== "admin"
+        ) {
+          return json({
+            success: false,
+            error: "Kamu tidak memiliki akses untuk upload file."
+          }, 403);
+        }
+
+
         const formData = await request.formData();
         const file = formData.get("file");
 

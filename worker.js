@@ -2750,50 +2750,29 @@ export default {
     }
 
     // ========================================
-    // SERVE DIGITAL PRODUCT PDF
+    // BLOCK DIRECT DIGITAL PRODUCT FILE ACCESS
     // ========================================
 
+    /*
+     * File digital berbayar tidak boleh disajikan langsung
+     * melalui path /uploads/digital/files/*.
+     *
+     * Database tetap boleh menyimpan path tersebut sebagai
+     * referensi internal R2. Download pelanggan harus melalui
+     * /api/digital-products/download/* atau
+     * /api/digital-products/download-guide/* yang
+     * memverifikasi digital download token.
+     */
     if (
       request.method === "GET" &&
       url.pathname.startsWith(
         "/uploads/digital/files/"
       )
     ) {
-      try {
-        const relativePath =
-          decodeURIComponent(
-            url.pathname.replace(
-              "/uploads/digital/files/",
-              ""
-            )
-          );
-
-        if (
-          !relativePath ||
-          relativePath.includes("..")
-        ) {
-          return new Response(
-            "Invalid path",
-            { status: 400 }
-          );
-        }
-
-        return await serveR2Object(
-          env,
-          `digital/files/${relativePath}`
-        );
-
-      } catch (error) {
-        console.error(
-          "[SERVE DIGITAL PDF]",
-          error
-        );
-
-        return new Response(
-          "Gagal mengambil PDF",
-          { status: 500 }
-        );
-      }
+      return json({
+        success: false,
+        error: "Akses file digital harus melalui link download resmi."
+      }, 403);
     }
 
 

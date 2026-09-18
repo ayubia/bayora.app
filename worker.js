@@ -4820,6 +4820,19 @@ if (
   url.pathname.endsWith("/sync-xendit-ppob")
 ) {
   try {
+    const currentUser =
+      await getCurrentUser(
+        request,
+        env.ppobku_db
+      );
+
+    if (!currentUser) {
+      return json({
+        success: false,
+        error: "Silakan login terlebih dahulu."
+      }, 401);
+    }
+
     const transactionId = decodeURIComponent(
       url.pathname
         .slice("/api/transactions/".length)
@@ -4843,6 +4856,7 @@ if (
     const transaction =
       await env.ppobku_db.prepare(`
         SELECT
+          t.user_id AS userId,
           t.transaction_id AS transactionId,
           t.payment_method AS paymentMethod,
           t.payment_status AS paymentStatus,
@@ -4865,6 +4879,16 @@ if (
         success: false,
         error: "Transaksi tidak ditemukan."
       }, 404);
+    }
+
+    if (
+      String(transaction.userId) !==
+      String(currentUser.id)
+    ) {
+      return json({
+        success: false,
+        error: "Kamu tidak memiliki akses ke transaksi ini."
+      }, 403);
     }
 
     if (transaction.productType === "digital") {

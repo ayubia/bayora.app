@@ -936,6 +936,648 @@ async function callDjuraganSosmedWorker(
 }
 
 
+// ========================================
+// SMM — DJURAGANSOSMED AUTOMATIC CATALOG SYNC
+// CATALOG ONLY — NEVER CREATES PROVIDER ORDERS
+// ========================================
+
+async function syncDjuraganSosmedCatalogWorker(env) {
+  const CHUNK_SIZE = 100;
+  const MIN_CATALOG_SIZE = 100;
+  const MIN_VALID_RATIO = 0.8;
+  const MIN_EXISTING_RATIO = 0.7;
+
+  const now = new Date().toISOString();
+
+  const provider =
+    await env.ppobku_db.prepare(`
+      SELECT id, name, active
+      FROM smm_providers
+      WHERE LOWER(name) = 'djuragansosmed'
+      LIMIT 1
+    `).first();
+
+  if (!provider) {
+    throw new Error(
+      "Provider DjuraganSosmed tidak ditemukan."
+    );
+  }
+
+  if (Number(provider.active) !== 1) {
+    throw new Error(
+      "Provider DjuraganSosmed sedang nonaktif."
+    );
+  }
+
+  const providerId = Number(provider.id);
+
+  const saveError = async message => {
+    try {
+      await env.ppobku_db.prepare(`
+        INSERT INTO smm_sync_state (
+          provider_id,
+          offset,
+          catalog_total,
+          processed_total,
+          last_run_at,
+          last_error
+        )
+        VALUES (?, 0, 0, 0, ?, ?)
+        ON CONFLICT(provider_id)
+        DO UPDATE SET
+          last_run_at = excluded.last_run_at,
+          last_error = excluded.last_error
+      `)
+        .bind(
+          providerId,
+          now,
+          String(message || "Unknown sync error")
+            .slice(0, 1000)
+        )
+        .run();
+    } catch (stateError) {
+      console.error(
+        "[SMM AUTO SYNC STATE ERROR]",
+        stateError?.message || String(stateError)
+      );
+    }
+  };
+
+  try {
+    const settings =
+      await env.ppobku_db.prepare(`
+        SELECT margin_percent
+        FROM smm_settings
+        WHERE id = 1
+        LIMIT 1
+      `).first();
+
+    const marginPercent =
+      Number(settings?.margin_percent || 0);
+
+    if (
+      !Number.isFinite(marginPercent) ||
+      marginPercent < 0
+    ) {
+      throw new Error(
+        "Margin global SMM tidak valid."
+      );
+    }
+
+    const data =
+      await callDjuraganSosmedWorker(
+        env,
+        "services"
+      );
+
+    const catalog =
+      Array.isArray(data)
+        ? data
+        : (
+            Array.isArray(data?.services)
+              ? data.services
+              : []
+          );
+
+    if (catalog.length < MIN_CATALOG_SIZE) {
+      throw new Error(
+        `Katalog DjuraganSosmed tidak wajar (${catalog.length} layanan).`
+      );
+    }
+
+    const detectPlatform = service => {
+      const source =
+        `${service?.category || ""} ${service?.name || ""}`
+          .normalize("NFKC")
+          .toLowerCase();
+
+      const rules = [
+        ["Instagram", ["instagram", " ig ", "ig ", " ig", "[ig]", "|ig "]],
+        ["TikTok", ["tiktok", "tik tok"]],
+        ["YouTube", ["youtube"]],
+        ["Facebook", ["facebook"]],
+        ["X / Twitter", ["twitter", "x/twitter", "x - twitter"]],
+        ["Threads", ["threads"]],
+        ["Telegram", ["telegram"]],
+        ["Shopee", ["shopee"]],
+        ["WhatsApp", ["whatsapp"]],
+        ["Spotify", ["spotify"]],
+        ["Lazada", ["lazada"]],
+        ["Tokopedia", ["tokopedia"]],
+        ["Pinterest", ["pinterest"]],
+        ["LinkedIn", ["linkedin"]],
+        ["Discord", ["discord"]],
+        ["SoundCloud", ["soundcloud"]],
+        ["Roblox", ["roblox"]],
+        ["Kick", ["kick.com", "kick "]],
+        ["Website", ["website", "web traffic", "mobile traffic"]]
+      ];
+
+      for (const [platform, keywords] of rules) {
+        if (
+          keywords.some(keyword =>
+            source.includes(keyword)
+          )
+        ) {
+          return platform;
+        }
+      }
+
+      return "Other";
+    };
+
+    const validServices = [];
+
+    for (const service of catalog) {
+      const providerServiceId =
+        String(service?.service || "").trim();
+
+      const providerRate =
+        Number(service?.rate);
+
+      const minQuantity =
+        Number(service?.min);
+
+      const maxQuantity =
+        Number(service?.max);
+
+      if (
+        !providerServiceId ||
+        !Number.isFinite(providerRate) ||
+        providerRate < 0 ||
+        !Number.isFinite(minQuantity) ||
+        !Number.isFinite(maxQuantity) ||
+        minQuantity < 1 ||
+        maxQuantity < minQuantity
+      ) {
+        continue;
+      }
+
+      const providerType =
+        String(service?.type || "")
+          .trim()
+          .toLowerCase();
+
+      validServices.push({
+        providerServiceId,
+        providerRate,
+        minQuantity,
+        maxQuantity,
+        platform: detectPlatform(service),
+        category:
+          String(service?.category || ""),
+        name:
+          String(service?.name || ""),
+        providerType,
+        refill:
+          service?.refill === true ? 1 : 0,
+        cancel:
+          service?.cancel === true ? 1 : 0,
+        dripfeed:
+          service?.dripfeed === true ? 1 : 0,
+        supported:
+          providerType === "default" &&
+          providerRate > 0
+      });
+    }
+
+    /*
+     * Stable ordering is required because sync progress uses
+     * an offset across multiple scheduled invocations.
+     */
+    validServices.sort((a, b) =>
+      a.providerServiceId.localeCompare(
+        b.providerServiceId,
+        undefined,
+        {
+          numeric: true,
+          sensitivity: "base"
+        }
+      )
+    );
+
+    const catalogFingerprint =
+      await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(
+          validServices
+            .map(service =>
+              service.providerServiceId
+            )
+            .join("\n")
+        )
+      );
+
+    const catalogFingerprintHex =
+      Array.from(
+        new Uint8Array(catalogFingerprint)
+      )
+        .map(byte =>
+          byte.toString(16).padStart(2, "0")
+        )
+        .join("");
+
+    if (
+      validServices.length < MIN_CATALOG_SIZE ||
+      validServices.length <
+        Math.floor(
+          catalog.length * MIN_VALID_RATIO
+        )
+    ) {
+      throw new Error(
+        `Katalog valid tidak mencukupi (${validServices.length}/${catalog.length}).`
+      );
+    }
+
+    const existingCountRow =
+      await env.ppobku_db.prepare(`
+        SELECT COUNT(*) AS total
+        FROM smm_services
+        WHERE provider_id = ?
+      `)
+        .bind(providerId)
+        .first();
+
+    const existingCount =
+      Number(existingCountRow?.total || 0);
+
+    if (
+      existingCount >= MIN_CATALOG_SIZE &&
+      validServices.length <
+        Math.floor(
+          existingCount * MIN_EXISTING_RATIO
+        )
+    ) {
+      throw new Error(
+        `Katalog provider turun tidak wajar (${validServices.length}/${existingCount}).`
+      );
+    }
+
+    let state =
+      await env.ppobku_db.prepare(`
+        SELECT
+          provider_id AS providerId,
+          offset,
+          cycle_id AS cycleId,
+          catalog_total AS catalogTotal,
+          processed_total AS processedTotal,
+          cycle_started_at AS cycleStartedAt,
+          catalog_fingerprint AS catalogFingerprint
+        FROM smm_sync_state
+        WHERE provider_id = ?
+        LIMIT 1
+      `)
+        .bind(providerId)
+        .first();
+
+    let offset =
+      Math.max(
+        0,
+        Number(state?.offset || 0)
+      );
+
+    /*
+     * Bila katalog berubah ukuran di tengah siklus,
+     * mulai siklus baru dari awal. Ini mencegah offset
+     * lama menunjuk ke susunan katalog yang berbeda.
+     */
+    const previousCatalogTotal =
+      Number(state?.catalogTotal || 0);
+
+    const previousCatalogFingerprint =
+      String(state?.catalogFingerprint || "");
+
+    let cycleId =
+      String(state?.cycleId || "");
+
+    let cycleStartedAt =
+      state?.cycleStartedAt || null;
+
+    if (
+      !cycleId ||
+      offset >= validServices.length ||
+      (
+        previousCatalogTotal > 0 &&
+        previousCatalogTotal !== validServices.length
+      ) ||
+      (
+        previousCatalogFingerprint &&
+        previousCatalogFingerprint !==
+          catalogFingerprintHex
+      )
+    ) {
+      offset = 0;
+      cycleId =
+        `${Date.now()}-${crypto.randomUUID()}`;
+      cycleStartedAt = now;
+
+      await env.ppobku_db.prepare(`
+        INSERT INTO smm_sync_state (
+          provider_id,
+          offset,
+          cycle_id,
+          catalog_total,
+          processed_total,
+          cycle_started_at,
+          last_run_at,
+          last_error,
+          catalog_fingerprint
+        )
+        VALUES (?, 0, ?, ?, 0, ?, ?, NULL, ?)
+        ON CONFLICT(provider_id)
+        DO UPDATE SET
+          offset = 0,
+          cycle_id = excluded.cycle_id,
+          catalog_total = excluded.catalog_total,
+          processed_total = 0,
+          cycle_started_at =
+            excluded.cycle_started_at,
+          last_run_at = excluded.last_run_at,
+          last_error = NULL,
+          catalog_fingerprint =
+            excluded.catalog_fingerprint
+      `)
+        .bind(
+          providerId,
+          cycleId,
+          validServices.length,
+          cycleStartedAt,
+          now,
+          catalogFingerprintHex
+        )
+        .run();
+    }
+
+    const chunk =
+      validServices.slice(
+        offset,
+        offset + CHUNK_SIZE
+      );
+
+    if (!chunk.length) {
+      throw new Error(
+        "Chunk auto-sync kosong secara tidak wajar."
+      );
+    }
+
+    const statements = [];
+
+    for (const service of chunk) {
+      const sellingRate =
+        Math.ceil(
+          service.providerRate *
+          (1 + marginPercent / 100)
+        );
+
+      statements.push(
+        env.ppobku_db.prepare(`
+          INSERT INTO smm_services (
+            provider_id,
+            provider_service_id,
+            platform,
+            category,
+            name,
+            description,
+            price,
+            min_quantity,
+            max_quantity,
+            refill,
+            cancel,
+            active,
+            created_at,
+            updated_at,
+            provider_type,
+            provider_rate,
+            dripfeed,
+            provider_category
+          )
+          VALUES (
+            ?, ?, ?, ?, ?, '',
+            ?, ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, ?
+          )
+          ON CONFLICT(
+            provider_id,
+            provider_service_id
+          )
+          DO UPDATE SET
+            platform = excluded.platform,
+            category = excluded.category,
+            name = excluded.name,
+            price = excluded.price,
+            min_quantity = excluded.min_quantity,
+            max_quantity = excluded.max_quantity,
+            refill = excluded.refill,
+            cancel = excluded.cancel,
+            active = excluded.active,
+            updated_at = excluded.updated_at,
+            provider_type =
+              excluded.provider_type,
+            provider_rate =
+              excluded.provider_rate,
+            dripfeed =
+              excluded.dripfeed,
+            provider_category =
+              excluded.provider_category
+        `).bind(
+          providerId,
+          service.providerServiceId,
+          service.platform,
+          service.category,
+          service.name,
+          sellingRate,
+          service.minQuantity,
+          service.maxQuantity,
+          service.refill,
+          service.cancel,
+          service.supported ? 1 : 0,
+          now,
+          now,
+          service.providerType,
+          service.providerRate,
+          service.dripfeed,
+          service.category
+        )
+      );
+    }
+
+    await env.ppobku_db.batch(statements);
+
+    const nextOffset =
+      offset + chunk.length;
+
+    const cycleComplete =
+      nextOffset >= validServices.length;
+
+    if (!cycleComplete) {
+      await env.ppobku_db.prepare(`
+        UPDATE smm_sync_state
+        SET
+          offset = ?,
+          catalog_total = ?,
+          processed_total = ?,
+          last_run_at = ?,
+          last_error = NULL,
+          catalog_fingerprint = ?
+        WHERE provider_id = ?
+          AND cycle_id = ?
+      `)
+        .bind(
+          nextOffset,
+          validServices.length,
+          nextOffset,
+          now,
+          catalogFingerprintHex,
+          providerId,
+          cycleId
+        )
+        .run();
+
+      return {
+        success: true,
+        cycleComplete: false,
+        providerId,
+        cycleId,
+        offset,
+        processedThisRun: chunk.length,
+        nextOffset,
+        catalogTotal: validServices.length,
+        marginPercent,
+        syncedAt: now
+      };
+    }
+
+    /*
+     * Seluruh chunk dalam siklus sudah berhasil.
+     * Baru sekarang kita boleh mencari layanan yang
+     * benar-benar hilang dari katalog provider.
+     */
+    const current =
+      await env.ppobku_db.prepare(`
+        SELECT provider_service_id
+        FROM smm_services
+        WHERE provider_id = ?
+      `)
+        .bind(providerId)
+        .all();
+
+    const providerIds =
+      new Set(
+        validServices.map(
+          service =>
+            service.providerServiceId
+        )
+      );
+
+    const missingIds =
+      (current.results || [])
+        .map(row =>
+          String(
+            row.provider_service_id || ""
+          )
+        )
+        .filter(
+          id =>
+            id &&
+            !providerIds.has(id)
+        );
+
+    /*
+     * Guard tambahan sebelum destructive disable.
+     */
+    if (
+      existingCount >= MIN_CATALOG_SIZE &&
+      validServices.length <
+        Math.floor(
+          existingCount * MIN_EXISTING_RATIO
+        )
+    ) {
+      throw new Error(
+        "Mass-disable dibatalkan oleh safety guard."
+      );
+    }
+
+    for (
+      let index = 0;
+      index < missingIds.length;
+      index += 50
+    ) {
+      const ids =
+        missingIds.slice(
+          index,
+          index + 50
+        );
+
+      if (!ids.length) continue;
+
+      const placeholders =
+        ids.map(() => "?").join(",");
+
+      await env.ppobku_db.prepare(`
+        UPDATE smm_services
+        SET
+          active = 0,
+          updated_at = ?
+        WHERE provider_id = ?
+          AND provider_service_id
+            IN (${placeholders})
+      `)
+        .bind(
+          now,
+          providerId,
+          ...ids
+        )
+        .run();
+    }
+
+    await env.ppobku_db.prepare(`
+      UPDATE smm_sync_state
+      SET
+        offset = 0,
+        cycle_id = NULL,
+        catalog_total = ?,
+        processed_total = ?,
+        cycle_started_at = NULL,
+        last_run_at = ?,
+        last_success_at = ?,
+        last_error = NULL,
+        catalog_fingerprint = ?
+      WHERE provider_id = ?
+        AND cycle_id = ?
+    `)
+      .bind(
+        validServices.length,
+        validServices.length,
+        now,
+        now,
+        catalogFingerprintHex,
+        providerId,
+        cycleId
+      )
+      .run();
+
+    return {
+      success: true,
+      cycleComplete: true,
+      providerId,
+      cycleId,
+      processedThisRun: chunk.length,
+      catalogTotal: validServices.length,
+      disabledMissing: missingIds.length,
+      marginPercent,
+      syncedAt: now
+    };
+
+  } catch (error) {
+    await saveError(
+      error?.message || String(error)
+    );
+
+    throw error;
+  }
+}
+
 export default {
   async fetch(request, env) {
 
@@ -11422,6 +12064,27 @@ if (
         message: "Endpoint tidak ditemukan"
       },
       { status: 404 }
+    );
+  },
+
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(
+      (async () => {
+        try {
+          const result =
+            await syncDjuraganSosmedCatalogWorker(env);
+
+          console.log(
+            "[SMM AUTO SYNC]",
+            JSON.stringify(result)
+          );
+        } catch (error) {
+          console.error(
+            "[SMM AUTO SYNC ERROR]",
+            error?.message || String(error)
+          );
+        }
+      })()
     );
   }
 };

@@ -8598,6 +8598,30 @@ export default {
     }
 
     // ========================================
+    // FRONTEND LEGAL PAGES
+    // ========================================
+
+    if (
+      request.method === "GET" &&
+      (
+        url.pathname === "/terms" ||
+        url.pathname === "/privacy"
+      )
+    ) {
+      const legalAssetPath =
+        url.pathname === "/terms"
+          ? "/terms.html"
+          : "/privacy.html";
+
+      const assetRequest = new Request(
+        new URL(legalAssetPath, request.url),
+        request
+      );
+
+      return env.ASSETS.fetch(assetRequest);
+    }
+
+    // ========================================
     // FRONTEND ROOT
     // ========================================
 

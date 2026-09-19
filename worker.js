@@ -4706,6 +4706,241 @@ export default {
 
 
     // ========================================
+    // ADMIN — SMM PLATFORM ICONS
+    // ========================================
+
+    if (
+      (
+        request.method === "GET" ||
+        request.method === "PUT"
+      ) &&
+      url.pathname === "/api/admin/smm/platform-icons"
+    ) {
+      try {
+        // ------------------------------------
+        // AUTH ADMIN
+        // ------------------------------------
+
+        const cookieHeader =
+          request.headers.get("Cookie") || "";
+
+        const match =
+          cookieHeader.match(
+            /(?:^|;\s*)bayora_admin_session=([^;]+)/
+          );
+
+        if (!match) {
+          return json({
+            success: false,
+            error: "Admin belum login."
+          }, 401);
+        }
+
+        let token;
+
+        try {
+          token = decodeURIComponent(match[1]);
+        } catch {
+          token = match[1];
+        }
+
+        const tokenHash =
+          hashSessionToken(token);
+
+        const session =
+          await env.ppobku_db.prepare(`
+            SELECT
+              s.id AS session_id,
+              s.expires_at,
+              a.id,
+              a.role,
+              a.active
+            FROM admin_sessions s
+            INNER JOIN admins a
+              ON a.id = s.admin_id
+            WHERE s.token_hash = ?
+            LIMIT 1
+          `)
+            .bind(tokenHash)
+            .first();
+
+        if (
+          !session ||
+          !session.active ||
+          new Date(session.expires_at).getTime()
+            <= Date.now()
+        ) {
+          return json({
+            success: false,
+            error:
+              "Session admin tidak valid atau expired."
+          }, 401);
+        }
+
+        if (
+          session.role !== "owner" &&
+          session.role !== "admin"
+        ) {
+          return json({
+            success: false,
+            error:
+              "Kamu tidak memiliki akses untuk mengubah icon platform."
+          }, 403);
+        }
+
+        // ------------------------------------
+        // GET ICONS
+        // ------------------------------------
+
+        if (request.method === "GET") {
+          const result =
+            await env.ppobku_db.prepare(`
+              SELECT
+                catalog.platform,
+                COALESCE(settings.icon, '') AS icon,
+                settings.updated_at AS updatedAt
+              FROM (
+                SELECT
+                  LOWER(TRIM(s.platform)) AS platform_key,
+                  MIN(TRIM(s.platform)) AS platform
+                FROM smm_services s
+                INNER JOIN smm_providers p
+                  ON p.id = s.provider_id
+                WHERE s.active = 1
+                  AND p.active = 1
+                  AND TRIM(COALESCE(s.platform, '')) <> ''
+                GROUP BY LOWER(TRIM(s.platform))
+              ) catalog
+              LEFT JOIN smm_platform_settings settings
+                ON settings.platform = catalog.platform_key
+              ORDER BY catalog.platform COLLATE NOCASE ASC
+            `).all();
+
+          return json({
+            success: true,
+            icons: result.results || []
+          });
+        }
+
+        // ------------------------------------
+        // PUT ICON
+        // ------------------------------------
+
+        let body;
+
+        try {
+          body = await request.json();
+        } catch {
+          return json({
+            success: false,
+            error: "Data icon tidak valid."
+          }, 400);
+        }
+
+        const platform =
+          String(body?.platform || "")
+            .trim();
+
+        const icon =
+          String(body?.icon || "")
+            .trim();
+
+        if (!platform) {
+          return json({
+            success: false,
+            error: "Platform wajib diisi."
+          }, 400);
+        }
+
+        if (platform.length > 100) {
+          return json({
+            success: false,
+            error: "Nama platform terlalu panjang."
+          }, 400);
+        }
+
+        if (
+          icon &&
+          !icon.startsWith("/assets/bayora-icons/")
+        ) {
+          return json({
+            success: false,
+            error:
+              "Icon harus berasal dari penyimpanan Bayora."
+          }, 400);
+        }
+
+        const normalizedPlatform =
+          platform.toLowerCase();
+
+        /*
+         * Pastikan platform benar-benar berasal
+         * dari katalog SMM yang ada.
+         */
+        const existingPlatform =
+          await env.ppobku_db.prepare(`
+            SELECT platform
+            FROM smm_services
+            WHERE LOWER(platform) = ?
+            LIMIT 1
+          `)
+            .bind(normalizedPlatform)
+            .first();
+
+        if (!existingPlatform) {
+          return json({
+            success: false,
+            error: "Platform SMM tidak ditemukan."
+          }, 404);
+        }
+
+        const canonicalPlatform =
+          String(existingPlatform.platform || platform)
+            .trim();
+
+        const now =
+          new Date().toISOString();
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO smm_platform_settings (
+            platform,
+            icon,
+            updated_at
+          )
+          VALUES (?, ?, ?)
+          ON CONFLICT(platform) DO UPDATE SET
+            icon = excluded.icon,
+            updated_at = excluded.updated_at
+        `)
+          .bind(
+            canonicalPlatform.toLowerCase(),
+            icon,
+            now
+          )
+          .run();
+
+        return json({
+          success: true,
+          platform: canonicalPlatform,
+          icon,
+          updatedAt: now
+        });
+
+      } catch (error) {
+        console.error(
+          "[ADMIN SMM PLATFORM ICONS]",
+          error?.message || String(error)
+        );
+
+        return json({
+          success: false,
+          error: "Gagal mengelola icon platform SMM."
+        }, 500);
+      }
+    }
+
+
+    // ========================================
     // SMM SERVICES
     // ========================================
 
@@ -4734,6 +4969,7 @@ export default {
             s.name,
             s.description,
             s.icon,
+            spi.icon AS platformIcon,
             s.price,
             s.min_quantity AS minQuantity,
             s.max_quantity AS maxQuantity,
@@ -4745,6 +4981,8 @@ export default {
           FROM smm_services s
           INNER JOIN smm_providers p
             ON p.id = s.provider_id
+          LEFT JOIN smm_platform_settings spi
+            ON spi.platform = LOWER(s.platform)
           WHERE s.active = 1
             AND p.active = 1
         `;

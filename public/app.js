@@ -740,6 +740,9 @@ async function loadSmmServices() {
                     icon:
                         service.icon ||
                         "",
+                    platformIcon:
+                        service.platformIcon ||
+                        "",
                     price:
                         Number(service.price) || 0,
                     minQuantity:
@@ -1270,14 +1273,33 @@ function getBayoraServiceIconHTML(id, service) {
         }
 
         function smmCustomIcon(service, fallback) {
-            const icon = String(service?.icon || "").trim();
+
+            /*
+             * Icon platform dari Admin adalah prioritas utama.
+             * Jika belum diatur, pertahankan icon service lama
+             * lalu fallback emoji.
+             */
+            const platformIconValue =
+                String(
+                    service?.platformIcon || ""
+                ).trim();
+
+            const serviceIconValue =
+                String(
+                    service?.icon || ""
+                ).trim();
+
+            const icon =
+                platformIconValue ||
+                serviceIconValue;
 
             if (
                 icon.startsWith("/assets/") ||
                 icon.startsWith("http://") ||
                 icon.startsWith("https://")
             ) {
-                const safeIcon = icon.replace(/"/g, "&quot;");
+                const safeIcon =
+                    icon.replace(/"/g, "&quot;");
 
                 return `
                     <img
@@ -1491,7 +1513,12 @@ function getBayoraServiceIconHTML(id, service) {
                     >
 
                         <div class="service-icon smm-service-icon">
-                            ${categoryIcon(key)}
+                            ${smmCustomIcon(
+                                service,
+                                platformIcon(
+                                    smmNavigation.platform
+                                )
+                            )}
                         </div>
 
                         <div>
@@ -2208,7 +2235,11 @@ function openSmmService(serviceId) {
     if (icon) {
 
         const smmIcon =
-            String(service.icon || "").trim();
+            String(
+                service.platformIcon ||
+                service.icon ||
+                ""
+            ).trim();
 
         if (
             smmIcon.startsWith("/") ||

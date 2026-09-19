@@ -176,7 +176,119 @@
             color: #888;
         }
 
-        @media (max-width: 800px) {
+
+/* SMM PLATFORM ICONS */
+.smm-platform-icons-panel {
+    margin-bottom: 18px;
+    padding: 18px;
+    border: 1px solid #ece9e3;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.smm-platform-icons-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.smm-platform-icons-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #222;
+}
+
+.smm-platform-icons-description {
+    margin-top: 4px;
+    color: #888;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.smm-platform-icons-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+}
+
+.smm-platform-icon-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #eeeae4;
+    border-radius: 13px;
+    background: #faf9f7;
+}
+
+.smm-platform-icon-preview {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #ebe7e0;
+    font-size: 22px;
+}
+
+.smm-platform-icon-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.smm-platform-icon-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.smm-platform-icon-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+}
+
+.smm-platform-icon-action {
+    margin-top: 7px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #315f9d;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.smm-platform-icon-action:hover {
+    text-decoration: underline;
+}
+
+.smm-platform-icons-empty {
+    grid-column: 1 / -1;
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+}
+
+.smm-platform-icon-file {
+    display: none;
+}
+
+@media (max-width: 800px) {
 
             .stats {
                 grid-template-columns: repeat(2, 1fr);
@@ -3553,6 +3665,44 @@ body.bayora-view-admins > main > .stats {
     </div>
 
 
+    <!-- ====================================================
+         SMM PLATFORM ICONS
+    ===================================================== -->
+
+    <div class="smm-platform-icons-panel">
+
+        <div class="smm-platform-icons-header">
+            <div>
+                <div class="smm-platform-icons-title">
+                    Icon Platform
+                </div>
+
+                <div class="smm-platform-icons-description">
+                    Ganti icon satu kali untuk seluruh kategori dan layanan pada platform yang sama.
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="smm-refresh-button"
+                id="smmPlatformIconsRefresh"
+            >
+                ↻ Refresh
+            </button>
+        </div>
+
+        <div
+            id="smmPlatformIcons"
+            class="smm-platform-icons-grid"
+        >
+            <div class="smm-platform-icons-empty">
+                Memuat platform...
+            </div>
+        </div>
+
+    </div>
+
+
     <div class="smm-summary">
 
         <div class="smm-summary-card">
@@ -4201,6 +4351,10 @@ body.bayora-view-admins > main > .stats {
 
     let smmEditingId = null;
 
+    let smmPlatformIcons = [];
+    let smmPlatformNames = [];
+
+
     const $ = (id) => document.getElementById(id);
 
 
@@ -4246,6 +4400,352 @@ body.bayora-view-admins > main > .stats {
         return labels[String(platform || "").toLowerCase()]
             || platform
             || "-";
+
+    }
+
+
+    function smmPlatformIconValue(platform) {
+
+        const key =
+            String(platform || "")
+                .trim()
+                .toLowerCase();
+
+        const row =
+            smmPlatformIcons.find(item =>
+                String(item?.platform || "")
+                    .trim()
+                    .toLowerCase() === key
+            );
+
+        return String(row?.icon || "").trim();
+
+    }
+
+
+    function renderSmmPlatformIcons() {
+
+        const container =
+            $("smmPlatformIcons");
+
+        if (!container) return;
+
+        if (!smmPlatformNames.length) {
+            container.innerHTML = `
+                <div class="smm-platform-icons-empty">
+                    Belum ada platform SMM.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML =
+            smmPlatformNames.map((platform, index) => {
+
+                const icon =
+                    smmPlatformIconValue(platform);
+
+                const safePlatform =
+                    escapeHtml(platform);
+
+                const preview =
+                    icon
+                        ? `
+                            <img
+                                src="${escapeHtml(icon)}"
+                                alt="${safePlatform}"
+                            >
+                        `
+                        : "◎";
+
+                return `
+                    <div class="smm-platform-icon-card">
+
+                        <div class="smm-platform-icon-preview">
+                            ${preview}
+                        </div>
+
+                        <div class="smm-platform-icon-content">
+
+                            <div class="smm-platform-icon-name">
+                                ${escapeHtml(
+                                    platformLabel(platform)
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                class="smm-platform-icon-action"
+                                data-smm-platform-upload="${index}"
+                            >
+                                ${icon ? "Ganti Icon" : "Upload Icon"}
+                            </button>
+
+                            <input
+                                type="file"
+                                class="smm-platform-icon-file"
+                                data-smm-platform-file="${index}"
+                                accept="image/png,image/jpeg,image/webp"
+                            >
+
+                        </div>
+
+                    </div>
+                `;
+            }).join("");
+
+        container
+            .querySelectorAll(
+                "[data-smm-platform-upload]"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const index =
+                            Number(
+                                button.dataset
+                                    .smmPlatformUpload
+                            );
+
+                        const input =
+                            container.querySelector(
+                                `[data-smm-platform-file="${index}"]`
+                            );
+
+                        input?.click();
+                    }
+                );
+            });
+
+        container
+            .querySelectorAll(
+                "[data-smm-platform-file]"
+            )
+            .forEach(input => {
+
+                input.addEventListener(
+                    "change",
+                    async function () {
+
+                        const index =
+                            Number(
+                                input.dataset
+                                    .smmPlatformFile
+                            );
+
+                        const platform =
+                            smmPlatformNames[index];
+
+                        const file =
+                            input.files?.[0];
+
+                        if (!platform || !file) {
+                            return;
+                        }
+
+                        const allowedTypes = [
+                            "image/png",
+                            "image/jpeg",
+                            "image/webp"
+                        ];
+
+                        if (!allowedTypes.includes(file.type)) {
+                            alert(
+                                "Icon harus berupa PNG, JPG, atau WEBP."
+                            );
+                            input.value = "";
+                            return;
+                        }
+
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert(
+                                "Ukuran icon maksimal 5 MB."
+                            );
+                            input.value = "";
+                            return;
+                        }
+
+                        try {
+
+                            input.disabled = true;
+
+                            const formData =
+                                new FormData();
+
+                            formData.append(
+                                "file",
+                                file
+                            );
+
+                            formData.append(
+                                "serviceId",
+                                `smm-platform-${String(platform)
+                                    .trim()
+                                    .toLowerCase()
+                                    .replace(/[^a-z0-9]+/g, "-")}`
+                            );
+
+                            const uploadResponse =
+                                await fetch(
+                                    "/api/services/upload-icon",
+                                    {
+                                        method: "POST",
+                                        credentials: "include",
+                                        body: formData
+                                    }
+                                );
+
+                            const uploadData =
+                                await uploadResponse.json();
+
+                            if (
+                                !uploadResponse.ok ||
+                                !uploadData.success ||
+                                !uploadData.path
+                            ) {
+                                throw new Error(
+                                    uploadData.error ||
+                                    "Gagal mengupload icon."
+                                );
+                            }
+
+                            const saveResponse =
+                                await fetch(
+                                    "/api/admin/smm/platform-icons",
+                                    {
+                                        method: "PUT",
+                                        credentials: "include",
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        },
+                                        body: JSON.stringify({
+                                            platform,
+                                            icon:
+                                                uploadData.path
+                                        })
+                                    }
+                                );
+
+                            const saveData =
+                                await saveResponse.json();
+
+                            if (
+                                !saveResponse.ok ||
+                                !saveData.success
+                            ) {
+                                throw new Error(
+                                    saveData.error ||
+                                    "Gagal menyimpan icon platform."
+                                );
+                            }
+
+                            await loadSmmPlatformIcons();
+
+                        } catch (error) {
+
+                            console.error(
+                                "[SMM PLATFORM ICON]",
+                                error
+                            );
+
+                            alert(
+                                error.message ||
+                                "Gagal mengganti icon platform."
+                            );
+
+                        } finally {
+                            input.disabled = false;
+                            input.value = "";
+                        }
+                    }
+                );
+            });
+
+    }
+
+
+    async function loadSmmPlatformIcons() {
+
+        const container =
+            $("smmPlatformIcons");
+
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="smm-platform-icons-empty">
+                Memuat platform...
+            </div>
+        `;
+
+        try {
+
+            const iconsResponse =
+                await fetch(
+                    "/api/admin/smm/platform-icons",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+            const iconsData =
+                await iconsResponse.json();
+
+            if (
+                !iconsResponse.ok ||
+                !iconsData.success
+            ) {
+                throw new Error(
+                    iconsData.error ||
+                    "Gagal memuat icon platform."
+                );
+            }
+
+            smmPlatformIcons =
+                Array.isArray(iconsData.icons)
+                    ? iconsData.icons
+                    : [];
+
+            smmPlatformNames =
+                [...new Set(
+                    smmPlatformIcons
+                        .map(item =>
+                            String(
+                                item?.platform || ""
+                            ).trim()
+                        )
+                        .filter(Boolean)
+                )]
+                    .sort((a, b) =>
+                        a.localeCompare(
+                            b,
+                            "id",
+                            { sensitivity: "base" }
+                        )
+                    );
+
+            renderSmmPlatformIcons();
+
+        } catch (error) {
+
+            console.error(
+                "[SMM PLATFORM ICON LOAD]",
+                error
+            );
+
+            container.innerHTML = `
+                <div class="smm-platform-icons-empty">
+                    ${escapeHtml(
+                        error.message ||
+                        "Gagal memuat icon platform."
+                    )}
+                </div>
+            `;
+        }
 
     }
 
@@ -5874,6 +6374,18 @@ body.bayora-view-admins > main > .stats {
         if (!$("smmPanel")) return;
 
         setupSmmDjuraganProvider();
+
+        const platformIconsRefresh =
+            $("smmPlatformIconsRefresh");
+
+        if (platformIconsRefresh) {
+            platformIconsRefresh.addEventListener(
+                "click",
+                loadSmmPlatformIcons
+            );
+        }
+
+        loadSmmPlatformIcons();
 
 
         const refreshButton =

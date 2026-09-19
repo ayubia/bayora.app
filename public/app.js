@@ -1464,7 +1464,19 @@ function getBayoraServiceIconHTML(id, service) {
                     return ai - bi;
                 });
 
-            return entries.map(([key, service]) => {
+            const backButton = `
+                <div class="smm-catalog-navigation">
+                    <button
+                        type="button"
+                        class="smm-back-button"
+                        onclick="backSmmNavigation()"
+                    >
+                        ← Kembali ke Platform
+                    </button>
+                </div>
+            `;
+
+            return backButton + entries.map(([key, service]) => {
 
                 const count = platformServices.filter(item =>
                     String(item.category || "general")
@@ -1529,7 +1541,19 @@ function getBayoraServiceIconHTML(id, service) {
             `;
         }
 
-        return services.map(service => {
+        const backButton = `
+            <div class="smm-catalog-navigation">
+                <button
+                    type="button"
+                    class="smm-back-button"
+                    onclick="backSmmNavigation()"
+                >
+                    ← Kembali ke Kategori
+                </button>
+            </div>
+        `;
+
+        return backButton + services.map(service => {
 
             const safeId = String(service.id ?? "")
                 .replace(/\\/g, "\\\\")
@@ -1772,6 +1796,23 @@ function formatRupiah(number) {
 }
 
 
+function backFromServicePage() {
+
+    /*
+     * Service page dipakai bersama oleh PPOB, Digital, dan SMM.
+     *
+     * Untuk SMM, kembali ke daftar layanan terakhir.
+     * Flow lainnya mempertahankan perilaku lama.
+     */
+    if (currentSmmService) {
+        backToSmmServices();
+        return;
+    }
+
+    showHome();
+}
+
+
 function showHome() {
 
     saveBayoraPage("home");
@@ -1948,6 +1989,44 @@ function updateSmmTotal() {
     totalElement.textContent =
         formatRupiah(total);
 
+}
+
+
+function backToSmmServices() {
+
+    /*
+     * Kembali dari detail SMM ke daftar layanan terakhir.
+     * Pertahankan platform + category yang sudah dipilih.
+     */
+    currentSmmService = null;
+
+    document
+        .getElementById("servicePage")
+        ?.classList.add("page-hidden");
+
+    document
+        .getElementById("checkoutPage")
+        ?.classList.add("page-hidden");
+
+    document
+        .getElementById("successPage")
+        ?.classList.add("page-hidden");
+
+    document
+        .getElementById("homePage")
+        ?.classList.remove("page-hidden");
+
+    const wrapper =
+        document.getElementById("smmFlowWrapper");
+
+    if (wrapper) {
+        wrapper.classList.add("page-hidden");
+    }
+
+    setCustomerServiceCategory("smm");
+    renderCustomerServices();
+
+    saveBayoraPage("home");
 }
 
 

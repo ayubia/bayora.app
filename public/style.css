@@ -1723,6 +1723,51 @@ body {
     font-weight: 700;
 }
 
+/* SMM CATALOG NAVIGATION */
+.smm-catalog-navigation {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.smm-catalog-navigation {
+    grid-column: 1 / -1;
+    display: block;
+}
+
+.smm-back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 7px 0;
+    border: 0;
+    background: transparent;
+    color: var(--bayora-primary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+        opacity .2s ease,
+        transform .2s ease;
+}
+
+.smm-back-button:hover {
+    opacity: .75;
+}
+
+.smm-back-button:active {
+    transform: translateX(-2px);
+}
+
+.smm-back-button:focus-visible {
+    outline: 2px solid var(--bayora-primary);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+
 .input-group label {
     color: var(--bayora-text);
     font-weight: 700;

@@ -289,8 +289,14 @@ function restoreBayoraLastPage() {
     const returnTransactionId =
         returnParams.get("transactionId");
 
+    const returnSmmOrderId =
+        returnParams.get("smmOrderId");
+
     if (
-        returnTransactionId &&
+        (
+            returnTransactionId ||
+            returnSmmOrderId
+        ) &&
         (
             returnPayment === "success" ||
             returnPayment === "cancel"
@@ -7362,6 +7368,9 @@ async function handleXenditReturn() {
     const transactionId =
         params.get("transactionId");
 
+    const smmOrderId =
+        params.get("smmOrderId");
+
     const guestToken =
         params.get("guestToken");
 
@@ -7391,6 +7400,406 @@ async function handleXenditReturn() {
             cleanUrl.hash
         );
     }
+
+    /*
+     * =====================================================
+     * BAYORA — XENDIT RETURN SMM
+     * =====================================================
+     *
+     * SMM memakai smmOrderId, bukan transactionId.
+     * Pembayaran diverifikasi langsung oleh server ke Xendit.
+     *
+     * Route sync hanya boleh mengubah status pembayaran.
+     * Tidak mengirim order ke provider.
+     */
+    if (
+        smmOrderId &&
+        (
+            payment === "success" ||
+            payment === "cancel"
+        )
+    ) {
+        const homePage =
+            document.getElementById("homePage");
+
+        const servicePage =
+            document.getElementById("servicePage");
+
+        const checkoutPage =
+            document.getElementById("checkoutPage");
+
+        const successPage =
+            document.getElementById("successPage");
+
+        if (homePage) {
+            homePage.classList.add("page-hidden");
+        }
+
+        if (servicePage) {
+            servicePage.classList.add("page-hidden");
+        }
+
+        if (checkoutPage) {
+            checkoutPage.classList.add("page-hidden");
+        }
+
+        if (!successPage) {
+            return;
+        }
+
+        successPage.classList.remove("page-hidden");
+
+        if (payment === "cancel") {
+            successPage.innerHTML = `
+                <div style="
+                    padding:40px 24px;
+                    text-align:center;
+                ">
+                    <h2>Pembayaran Dibatalkan</h2>
+
+                    <p style="
+                        margin-top:10px;
+                        color:#64748b;
+                    ">
+                        Pembayaran SMM belum diselesaikan.
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+        successPage.innerHTML = `
+            <div style="
+                padding:40px 24px;
+                text-align:center;
+            ">
+                <h2>Memeriksa Pembayaran</h2>
+
+                <p style="
+                    margin-top:10px;
+                    color:#64748b;
+                ">
+                    Pembayaran SMM sedang diverifikasi.
+                    Silakan tunggu beberapa saat.
+                </p>
+            </div>
+        `;
+
+        try {
+            const syncResponse =
+                await fetch(
+                    `/api/smm/transactions/${encodeURIComponent(smmOrderId)}/sync`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        }
+                    }
+                );
+
+            const syncData =
+                await syncResponse.json();
+
+            if (
+                !syncResponse.ok ||
+                !syncData.success
+            ) {
+                throw new Error(
+                    syncData.error ||
+                    "Gagal memverifikasi pembayaran SMM."
+                );
+            }
+
+            if (
+                String(
+                    syncData.paymentStatus || ""
+                ).toUpperCase() === "PAID"
+            ) {
+                successPage.innerHTML = `
+                    <div style="
+                        padding:40px 24px;
+                        text-align:center;
+                    ">
+                        <h2>Pembayaran Berhasil</h2>
+
+                        <p style="
+                            margin-top:10px;
+                            color:#64748b;
+                        ">
+                            Pesanan sedang dikirim ke provider.
+                            Jangan tutup halaman ini.
+                        </p>
+                    </div>
+                `;
+
+                /*
+                 * Stage 7D-12F
+                 *
+                 * PAID -> atomic submission claim ->
+                 * provider submission.
+                 *
+                 * IMPORTANT:
+                 * provider-submit is called exactly once here.
+                 * Never automatically retry provider-submit.
+                 */
+
+                const submitResponse =
+                    await fetch(
+                        `/api/smm/transactions/${encodeURIComponent(smmOrderId)}/submit`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+                const submitData =
+                    await submitResponse.json();
+
+                if (
+                    !submitResponse.ok ||
+                    !submitData.success
+                ) {
+                    const submitStatus =
+                        String(
+                            submitData.submissionStatus ||
+                            ""
+                        ).toUpperCase();
+
+                    /*
+                     * A concurrent request may already own or
+                     * have completed submission. Never retry
+                     * provider-submit from this branch.
+                     */
+                    if (
+                        [
+                            "SUBMITTING",
+                            "SENDING",
+                            "SUBMITTED"
+                        ].includes(submitStatus)
+                    ) {
+                        successPage.innerHTML = `
+                            <div style="
+                                padding:40px 24px;
+                                text-align:center;
+                            ">
+                                <h2>Pesanan Sedang Diproses</h2>
+
+                                <p style="
+                                    margin-top:10px;
+                                    color:#64748b;
+                                ">
+                                    Pembayaran berhasil dan pesanan
+                                    sedang diproses.
+                                </p>
+                            </div>
+                        `;
+
+                        return;
+                    }
+
+                    throw new Error(
+                        submitData.error ||
+                        "Gagal menyiapkan pesanan SMM."
+                    );
+                }
+
+                const claimedStatus =
+                    String(
+                        submitData.submissionStatus ||
+                        ""
+                    ).toUpperCase();
+
+                if (
+                    claimedStatus !== "SUBMITTING"
+                ) {
+                    /*
+                     * Do not guess and do not call provider.
+                     */
+                    successPage.innerHTML = `
+                        <div style="
+                            padding:40px 24px;
+                            text-align:center;
+                        ">
+                            <h2>Pesanan Sedang Diproses</h2>
+
+                            <p style="
+                                margin-top:10px;
+                                color:#64748b;
+                            ">
+                                Pembayaran berhasil.
+                                Status pesanan sedang diperbarui.
+                            </p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                const providerResponse =
+                    await fetch(
+                        `/api/smm/transactions/${encodeURIComponent(smmOrderId)}/provider-submit`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+                const providerData =
+                    await providerResponse.json();
+
+                const providerSubmissionStatus =
+                    String(
+                        providerData.submissionStatus ||
+                        ""
+                    ).toUpperCase();
+
+                if (
+                    providerResponse.ok &&
+                    providerData.success &&
+                    providerSubmissionStatus ===
+                        "SUBMITTED"
+                ) {
+                    successPage.innerHTML = `
+                        <div style="
+                            padding:40px 24px;
+                            text-align:center;
+                        ">
+                            <h2>Pesanan Berhasil Diproses</h2>
+
+                            <p style="
+                                margin-top:10px;
+                                color:#64748b;
+                            ">
+                                Pembayaran berhasil dan pesanan
+                                telah dikirim ke provider.
+                            </p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                /*
+                 * Never retry ambiguous/sending provider calls.
+                 * The server state is authoritative.
+                 */
+                if (
+                    [
+                        "SENDING",
+                        "AMBIGUOUS"
+                    ].includes(
+                        providerSubmissionStatus
+                    )
+                ) {
+                    successPage.innerHTML = `
+                        <div style="
+                            padding:40px 24px;
+                            text-align:center;
+                        ">
+                            <h2>Pesanan Sedang Diproses</h2>
+
+                            <p style="
+                                margin-top:10px;
+                                color:#64748b;
+                            ">
+                                Pembayaran berhasil.
+                                Status pengiriman pesanan sedang
+                                dikonfirmasi.
+                            </p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                if (
+                    providerSubmissionStatus ===
+                        "FAILED"
+                ) {
+                    successPage.innerHTML = `
+                        <div style="
+                            padding:40px 24px;
+                            text-align:center;
+                        ">
+                            <h2>Pesanan Belum Dapat Diproses</h2>
+
+                            <p style="
+                                margin-top:10px;
+                                color:#64748b;
+                            ">
+                                Pembayaran berhasil, tetapi provider
+                                belum dapat menerima pesanan.
+                                Pesanan tidak dikirim ulang otomatis.
+                            </p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                throw new Error(
+                    providerData.error ||
+                    "Status pengiriman pesanan SMM tidak dapat dipastikan."
+                );
+            }
+
+            successPage.innerHTML = `
+                <div style="
+                    padding:40px 24px;
+                    text-align:center;
+                ">
+                    <h2>Pembayaran Sedang Diproses</h2>
+
+                    <p style="
+                        margin-top:10px;
+                        color:#64748b;
+                    ">
+                        Status pembayaran belum selesai.
+                        Silakan tunggu beberapa saat.
+                    </p>
+                </div>
+            `;
+
+            setTimeout(
+                () => handleXenditReturn(),
+                3000
+            );
+
+        } catch (error) {
+            console.error(
+                "[XENDIT SMM RETURN]",
+                error
+            );
+
+            successPage.innerHTML = `
+                <div style="
+                    padding:40px 24px;
+                    text-align:center;
+                ">
+                    <h2>Memeriksa Pembayaran</h2>
+
+                    <p style="
+                        margin-top:10px;
+                        color:#64748b;
+                    ">
+                        Pembayaran sedang diverifikasi.
+                        Silakan tunggu beberapa saat.
+                    </p>
+                </div>
+            `;
+        }
+
+        return;
+    }
+
 
     if (
         !transactionId ||

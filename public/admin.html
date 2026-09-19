@@ -3271,20 +3271,11 @@ body.bayora-view-admins > main > .stats {
                 Kelola layanan social media marketing BAYORA.
             </div>
         </div>
-
-        <button
-            type="button"
-            class="smm-add-button"
-            id="smmAddButton"
-        >
-            + Tambah Layanan
-        </button>
-
-    </div>
+</div>
 
 
     <!-- ====================================================
-         SMM PROVIDER
+         DJURAGANSOSMED PROVIDER
     ===================================================== -->
 
     <div
@@ -3297,7 +3288,6 @@ body.bayora-view-admins > main > .stats {
             background:#ffffff;
         "
     >
-
         <div
             style="
                 display:flex;
@@ -3307,9 +3297,7 @@ body.bayora-view-admins > main > .stats {
                 flex-wrap:wrap;
             "
         >
-
             <div>
-
                 <div
                     style="
                         display:flex;
@@ -3321,6 +3309,7 @@ body.bayora-view-admins > main > .stats {
                     "
                 >
                     <span
+                        id="smmProviderStatusDot"
                         style="
                             width:10px;
                             height:10px;
@@ -3328,10 +3317,9 @@ body.bayora-view-admins > main > .stats {
                             background:#cbd2df;
                             display:inline-block;
                         "
-                        id="smmProviderStatusDot"
                     ></span>
 
-                    <span>Sosmedly</span>
+                    <span>DjuraganSosmed</span>
                 </div>
 
                 <div
@@ -3342,39 +3330,21 @@ body.bayora-view-admins > main > .stats {
                         font-size:13px;
                     "
                 >
-                    Memeriksa konfigurasi provider...
+                    Memuat status provider...
                 </div>
-
             </div>
-
 
             <div
                 style="
                     display:flex;
+                    align-items:center;
                     gap:8px;
                     flex-wrap:wrap;
                 "
             >
-
                 <button
                     type="button"
-                    id="smmSosmedlyTestButton"
-                    style="
-                        border:0;
-                        border-radius:10px;
-                        padding:10px 14px;
-                        background:#111827;
-                        color:#fff;
-                        cursor:pointer;
-                        font-weight:600;
-                    "
-                >
-                    Test Koneksi
-                </button>
-
-                <button
-                    type="button"
-                    id="smmSosmedlyBalanceButton"
+                    id="smmDjuraganStatusButton"
                     style="
                         border:1px solid #dfe4ec;
                         border-radius:10px;
@@ -3385,39 +3355,38 @@ body.bayora-view-admins > main > .stats {
                         font-weight:600;
                     "
                 >
-                    Cek Saldo
+                    Memuat Status...
                 </button>
 
-                <button
-                    type="button"
-                    id="smmSosmedlyCatalogButton"
-                    style="
-                        border:1px solid #dfe4ec;
-                        border-radius:10px;
-                        padding:10px 14px;
-                        background:#fff;
-                        color:#202938;
-                        cursor:pointer;
-                        font-weight:600;
-                    "
-                >
-                    Import Katalog
-                </button>
-
+            <button
+                type="button"
+                id="smmDjuraganBalanceButton"
+                style="
+                    border:1px solid #dfe4ec;
+                    border-radius:10px;
+                    padding:10px 14px;
+                    background:#fff;
+                    color:#202938;
+                    cursor:pointer;
+                    font-weight:600;
+                "
+            >
+                Cek Saldo
+            </button>
             </div>
-
         </div>
-
 
         <div
             style="
                 display:grid;
-                grid-template-columns:repeat(3,minmax(0,1fr));
+                grid-template-columns:repeat(
+                    3,
+                    minmax(0,1fr)
+                );
                 gap:12px;
                 margin-top:18px;
             "
         >
-
             <div
                 style="
                     padding:14px;
@@ -3435,7 +3404,7 @@ body.bayora-view-admins > main > .stats {
                 </div>
 
                 <strong
-                    id="smmSosmedlyBalance"
+                    id="smmDjuraganBalance"
                     style="
                         display:block;
                         margin-top:5px;
@@ -3446,7 +3415,6 @@ body.bayora-view-admins > main > .stats {
                     —
                 </strong>
             </div>
-
 
             <div
                 style="
@@ -3465,7 +3433,7 @@ body.bayora-view-admins > main > .stats {
                 </div>
 
                 <strong
-                    id="smmSosmedlyCurrency"
+                    id="smmDjuraganCurrency"
                     style="
                         display:block;
                         margin-top:5px;
@@ -3473,10 +3441,9 @@ body.bayora-view-admins > main > .stats {
                         color:#17213a;
                     "
                 >
-                    —
+                    IDR
                 </strong>
             </div>
-
 
             <div
                 style="
@@ -3491,11 +3458,11 @@ body.bayora-view-admins > main > .stats {
                         color:#8a93a5;
                     "
                 >
-                    Layanan Provider
+                    Katalog Djuragan
                 </div>
 
                 <strong
-                    id="smmSosmedlyCatalogCount"
+                    id="smmDjuraganCatalogCount"
                     style="
                         display:block;
                         margin-top:5px;
@@ -3506,89 +3473,83 @@ body.bayora-view-admins > main > .stats {
                     —
                 </strong>
             </div>
-
         </div>
-
 
         <div
             style="
                 display:flex;
-                align-items:center;
+                align-items:flex-end;
                 gap:10px;
                 margin-top:14px;
                 flex-wrap:wrap;
             "
         >
-
             <label
-                for="smmSosmedlyMargin"
+                for="smmDjuraganMargin"
                 style="
                     font-size:13px;
                     color:#667085;
                     font-weight:600;
                 "
             >
-                Margin harga jual
-            </label>
-
-            <div
-                style="
-                    display:flex;
-                    align-items:center;
-                    gap:6px;
-                "
-            >
-
-                <input
-                    type="number"
-                    id="smmSosmedlyMargin"
-                    min="0"
-                    max="10000"
-                    step="0.1"
-                    placeholder="contoh 30"
-                    style="
-                        width:130px;
-                        padding:9px 11px;
-                        border:1px solid #dfe4ec;
-                        border-radius:10px;
-                        outline:none;
-                        font-size:13px;
-                        box-sizing:border-box;
-                    "
-                >
+                Margin harga jual global
 
                 <span
                     style="
-                        font-size:13px;
-                        color:#667085;
+                        display:flex;
+                        align-items:center;
+                        gap:6px;
+                        margin-top:6px;
                     "
                 >
-                    %
+                    <input
+                        type="number"
+                        id="smmDjuraganMargin"
+                        min="0"
+                        max="1000"
+                        step="0.1"
+                        style="
+                            width:130px;
+                            padding:9px 11px;
+                            border:1px solid #dfe4ec;
+                            border-radius:10px;
+                            outline:none;
+                            font-size:13px;
+                            box-sizing:border-box;
+                        "
+                    >
+
+                    <span>%</span>
                 </span>
+            </label>
 
-            </div>
-
-            <span
+            <button
+                type="button"
+                id="smmDjuraganMarginSaveButton"
                 style="
-                    font-size:12px;
-                    color:#98a2b3;
+                    border:0;
+                    border-radius:10px;
+                    padding:10px 14px;
+                    background:#111827;
+                    color:#fff;
+                    cursor:pointer;
+                    font-weight:600;
                 "
             >
-                Layanan baru akan diimpor nonaktif.
-            </span>
-
+                Simpan Margin
+            </button>
         </div>
 
-
         <div
-            id="smmSosmedlyMessage"
+            id="smmDjuraganMessage"
             style="
                 margin-top:12px;
                 font-size:13px;
                 color:#7b8497;
             "
-        ></div>
-
+        >
+            Provider tetap nonaktif selama tahap migrasi.
+        </div>
     </div>
 
 
@@ -3605,13 +3566,13 @@ body.bayora-view-admins > main > .stats {
         </div>
 
         <div class="smm-summary-card">
-            <span>Instagram</span>
-            <strong id="smmInstagramServices">0</strong>
+            <span>Rate 0</span>
+            <strong id="smmZeroRateServices">0</strong>
         </div>
 
         <div class="smm-summary-card">
-            <span>TikTok</span>
-            <strong id="smmTiktokServices">0</strong>
+            <span>Provider</span>
+            <strong id="smmProviderStatus">Nonaktif</strong>
         </div>
 
     </div>
@@ -3630,6 +3591,15 @@ body.bayora-view-admins > main > .stats {
             <option value="facebook">Facebook</option>
             <option value="telegram">Telegram</option>
             <option value="x">X</option>
+        </select>
+
+        <select
+            id="smmStatusFilter"
+            class="smm-filter"
+        >
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="inactive">Nonaktif</option>
         </select>
 
         <input
@@ -3658,6 +3628,46 @@ body.bayora-view-admins > main > .stats {
         <div class="smm-empty">
             Memuat layanan SMM...
         </div>
+    </div>
+
+    <div
+        id="smmPagination"
+        style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-top:20px;
+        "
+    >
+        <button
+            type="button"
+            id="smmPrevPage"
+            class="smm-refresh-button"
+        >
+            ← Sebelumnya
+        </button>
+
+        <span
+            id="smmPageInfo"
+            style="
+                font-size:13px;
+                color:#667085;
+                min-width:170px;
+                text-align:center;
+            "
+        >
+            Halaman 1 dari 1
+        </span>
+
+        <button
+            type="button"
+            id="smmNextPage"
+            class="smm-refresh-button"
+        >
+            Berikutnya →
+        </button>
     </div>
 
 </section>
@@ -4175,6 +4185,20 @@ body.bayora-view-admins > main > .stats {
 (function () {
 
     let smmServices = [];
+
+    let smmCurrentPage = 1;
+    const smmPageLimit = 50;
+
+    let smmPagination = {
+        page: 1,
+        limit: 50,
+        total: 0,
+        totalPages: 1
+    };
+
+    let smmSearchTimer = null;
+    let smmLoadSequence = 0;
+
     let smmEditingId = null;
 
     const $ = (id) => document.getElementById(id);
@@ -4226,47 +4250,83 @@ body.bayora-view-admins > main > .stats {
     }
 
 
-    function renderSmmSummary() {
+    function renderSmmSummary(data = null) {
+
+        const services =
+            data?.services || null;
+
+        if (!services) {
+            return;
+        }
 
         const total =
-            smmServices.length;
+            Number(services.total || 0);
 
         const active =
-            smmServices.filter(
-                service => Number(service.active) === 1
-            ).length;
+            Number(services.active || 0);
 
-        const instagram =
-            smmServices.filter(
-                service =>
-                    String(service.platform).toLowerCase()
-                    === "instagram"
-            ).length;
+        const zeroRate =
+            Number(services.zeroRate || 0);
 
-        const tiktok =
-            smmServices.filter(
-                service =>
-                    String(service.platform).toLowerCase()
-                    === "tiktok"
-            ).length;
+        const providerActive =
+            data?.provider?.active === true;
 
 
         if ($("smmTotalServices")) {
-            $("smmTotalServices").textContent = total;
+            $("smmTotalServices").textContent =
+                total.toLocaleString("id-ID");
         }
 
         if ($("smmActiveServices")) {
-            $("smmActiveServices").textContent = active;
+            $("smmActiveServices").textContent =
+                active.toLocaleString("id-ID");
         }
 
-        if ($("smmInstagramServices")) {
-            $("smmInstagramServices").textContent = instagram;
+        if ($("smmZeroRateServices")) {
+            $("smmZeroRateServices").textContent =
+                zeroRate.toLocaleString("id-ID");
         }
 
-        if ($("smmTiktokServices")) {
-            $("smmTiktokServices").textContent = tiktok;
+        if ($("smmProviderStatus")) {
+            $("smmProviderStatus").textContent =
+                providerActive
+                    ? "Aktif"
+                    : "Nonaktif";
+        }
+    }
+
+
+    function renderSmmPagination() {
+
+        const page =
+            Number(smmPagination.page || 1);
+
+        const totalPages =
+            Math.max(
+                1,
+                Number(
+                    smmPagination.totalPages || 1
+                )
+            );
+
+        const total =
+            Number(smmPagination.total || 0);
+
+        if ($("smmPageInfo")) {
+            $("smmPageInfo").textContent =
+                `Halaman ${page} dari ${totalPages} · ` +
+                `${total.toLocaleString("id-ID")} layanan`;
         }
 
+        if ($("smmPrevPage")) {
+            $("smmPrevPage").disabled =
+                page <= 1;
+        }
+
+        if ($("smmNextPage")) {
+            $("smmNextPage").disabled =
+                page >= totalPages;
+        }
     }
 
 
@@ -4277,85 +4337,52 @@ body.bayora-view-admins > main > .stats {
 
         if (!container) return;
 
-
-        const search =
-            String(
-                $("smmSearch")?.value || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        const platform =
-            String(
-                $("smmPlatformFilter")?.value || ""
-            )
-            .toLowerCase();
-
-
-        const filtered =
-            smmServices.filter(service => {
-
-                const matchesPlatform =
-                    !platform ||
-                    String(service.platform || "")
-                        .toLowerCase() === platform;
-
-
-                const haystack = [
-                    service.name,
-                    service.description,
-                    service.category,
-                    service.platform
-                ]
-                    .map(value =>
-                        String(value || "").toLowerCase()
-                    )
-                    .join(" ");
-
-
-                const matchesSearch =
-                    !search ||
-                    haystack.includes(search);
-
-
-                return matchesPlatform &&
-                    matchesSearch;
-
-            });
-
-
-        if (!filtered.length) {
+        if (!smmServices.length) {
 
             container.innerHTML = `
                 <div class="smm-empty">
-                    Tidak ada layanan SMM.
+                    Tidak ada layanan DjuraganSosmed
+                    yang cocok dengan filter.
                 </div>
             `;
 
+            renderSmmPagination();
             return;
-
         }
 
-
         container.innerHTML =
-            filtered.map(service => {
+            smmServices.map(service => {
 
                 const active =
                     Number(service.active) === 1;
 
+                const providerRate =
+                    Number(
+                        service.providerRate || 0
+                    );
+
+                const zeroRate =
+                    !Number.isFinite(providerRate) ||
+                    providerRate <= 0;
+
+                const providerType =
+                    String(
+                        service.providerType ||
+                        "Default"
+                    );
 
                 return `
                     <div
                         class="smm-service-card ${active ? "" : "is-inactive"}"
                     >
-
                         <div class="smm-service-top">
 
                             <div>
                                 <div class="smm-service-platform">
                                     ${escapeHtml(
-                                        platformLabel(service.platform)
+                                        platformLabel(
+                                            service.platform
+                                        )
                                     )}
                                 </div>
 
@@ -4380,21 +4407,30 @@ body.bayora-view-admins > main > .stats {
 
                         </div>
 
-
                         <div class="smm-service-description">
                             ${escapeHtml(
                                 service.description ||
-                                "Tidak ada deskripsi."
+                                "Layanan provider DjuraganSosmed"
                             )}
                         </div>
-
 
                         <div class="smm-service-meta">
 
                             <div>
-                                <span>Harga</span>
+                                <span>Harga Jual</span>
                                 <strong>
-                                    ${formatSmmPrice(service.price)}
+                                    ${formatSmmPrice(
+                                        service.price
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Rate Provider</span>
+                                <strong>
+                                    ${formatSmmPrice(
+                                        providerRate
+                                    )}
                                 </strong>
                             </div>
 
@@ -4417,7 +4453,7 @@ body.bayora-view-admins > main > .stats {
                             </div>
 
                             <div>
-                                <span>Provider</span>
+                                <span>ID Provider</span>
                                 <strong>
                                     ${escapeHtml(
                                         service.providerServiceId ||
@@ -4426,66 +4462,51 @@ body.bayora-view-admins > main > .stats {
                                 </strong>
                             </div>
 
-                        </div>
+                            <div>
+                                <span>Tipe</span>
+                                <strong>
+                                    ${escapeHtml(
+                                        providerType
+                                    )}
+                                </strong>
+                            </div>
 
+                        </div>
 
                         <div class="smm-service-actions">
 
                             <button
                                 type="button"
-                                class="smm-edit-button"
-                                data-smm-edit="${service.id}"
-                            >
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
                                 class="smm-toggle-button"
-                                data-smm-toggle="${service.id}"
+                                data-smm-toggle="${Number(
+                                    service.id
+                                )}"
+                                ${
+                                    zeroRate && !active
+                                        ? "disabled"
+                                        : ""
+                                }
                             >
-                                ${active ? "Nonaktifkan" : "Aktifkan"}
-                            </button>
-
-                            <button
-                                type="button"
-                                class="smm-delete-button"
-                                data-smm-delete="${service.id}"
-                            >
-                                Hapus
+                                ${
+                                    active
+                                        ? "Nonaktifkan"
+                                        : zeroRate
+                                            ? "Rate 0 — Tidak dapat diaktifkan"
+                                            : "Aktifkan"
+                                }
                             </button>
 
                         </div>
 
                     </div>
                 `;
-
             })
             .join("");
 
-
         container
-            .querySelectorAll("[data-smm-edit]")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        openSmmEdit(
-                            Number(
-                                button.dataset.smmEdit
-                            )
-                        );
-
-                    }
-                );
-
-            });
-
-
-        container
-            .querySelectorAll("[data-smm-toggle]")
+            .querySelectorAll(
+                "[data-smm-toggle]"
+            )
             .forEach(button => {
 
                 button.addEventListener(
@@ -4497,95 +4518,181 @@ body.bayora-view-admins > main > .stats {
                                 button.dataset.smmToggle
                             )
                         );
-
                     }
                 );
-
             });
 
-
-        container
-            .querySelectorAll("[data-smm-delete]")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        deleteSmmService(
-                            Number(
-                                button.dataset.smmDelete
-                            )
-                        );
-
-                    }
-                );
-
-            });
-
+        renderSmmPagination();
     }
 
 
-    async function loadSmmServices() {
+    function buildSmmServicesUrl() {
+
+        const params =
+            new URLSearchParams();
+
+        params.set(
+            "page",
+            String(smmCurrentPage)
+        );
+
+        params.set(
+            "limit",
+            String(smmPageLimit)
+        );
+
+        params.set(
+            "provider",
+            "DjuraganSosmed"
+        );
+
+        const search =
+            String(
+                $("smmSearch")?.value || ""
+            ).trim();
+
+        const platform =
+            String(
+                $("smmPlatformFilter")?.value || ""
+            ).trim();
+
+        const status =
+            String(
+                $("smmStatusFilter")?.value || ""
+            ).trim();
+
+        if (search) {
+            params.set(
+                "search",
+                search
+            );
+        }
+
+        if (platform) {
+            params.set(
+                "platform",
+                platform
+            );
+        }
+
+        if (status) {
+            params.set(
+                "status",
+                status
+            );
+        }
+
+        return (
+            "/api/admin/smm/services?" +
+            params.toString()
+        );
+    }
+
+
+    async function loadSmmServices(
+        options = {}
+    ) {
 
         const container =
             $("smmServices");
 
         if (!container) return;
 
+        if (options.resetPage) {
+            smmCurrentPage = 1;
+        }
+
+        const sequence =
+            ++smmLoadSequence;
 
         container.innerHTML = `
             <div class="smm-empty">
-                Memuat layanan SMM...
+                Memuat layanan DjuraganSosmed...
             </div>
         `;
-
 
         try {
 
             const response =
                 await fetch(
-                    "/api/admin/smm/services",
+                    buildSmmServicesUrl(),
                     {
                         credentials: "include",
                         cache: "no-store"
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.error ||
                     "Gagal memuat layanan SMM."
                 );
-
             }
 
+            if (
+                sequence !== smmLoadSequence
+            ) {
+                return;
+            }
 
             smmServices =
                 Array.isArray(data.services)
                     ? data.services
                     : [];
 
+            smmPagination = {
+                page:
+                    Number(
+                        data.pagination?.page ||
+                        smmCurrentPage
+                    ),
+
+                limit:
+                    Number(
+                        data.pagination?.limit ||
+                        smmPageLimit
+                    ),
+
+                total:
+                    Number(
+                        data.pagination?.total ||
+                        0
+                    ),
+
+                totalPages:
+                    Math.max(
+                        1,
+                        Number(
+                            data.pagination?.totalPages ||
+                            1
+                        )
+                    )
+            };
+
+            smmCurrentPage =
+                smmPagination.page;
 
             renderSmmSummary();
             renderSmmServices();
 
         } catch (error) {
 
+            if (
+                sequence !== smmLoadSequence
+            ) {
+                return;
+            }
+
             console.error(
                 "[SMM LOAD]",
                 error
             );
-
 
             container.innerHTML = `
                 <div class="smm-empty smm-error">
@@ -4595,9 +4702,7 @@ body.bayora-view-admins > main > .stats {
                     )}
                 </div>
             `;
-
         }
-
     }
 
 
@@ -5191,13 +5296,15 @@ body.bayora-view-admins > main > .stats {
 
 
     /* ======================================================
-       SOSMEDLY PROVIDER
+       DJURAGANSOSMED PROVIDER
     ====================================================== */
 
-    function setSmmSosmedlyMessage(message, error = false) {
-
+    function setSmmDjuraganMessage(
+        message,
+        error = false
+    ) {
         const element =
-            $("smmSosmedlyMessage");
+            $("smmDjuraganMessage");
 
         if (!element) return;
 
@@ -5211,11 +5318,10 @@ body.bayora-view-admins > main > .stats {
     }
 
 
-    function setSmmSosmedlyStatus(
+    function setSmmDjuraganStatus(
         text,
         connected = false
     ) {
-
         const status =
             $("smmProviderStatus");
 
@@ -5224,7 +5330,7 @@ body.bayora-view-admins > main > .stats {
 
         if (status) {
             status.textContent =
-                text || "";
+                String(text || "");
         }
 
         if (dot) {
@@ -5236,353 +5342,272 @@ body.bayora-view-admins > main > .stats {
     }
 
 
-    async function loadSmmSosmedlyProvider() {
-
-        try {
-
-            const response =
-                await fetch(
-                    "/api/admin/smm/provider",
-                    {
-                        credentials: "include",
-                        cache: "no-store"
-                    }
-                );
+    let smmDjuraganProviderActive = false;
 
 
-            const data =
-                await response.json();
+    function renderSmmDjuraganProviderStatus(data) {
+        const active =
+            Boolean(data?.provider?.active);
 
+        smmDjuraganProviderActive =
+            active;
 
-            if (
-                !response.ok ||
-                !data.success
-            ) {
+        const button =
+            $("smmDjuraganStatusButton");
 
-                throw new Error(
-                    data.error ||
-                    "Gagal memuat provider Sosmedly."
-                );
-
-            }
-
-
-            if (!data.apiKeyConfigured) {
-
-                setSmmSosmedlyStatus(
-                    "API key Sosmedly belum dikonfigurasi.",
-                    false
-                );
-
-                setSmmSosmedlyMessage(
-                    "Tambahkan SOSMEDLY_API_KEY di .env server."
-                );
-
-                return;
-
-            }
-
-
-            setSmmSosmedlyStatus(
-                "API key terkonfigurasi. Siap diuji.",
-                false
-            );
-
-
-            if (data.provider?.active) {
-
-                setSmmSosmedlyStatus(
-                    "Provider Sosmedly aktif.",
-                    false
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "[SOSMEDLY PROVIDER]",
-                error
-            );
-
-            setSmmSosmedlyStatus(
-                error.message ||
-                "Gagal memuat provider Sosmedly.",
-                false
-            );
-
+        if (button) {
+            button.disabled = false;
+            button.textContent =
+                active
+                    ? "Nonaktifkan Provider"
+                    : "Aktifkan Provider";
         }
 
+        setSmmDjuraganStatus(
+            active
+                ? "Provider DjuraganSosmed aktif."
+                : "Katalog tersinkron. Provider masih nonaktif.",
+            active
+        );
+
+        return active;
     }
 
 
-    async function testSmmSosmedlyConnection() {
+    async function loadSmmDjuraganProviderStatus() {
+        const response =
+            await fetch(
+                "/api/admin/smm/provider/djuragansosmed/status",
+                {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
 
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Gagal memuat status provider."
+            );
+        }
+
+        renderSmmDjuraganProviderStatus(
+            data
+        );
+
+        return data;
+    }
+
+
+    async function toggleSmmDjuraganProvider() {
         const button =
-            $("smmSosmedlyTestButton");
+            $("smmDjuraganStatusButton");
+
+        const nextActive =
+            smmDjuraganProviderActive
+                ? 0
+                : 1;
+
+        const confirmed =
+            window.confirm(
+                nextActive === 1
+                    ? (
+                        "Aktifkan provider DjuraganSosmed?\n\n" +
+                        "Hanya layanan yang sudah berstatus aktif " +
+                        "yang dapat muncul di katalog publik.\n\n" +
+                        "Tidak ada order provider yang dibuat oleh tindakan ini."
+                    )
+                    : (
+                        "Nonaktifkan provider DjuraganSosmed?\n\n" +
+                        "Seluruh layanan Djuragan akan langsung " +
+                        "disembunyikan dari katalog publik.\n\n" +
+                        "Status aktif masing-masing layanan tidak diubah."
+                    )
+            );
+
+        if (!confirmed) return;
 
         if (button) {
             button.disabled = true;
-            button.textContent = "Menguji...";
+            button.textContent =
+                nextActive === 1
+                    ? "Mengaktifkan..."
+                    : "Menonaktifkan...";
         }
 
-
-        setSmmSosmedlyMessage(
-            "Menghubungkan ke Sosmedly..."
-        );
-
-
         try {
-
             const response =
                 await fetch(
-                    "/api/admin/smm/provider/sosmedly/test",
+                    "/api/admin/smm/provider/djuragansosmed/status",
                     {
-                        method: "POST",
+                        method: "PUT",
                         credentials: "include",
                         headers: {
                             "Content-Type":
                                 "application/json"
-                        }
+                        },
+                        body:
+                            JSON.stringify({
+                                active: nextActive
+                            })
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.error ||
-                    "Koneksi Sosmedly gagal."
+                    "Gagal mengubah status provider."
                 );
-
             }
 
-
-            setSmmSosmedlyStatus(
-                "Terhubung ke Sosmedly.",
-                true
+            renderSmmDjuraganProviderStatus(
+                data
             );
 
-
-            const balance =
-                data.balance ?? "0";
-
-            const currency =
-                data.currency || "IDR";
-
-
-            if ($("smmSosmedlyBalance")) {
-                $("smmSosmedlyBalance").textContent =
-                    `${currency} ${Number(balance).toLocaleString("id-ID")}`;
-            }
-
-
-            if ($("smmSosmedlyCurrency")) {
-                $("smmSosmedlyCurrency").textContent =
-                    currency;
-            }
-
-
-            setSmmSosmedlyMessage(
-                "Test koneksi berhasil. Tidak ada order yang dibuat."
+            setSmmDjuraganMessage(
+                nextActive === 1
+                    ? "Provider DjuraganSosmed berhasil diaktifkan."
+                    : "Provider DjuraganSosmed berhasil dinonaktifkan."
             );
+
+            await loadSmmDjuraganMargin();
+            await loadSmmServices({
+                resetPage: true
+            });
 
         } catch (error) {
-
             console.error(
-                "[SOSMEDLY TEST]",
+                "[DJURAGAN PROVIDER STATUS]",
                 error
             );
 
-            setSmmSosmedlyStatus(
-                "Tidak terhubung.",
-                false
-            );
-
-            setSmmSosmedlyMessage(
+            setSmmDjuraganMessage(
                 error.message ||
-                "Koneksi Sosmedly gagal.",
+                "Gagal mengubah status provider.",
                 true
             );
 
-        } finally {
-
-            if (button) {
-                button.disabled = false;
-                button.textContent = "Test Koneksi";
+            try {
+                await loadSmmDjuraganProviderStatus();
+            } catch {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent =
+                        "Muat Ulang Status";
+                }
             }
-
         }
-
     }
 
 
-    async function loadSmmSosmedlyBalance() {
-
-        const button =
-            $("smmSosmedlyBalanceButton");
-
-        if (button) {
-            button.disabled = true;
-            button.textContent = "Memuat...";
-        }
-
-
+    async function loadSmmDjuraganMargin() {
         try {
-
             const response =
                 await fetch(
-                    "/api/admin/smm/provider/sosmedly/balance",
+                    "/api/admin/smm/provider/djuragansosmed/margin",
                     {
                         credentials: "include",
                         cache: "no-store"
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.error ||
-                    "Gagal mengambil saldo Sosmedly."
+                    "Gagal memuat margin."
                 );
-
             }
 
+            const input =
+                $("smmDjuraganMargin");
 
-            const balance =
-                data.balance ?? "0";
-
-            const currency =
-                data.currency || "IDR";
-
-
-            if ($("smmSosmedlyBalance")) {
-                $("smmSosmedlyBalance").textContent =
-                    `${currency} ${Number(balance).toLocaleString("id-ID")}`;
+            if (input) {
+                input.value =
+                    data.marginPercent ?? "";
             }
 
+            renderSmmSummary(data);
 
-            if ($("smmSosmedlyCurrency")) {
-                $("smmSosmedlyCurrency").textContent =
-                    currency;
-            }
-
-
-            setSmmSosmedlyStatus(
-                "Saldo berhasil diperbarui.",
-                true
-            );
-
-
-            setSmmSosmedlyMessage(
-                "Saldo provider berhasil diperbarui."
-            );
+            return data;
 
         } catch (error) {
-
             console.error(
-                "[SOSMEDLY BALANCE]",
+                "[DJURAGAN MARGIN]",
                 error
             );
 
-            setSmmSosmedlyMessage(
+            setSmmDjuraganMessage(
                 error.message ||
-                "Gagal mengambil saldo.",
+                "Gagal memuat margin.",
                 true
             );
 
-        } finally {
-
-            if (button) {
-                button.disabled = false;
-                button.textContent = "Cek Saldo";
-            }
-
+            return null;
         }
-
     }
 
 
-    async function loadSmmSosmedlyCatalog() {
-
+    async function saveSmmDjuraganMargin() {
         const button =
-            $("smmSosmedlyCatalogButton");
+            $("smmDjuraganMarginSaveButton");
 
-        const marginInput =
-            $("smmSosmedlyMargin");
-
+        const input =
+            $("smmDjuraganMargin");
 
         const margin =
-            Number(
-                marginInput?.value
-            );
-
+            Number(input?.value);
 
         if (
             !Number.isFinite(margin) ||
             margin < 0 ||
-            margin > 10000
+            margin > 1000
         ) {
-
-            alert(
-                "Masukkan margin harga jual terlebih dahulu.\n\n" +
-                "Contoh: 30 untuk margin +30%."
+            setSmmDjuraganMessage(
+                "Margin harus antara 0 sampai 1000%.",
+                true
             );
-
-            if (marginInput) {
-                marginInput.focus();
-            }
-
             return;
-
         }
-
 
         const confirmed =
             window.confirm(
-                `Import katalog Sosmedly dengan margin ${margin}%?\n\n` +
-                "Layanan baru akan dibuat NONAKTIF terlebih dahulu.\n" +
-                "Harga layanan yang sudah ada tidak akan ditimpa.\n\n" +
-                "Lanjutkan?"
+                `Ubah margin global DjuraganSosmed menjadi ${margin}%?\n\n` +
+                "Harga jual seluruh layanan Djuragan akan dihitung ulang."
             );
-
 
         if (!confirmed) return;
 
-
         if (button) {
             button.disabled = true;
-            button.textContent = "Mengimpor...";
+            button.textContent =
+                "Menyimpan...";
         }
 
-
-        setSmmSosmedlyMessage(
-            "Mengambil dan mengimpor katalog Sosmedly..."
-        );
-
-
         try {
-
             const response =
                 await fetch(
-                    "/api/admin/smm/provider/sosmedly/import",
+                    "/api/admin/smm/provider/djuragansosmed/margin",
                     {
-                        method: "POST",
+                        method: "PUT",
                         credentials: "include",
                         headers: {
                             "Content-Type":
@@ -5595,123 +5620,252 @@ body.bayora-view-admins > main > .stats {
                     }
                 );
 
-
             const data =
                 await response.json();
-
 
             if (
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.error ||
-                    "Gagal mengimpor katalog Sosmedly."
+                    "Gagal menyimpan margin."
                 );
-
             }
 
-
-            if ($("smmSosmedlyCatalogCount")) {
-
-                $("smmSosmedlyCatalogCount").textContent =
-                    Number(
-                        data.totalProviderServices || 0
-                    ).toLocaleString("id-ID");
-
+            if (input) {
+                input.value =
+                    data.marginPercent ?? margin;
             }
 
-
-            setSmmSosmedlyStatus(
-                `Katalog tersinkronisasi (${Number(data.sourceCount || 0).toLocaleString("id-ID")} layanan).`,
-                true
+            setSmmDjuraganMessage(
+                `Margin ${Number(
+                    data.marginPercent ?? margin
+                )}% tersimpan. ` +
+                `${Number(
+                    data.repriced ?? 0
+                ).toLocaleString("id-ID")} layanan dihitung ulang.`
             );
-
-
-            setSmmSosmedlyMessage(
-                `Import selesai: ${Number(data.created || 0).toLocaleString("id-ID")} baru, ` +
-                `${Number(data.updated || 0).toLocaleString("id-ID")} diperbarui, ` +
-                `${Number(data.skipped || 0).toLocaleString("id-ID")} dilewati. ` +
-                "Layanan baru tetap nonaktif."
-            );
-
 
             await loadSmmServices();
 
-
         } catch (error) {
-
             console.error(
-                "[SOSMEDLY IMPORT]",
+                "[DJURAGAN MARGIN SAVE]",
                 error
             );
 
-
-            setSmmSosmedlyMessage(
+            setSmmDjuraganMessage(
                 error.message ||
-                "Gagal mengimpor katalog.",
+                "Gagal menyimpan margin.",
                 true
             );
 
         } finally {
-
             if (button) {
                 button.disabled = false;
-                button.textContent = "Import Katalog";
+                button.textContent =
+                    "Simpan Margin";
             }
-
         }
-
     }
 
 
-    function setupSmmSosmedlyProvider() {
+    async function loadSmmDjuraganBalance() {
+        const button =
+            $("smmDjuraganBalanceButton");
 
+        if (button) {
+            button.disabled = true;
+            button.textContent =
+                "Memuat...";
+        }
+
+        try {
+            const response =
+                await fetch(
+                    "/api/admin/smm/provider/djuragansosmed/balance",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal mengambil saldo DjuraganSosmed."
+                );
+            }
+
+            const balance =
+                data.balance ?? "0";
+
+            const currency =
+                data.currency || "IDR";
+
+            if ($("smmDjuraganBalance")) {
+                $("smmDjuraganBalance").textContent =
+                    `${currency} ${Number(
+                        balance
+                    ).toLocaleString("id-ID")}`;
+            }
+
+            if ($("smmDjuraganCurrency")) {
+                $("smmDjuraganCurrency").textContent =
+                    currency;
+            }
+
+            setSmmDjuraganStatus(
+                "API DjuraganSosmed terhubung. Provider masih nonaktif.",
+                true
+            );
+
+            setSmmDjuraganMessage(
+                "Saldo provider berhasil diperbarui."
+            );
+
+        } catch (error) {
+            console.error(
+                "[DJURAGAN BALANCE]",
+                error
+            );
+
+            setSmmDjuraganStatus(
+                "Provider belum dapat diverifikasi.",
+                false
+            );
+
+            setSmmDjuraganMessage(
+                error.message ||
+                "Gagal mengambil saldo.",
+                true
+            );
+
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent =
+                    "Cek Saldo";
+            }
+        }
+    }
+
+
+    async function loadSmmDjuraganProvider() {
+        setSmmDjuraganStatus(
+            "Memuat data DjuraganSosmed...",
+            false
+        );
+
+        try {
+            const [
+                marginResponse,
+                servicesResponse,
+                statusResponse
+            ] = await Promise.all([
+                loadSmmDjuraganMargin(),
+                fetch(
+                    "/api/admin/smm/services?page=1&limit=1&provider=DjuraganSosmed",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                ),
+                loadSmmDjuraganProviderStatus()
+            ]);
+
+            const servicesData =
+                await servicesResponse.json();
+
+            if (
+                !servicesResponse.ok ||
+                !servicesData.success
+            ) {
+                throw new Error(
+                    servicesData.error ||
+                    "Gagal memuat katalog DjuraganSosmed."
+                );
+            }
+
+            if ($("smmDjuraganCatalogCount")) {
+                $("smmDjuraganCatalogCount").textContent =
+                    Number(
+                        servicesData.pagination?.total || 0
+                    ).toLocaleString("id-ID");
+            }
+
+            renderSmmDjuraganProviderStatus(
+                statusResponse
+            );
+
+            if (marginResponse) {
+                setSmmDjuraganMessage(
+                    "Katalog DjuraganSosmed siap dikelola. Tidak ada order provider yang dibuat."
+                );
+            }
+
+        } catch (error) {
+            console.error(
+                "[DJURAGAN PROVIDER]",
+                error
+            );
+
+            setSmmDjuraganStatus(
+                error.message ||
+                "Gagal memuat DjuraganSosmed.",
+                false
+            );
+
+            setSmmDjuraganMessage(
+                error.message ||
+                "Gagal memuat provider.",
+                true
+            );
+        }
+    }
+
+
+    function setupSmmDjuraganProvider() {
         if (!$("smmProviderCard")) return;
 
-
-        const testButton =
-            $("smmSosmedlyTestButton");
-
-        if (testButton) {
-
-            testButton.addEventListener(
-                "click",
-                testSmmSosmedlyConnection
-            );
-
-        }
-
+        const statusButton =
+            $("smmDjuraganStatusButton");
 
         const balanceButton =
-            $("smmSosmedlyBalanceButton");
+            $("smmDjuraganBalanceButton");
+
+        const marginButton =
+            $("smmDjuraganMarginSaveButton");
+
+        if (statusButton) {
+            statusButton.addEventListener(
+                "click",
+                toggleSmmDjuraganProvider
+            );
+        }
 
         if (balanceButton) {
-
             balanceButton.addEventListener(
                 "click",
-                loadSmmSosmedlyBalance
+                loadSmmDjuraganBalance
             );
-
         }
 
-
-        const catalogButton =
-            $("smmSosmedlyCatalogButton");
-
-        if (catalogButton) {
-
-            catalogButton.addEventListener(
+        if (marginButton) {
+            marginButton.addEventListener(
                 "click",
-                loadSmmSosmedlyCatalog
+                saveSmmDjuraganMargin
             );
-
         }
 
-
-        loadSmmSosmedlyProvider();
-
+        loadSmmDjuraganProvider();
     }
 
 
@@ -5719,35 +5873,19 @@ body.bayora-view-admins > main > .stats {
 
         if (!$("smmPanel")) return;
 
-
-        setupSmmSosmedlyProvider();
-
-        bindSmmIconUpload();
-
-
-        const addButton =
-            $("smmAddButton");
-
-        if (addButton) {
-
-            addButton.addEventListener(
-                "click",
-                openSmmModal
-            );
-
-        }
+        setupSmmDjuraganProvider();
 
 
         const refreshButton =
             $("smmRefreshButton");
 
         if (refreshButton) {
-
             refreshButton.addEventListener(
                 "click",
-                loadSmmServices
+                function () {
+                    loadSmmServices();
+                }
             );
-
         }
 
 
@@ -5755,12 +5893,25 @@ body.bayora-view-admins > main > .stats {
             $("smmSearch");
 
         if (search) {
-
             search.addEventListener(
                 "input",
-                renderSmmServices
-            );
+                function () {
 
+                    clearTimeout(
+                        smmSearchTimer
+                    );
+
+                    smmSearchTimer =
+                        setTimeout(
+                            function () {
+                                loadSmmServices({
+                                    resetPage: true
+                                });
+                            },
+                            350
+                        );
+                }
+            );
         }
 
 
@@ -5768,75 +5919,79 @@ body.bayora-view-admins > main > .stats {
             $("smmPlatformFilter");
 
         if (platform) {
-
             platform.addEventListener(
                 "change",
-                renderSmmServices
-            );
-
-        }
-
-
-        const form =
-            $("smmForm");
-
-        if (form) {
-
-            form.addEventListener(
-                "submit",
-                saveSmmService
-            );
-
-        }
-
-
-        const closeButton =
-            $("smmModalClose");
-
-        if (closeButton) {
-
-            closeButton.addEventListener(
-                "click",
-                closeSmmModal
-            );
-
-        }
-
-
-        const cancelButton =
-            $("smmCancelButton");
-
-        if (cancelButton) {
-
-            cancelButton.addEventListener(
-                "click",
-                closeSmmModal
-            );
-
-        }
-
-
-        const modal =
-            $("smmModal");
-
-        if (modal) {
-
-            modal.addEventListener(
-                "click",
-                function (event) {
-
-                    if (event.target === modal) {
-                        closeSmmModal();
-                    }
-
+                function () {
+                    loadSmmServices({
+                        resetPage: true
+                    });
                 }
             );
+        }
 
+
+        const status =
+            $("smmStatusFilter");
+
+        if (status) {
+            status.addEventListener(
+                "change",
+                function () {
+                    loadSmmServices({
+                        resetPage: true
+                    });
+                }
+            );
+        }
+
+
+        const previous =
+            $("smmPrevPage");
+
+        if (previous) {
+            previous.addEventListener(
+                "click",
+                function () {
+
+                    if (smmCurrentPage <= 1) {
+                        return;
+                    }
+
+                    smmCurrentPage -= 1;
+                    loadSmmServices();
+                }
+            );
+        }
+
+
+        const next =
+            $("smmNextPage");
+
+        if (next) {
+            next.addEventListener(
+                "click",
+                function () {
+
+                    const totalPages =
+                        Number(
+                            smmPagination.totalPages ||
+                            1
+                        );
+
+                    if (
+                        smmCurrentPage >= totalPages
+                    ) {
+                        return;
+                    }
+
+                    smmCurrentPage += 1;
+                    loadSmmServices();
+                }
+            );
         }
 
 
         loadSmmServices();
-
     }
 
 

@@ -8616,3 +8616,70 @@ handleXenditReturn();
     }
 
 })();
+
+/* =========================================================
+   BAYORA FAQ ACCORDION
+   ========================================================= */
+
+(function () {
+
+    function initBayoraFaq() {
+
+        const items =
+            document.querySelectorAll(".bayora-faq-item");
+
+        if (!items.length) return;
+
+        items.forEach(item => {
+
+            const button =
+                item.querySelector(".bayora-faq-question");
+
+            if (!button) return;
+
+            button.addEventListener("click", () => {
+
+                const willOpen =
+                    !item.classList.contains("is-open");
+
+                items.forEach(other => {
+
+                    other.classList.remove("is-open");
+
+                    const otherButton =
+                        other.querySelector(
+                            ".bayora-faq-question"
+                        );
+
+                    if (otherButton) {
+                        otherButton.setAttribute(
+                            "aria-expanded",
+                            "false"
+                        );
+                    }
+                });
+
+                if (willOpen) {
+                    item.classList.add("is-open");
+                    button.setAttribute(
+                        "aria-expanded",
+                        "true"
+                    );
+                }
+
+            });
+
+        });
+
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            initBayoraFaq
+        );
+    } else {
+        initBayoraFaq();
+    }
+
+})();

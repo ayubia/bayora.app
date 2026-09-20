@@ -9315,3 +9315,148 @@ section.bayora-services #customerServiceGrid .service-section-grid,
         padding: 13px 14px;
     }
 }
+
+/* =========================================================
+   BAYORA FAQ
+   ========================================================= */
+
+.bayora-faq {
+    padding: 72px 0;
+}
+
+.bayora-faq-header {
+    max-width: 650px;
+    margin-bottom: 30px;
+}
+
+.bayora-faq-header h2 {
+    margin: 8px 0 10px;
+}
+
+.bayora-faq-header p {
+    margin: 0;
+    color: #697386;
+    line-height: 1.7;
+}
+
+.bayora-faq-list {
+    width: 100%;
+    border-top: 1px solid #e8e6e1;
+}
+
+.bayora-faq-item {
+    border-bottom: 1px solid #e8e6e1;
+}
+
+.bayora-faq-question {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 22px 2px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.bayora-faq-question:hover {
+    opacity: .75;
+}
+
+.bayora-faq-icon {
+    display: flex;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f3f6fa;
+    color: #1769e0;
+    font-size: 21px;
+    font-weight: 400;
+    transition:
+        transform .25s ease,
+        background .25s ease;
+}
+
+.bayora-faq-item.is-open .bayora-faq-icon {
+    transform: rotate(45deg);
+    background: #eaf2ff;
+}
+
+.bayora-faq-answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .28s ease;
+}
+
+.bayora-faq-answer > div {
+    overflow: hidden;
+    color: #697386;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.bayora-faq-item.is-open .bayora-faq-answer {
+    grid-template-rows: 1fr;
+}
+
+.bayora-faq-item.is-open .bayora-faq-answer > div {
+    padding-bottom: 22px;
+}
+
+@media (max-width: 640px) {
+    .bayora-faq {
+        padding: 52px 0;
+    }
+
+    .bayora-faq-header {
+        margin-bottom: 22px;
+    }
+
+    .bayora-faq-question {
+        gap: 16px;
+        padding: 19px 0;
+        font-size: 15px;
+    }
+
+    .bayora-faq-answer > div {
+        padding-right: 42px;
+        font-size: 13px;
+    }
+}
+
+/* BAYORA FAQ — CONTAINER ALIGNMENT */
+
+.bayora-faq {
+    width: min(100% - 40px, 1240px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 640px) {
+    .bayora-faq {
+        width: calc(100% - 32px);
+    }
+}
+
+/* BAYORA SEARCH — HIDE NATIVE SAFARI CLEAR BUTTON */
+#bayoraSearchInput::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
+/* BAYORA SEARCH — HIDE NATIVE SAFARI CLEAR BUTTON */
+#bayoraSearchInput::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}

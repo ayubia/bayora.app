@@ -9096,3 +9096,36 @@ section.bayora-services #customerServiceGrid .service-section-grid,
     display: none;
 }
 
+
+/* BAYORA FOOTER — FINAL POLISH */
+footer {
+    padding: 38px 6% 40px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+footer p {
+    margin: 0;
+}
+
+footer p:first-child {
+    margin-bottom: 4px;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+footer p:nth-child(2) {
+    color: #aebfdf;
+}
+
+footer a {
+    transition: color 0.2s ease;
+}
+
+@media (max-width: 640px) {
+    footer {
+        padding: 32px 20px 34px;
+        font-size: 13px;
+    }
+}

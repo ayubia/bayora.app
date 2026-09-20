@@ -8605,13 +8605,16 @@ export default {
       request.method === "GET" &&
       (
         url.pathname === "/terms" ||
-        url.pathname === "/privacy"
+        url.pathname === "/privacy" ||
+        url.pathname === "/legal"
       )
     ) {
       const legalAssetPath =
         url.pathname === "/terms"
           ? "/terms.html"
-          : "/privacy.html";
+          : url.pathname === "/privacy"
+            ? "/privacy.html"
+            : "/legal.html";
 
       const assetRequest = new Request(
         new URL(legalAssetPath, request.url),

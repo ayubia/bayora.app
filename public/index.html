@@ -498,7 +498,7 @@ footer a{
     }
 
     .bayora-hero-inner{
-        min-height:520px;
+        min-height:570px;
         align-items:flex-start;
         padding:35px 23px;
         border-radius:23px;
@@ -509,25 +509,72 @@ footer a{
     }
 
     .bayora-hero h1{
+        max-width:72%;
         font-size:39px;
         letter-spacing:-1.8px;
     }
 
     .bayora-hero-copy>p{
-        max-width:75%;
+        max-width:58%;
         font-size:13px;
+        line-height:1.65;
+    }
+
+    .bayora-main-btn{
+        position:relative;
+        z-index:6;
     }
 
     .bayora-mini-trust{
+        position:relative;
+        z-index:6;
+        width:55%;
         gap:9px;
         font-size:10px;
     }
 
+    /* Mobile composition: phone besar di sisi kanan */
     .bayora-hero-art{
-        right:-80px;
-        top:225px;
-        transform:scale(.84);
-        transform-origin:top center;
+        right:-48px;
+        top:145px;
+        width:360px;
+        height:420px;
+        transform:none;
+    }
+
+    .bayora-phone{
+        left:145px;
+        top:42px;
+        width:165px;
+        height:325px;
+        transform:rotate(7deg);
+    }
+
+    .bayora-orbit{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        font-size:21px;
+    }
+
+    .orbit-one{
+        top:22px;
+        left:112px;
+    }
+
+    .orbit-two{
+        top:235px;
+        left:72px;
+    }
+
+    .orbit-three{
+        top:145px;
+        right:0;
+    }
+
+    .orbit-four{
+        bottom:24px;
+        right:24px;
     }
 
     .bayora-service-grid{
@@ -556,21 +603,68 @@ footer a{
 @media(max-width:430px){
 
     .bayora-hero-inner{
-        min-height:535px;
+        min-height:555px;
+        padding:32px 20px;
     }
 
     .bayora-hero h1{
+        max-width:100%;
         font-size:34px;
     }
 
     .bayora-hero-copy>p{
-        max-width:85%;
+        max-width:72%;
+    }
+
+    .bayora-main-btn{
+        padding:13px 19px;
+    }
+
+    .bayora-mini-trust{
+        width:58%;
+        gap:7px;
+        font-size:9px;
     }
 
     .bayora-hero-art{
-        right:-105px;
-        top:245px;
-        transform:scale(.76);
+        right:-65px;
+        top:185px;
+        width:330px;
+        height:390px;
+        transform:none;
+    }
+
+    .bayora-phone{
+        left:137px;
+        top:50px;
+        width:155px;
+        height:305px;
+    }
+
+    .bayora-orbit{
+        width:43px;
+        height:43px;
+        font-size:20px;
+    }
+
+    .orbit-one{
+        top:30px;
+        left:105px;
+    }
+
+    .orbit-two{
+        top:225px;
+        left:70px;
+    }
+
+    .orbit-three{
+        top:145px;
+        right:0;
+    }
+
+    .orbit-four{
+        bottom:20px;
+        right:20px;
     }
 
     .bayora-service-card{
@@ -892,6 +986,473 @@ footer a{
     }
 
 }
+
+
+
+/* =========================================================
+   BAYORA HERO V2
+   Independent responsive hero
+   ========================================================= */
+
+.bayora-v2-hero{
+    padding:28px clamp(16px,6vw,90px) 35px;
+    background:var(--bayora-bg);
+}
+
+.bayora-v2-shell{
+    position:relative;
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);
+    align-items:center;
+    gap:30px;
+    min-height:430px;
+    overflow:hidden;
+    padding:55px clamp(28px,5vw,70px);
+    border:1px solid #dcecff;
+    border-radius:28px;
+    background:
+        radial-gradient(circle at 88% 20%,rgba(20,201,244,.22),transparent 28%),
+        radial-gradient(circle at 70% 100%,rgba(18,104,255,.13),transparent 35%),
+        linear-gradient(120deg,#f2f8ff,#e5f6ff);
+    box-shadow:0 20px 60px rgba(20,70,130,.10);
+}
+
+.bayora-v2-copy{
+    position:relative;
+    z-index:5;
+    min-width:0;
+}
+
+.bayora-v2-pill{
+    display:inline-flex;
+    padding:7px 13px;
+    margin-bottom:17px;
+    border:1px solid #d8e8ff;
+    border-radius:999px;
+    background:#eaf3ff;
+    color:var(--bayora-blue);
+    font-size:11px;
+    font-weight:850;
+    letter-spacing:1.5px;
+}
+
+.bayora-v2-copy h1{
+    margin:0 0 18px;
+    color:var(--bayora-navy);
+    font-size:clamp(40px,5vw,63px);
+    line-height:1.03;
+    letter-spacing:-2.8px;
+}
+
+.bayora-v2-copy h1 span{
+    color:var(--bayora-blue);
+}
+
+.bayora-v2-copy>p{
+    max-width:530px;
+    margin:0;
+    color:#60728b;
+    font-size:16px;
+    line-height:1.75;
+}
+
+.bayora-v2-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-top:23px;
+    padding:14px 22px;
+    border-radius:13px;
+    background:linear-gradient(135deg,var(--bayora-blue),var(--bayora-cyan));
+    box-shadow:0 12px 27px rgba(18,104,255,.22);
+    color:#fff!important;
+    text-decoration:none;
+    font-weight:850;
+    transition:.2s ease;
+}
+
+.bayora-v2-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 34px rgba(18,104,255,.28);
+}
+
+.bayora-v2-trust{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-top:18px;
+    color:#60718b;
+    font-size:12px;
+    font-weight:700;
+}
+
+.bayora-v2-trust span{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.bayora-v2-trust b{
+    color:var(--bayora-blue);
+}
+
+/* VISUAL */
+
+.bayora-v2-visual{
+    position:relative;
+    width:min(100%,430px);
+    height:350px;
+    justify-self:end;
+}
+
+.bayora-v2-phone{
+    position:absolute;
+    z-index:3;
+    left:50%;
+    top:50%;
+    width:150px;
+    height:295px;
+    padding:7px;
+    border:8px solid #082b63;
+    border-radius:31px;
+    background:#082b63;
+    box-shadow:0 25px 50px rgba(4,35,87,.24);
+    transform:translate(-50%,-50%) rotate(7deg);
+}
+
+.bayora-v2-speaker{
+    position:absolute;
+    z-index:5;
+    left:50%;
+    top:7px;
+    width:45px;
+    height:5px;
+    transform:translateX(-50%);
+    border-radius:10px;
+    background:#061a45;
+}
+
+.bayora-v2-screen{
+    height:100%;
+    overflow:hidden;
+    padding:28px 11px 10px;
+    border-radius:20px;
+    background:linear-gradient(180deg,#f6fbff,#eaf5ff);
+}
+
+.bayora-v2-phone-top{
+    display:flex;
+    justify-content:space-between;
+    color:var(--bayora-navy);
+    font-size:10px;
+}
+
+.bayora-v2-balance{
+    margin-top:17px;
+    padding:12px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#1268ff,#14c9f4);
+    color:#fff;
+}
+
+.bayora-v2-balance small,
+.bayora-v2-balance strong{
+    display:block;
+}
+
+.bayora-v2-balance small{
+    font-size:7px;
+    opacity:.8;
+}
+
+.bayora-v2-balance strong{
+    margin-top:4px;
+    font-size:13px;
+}
+
+.bayora-v2-actions{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:4px;
+    margin-top:12px;
+}
+
+.bayora-v2-actions div{
+    padding:6px 1px;
+    border-radius:8px;
+    background:#fff;
+    text-align:center;
+    font-size:11px;
+}
+
+.bayora-v2-actions small{
+    display:block;
+    margin-top:2px;
+    color:#63738b;
+    font-size:6px;
+}
+
+.bayora-v2-card{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-top:12px;
+    padding:10px;
+    border-radius:10px;
+    background:#fff;
+    color:var(--bayora-navy);
+    font-size:8px;
+}
+
+.bayora-v2-card span{
+    color:#15956a;
+    font-size:7px;
+}
+
+/* FLOATING ICONS */
+
+.bayora-v2-float{
+    position:absolute;
+    z-index:4;
+    display:grid;
+    place-items:center;
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 12px 28px rgba(18,65,120,.14);
+    font-size:23px;
+}
+
+.bayora-v2-float img{
+    display:block;
+    width:30px;
+    height:30px;
+    object-fit:contain;
+}
+
+.v2-float-1{
+    top:36px;
+    left:50px;
+}
+
+.v2-float-2{
+    left:12px;
+    bottom:72px;
+}
+
+.v2-float-3{
+    top:82px;
+    right:18px;
+}
+
+.v2-float-4{
+    right:58px;
+    bottom:28px;
+}
+
+
+/* TABLET */
+
+@media(max-width:1000px) and (min-width:701px){
+
+    .bayora-v2-shell{
+        grid-template-columns:minmax(0,1fr) 300px;
+        padding:45px 35px;
+    }
+
+    .bayora-v2-copy h1{
+        font-size:44px;
+    }
+
+    .bayora-v2-visual{
+        transform:scale(.88);
+        transform-origin:center right;
+    }
+}
+
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+    .bayora-v2-hero{
+        padding:15px;
+    }
+
+    .bayora-v2-shell{
+        display:grid;
+        grid-template-columns:minmax(0,1fr) 43%;
+        align-items:start;
+        gap:0;
+        min-height:550px;
+        padding:34px 21px 24px;
+        border-radius:23px;
+    }
+
+    .bayora-v2-copy{
+        grid-column:1 / -1;
+        grid-row:1;
+        padding-right:0;
+    }
+
+    .bayora-v2-pill{
+        margin-bottom:15px;
+        padding:6px 11px;
+        font-size:9px;
+        letter-spacing:1.15px;
+    }
+
+    .bayora-v2-copy h1{
+        max-width:100%;
+        margin-bottom:14px;
+        font-size:clamp(33px,9vw,40px);
+        line-height:1.04;
+        letter-spacing:-1.8px;
+    }
+
+    .bayora-v2-copy>p{
+        max-width:60%;
+        font-size:13px;
+        line-height:1.6;
+    }
+
+    .bayora-v2-btn{
+        position:relative;
+        z-index:8;
+        margin-top:20px;
+        padding:13px 18px;
+        font-size:14px;
+    }
+
+    .bayora-v2-trust{
+        position:relative;
+        z-index:8;
+        width:58%;
+        gap:8px 12px;
+        margin-top:17px;
+        font-size:10px;
+    }
+
+    .bayora-v2-visual{
+        position:absolute;
+        z-index:3;
+        right:-44px;
+        bottom:-5px;
+        width:255px;
+        height:355px;
+    }
+
+    .bayora-v2-phone{
+        width:145px;
+        height:285px;
+    }
+
+    .bayora-v2-float{
+        width:43px;
+        height:43px;
+        border-radius:13px;
+        font-size:20px;
+    }
+
+    .v2-float-1{
+        top:12px;
+        left:24px;
+    }
+
+    .v2-float-2{
+        left:2px;
+        bottom:68px;
+    }
+
+    .v2-float-3{
+        top:95px;
+        right:2px;
+    }
+
+    .v2-float-4{
+        right:36px;
+        bottom:12px;
+    }
+}
+
+
+/* SMALL MOBILE */
+
+@media(max-width:430px){
+
+    .bayora-v2-shell{
+        min-height:540px;
+        padding:31px 19px 22px;
+    }
+
+    .bayora-v2-copy h1{
+        font-size:34px;
+    }
+
+    .bayora-v2-copy>p{
+        max-width:61%;
+        font-size:12px;
+    }
+
+    .bayora-v2-btn{
+        padding:12px 16px;
+        font-size:13px;
+    }
+
+    .bayora-v2-trust{
+        width:55%;
+        gap:7px 9px;
+        font-size:9px;
+    }
+
+    .bayora-v2-visual{
+        right:-48px;
+        bottom:-2px;
+        width:235px;
+        height:335px;
+    }
+
+    .bayora-v2-phone{
+        width:136px;
+        height:270px;
+    }
+
+    .bayora-v2-float{
+        width:40px;
+        height:40px;
+        font-size:18px;
+    }
+}
+
+
+/* VERY SMALL */
+
+@media(max-width:360px){
+
+    .bayora-v2-shell{
+        min-height:525px;
+        padding-left:17px;
+        padding-right:17px;
+    }
+
+    .bayora-v2-copy h1{
+        font-size:31px;
+    }
+
+    .bayora-v2-copy>p{
+        max-width:62%;
+        font-size:11px;
+    }
+
+    .bayora-v2-visual{
+        right:-52px;
+        width:220px;
+        transform:scale(.94);
+        transform-origin:right bottom;
+    }
+}
+
 
 </style>
 
@@ -1785,11 +2346,11 @@ footer a{
 <section id="homePage" class="page">
 
     <!-- NAV / HERO -->
-    <section class="bayora-hero">
-        <div class="bayora-hero-inner">
+    <section class="bayora-v2-hero">
+        <div class="bayora-v2-shell">
 
-            <div class="bayora-hero-copy">
-                <div class="bayora-pill">✦ LAYANAN & PRODUK DIGITAL</div>
+            <div class="bayora-v2-copy">
+                <div class="bayora-v2-pill">✦ LAYANAN & PRODUK DIGITAL</div>
 
                 <h1>
                     Semua kebutuhan<br>
@@ -1801,50 +2362,53 @@ footer a{
                     dalam satu tempat.
                 </p>
 
-                <a href="#layanan" class="bayora-main-btn">
+                <a href="#layanan" class="bayora-v2-btn">
                     Mulai Transaksi <span>→</span>
                 </a>
 
-                <div class="bayora-mini-trust">
-                    <span>✓ Aman</span>
-                    <span>✓ Cepat</span>
-                    <span>✓ Terpercaya</span>
+                <div class="bayora-v2-trust">
+                    <span><b>✓</b> Aman</span>
+                    <span><b>✓</b> Cepat</span>
+                    <span><b>✓</b> Terpercaya</span>
                 </div>
             </div>
 
-            <div class="bayora-hero-art" aria-hidden="true">
-                <div class="bayora-orbit orbit-one">⚡</div>
-                <div class="bayora-orbit orbit-two">₿</div>
-                <div class="bayora-orbit orbit-three">📶</div>
-                <div class="bayora-orbit orbit-four">🎮</div>
+            <div class="bayora-v2-visual" aria-hidden="true">
 
-                <div class="bayora-phone">
-                    <div class="phone-speaker"></div>
-                    <div class="phone-screen">
-                        <div class="phone-top">
+                <div class="bayora-v2-float v2-float-1" title="Pulsa"><img src="/assets/bayora-icons/pulsa.png" alt=""></div>
+                <div class="bayora-v2-float v2-float-2" title="Paket Data"><img src="/assets/bayora-icons/paket-data.png" alt=""></div>
+                <div class="bayora-v2-float v2-float-3" title="Token PLN"><img src="/assets/bayora-icons/token-pln.png" alt=""></div>
+                <div class="bayora-v2-float v2-float-4" title="E-Wallet"><img src="/assets/bayora-icons/e-wallet.png" alt=""></div>
+
+                <div class="bayora-v2-phone">
+                    <div class="bayora-v2-speaker"></div>
+
+                    <div class="bayora-v2-screen">
+                        <div class="bayora-v2-phone-top">
                             <b>BAYORA</b>
                             <span>•••</span>
                         </div>
 
-                        <div class="phone-balance">
+                        <div class="bayora-v2-balance">
                             <small>Kebutuhan digital</small>
                             <strong>Lebih sederhana.</strong>
                         </div>
 
-                        <div class="phone-actions">
+                        <div class="bayora-v2-actions">
                             <div>📱<small>Pulsa</small></div>
                             <div>🌐<small>Data</small></div>
                             <div>⚡<small>PLN</small></div>
                             <div>💰<small>Wallet</small></div>
                         </div>
 
-                        <div class="phone-card">
+                        <div class="bayora-v2-card">
                             <small>Di BAYORA</small>
                             <b>Layanan & Produk Digital</b>
                             <span>Dalam satu tempat ✓</span>
                         </div>
                     </div>
                 </div>
+
             </div>
 
         </div>

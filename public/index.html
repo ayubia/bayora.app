@@ -1862,6 +1862,41 @@ footer a{
             </div>
         </div>
 
+        <!-- BAYORA SMART SEARCH -->
+        <div class="bayora-search" id="bayoraSearch">
+            <div class="bayora-search-box">
+                <span class="bayora-search-icon" aria-hidden="true">⌕</span>
+
+                <input
+                    type="search"
+                    id="bayoraSearchInput"
+                    placeholder="Cari layanan atau produk..."
+                    autocomplete="off"
+                    aria-label="Cari layanan atau produk Bayora"
+                >
+
+                <button
+                    type="button"
+                    class="bayora-search-clear"
+                    id="bayoraSearchClear"
+                    aria-label="Hapus pencarian"
+                    hidden
+                >×</button>
+            </div>
+
+            <div
+                class="bayora-search-results"
+                id="bayoraSearchResults"
+                hidden
+            ></div>
+
+            <div
+                class="bayora-search-status"
+                id="bayoraSearchStatus"
+                aria-live="polite"
+            ></div>
+        </div>
+
         <div class="bayora-service-grid" id="customerServiceGrid"></div>
 
         <div class="bayora-trust-banner">

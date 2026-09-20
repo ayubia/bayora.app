@@ -8223,3 +8223,396 @@ function getPaymentName(payment) {
 setupDigitalProductFlow();
 
 handleXenditReturn();
+
+
+/* BAYORA SMART SEARCH FINAL */
+
+(function () {
+
+    function normalizeBayoraSearch(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[-_]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function escapeBayoraSearch(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function initBayoraSearch() {
+
+        const input =
+            document.getElementById("bayoraSearchInput");
+
+        const clear =
+            document.getElementById("bayoraSearchClear");
+
+        const results =
+            document.getElementById("bayoraSearchResults");
+
+        const status =
+            document.getElementById("bayoraSearchStatus");
+
+        const wrapper =
+            document.getElementById("bayoraSearch");
+
+        if (!input || !clear || !results || !status || !wrapper) {
+            return;
+        }
+
+        let currentResults = [];
+        let selectedIndex = -1;
+
+        function collect(query) {
+
+            const q = normalizeBayoraSearch(query);
+
+            if (!q) return [];
+
+            const matches = [];
+
+            Object.entries(services || {}).forEach(
+                ([serviceId, service]) => {
+
+                    const text =
+                        normalizeBayoraSearch([
+                            serviceId,
+                            service?.title,
+                            service?.short_description,
+                            service?.description,
+                            service?.label
+                        ].filter(Boolean).join(" "));
+
+                    if (text.includes(q)) {
+                        matches.push({
+                            type: "service",
+                            serviceId,
+                            title: service?.title || serviceId,
+                            subtitle:
+                                service?.short_description ||
+                                service?.description ||
+                                "Layanan Bayora"
+                        });
+                    }
+                }
+            );
+
+            Object.entries(products || {}).forEach(
+                ([serviceId, list]) => {
+
+                    if (!Array.isArray(list)) return;
+
+                    const service =
+                        (services || {})[serviceId] || {};
+
+                    list.forEach(product => {
+
+                        const text =
+                            normalizeBayoraSearch([
+                                product?.name,
+                                product?.operator,
+                                product?.info,
+                                product?.mood,
+                                product?.productType,
+                                service?.title,
+                                serviceId
+                            ].filter(Boolean).join(" "));
+
+                        if (text.includes(q)) {
+                            matches.push({
+                                type: "product",
+                                serviceId,
+                                productId: product?.id,
+                                title:
+                                    product?.name ||
+                                    "Produk Bayora",
+                                subtitle: [
+                                    product?.operator,
+                                    service?.title
+                                ].filter(Boolean).join(" • ")
+                            });
+                        }
+                    });
+                }
+            );
+
+            /*
+             * SMM SERVICES
+             * Katalog SMM dimuat terpisah dari services/products.
+             */
+            (smmServices || []).forEach(service => {
+
+                const text =
+                    normalizeBayoraSearch([
+                        service?.id,
+                        service?.title,
+                        service?.name,
+                        service?.platform,
+                        service?.category,
+                        service?.description
+                    ].filter(Boolean).join(" "));
+
+                if (text.includes(q)) {
+                    matches.push({
+                        type: "smm",
+                        serviceId: service.id,
+                        title:
+                            service?.title ||
+                            service?.name ||
+                            "Layanan SMM",
+                        subtitle: [
+                            service?.platform,
+                            service?.category
+                        ].filter(Boolean).join(" • ")
+                    });
+                }
+            });
+
+            return matches
+                .sort((a, b) => {
+
+                    const aq =
+                        normalizeBayoraSearch(a.title);
+
+                    const bq =
+                        normalizeBayoraSearch(b.title);
+
+                    const aExact = aq === q ? 0 :
+                        aq.startsWith(q) ? 1 : 2;
+
+                    const bExact = bq === q ? 0 :
+                        bq.startsWith(q) ? 1 : 2;
+
+                    if (aExact !== bExact) {
+                        return aExact - bExact;
+                    }
+
+                    if (a.type !== b.type) {
+                        return a.type === "service" ? -1 : 1;
+                    }
+
+                    return String(a.title)
+                        .localeCompare(String(b.title), "id");
+                })
+                .slice(0, 15);
+        }
+
+        function closeResults() {
+            results.hidden = true;
+            results.innerHTML = "";
+            status.textContent = "";
+            currentResults = [];
+            selectedIndex = -1;
+        }
+
+        function openResult(item) {
+
+            if (!item) return;
+
+            input.value = "";
+            clear.hidden = true;
+            closeResults();
+
+            if (
+                item.type === "smm" &&
+                typeof openSmmService === "function"
+            ) {
+                openSmmService(item.serviceId);
+                return;
+            }
+
+            if (typeof openService === "function") {
+                openService(item.serviceId);
+            }
+        }
+
+        function render() {
+
+            const query = input.value.trim();
+
+            clear.hidden = !query;
+            selectedIndex = -1;
+
+            if (!query) {
+                closeResults();
+                return;
+            }
+
+            currentResults = collect(query);
+            results.hidden = false;
+
+            if (!currentResults.length) {
+
+                status.textContent = "0 hasil ditemukan";
+
+                results.innerHTML = `
+                    <div class="bayora-search-no-result">
+                        <strong>Tidak ditemukan</strong>
+                        <span>
+                            Tidak ada layanan atau produk yang cocok
+                            dengan “${escapeBayoraSearch(query)}”.
+                        </span>
+                    </div>
+                `;
+
+                return;
+            }
+
+            status.textContent =
+                `${currentResults.length} hasil ditemukan`;
+
+            results.innerHTML =
+                currentResults.map((item, index) => `
+                    <button
+                        type="button"
+                        class="bayora-search-result"
+                        data-index="${index}"
+                    >
+                        <span class="bayora-search-result-main">
+                            <strong>
+                                ${escapeBayoraSearch(item.title)}
+                            </strong>
+                            <small>
+                                ${escapeBayoraSearch(
+                                    item.subtitle || "Bayora"
+                                )}
+                            </small>
+                        </span>
+
+                        <span class="bayora-search-result-badge">
+                            ${item.type === "smm"
+                                ? "SMM"
+                                : item.type === "service"
+                                    ? "Layanan"
+                                    : "Produk"}
+                        </span>
+                    </button>
+                `).join("");
+
+            results
+                .querySelectorAll(".bayora-search-result")
+                .forEach(button => {
+                    button.addEventListener("click", () => {
+                        openResult(
+                            currentResults[
+                                Number(button.dataset.index)
+                            ]
+                        );
+                    });
+                });
+        }
+
+        function updateKeyboardSelection() {
+
+            const buttons =
+                Array.from(
+                    results.querySelectorAll(
+                        ".bayora-search-result"
+                    )
+                );
+
+            buttons.forEach((button, index) => {
+                button.classList.toggle(
+                    "is-selected",
+                    index === selectedIndex
+                );
+            });
+
+            if (selectedIndex >= 0 && buttons[selectedIndex]) {
+                buttons[selectedIndex].scrollIntoView({
+                    block: "nearest"
+                });
+            }
+        }
+
+        input.addEventListener("input", render);
+
+        input.addEventListener("focus", () => {
+            if (input.value.trim()) {
+                render();
+            }
+        });
+
+        clear.addEventListener("click", () => {
+            input.value = "";
+            clear.hidden = true;
+            closeResults();
+            input.focus();
+        });
+
+        input.addEventListener("keydown", event => {
+
+            if (
+                event.key === "ArrowDown" &&
+                currentResults.length
+            ) {
+                event.preventDefault();
+
+                selectedIndex =
+                    Math.min(
+                        selectedIndex + 1,
+                        currentResults.length - 1
+                    );
+
+                updateKeyboardSelection();
+            }
+
+            if (
+                event.key === "ArrowUp" &&
+                currentResults.length
+            ) {
+                event.preventDefault();
+
+                selectedIndex =
+                    Math.max(selectedIndex - 1, 0);
+
+                updateKeyboardSelection();
+            }
+
+            if (event.key === "Enter") {
+
+                if (!currentResults.length) return;
+
+                event.preventDefault();
+
+                openResult(
+                    currentResults[
+                        selectedIndex >= 0
+                            ? selectedIndex
+                            : 0
+                    ]
+                );
+            }
+
+            if (event.key === "Escape") {
+                closeResults();
+                input.blur();
+            }
+        });
+
+        document.addEventListener("click", event => {
+            if (!wrapper.contains(event.target)) {
+                closeResults();
+            }
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            initBayoraSearch
+        );
+    } else {
+        initBayoraSearch();
+    }
+
+})();

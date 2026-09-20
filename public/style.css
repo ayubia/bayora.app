@@ -9123,3 +9123,195 @@ section.bayora-services #customerServiceGrid .service-section-grid,
     object-fit: contain !important;
 }
 
+
+
+/* BAYORA SMART SEARCH FINAL */
+
+.bayora-search {
+    position: relative;
+    z-index: 30;
+    width: 100%;
+    margin: 22px 0 24px;
+}
+
+.bayora-search-box {
+    position: relative;
+    width: 100%;
+}
+
+.bayora-search-box input {
+    width: 100%;
+    height: 54px;
+    padding: 0 50px 0 48px;
+    border: 1px solid #e6e3dd;
+    border-radius: 14px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.bayora-search-box input:focus {
+    border-color: #b9c8df;
+    box-shadow: 0 0 0 3px rgba(23,105,224,.08);
+}
+
+.bayora-search-box input::placeholder {
+    color: #9299a5;
+}
+
+.bayora-search-icon {
+    position: absolute;
+    z-index: 2;
+    left: 17px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #697386;
+    font-size: 23px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.bayora-search-clear {
+    position: absolute;
+    z-index: 2;
+    right: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #697386;
+    font-size: 23px;
+    line-height: 30px;
+    cursor: pointer;
+}
+
+.bayora-search-clear:hover {
+    background: rgba(15,42,90,.06);
+}
+
+.bayora-search-results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(54px + 8px);
+    width: 100%;
+    max-height: 440px;
+    overflow-y: auto;
+    border: 1px solid #e6e3dd;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 18px 48px rgba(15,42,90,.13);
+}
+
+.bayora-search-result {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 16px;
+    border: 0;
+    border-bottom: 1px solid #f0eee9;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.bayora-search-result:last-child {
+    border-bottom: 0;
+}
+
+.bayora-search-result:hover,
+.bayora-search-result:focus-visible,
+.bayora-search-result.is-selected {
+    background: #f7faff;
+    outline: none;
+}
+
+.bayora-search-result-main {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bayora-search-result-main strong {
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bayora-search-result-main small {
+    overflow: hidden;
+    color: #7a8497;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bayora-search-result-badge {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #1769e0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.bayora-search-no-result {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 18px;
+}
+
+.bayora-search-no-result strong {
+    font-size: 14px;
+}
+
+.bayora-search-no-result span {
+    color: #7a8497;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.bayora-search-status {
+    min-height: 18px;
+    margin-top: 7px;
+    color: #7a8497;
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .bayora-search {
+        margin: 18px 0 20px;
+    }
+
+    .bayora-search-box input {
+        height: 50px;
+        border-radius: 13px;
+    }
+
+    .bayora-search-results {
+        top: calc(50px + 8px);
+        max-height: 380px;
+        border-radius: 13px;
+    }
+
+    .bayora-search-result {
+        padding: 13px 14px;
+    }
+}

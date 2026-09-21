@@ -259,20 +259,17 @@ async function serveR2Object(env, key) {
 async function sendTransactionToDigiflazzWorker(env, transactionId) {
   const transaction = await env.ppobku_db.prepare(`
     SELECT
-      t.id,
       t.transaction_id,
       t.reference,
       t.target,
-      t.product_id,
-      t.product_name,
-      t.price,
       t.payment_status,
+      t.status,
+      t.provider,
       t.digiflazz_status,
       t.digiflazz_ref,
       p.product_type,
       p.digital_file,
-      p.digiflazz_sku,
-      p.cost_price
+      p.digiflazz_sku
     FROM transactions t
     LEFT JOIN products p
       ON p.id = t.product_id
@@ -299,286 +296,46 @@ async function sendTransactionToDigiflazzWorker(env, transactionId) {
     throw new Error("Pembayaran belum berstatus PAID.");
   }
 
-  const claim = await env.ppobku_db.prepare(`
-    UPDATE transactions
-    SET
-      digiflazz_status = 'PROCESSING',
-      processed_at = ?
-    WHERE transaction_id = ?
-      AND payment_status = 'PAID'
-      AND digiflazz_status = 'PENDING'
-  `).bind(
-    new Date().toISOString(),
-    transactionId
-  ).run();
-
-  if (!claim.meta || claim.meta.changes === 0) {
-    const current = await env.ppobku_db.prepare(`
-      SELECT
-        transaction_id,
-        payment_status,
-        digiflazz_status,
-        digiflazz_ref,
-        digiflazz_message
-      FROM transactions
-      WHERE transaction_id = ?
-    `).bind(transactionId).first();
-
-    return {
-      skipped: true,
-      reason: "TRANSAKSI_SUDAH_DIPROSES_ATAU_SEDANG_DIPROSES",
-      transaction: current || null
-    };
-  }
-
-  const username = env.DIGIFLAZZ_USERNAME;
-  const apiKey = env.DIGIFLAZZ_API_KEY;
-
-  if (!username || !apiKey) {
-    await env.ppobku_db.prepare(`
-      UPDATE transactions
-      SET
-        digiflazz_status = 'FAILED',
-        digiflazz_message = ?,
-        processed_at = ?
-      WHERE transaction_id = ?
-    `).bind(
-      "Credential Digiflazz belum dikonfigurasi.",
-      new Date().toISOString(),
-      transactionId
-    ).run();
-
-    throw new Error("Credential Digiflazz belum dikonfigurasi.");
-  }
-
   if (!transaction.digiflazz_sku) {
-    await env.ppobku_db.prepare(`
-      UPDATE transactions
-      SET
-        digiflazz_status = 'FAILED',
-        digiflazz_message = ?,
-        processed_at = ?
-      WHERE transaction_id = ?
-    `).bind(
-      "Produk tidak memiliki digiflazz_sku.",
-      new Date().toISOString(),
-      transactionId
-    ).run();
-
     throw new Error("Produk tidak memiliki digiflazz_sku.");
   }
 
-  const refId = "PPOBKU-" + transaction.reference;
+  const gatewayUrl = String(
+    env.DIGIFLAZZ_GATEWAY_URL || ""
+  ).replace(/\/+$/, "");
 
-  const sign = createHash("md5")
-    .update(username + apiKey + refId)
-    .digest("hex");
+  const gatewayToken =
+    env.DIGIFLAZZ_GATEWAY_TOKEN;
 
-  const payload = {
-    username,
-    buyer_sku_code: transaction.digiflazz_sku,
-    customer_no: String(transaction.target),
-    ref_id: refId,
-    sign
-  };
-
-  if (env.PUBLIC_BASE_URL) {
-    payload.cb_url =
-      String(env.PUBLIC_BASE_URL).replace(/\/$/, "") +
-      "/api/webhooks/digiflazz";
-  }
-
-  let response;
-  let responseData;
-
-  try {
-    response = await fetch(
-      "https://api.digiflazz.com/v1/transaction",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }
+  if (!gatewayUrl || !gatewayToken) {
+    throw new Error(
+      "Gateway Digiflazz belum dikonfigurasi."
     );
-
-    responseData = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const errorMessage =
-        responseData?.data?.message ||
-        responseData?.message ||
-        `Digiflazz HTTP ${response.status}`;
-
-      await env.ppobku_db.prepare(`
-        UPDATE transactions
-        SET
-          digiflazz_message = ?,
-          processed_at = ?
-        WHERE transaction_id = ?
-      `).bind(
-        String(errorMessage),
-        new Date().toISOString(),
-        transactionId
-      ).run();
-
-      throw new Error(String(errorMessage));
-    }
-  } catch (error) {
-    await env.ppobku_db.prepare(`
-      UPDATE transactions
-      SET
-        digiflazz_message = ?,
-        processed_at = ?
-      WHERE transaction_id = ?
-    `).bind(
-      String(error?.message || "Request ke Digiflazz gagal."),
-      new Date().toISOString(),
-      transactionId
-    ).run();
-
-    throw error;
-  }
-
-  const result = responseData?.data || {};
-
-  console.log(
-    "[DIGIFLAZZ RESPONSE]",
-    JSON.stringify({
-      transaction_id: transaction.transaction_id,
-      ref_id: result.ref_id || refId,
-      status: result.status || null,
-      rc: result.rc || null,
-      sn: result.sn || null,
-      message: result.message || null
-    })
-  );
-
-  const status = String(result.status || "").toLowerCase();
-
-  const message =
-    result.message ||
-    "Tidak ada pesan dari Digiflazz.";
-
-  const digiflazzRef = result.ref_id || refId;
-
-  let finalStatus = "PROCESSING";
-
-  if (status === "sukses") {
-    finalStatus = "SUCCESS";
-  } else if (status === "gagal") {
-    finalStatus = "FAILED";
-  } else if (status === "pending") {
-    finalStatus = "PENDING";
-  }
-
-  await env.ppobku_db.prepare(`
-    UPDATE transactions
-    SET
-      status = ?,
-      digiflazz_status = ?,
-      digiflazz_ref = ?,
-      digiflazz_message = ?,
-      digiflazz_rc = ?,
-      digiflazz_sn = ?,
-      processed_at = ?
-    WHERE transaction_id = ?
-  `).bind(
-    finalStatus,
-    finalStatus,
-    String(digiflazzRef),
-    String(message),
-    result.rc || null,
-    result.sn || null,
-    new Date().toISOString(),
-    transactionId
-  ).run();
-
-  return {
-    skipped: false,
-    status: finalStatus,
-    ref_id: digiflazzRef,
-    message
-  };
-}
-
-
-
-async function sendTransactionToHaybiWorker(env, transactionId) {
-  const transaction = await env.ppobku_db.prepare(`
-    SELECT
-      t.transaction_id,
-      t.reference,
-      t.target,
-      t.payment_status,
-      t.status,
-      t.provider,
-      t.haybi_status,
-      t.haybi_ref,
-      p.product_type,
-      p.haybi_sku
-    FROM transactions t
-    LEFT JOIN products p
-      ON p.id = t.product_id
-    WHERE t.transaction_id = ?
-  `).bind(transactionId).first();
-
-  if (!transaction) {
-    throw new Error("Transaksi tidak ditemukan.");
-  }
-
-  if (
-    String(transaction.transaction_id || "").startsWith("DIGITAL-") ||
-    transaction.product_type === "digital"
-  ) {
-    return {
-      skipped: true,
-      digital: true,
-      reason: "PRODUK_DIGITAL"
-    };
-  }
-
-  if (transaction.payment_status !== "PAID") {
-    throw new Error("Pembayaran belum berstatus PAID.");
-  }
-
-  if (!transaction.haybi_sku) {
-    throw new Error("Produk tidak memiliki haybi_sku.");
-  }
-
-  const username = env.HAYBI_USERNAME;
-  const apiKey = env.HAYBI_API_KEY;
-
-  if (!username || !apiKey) {
-    throw new Error("Credential HAYBI belum dikonfigurasi.");
   }
 
   /*
-   * Ref ID HARUS stabil.
-   * Retry transaksi Bayora yang sama tidak boleh membuat ref baru.
+   * Ref ID harus stabil untuk transaksi Bayora yang sama.
    */
   const refId =
-    transaction.haybi_ref ||
-    ("BAYORA-" + transaction.reference);
+    transaction.digiflazz_ref ||
+    ("PPOBKU-" + transaction.reference);
 
   /*
-   * Atomic claim.
-   * Hanya transaksi yang belum pernah diklaim HAYBI yang boleh
-   * melakukan POST /transaksi.
+   * Atomic claim:
+   * satu transaksi hanya boleh dimiliki satu provider.
    */
   const claim = await env.ppobku_db.prepare(`
     UPDATE transactions
     SET
-      provider = 'HAYBI',
-      haybi_status = 'PROCESSING',
-      haybi_ref = ?,
+      provider = 'DIGIFLAZZ',
+      digiflazz_status = 'PROCESSING',
+      digiflazz_ref = ?,
       processed_at = ?
     WHERE transaction_id = ?
       AND payment_status = 'PAID'
       AND provider IS NULL
-      AND haybi_status IS NULL
-      AND haybi_ref IS NULL
+      AND digiflazz_status = 'PENDING'
+      AND digiflazz_ref IS NULL
   `).bind(
     refId,
     new Date().toISOString(),
@@ -592,11 +349,11 @@ async function sendTransactionToHaybiWorker(env, transactionId) {
         payment_status,
         status,
         provider,
-        haybi_status,
-        haybi_ref,
-        haybi_rc,
-        haybi_message,
-        haybi_sn
+        digiflazz_status,
+        digiflazz_ref,
+        digiflazz_rc,
+        digiflazz_message,
+        digiflazz_sn
       FROM transactions
       WHERE transaction_id = ?
     `).bind(transactionId).first();
@@ -608,52 +365,69 @@ async function sendTransactionToHaybiWorker(env, transactionId) {
     };
   }
 
-  const sign = createHash("md5")
-    .update(username + apiKey + refId)
-    .digest("hex");
-
-  const payload = {
-    username,
-    ref_id: refId,
-    sign,
-    produk: transaction.haybi_sku,
-    no_tujuan: String(transaction.target)
-  };
-
   let response;
-  let data;
+  let gatewayData;
 
   try {
     response = await fetch(
-      "https://haybi.id/api/h2h/transaksi",
+      gatewayUrl + "/digiflazz/transaction",
       {
         method: "POST",
         headers: {
+          "Authorization": "Bearer " + gatewayToken,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          buyer_sku_code: transaction.digiflazz_sku,
+          customer_no: String(transaction.target),
+          ref_id: refId
+        })
       }
     );
 
-    data = await response.json().catch(() => ({}));
+    gatewayData = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
+    /*
+     * DRY RUN tidak boleh dianggap sebagai fulfillment.
+     * Claim tetap tertutup agar tidak terjadi fallback/order ganda.
+     */
+    if (gatewayData?.dry_run === true) {
       const message =
-        data?.pesan ||
-        data?.message ||
-        `HAYBI HTTP ${response.status}`;
+        "Gateway Digiflazz masih dalam DRY RUN.";
+
+      await env.ppobku_db.prepare(`
+        UPDATE transactions
+        SET
+          digiflazz_message = ?,
+          processed_at = ?
+        WHERE transaction_id = ?
+          AND provider = 'DIGIFLAZZ'
+      `).bind(
+        message,
+        new Date().toISOString(),
+        transactionId
+      ).run();
+
+      throw new Error(message);
+    }
+
+    if (!response.ok || gatewayData?.success !== true) {
+      const message =
+        gatewayData?.data?.message ||
+        gatewayData?.error ||
+        `Gateway Digiflazz HTTP ${response.status}`;
 
       /*
-       * Jangan otomatis membuka claim kembali.
-       * Request yang timeout/error transport belum membuktikan
-       * bahwa HAYBI tidak menerima order.
+       * Jangan membuka claim kembali.
+       * Timeout/error belum membuktikan Digiflazz tidak menerima order.
        */
       await env.ppobku_db.prepare(`
         UPDATE transactions
         SET
-          haybi_message = ?,
+          digiflazz_message = ?,
           processed_at = ?
         WHERE transaction_id = ?
+          AND provider = 'DIGIFLAZZ'
       `).bind(
         String(message),
         new Date().toISOString(),
@@ -666,11 +440,15 @@ async function sendTransactionToHaybiWorker(env, transactionId) {
     await env.ppobku_db.prepare(`
       UPDATE transactions
       SET
-        haybi_message = ?,
+        digiflazz_message = ?,
         processed_at = ?
       WHERE transaction_id = ?
+        AND provider = 'DIGIFLAZZ'
     `).bind(
-      String(error?.message || "Request ke HAYBI gagal."),
+      String(
+        error?.message ||
+        "Request ke gateway Digiflazz gagal."
+      ),
       new Date().toISOString(),
       transactionId
     ).run();
@@ -678,52 +456,48 @@ async function sendTransactionToHaybiWorker(env, transactionId) {
     throw error;
   }
 
+  const result = gatewayData?.data || {};
   const providerStatus =
-    String(data?.status || "").toLowerCase();
+    String(result.status || "").toLowerCase();
 
-  const rc = data?.rc || null;
-
+  const rc = result.rc || null;
   const message =
-    data?.pesan ||
-    data?.message ||
-    "Transaksi diterima HAYBI.";
+    result.message ||
+    "Transaksi diterima Digiflazz.";
 
-  /*
-   * Berdasarkan dokumentasi HAYBI:
-   * response awal transaksi normal adalah pending / RC 01.
-   * SUCCESS hanya boleh diberikan bila provider benar-benar
-   * mengembalikan status final sukses.
-   */
-  let finalStatus = "PENDING";
+  let finalStatus = "PROCESSING";
 
-  if (providerStatus === "sukses" && rc !== "01") {
+  if (providerStatus === "sukses") {
     finalStatus = "SUCCESS";
-  } else if (
-    providerStatus === "error" &&
-    rc !== "01"
-  ) {
+  } else if (providerStatus === "gagal") {
     finalStatus = "FAILED";
+  } else if (providerStatus === "pending") {
+    finalStatus = "PENDING";
   }
+
+  const digiflazzRef =
+    result.ref_id || refId;
 
   await env.ppobku_db.prepare(`
     UPDATE transactions
     SET
       status = ?,
-      provider = 'HAYBI',
-      haybi_status = ?,
-      haybi_ref = ?,
-      haybi_rc = ?,
-      haybi_message = ?,
-      haybi_sn = ?,
+      provider = 'DIGIFLAZZ',
+      digiflazz_status = ?,
+      digiflazz_ref = ?,
+      digiflazz_message = ?,
+      digiflazz_rc = ?,
+      digiflazz_sn = ?,
       processed_at = ?
     WHERE transaction_id = ?
+      AND provider = 'DIGIFLAZZ'
   `).bind(
     finalStatus,
     finalStatus,
-    refId,
-    rc,
+    String(digiflazzRef),
     String(message),
-    data?.sn || null,
+    rc,
+    result.sn || null,
     new Date().toISOString(),
     transactionId
   ).run();
@@ -731,23 +505,29 @@ async function sendTransactionToHaybiWorker(env, transactionId) {
   return {
     skipped: false,
     status: finalStatus,
-    ref_id: refId,
+    ref_id: digiflazzRef,
     rc,
     message
   };
 }
 
 
-async function checkHaybiTransactionStatus(env, transactionId) {
+async function checkDigiflazzTransactionStatus(env, transactionId) {
   const transaction = await env.ppobku_db.prepare(`
     SELECT
-      transaction_id,
-      payment_status,
-      provider,
-      haybi_status,
-      haybi_ref
-    FROM transactions
-    WHERE transaction_id = ?
+      t.transaction_id,
+      t.target,
+      t.payment_status,
+      t.provider,
+      t.digiflazz_status,
+      t.digiflazz_ref,
+      t.processed_at,
+      t.created_at,
+      p.digiflazz_sku
+    FROM transactions t
+    LEFT JOIN products p
+      ON p.id = t.product_id
+    WHERE t.transaction_id = ?
   `).bind(transactionId).first();
 
   if (!transaction) {
@@ -759,68 +539,148 @@ async function checkHaybiTransactionStatus(env, transactionId) {
   }
 
   if (
-    transaction.provider !== "HAYBI" ||
-    !transaction.haybi_ref
+    transaction.provider !== "DIGIFLAZZ" ||
+    !transaction.digiflazz_ref
   ) {
-    throw new Error("Transaksi belum dikirim ke HAYBI.");
+    throw new Error("Transaksi belum dikirim ke Digiflazz.");
   }
 
-  const username = env.HAYBI_USERNAME;
-  const apiKey = env.HAYBI_API_KEY;
-
-  if (!username || !apiKey) {
-    throw new Error("Credential HAYBI belum dikonfigurasi.");
+  if (!transaction.digiflazz_sku) {
+    throw new Error("Produk tidak memiliki digiflazz_sku.");
   }
 
-  const refId = transaction.haybi_ref;
+  /*
+   * Jangan cek ulang transaksi yang sudah final.
+   */
+  if (
+    transaction.digiflazz_status === "SUCCESS" ||
+    transaction.digiflazz_status === "FAILED"
+  ) {
+    return {
+      skipped: true,
+      reason: "STATUS_SUDAH_FINAL",
+      status: transaction.digiflazz_status
+    };
+  }
 
-  const sign = createHash("md5")
-    .update(username + apiKey + refId)
-    .digest("hex");
+  const gatewayUrl = String(
+    env.DIGIFLAZZ_GATEWAY_URL || ""
+  ).replace(/\/+$/, "");
+
+  const gatewayToken =
+    env.DIGIFLAZZ_GATEWAY_TOKEN;
+
+  if (!gatewayUrl || !gatewayToken) {
+    throw new Error(
+      "Gateway Digiflazz belum dikonfigurasi."
+    );
+  }
+
+  /*
+   * Ref Digiflazz lama tidak boleh dipakai ulang setelah
+   * melewati batas aman 90 hari.
+   */
+  const createdAt = Date.parse(transaction.created_at);
+
+  if (
+    Number.isFinite(createdAt) &&
+    Date.now() - createdAt >= 90 * 24 * 60 * 60 * 1000
+  ) {
+    return {
+      skipped: true,
+      reason: "STATUS_CHECK_EXPIRED_90_DAYS"
+    };
+  }
+
+  /*
+   * Atomic throttle.
+   *
+   * processed_at sekaligus menjadi lease 60 detik untuk
+   * status check. Hanya satu request konkuren yang boleh
+   * memperoleh lease dan menghubungi gateway.
+   */
+  const now = new Date().toISOString();
+  const cutoff =
+    new Date(Date.now() - 60000).toISOString();
+
+  const throttle = await env.ppobku_db.prepare(`
+    UPDATE transactions
+    SET processed_at = ?
+    WHERE transaction_id = ?
+      AND provider = 'DIGIFLAZZ'
+      AND digiflazz_ref = ?
+      AND digiflazz_status IN ('PENDING', 'PROCESSING')
+      AND (
+        processed_at IS NULL OR
+        processed_at <= ?
+      )
+  `).bind(
+    now,
+    transactionId,
+    transaction.digiflazz_ref,
+    cutoff
+  ).run();
+
+  if (
+    !throttle.meta ||
+    Number(throttle.meta.changes || 0) === 0
+  ) {
+    return {
+      skipped: true,
+      reason: "STATUS_CHECK_RATE_LIMIT",
+      retry_after_ms: 60000
+    };
+  }
 
   const response = await fetch(
-    "https://haybi.id/api/h2h/cek-status",
+    gatewayUrl + "/digiflazz/transaction",
     {
       method: "POST",
       headers: {
+        "Authorization": "Bearer " + gatewayToken,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        username,
-        ref_id: refId,
-        sign
+        buyer_sku_code: transaction.digiflazz_sku,
+        customer_no: String(transaction.target),
+        ref_id: transaction.digiflazz_ref
       })
     }
   );
 
-  const data = await response.json().catch(() => ({}));
+  const gatewayData =
+    await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+  if (gatewayData?.dry_run === true) {
     throw new Error(
-      data?.pesan ||
-      data?.message ||
-      `HAYBI HTTP ${response.status}`
+      "Gateway Digiflazz masih dalam DRY RUN."
     );
   }
 
-  const providerStatus =
-    String(data?.status || "").toLowerCase();
+  if (!response.ok || gatewayData?.success !== true) {
+    throw new Error(
+      gatewayData?.data?.message ||
+      gatewayData?.error ||
+      `Gateway Digiflazz HTTP ${response.status}`
+    );
+  }
 
-  const rc = data?.rc || null;
+  const data = gatewayData?.data || {};
+
+  const providerStatus =
+    String(data.status || "").toLowerCase();
+
+  const rc = data.rc || null;
 
   const message =
-    data?.pesan ||
-    data?.message ||
-    "Status HAYBI diperbarui.";
+    data.message ||
+    "Status Digiflazz diperbarui.";
 
   let finalStatus = "PENDING";
 
-  if (providerStatus === "sukses" && rc !== "01") {
+  if (providerStatus === "sukses") {
     finalStatus = "SUCCESS";
-  } else if (
-    providerStatus === "error" &&
-    rc !== "01"
-  ) {
+  } else if (providerStatus === "gagal") {
     finalStatus = "FAILED";
   }
 
@@ -828,29 +688,32 @@ async function checkHaybiTransactionStatus(env, transactionId) {
     UPDATE transactions
     SET
       status = ?,
-      haybi_status = ?,
-      haybi_rc = ?,
-      haybi_message = ?,
-      haybi_sn = ?,
+      digiflazz_status = ?,
+      digiflazz_rc = ?,
+      digiflazz_message = ?,
+      digiflazz_sn = ?,
       processed_at = ?
     WHERE transaction_id = ?
-      AND provider = 'HAYBI'
+      AND provider = 'DIGIFLAZZ'
+      AND digiflazz_ref = ?
   `).bind(
     finalStatus,
     finalStatus,
     rc,
     String(message),
-    data?.sn || null,
+    data.sn || null,
     new Date().toISOString(),
-    transactionId
+    transactionId,
+    transaction.digiflazz_ref
   ).run();
 
   return {
+    skipped: false,
     status: finalStatus,
-    ref_id: refId,
+    ref_id: transaction.digiflazz_ref,
     rc,
     message,
-    sn: data?.sn || null
+    sn: data.sn || null
   };
 }
 
@@ -11496,7 +11359,7 @@ async function sendDigitalProductEmailWorker(
 
 /* ==========================================================
    POST /api/transactions/:id/sync-xendit-ppob
-   Sinkronisasi pembayaran Xendit untuk PPOB lalu HAYBI
+   Sinkronisasi pembayaran Xendit untuk PPOB lalu DIGIFLAZZ
 ========================================================== */
 
 if (
@@ -11597,12 +11460,12 @@ if (
      * Jika pembayaran sebelumnya sudah berhasil disinkronkan,
      * jangan memeriksa/mengubah pembayaran lagi.
      *
-     * Cukup lanjutkan fulfillment HAYBI.
+     * Cukup lanjutkan fulfillment DIGIFLAZZ.
      * Helper memiliki anti-double-order sendiri.
      */
     if (transaction.paymentStatus === "PAID") {
-      const haybi =
-        await sendTransactionToHaybiWorker(
+      const digiflazz =
+        await sendTransactionToDigiflazzWorker(
           env,
           transactionId
         );
@@ -11611,7 +11474,7 @@ if (
         success: true,
         changed: false,
         paymentStatus: "PAID",
-        haybi
+        digiflazz
       });
     }
 
@@ -11686,7 +11549,7 @@ if (
       /*
        * PPOB belum SUCCESS pada tahap ini.
        * Ini baru menandai pembayaran sebagai PAID.
-       * SUCCESS ditentukan oleh respons HAYBI.
+       * SUCCESS ditentukan oleh respons DIGIFLAZZ.
        */
       const update =
         await env.ppobku_db.prepare(`
@@ -11722,8 +11585,8 @@ if (
         })
       );
 
-      const haybi =
-        await sendTransactionToHaybiWorker(
+      const digiflazz =
+        await sendTransactionToDigiflazzWorker(
           env,
           transactionId
         );
@@ -11733,7 +11596,7 @@ if (
         changed:
           Number(update.meta?.changes || 0) > 0,
         paymentStatus: "PAID",
-        haybi
+        digiflazz
       });
     }
 
@@ -12120,11 +11983,11 @@ if (
           t.status,
           t.payment_status AS paymentStatus,
           t.provider,
-          t.haybi_status AS haybiStatus,
-          t.haybi_ref AS haybiRef,
-          t.haybi_rc AS haybiRc,
-          t.haybi_message AS haybiMessage,
-          t.haybi_sn AS haybiSn,
+          t.digiflazz_status AS digiflazzStatus,
+          t.digiflazz_ref AS digiflazzRef,
+          t.digiflazz_rc AS digiflazzRc,
+          t.digiflazz_message AS digiflazzMessage,
+          t.digiflazz_sn AS digiflazzSn,
 
           CASE
             WHEN t.transaction_id LIKE 'DIGITAL-%'
@@ -12222,22 +12085,22 @@ if (
     /*
      * GET tidak pernah membuat order baru.
      *
-     * Jika order PPOB sudah pernah dikirim ke HAYBI dan masih
+     * Jika order PPOB sudah pernah dikirim ke Digiflazz dan masih
      * menunggu hasil final, polling frontend boleh mengecek
      * status order tersebut menggunakan ref_id yang sama.
      */
     if (
       transaction.productType !== "digital" &&
       transaction.paymentStatus === "PAID" &&
-      transaction.provider === "HAYBI" &&
-      transaction.haybiRef &&
+      transaction.provider === "DIGIFLAZZ" &&
+      transaction.digiflazzRef &&
       (
-        transaction.haybiStatus === "PENDING" ||
-        transaction.haybiStatus === "PROCESSING"
+        transaction.digiflazzStatus === "PENDING" ||
+        transaction.digiflazzStatus === "PROCESSING"
       )
     ) {
       try {
-        await checkHaybiTransactionStatus(
+        await checkDigiflazzTransactionStatus(
           env,
           transactionId
         );
@@ -12263,11 +12126,11 @@ if (
               t.status,
               t.payment_status AS paymentStatus,
               t.provider,
-              t.haybi_status AS haybiStatus,
-              t.haybi_ref AS haybiRef,
-              t.haybi_rc AS haybiRc,
-              t.haybi_message AS haybiMessage,
-              t.haybi_sn AS haybiSn,
+              t.digiflazz_status AS digiflazzStatus,
+              t.digiflazz_ref AS digiflazzRef,
+              t.digiflazz_rc AS digiflazzRc,
+              t.digiflazz_message AS digiflazzMessage,
+              t.digiflazz_sn AS digiflazzSn,
 
               CASE
                 WHEN t.transaction_id LIKE 'DIGITAL-%'
@@ -12290,16 +12153,16 @@ if (
           });
         }
 
-      } catch (haybiError) {
+      } catch (digiflazzError) {
         /*
          * Gangguan cek-status provider tidak membuat endpoint
          * transaksi ikut gagal. Frontend tetap menerima status
          * terakhir yang tersimpan di database.
          */
         console.error(
-          "[HAYBI STATUS CHECK ERROR]",
+          "[DIGIFLAZZ STATUS CHECK ERROR]",
           transactionId,
-          haybiError?.message || String(haybiError)
+          digiflazzError?.message || String(digiflazzError)
         );
       }
     }

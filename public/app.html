@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071F52">
+  <title>Download Aplikasi BAYORA</title>
+
+  <link rel="icon" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <style>
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;
+      color:#071f52;
+      background:#f7fbff;
+    }
+
+    .app-nav{
+      width:min(1180px,calc(100% - 36px));
+      height:76px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .app-brand{
+      color:#071f52;
+      text-decoration:none;
+      font-size:23px;
+      font-weight:900;
+      letter-spacing:-.7px;
+    }
+
+    .app-back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 16px;
+      border:1px solid #dce8f7;
+      border-radius:999px;
+      background:#fff;
+      color:#52647e;
+      text-decoration:none;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .app-wrap{
+      width:min(1120px,calc(100% - 36px));
+      margin:10px auto 60px;
+    }
+
+    .app-hero{
+      position:relative;
+      overflow:hidden;
+      padding:58px 50px;
+      border:1px solid rgba(20,120,255,.12);
+      border-radius:30px;
+      text-align:center;
+      background:
+        radial-gradient(circle at 80% 10%,rgba(0,201,237,.17),transparent 32%),
+        radial-gradient(circle at 15% 80%,rgba(20,120,255,.10),transparent 32%),
+        linear-gradient(135deg,#f8fbff,#edf8ff);
+    }
+
+    .app-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:9px 15px;
+      border:1px solid rgba(20,120,255,.15);
+      border-radius:999px;
+      background:rgba(255,255,255,.7);
+      color:#1478ff;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:1.4px;
+    }
+
+    .app-hero h1{
+      max-width:720px;
+      margin:22px auto 14px;
+      font-size:clamp(36px,5vw,58px);
+      line-height:1.04;
+      letter-spacing:-2.2px;
+    }
+
+    .app-hero h1 span{color:#1478ff}
+
+    .app-hero>p{
+      max-width:620px;
+      margin:0 auto;
+      color:#687991;
+      font-size:16px;
+      line-height:1.7;
+    }
+
+    .platforms{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:20px;
+      margin-top:24px;
+    }
+
+    .platform-card{
+      position:relative;
+      overflow:hidden;
+      padding:30px;
+      border:1px solid #e1ebf6;
+      border-radius:26px;
+      background:#fff;
+      box-shadow:0 15px 45px rgba(7,31,82,.06);
+    }
+
+    .platform-head{
+      display:flex;
+      align-items:center;
+      gap:15px;
+      margin-bottom:20px;
+    }
+
+    .platform-icon{
+      width:56px;
+      height:56px;
+      flex:0 0 56px;
+      display:grid;
+      place-items:center;
+      border-radius:18px;
+      background:#edf6ff;
+      font-size:28px;
+    }
+
+    .platform-icon img{
+      width:31px;
+      height:31px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .platform-head h2{
+      margin:0 0 4px;
+      font-size:22px;
+      letter-spacing:-.5px;
+    }
+
+    .platform-head p{
+      margin:0;
+      color:#8390a4;
+      font-size:13px;
+    }
+
+    .android-btn{
+      width:100%;
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-top:25px;
+      padding:14px 20px;
+      border:0;
+      border-radius:17px;
+      background:linear-gradient(120deg,#1478ff,#00c9ed);
+      box-shadow:0 13px 28px rgba(20,120,255,.18);
+      color:#fff;
+      text-decoration:none;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .android-note{
+      display:flex;
+      gap:9px;
+      margin-top:15px;
+      color:#77879d;
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .steps{
+      display:grid;
+      gap:10px;
+      margin-top:20px;
+    }
+
+    .step{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px;
+      border:1px solid #edf2f8;
+      border-radius:16px;
+      background:#fbfdff;
+    }
+
+    .step-num{
+      width:32px;
+      height:32px;
+      flex:0 0 32px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+      background:#eaf4ff;
+      color:#1478ff;
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .step b{
+      display:block;
+      margin-bottom:2px;
+      font-size:13px;
+    }
+
+    .step span{
+      color:#7c8ba0;
+      font-size:11px;
+      line-height:1.4;
+    }
+
+    .device-tip{
+      display:none;
+      margin-top:20px;
+      padding:14px 16px;
+      border:1px solid #dcecff;
+      border-radius:16px;
+      background:#f3f9ff;
+      color:#55708e;
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .device-tip.show{display:block}
+
+    .app-security{
+      display:flex;
+      justify-content:center;
+      gap:22px;
+      flex-wrap:wrap;
+      margin:25px 0 0;
+      color:#78889e;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .app-security b{
+      margin-right:4px;
+      color:#1478ff;
+    }
+
+    footer{
+      padding:25px 20px 40px;
+      text-align:center;
+      color:#8b98aa;
+      font-size:12px;
+    }
+
+    footer a{
+      color:#1478ff;
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    @media(max-width:700px){
+      .app-nav{
+        width:calc(100% - 30px);
+        height:66px;
+      }
+
+      .app-brand{font-size:20px}
+      .app-back{padding:8px 12px;font-size:11px}
+
+      .app-wrap{
+        width:calc(100% - 28px);
+        margin-top:5px;
+        margin-bottom:35px;
+      }
+
+      .app-hero{
+        padding:37px 20px;
+        border-radius:25px;
+      }
+
+      .app-hero h1{
+        margin-top:19px;
+        font-size:35px;
+        letter-spacing:-1.5px;
+      }
+
+      .app-hero>p{
+        font-size:13px;
+        line-height:1.6;
+      }
+
+      .platforms{
+        grid-template-columns:1fr;
+        gap:14px;
+        margin-top:15px;
+      }
+
+      .platform-card{
+        padding:21px;
+        border-radius:22px;
+      }
+
+      .platform-icon{
+        width:50px;
+        height:50px;
+        flex-basis:50px;
+        border-radius:15px;
+        font-size:24px;
+      }
+
+      .platform-head h2{font-size:19px}
+      .android-btn{min-height:54px}
+      .app-security{gap:12px;font-size:10px}
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="app-nav">
+    <a class="app-brand" href="/">BAYORA</a>
+    <a class="app-back" href="/">← Kembali ke Beranda</a>
+  </nav>
+
+  <main class="app-wrap">
+    <section class="app-hero">
+      <div class="app-pill">✦ APLIKASI BAYORA</div>
+      <h1>BAYORA sekarang<br><span>lebih dekat.</span></h1>
+      <p>
+        Akses layanan dan produk digital BAYORA langsung dari layar utama
+        smartphone kamu. Pilih perangkat yang kamu gunakan.
+      </p>
+
+      <div id="deviceTip" class="device-tip"></div>
+
+      <div class="platforms">
+        <article class="platform-card" id="android">
+          <div class="platform-head">
+            <div class="platform-icon"><img src="/assets/app/android-logo.webp" alt="Android"></div>
+            <div>
+              <h2>Android</h2>
+              <p>Download aplikasi BAYORA untuk Android</p>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div>
+                <b>Download APK</b>
+                <span>Unduh file aplikasi BAYORA langsung dari website resmi.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div>
+                <b>Buka file BAYORA.apk</b>
+                <span>Android mungkin meminta izin instalasi dari browser.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div>
+                <b>Install & buka BAYORA</b>
+                <span>Aplikasi akan muncul di layar aplikasi Android kamu.</span>
+              </div>
+            </div>
+          </div>
+
+          <a class="android-btn"
+             href="/downloads/BAYORA.apk"
+             download="BAYORA.apk">
+            ↓ Download BAYORA.apk
+          </a>
+
+          <div class="android-note">
+            <span>✓</span>
+            <span>Download resmi dari bayora.my.id. Jika muncul peringatan instalasi dari sumber lain, izinkan browser yang kamu gunakan untuk memasang aplikasi.</span>
+          </div>
+        </article>
+
+        <article class="platform-card" id="iphone">
+          <div class="platform-head">
+            <div class="platform-icon"><img src="/assets/app/apple-logo.svg" alt="Apple"></div>
+            <div>
+              <h2>iPhone</h2>
+              <p>Tambahkan BAYORA sebagai Web App</p>
+            </div>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div>
+                <b>Buka BAYORA di Safari</b>
+                <span>Gunakan Safari dan buka bayora.my.id.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div>
+                <b>Tekan tombol Share</b>
+                <span>Tekan ikon kotak dengan panah ke atas di Safari.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div>
+                <b>Add to Home Screen</b>
+                <span>Pilih “Add to Home Screen” dari menu Share.</span>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">4</div>
+              <div>
+                <b>Tambahkan BAYORA</b>
+                <span>Pilih “Open as Web App” jika tersedia, lalu tekan Add.</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="app-security">
+        <span><b>✓</b> Resmi BAYORA</span>
+        <span><b>✓</b> Aman</span>
+        <span><b>✓</b> Akses lebih cepat</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 BAYORA · <a href="/legal">Syarat & Privasi</a>
+  </footer>
+
+  <script>
+    (() => {
+      const ua = navigator.userAgent || "";
+      const android = /Android/i.test(ua);
+      const ios = /iPhone|iPad|iPod/i.test(ua);
+      const tip = document.getElementById("deviceTip");
+
+      if (android) {
+        tip.innerHTML = "Perangkat Android terdeteksi. Kamu bisa langsung menggunakan tombol <b>Download BAYORA.apk</b> di bawah.";
+        tip.classList.add("show");
+        document.getElementById("android").scrollIntoView({block:"nearest"});
+      } else if (ios) {
+        tip.innerHTML = "Perangkat iPhone/iPad terdeteksi. Ikuti panduan <b>iPhone</b> di bawah untuk menambahkan BAYORA ke Home Screen.";
+        tip.classList.add("show");
+      }
+    })();
+  </script>
+</body>
+</html>

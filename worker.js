@@ -8606,7 +8606,8 @@ export default {
       (
         url.pathname === "/terms" ||
         url.pathname === "/privacy" ||
-        url.pathname === "/legal"
+        url.pathname === "/legal" ||
+        url.pathname === "/app"
       )
     ) {
       const legalAssetPath =
@@ -8614,7 +8615,9 @@ export default {
           ? "/terms.html"
           : url.pathname === "/privacy"
             ? "/privacy.html"
-            : "/legal.html";
+            : url.pathname === "/app"
+              ? "/app.html"
+              : "/legal.html";
 
       const assetRequest = new Request(
         new URL(legalAssetPath, request.url),

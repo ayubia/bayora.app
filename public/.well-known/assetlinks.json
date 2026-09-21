@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "id.bayora.app",
+        "sha256_cert_fingerprints": ["09:9B:94:8C:E8:B4:6A:95:29:54:86:0A:DA:C2:AB:C6:71:AA:DA:31:B8:26:A8:CB:E1:9E:95:38:B1:48:01:E7"]
+      }
+    }]

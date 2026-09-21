@@ -2258,6 +2258,7 @@ footer a{
 
     <link rel="icon" href="/favicon.ico?v=bayora" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=bayora">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=bayora">
 </head>
 
@@ -4006,6 +4007,17 @@ if (!response.ok || !data.success) {
     );
 
 })();
+</script>
+
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(error => {
+      console.warn("BAYORA service worker:", error);
+    });
+  });
+}
 </script>
 
 </body>

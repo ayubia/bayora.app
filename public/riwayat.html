@@ -144,10 +144,535 @@ h1 {
         font-size: 14px;
     }
 }
+
+.history-tabs {
+    display: flex;
+    gap: 8px;
+    margin: -10px 0 24px;
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.history-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.history-tab {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 8px 15px;
+    border: 1px solid #e2eaf5;
+    border-radius: 999px;
+    background: #fff;
+    color: #71809a;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease,
+        box-shadow .18s ease;
+}
+
+.history-tab:hover {
+    border-color: #bcd7fa;
+    color: #1769d3;
+}
+
+.history-tab.active {
+    border-color: #2478e8;
+    background: #2478e8;
+    color: #fff;
+    box-shadow:
+        0 7px 18px rgba(36,120,232,.18);
+}
+
+.transaction-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #f4f7fb;
+    color: #66768d;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (max-width: 700px) {
+    .history-tabs {
+        margin-top: -8px;
+        margin-bottom: 18px;
+    }
+
+    .history-tab {
+        min-height: 36px;
+        padding: 7px 13px;
+    }
+}
+
+
+
+/* =========================
+   TRANSACTION FEEDBACK
+========================= */
+
+.transaction-code-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 11px 12px;
+    border: 1px solid #e8edf4;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.transaction-code-content {
+    min-width: 0;
+}
+
+.transaction-code-label {
+    display: block;
+    margin-bottom: 3px;
+    color: #8a96a8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+
+.transaction-code-value {
+    display: block;
+    overflow: hidden;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.transaction-copy-button {
+    flex: 0 0 auto;
+    border: 1px solid #dce5f0;
+    border-radius: 9px;
+    padding: 7px 11px;
+    background: #fff;
+    color: #2478e8;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.transaction-copy-button:disabled {
+    cursor: default;
+    opacity: .7;
+}
+
+.transaction-feedback-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.transaction-feedback-button {
+    flex: 1;
+    min-height: 39px;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.transaction-feedback-button.received {
+    border: 1px solid #cfe9dc;
+    background: #f0faf5;
+    color: #157347;
+}
+
+.transaction-feedback-button.not-received {
+    border: 1px solid #f3d0d0;
+    background: #fff5f5;
+    color: #b42318;
+}
+
+.transaction-feedback-button:disabled {
+    cursor: default;
+    opacity: .58;
+}
+
+.feedback-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, .45);
+    backdrop-filter: blur(3px);
+}
+
+.feedback-modal.open {
+    display: flex;
+}
+
+.feedback-modal-card {
+    width: min(430px, 100%);
+    border-radius: 20px;
+    padding: 24px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+}
+
+.feedback-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.feedback-modal-title {
+    margin: 0;
+    color: #172033;
+    font-size: 20px;
+    letter-spacing: -.3px;
+}
+
+.feedback-modal-subtitle {
+    margin: 6px 0 0;
+    color: #7b8798;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.feedback-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f6fa;
+    color: #536176;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.feedback-stars {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 24px 0 20px;
+}
+
+.feedback-star {
+    border: 0;
+    padding: 2px;
+    background: transparent;
+    color: #d4dae3;
+    font-size: 35px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.feedback-star.active {
+    color: #f5ad21;
+}
+
+.feedback-review-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #445066;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.feedback-review {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+    border: 1px solid #dde4ed;
+    border-radius: 12px;
+    padding: 11px 12px;
+    color: #172033;
+    font: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.feedback-review:focus {
+    border-color: #7eb2f3;
+    box-shadow: 0 0 0 3px rgba(36,120,232,.08);
+}
+
+.feedback-submit {
+    width: 100%;
+    min-height: 43px;
+    margin-top: 15px;
+    border: 0;
+    border-radius: 11px;
+    background: #2478e8;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.feedback-submit:disabled {
+    cursor: default;
+    opacity: .55;
+}
+
+.feedback-message {
+    min-height: 18px;
+    margin-top: 10px;
+    color: #667085;
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .transaction-feedback-actions {
+        flex-direction: column;
+    }
+
+    .transaction-code-box {
+        align-items: flex-start;
+    }
+}
+
 </style>
     <link rel="icon" href="/favicon.ico?v=bayora" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=bayora">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=bayora">
+
+<style id="bayora-native-complaint-style">
+.complaint-progress {
+    margin-top: 10px;
+    padding: 11px 13px;
+    border: 1px solid #dfe6ef;
+    border-radius: 11px;
+    background: #f8fafc;
+    color: #526174;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.complaint-progress strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 13px;
+    color: #172033;
+}
+
+.complaint-progress.open strong {
+    color: #b76b00;
+}
+
+.complaint-progress.checking strong {
+    color: #2468c9;
+}
+
+.complaint-progress.handling strong {
+    color: #6c4ccf;
+}
+
+.complaint-progress.resolved strong {
+    color: #23845b;
+}
+
+.transaction-feedback-button.complaint-locked {
+    opacity: .72;
+    cursor: default;
+}
+</style>
+
+
+<style id="bayora-complaint-contact-style">
+.complaint-contact-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 26, 69, .46);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: .18s ease;
+}
+
+.complaint-contact-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.complaint-contact-modal {
+    position: relative;
+    width: min(100%, 430px);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 26px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(6, 26, 69, .22);
+    transform: translateY(12px) scale(.98);
+    transition: .18s ease;
+}
+
+.complaint-contact-overlay.open
+.complaint-contact-modal {
+    transform: translateY(0) scale(1);
+}
+
+.complaint-contact-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #f1f5fb;
+    color: #52627a;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.complaint-contact-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    background: #fff3e8;
+    color: #e36a13;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.complaint-contact-modal h3 {
+    margin: 0 0 8px;
+    color: #13264b;
+    font-size: 20px;
+}
+
+.complaint-contact-description {
+    margin: 0 0 20px;
+    color: #6b7b93;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.complaint-contact-label {
+    display: block;
+    margin-top: 13px;
+    color: #273b60;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.complaint-contact-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 7px;
+    padding: 12px 13px;
+    border: 1px solid #dce6f3;
+    border-radius: 12px;
+    background: #fff;
+    color: #13264b;
+    font: inherit;
+    font-size: 13px;
+}
+
+.complaint-contact-input:focus {
+    outline: none;
+    border-color: #1268ff;
+    box-shadow: 0 0 0 3px rgba(18, 104, 255, .08);
+}
+
+.complaint-contact-or {
+    margin: 11px 0 -2px;
+    color: #94a0b2;
+    font-size: 11px;
+    text-align: center;
+}
+
+.complaint-contact-message {
+    min-height: 18px;
+    margin-top: 12px;
+    color: #d83b3b;
+    font-size: 12px;
+}
+
+.complaint-contact-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.complaint-contact-cancel,
+.complaint-contact-submit {
+    min-height: 43px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.complaint-contact-cancel {
+    border: 1px solid #dce6f3;
+    background: #fff;
+    color: #52627a;
+}
+
+.complaint-contact-submit {
+    border: 0;
+    background: #1268ff;
+    color: #fff;
+}
+
+.complaint-contact-submit:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.complaint-contact-note {
+    margin-top: 12px;
+    color: #8a97aa;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .complaint-contact-overlay {
+        align-items: flex-end;
+        padding: 12px;
+    }
+
+    .complaint-contact-modal {
+        width: 100%;
+        padding: 22px 18px;
+        border-radius: 22px 22px 16px 16px;
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -162,6 +687,45 @@ h1 {
 
     <h1>Riwayat Transaksi</h1>
 
+    <div
+        id="historyCategoryTabs"
+        class="history-tabs"
+        role="tablist"
+        aria-label="Kategori transaksi"
+    >
+        <button
+            type="button"
+            class="history-tab active"
+            data-history-type="ALL"
+        >
+            Semua
+        </button>
+
+        <button
+            type="button"
+            class="history-tab"
+            data-history-type="PPOB"
+        >
+            PPOB
+        </button>
+
+        <button
+            type="button"
+            class="history-tab"
+            data-history-type="DIGITAL"
+        >
+            Produk Digital
+        </button>
+
+        <button
+            type="button"
+            class="history-tab"
+            data-history-type="SMM"
+        >
+            SMM
+        </button>
+    </div>
+
     <section id="historyList" class="history-list">
         <div class="empty">
             Memuat riwayat transaksi...
@@ -171,6 +735,871 @@ h1 {
 </main>
 
 <script>
+
+let feedbackTransactionId = "";
+let feedbackRating = 0;
+
+function transactionCanBeReceived(transaction) {
+    const status =
+        String(transaction?.status || "")
+        .trim()
+        .toUpperCase();
+
+    return [
+        "SUCCESS",
+        "COMPLETED",
+        "SUCCESSFUL",
+        "DELIVERED"
+    ].includes(status);
+}
+
+function transactionCanBeReported(transaction) {
+    const status =
+        String(transaction?.status || "")
+        .trim()
+        .toUpperCase();
+
+    const paymentStatus =
+        String(transaction?.paymentStatus || "")
+        .trim()
+        .toUpperCase();
+
+    const paid = [
+        "PAID",
+        "SUCCESS",
+        "SUCCESSFUL",
+        "PROCESSING",
+        "IN_PROGRESS",
+        "COMPLETED"
+    ];
+
+    return (
+        paid.includes(paymentStatus) ||
+        paid.includes(status)
+    );
+}
+
+async function copyTransactionCode(
+    transactionId,
+    button
+) {
+    const value = String(transactionId || "");
+
+    if (!value) return;
+
+    try {
+        if (
+            navigator.clipboard &&
+            window.isSecureContext
+        ) {
+            await navigator.clipboard.writeText(value);
+        } else {
+            const textarea =
+                document.createElement("textarea");
+
+            textarea.value = value;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            document.execCommand("copy");
+            textarea.remove();
+        }
+
+        if (button) {
+            const oldText = button.textContent;
+            button.textContent = "Tersalin ✓";
+            button.disabled = true;
+
+            setTimeout(() => {
+                button.textContent = oldText;
+                button.disabled = false;
+            }, 1300);
+        }
+
+    } catch (error) {
+        console.error("[COPY TRANSACTION]", error);
+
+        window.prompt(
+            "Salin kode transaksi:",
+            value
+        );
+    }
+}
+
+async function sendTransactionFeedback(
+    transactionId,
+    action
+) {
+    const response =
+        await fetch(
+            "/api/auth/transaction-feedback",
+            {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    transactionId,
+                    action
+                })
+            }
+        );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+        throw new Error(
+            data.error ||
+            "Gagal menyimpan konfirmasi."
+        );
+    }
+
+    return data;
+}
+
+async function markTransactionReceived(
+    transactionId,
+    button
+) {
+    if (!transactionId) return;
+
+    const confirmed = window.confirm(
+        "Pastikan layanan/produk sudah benar-benar kamu terima. Lanjutkan?"
+    );
+
+    if (!confirmed) return;
+
+    const original =
+        button?.textContent || "";
+
+    try {
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Menyimpan...";
+        }
+
+        await sendTransactionFeedback(
+            transactionId,
+            "RECEIVED"
+        );
+
+        openFeedbackModal(transactionId);
+
+        if (button) {
+            button.textContent =
+                "✓ Sudah Diterima";
+        }
+
+        const card =
+            button?.closest(
+                ".transaction-card"
+            );
+
+        if (card) {
+            card
+                .querySelectorAll(
+                    ".transaction-feedback-button"
+                )
+                .forEach(item => {
+                    item.disabled = true;
+                });
+        }
+
+    } catch (error) {
+        alert(error.message);
+
+        if (button) {
+            button.disabled = false;
+            button.textContent = original;
+        }
+    }
+}
+
+function openComplaintContactForm(transactionId, button) {
+    const old =
+        document.getElementById(
+            "complaintContactModal"
+        );
+
+    if (old) old.remove();
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "complaintContactModal";
+
+    modal.className =
+        "complaint-contact-overlay";
+
+    modal.innerHTML = `
+        <div
+            class="complaint-contact-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="complaintContactTitle"
+        >
+            <button
+                type="button"
+                class="complaint-contact-close"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+
+            <div class="complaint-contact-icon">
+                !
+            </div>
+
+            <h3 id="complaintContactTitle">
+                Belum Diterima
+            </h3>
+
+            <p class="complaint-contact-description">
+                Masukkan kontak yang dapat dihubungi admin untuk membantu menangani transaksi ini.
+            </p>
+
+            <label class="complaint-contact-label">
+                Nama
+                <input
+                    id="complaintContactName"
+                    class="complaint-contact-input"
+                    type="text"
+                    maxlength="100"
+                    autocomplete="name"
+                    placeholder="Nama yang dapat dihubungi"
+                >
+            </label>
+
+            <label class="complaint-contact-label">
+                Nomor WhatsApp
+                <input
+                    id="complaintContactWhatsapp"
+                    class="complaint-contact-input"
+                    type="tel"
+                    maxlength="25"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    placeholder="Contoh: 081234567890"
+                >
+            </label>
+
+            <div class="complaint-contact-or">
+                atau
+            </div>
+
+            <label class="complaint-contact-label">
+                Email
+                <input
+                    id="complaintContactEmail"
+                    class="complaint-contact-input"
+                    type="email"
+                    maxlength="150"
+                    autocomplete="email"
+                    placeholder="nama@email.com"
+                >
+            </label>
+
+            <div
+                id="complaintContactMessage"
+                class="complaint-contact-message"
+            ></div>
+
+            <div class="complaint-contact-actions">
+                <button
+                    type="button"
+                    class="complaint-contact-cancel"
+                >
+                    Batal
+                </button>
+
+                <button
+                    type="button"
+                    class="complaint-contact-submit"
+                >
+                    Kirim Laporan
+                </button>
+            </div>
+
+            <div class="complaint-contact-note">
+                Isi minimal nomor WhatsApp atau email agar admin dapat menghubungimu.
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => {
+        modal.classList.add("open");
+    });
+
+    const close = () => {
+        modal.classList.remove("open");
+
+        window.setTimeout(
+            () => modal.remove(),
+            180
+        );
+    };
+
+    modal
+        .querySelector(
+            ".complaint-contact-close"
+        )
+        ?.addEventListener(
+            "click",
+            close
+        );
+
+    modal
+        .querySelector(
+            ".complaint-contact-cancel"
+        )
+        ?.addEventListener(
+            "click",
+            close
+        );
+
+    modal.addEventListener(
+        "click",
+        event => {
+            if (event.target === modal) {
+                close();
+            }
+        }
+    );
+
+    modal
+        .querySelector(
+            ".complaint-contact-submit"
+        )
+        ?.addEventListener(
+            "click",
+            async () => {
+                const name =
+                    document
+                        .getElementById(
+                            "complaintContactName"
+                        )
+                        ?.value
+                        .trim() || "";
+
+                const whatsapp =
+                    document
+                        .getElementById(
+                            "complaintContactWhatsapp"
+                        )
+                        ?.value
+                        .trim() || "";
+
+                const email =
+                    document
+                        .getElementById(
+                            "complaintContactEmail"
+                        )
+                        ?.value
+                        .trim() || "";
+
+                const message =
+                    document.getElementById(
+                        "complaintContactMessage"
+                    );
+
+                if (!name) {
+                    if (message) {
+                        message.textContent =
+                            "Nama wajib diisi.";
+                    }
+                    return;
+                }
+
+                if (!whatsapp && !email) {
+                    if (message) {
+                        message.textContent =
+                            "Isi minimal nomor WhatsApp atau email.";
+                    }
+                    return;
+                }
+
+                if (
+                    whatsapp &&
+                    !/^[+0-9][0-9\s\-()]{7,24}$/.test(
+                        whatsapp
+                    )
+                ) {
+                    if (message) {
+                        message.textContent =
+                            "Nomor WhatsApp tidak valid.";
+                    }
+                    return;
+                }
+
+                if (
+                    email &&
+                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                        email
+                    )
+                ) {
+                    if (message) {
+                        message.textContent =
+                            "Email tidak valid.";
+                    }
+                    return;
+                }
+
+                const submit =
+                    modal.querySelector(
+                        ".complaint-contact-submit"
+                    );
+
+                const original =
+                    submit?.textContent || "";
+
+                try {
+                    if (submit) {
+                        submit.disabled = true;
+                        submit.textContent =
+                            "Mengirim...";
+                    }
+
+                    if (button) {
+                        button.disabled = true;
+                        button.textContent =
+                            "Mengirim laporan...";
+                    }
+
+                    const response =
+                        await fetch(
+                            "/api/auth/transaction-feedback",
+                            {
+                                method: "POST",
+                                credentials: "include",
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+                                body:
+                                    JSON.stringify({
+                                        transactionId,
+                                        action:
+                                            "NOT_RECEIVED",
+                                        contactName:
+                                            name,
+                                        contactWhatsapp:
+                                            whatsapp,
+                                        contactEmail:
+                                            email
+                                    })
+                            }
+                        );
+
+                    const data =
+                        await response.json();
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+                        throw new Error(
+                            data.error ||
+                            "Gagal mengirim laporan."
+                        );
+                    }
+
+                    close();
+
+                    if (button) {
+                        button.textContent =
+                            "Laporan Terkirim ✓";
+                    }
+
+                    alert(
+                        "Laporan berhasil dikirim ke admin."
+                    );
+
+                    await loadHistory();
+
+                } catch (error) {
+                    if (message) {
+                        message.textContent =
+                            error.message ||
+                            "Gagal mengirim laporan.";
+                    }
+
+                    if (submit) {
+                        submit.disabled = false;
+                        submit.textContent =
+                            original;
+                    }
+
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent =
+                            "Belum Diterima";
+                    }
+                }
+            }
+        );
+
+    document
+        .getElementById(
+            "complaintContactName"
+        )
+        ?.focus();
+}
+
+async function markTransactionNotReceived(
+    transactionId,
+    button
+) {
+    if (!transactionId) return;
+
+    openComplaintContactForm(
+        transactionId,
+        button
+    );
+}
+
+function openFeedbackModal(transactionId) {
+    feedbackTransactionId =
+        String(transactionId || "");
+
+    feedbackRating = 0;
+
+    const modal =
+        document.getElementById(
+            "feedbackModal"
+        );
+
+    const review =
+        document.getElementById(
+            "feedbackReview"
+        );
+
+    const message =
+        document.getElementById(
+            "feedbackMessage"
+        );
+
+    if (review) review.value = "";
+    if (message) message.textContent = "";
+
+    updateFeedbackStars();
+
+    if (modal) {
+        modal.classList.add("open");
+        modal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+    }
+}
+
+function closeFeedbackModal() {
+    const modal =
+        document.getElementById(
+            "feedbackModal"
+        );
+
+    if (modal) {
+        modal.classList.remove("open");
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+    }
+}
+
+function updateFeedbackStars() {
+    document
+        .querySelectorAll(
+            ".feedback-star"
+        )
+        .forEach(star => {
+            const rating =
+                Number(
+                    star.dataset.rating
+                );
+
+            star.classList.toggle(
+                "active",
+                rating <= feedbackRating
+            );
+        });
+}
+
+async function submitTransactionReview() {
+    if (!feedbackTransactionId) return;
+
+    const message =
+        document.getElementById(
+            "feedbackMessage"
+        );
+
+    const submit =
+        document.getElementById(
+            "feedbackSubmit"
+        );
+
+    const review =
+        document.getElementById(
+            "feedbackReview"
+        )?.value || "";
+
+    if (
+        !Number.isInteger(feedbackRating) ||
+        feedbackRating < 1 ||
+        feedbackRating > 5
+    ) {
+        if (message) {
+            message.textContent =
+                "Pilih 1–5 bintang terlebih dahulu.";
+        }
+        return;
+    }
+
+    try {
+        if (submit) {
+            submit.disabled = true;
+            submit.textContent =
+                "Mengirim...";
+        }
+
+        const response =
+            await fetch(
+                "/api/auth/transaction-feedback",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        transactionId:
+                            feedbackTransactionId,
+                        action: "REVIEW",
+                        rating:
+                            feedbackRating,
+                        review
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Gagal mengirim penilaian."
+            );
+        }
+
+        if (message) {
+            message.textContent =
+                "Terima kasih atas penilaianmu ✓";
+        }
+
+        if (submit) {
+            submit.textContent =
+                "Penilaian Terkirim ✓";
+        }
+
+        setTimeout(() => {
+            closeFeedbackModal();
+        }, 1100);
+
+    } catch (error) {
+        if (message) {
+            message.textContent =
+                error.message;
+        }
+
+        if (submit) {
+            submit.disabled = false;
+            submit.textContent =
+                "Kirim Penilaian";
+        }
+    }
+}
+
+function setupFeedbackUI() {
+    document
+        .querySelectorAll(
+            ".feedback-star"
+        )
+        .forEach(star => {
+            star.addEventListener(
+                "click",
+                () => {
+                    feedbackRating =
+                        Number(
+                            star.dataset.rating
+                        );
+
+                    updateFeedbackStars();
+                }
+            );
+        });
+
+    const modal =
+        document.getElementById(
+            "feedbackModal"
+        );
+
+    modal?.addEventListener(
+        "click",
+        event => {
+            if (event.target === modal) {
+                closeFeedbackModal();
+            }
+        }
+    );
+}
+
+
+
+let historyTransactions = [];
+let historyType = "ALL";
+
+function normalizeHistoryType(transaction) {
+
+    const explicit =
+        String(
+            transaction?.transactionType || ""
+        )
+        .trim()
+        .toUpperCase();
+
+    if (
+        explicit === "PPOB" ||
+        explicit === "DIGITAL" ||
+        explicit === "SMM"
+    ) {
+        return explicit;
+    }
+
+    const transactionId =
+        String(
+            transaction?.transactionId || ""
+        )
+        .trim()
+        .toUpperCase();
+
+    if (transactionId.startsWith("SMM-")) {
+        return "SMM";
+    }
+
+    if (transactionId.startsWith("DIGITAL-")) {
+        return "DIGITAL";
+    }
+
+    return "PPOB";
+}
+
+function getHistoryTypeLabel(type) {
+
+    if (type === "DIGITAL") {
+        return "Produk Digital";
+    }
+
+    if (type === "SMM") {
+        return "SMM";
+    }
+
+    return "PPOB";
+}
+
+function renderHistoryList() {
+
+    const list =
+        document.getElementById("historyList");
+
+    if (!list) {
+        return;
+    }
+
+    const filtered =
+        historyType === "ALL"
+            ? historyTransactions
+            : historyTransactions.filter(
+                transaction =>
+                    normalizeHistoryType(
+                        transaction
+                    ) === historyType
+            );
+
+    if (!filtered.length) {
+
+        const label =
+            historyType === "ALL"
+                ? "akun ini"
+                : getHistoryTypeLabel(
+                    historyType
+                );
+
+        list.innerHTML = `
+            <div class="empty">
+                ${
+                    historyType === "ALL"
+                        ? "Belum ada transaksi pada akun ini."
+                        : `Belum ada transaksi ${escapeHtml(label)}.`
+                }
+            </div>
+        `;
+
+        return;
+    }
+
+    list.innerHTML =
+        filtered
+            .map(renderTransaction)
+            .join("");
+}
+
+function setupHistoryTabs() {
+
+    const tabs =
+        document.querySelectorAll(
+            "[data-history-type]"
+        );
+
+    tabs.forEach(tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                historyType =
+                    String(
+                        tab.dataset.historyType ||
+                        "ALL"
+                    )
+                    .toUpperCase();
+
+                tabs.forEach(item => {
+                    item.classList.toggle(
+                        "active",
+                        item === tab
+                    );
+                });
+
+                renderHistoryList();
+            }
+        );
+    });
+}
+
+
 async function loadHistory() {
 
     const list = document.getElementById("historyList");
@@ -191,21 +1620,12 @@ async function loadHistory() {
             return;
         }
 
-        if (!data.transactions.length) {
+        historyTransactions =
+            Array.isArray(data.transactions)
+                ? data.transactions
+                : [];
 
-            list.innerHTML = `
-                <div class="empty">
-                    Belum ada transaksi pada akun ini.
-                </div>
-            `;
-
-            return;
-        }
-
-        list.innerHTML =
-            data.transactions
-                .map(renderTransaction)
-                .join("");
+        renderHistoryList();
 
     } catch (error) {
 
@@ -215,6 +1635,125 @@ async function loadHistory() {
             </div>
         `;
     }
+}
+
+
+function getComplaintStatus(transaction) {
+    return String(
+        transaction?.complaintStatus || ""
+    ).trim().toUpperCase();
+}
+
+function getComplaintLabel(status) {
+    const labels = {
+        OPEN: "Laporan Terkirim",
+        CHECKING: "Dalam Pengecekan",
+        HANDLING: "Sedang Ditangani",
+        RESOLVED: "Sudah Ditangani"
+    };
+
+    return labels[status] || "";
+}
+
+function getComplaintCooldownUntil(transaction) {
+    const value =
+        transaction?.complaintResolvedAt ||
+        transaction?.complaintStatusUpdatedAt;
+
+    const time =
+        Date.parse(value || "");
+
+    if (!Number.isFinite(time)) {
+        return null;
+    }
+
+    return time + 24 * 60 * 60 * 1000;
+}
+
+function complaintIsLocked(transaction) {
+    const status =
+        getComplaintStatus(transaction);
+
+    if (
+        status === "OPEN" ||
+        status === "CHECKING" ||
+        status === "HANDLING"
+    ) {
+        return true;
+    }
+
+    if (status === "RESOLVED") {
+        const until =
+            getComplaintCooldownUntil(
+                transaction
+            );
+
+        return (
+            until === null ||
+            Date.now() < until
+        );
+    }
+
+    return false;
+}
+
+function renderComplaintProgress(transaction) {
+    const status =
+        getComplaintStatus(transaction);
+
+    if (!status || status === "NONE") {
+        return "";
+    }
+
+    let description = "";
+
+    if (status === "OPEN") {
+        description =
+            "Laporanmu sudah terkirim dan menunggu pemeriksaan admin.";
+    } else if (status === "CHECKING") {
+        description =
+            "Admin sedang memeriksa transaksi dan laporanmu.";
+    } else if (status === "HANDLING") {
+        description =
+            "Laporanmu sedang ditangani oleh admin.";
+    } else if (status === "RESOLVED") {
+        const until =
+            getComplaintCooldownUntil(
+                transaction
+            );
+
+        if (
+            until &&
+            Date.now() < until
+        ) {
+            description =
+                "Laporan sudah ditangani. Laporan ulang tersedia setelah " +
+                new Date(until).toLocaleString(
+                    "id-ID",
+                    {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    }
+                ) +
+                ".";
+        } else {
+            description =
+                "Laporan sudah ditangani. Jika masalah masih terjadi, kamu dapat membuat laporan ulang.";
+        }
+    }
+
+    return `
+        <div class="complaint-progress ${status.toLowerCase()}">
+            <strong>
+                ${escapeHtml(
+                    getComplaintLabel(status)
+                )}${status === "RESOLVED" ? " ✓" : ""}
+            </strong>
+            <span>
+                ${escapeHtml(description)}
+            </span>
+        </div>
+    `;
 }
 
 function renderTransaction(transaction) {
@@ -260,7 +1799,149 @@ function renderTransaction(transaction) {
 
             </div>
 
+
+            <div class="transaction-code-box">
+                <div class="transaction-code-content">
+                    <span class="transaction-code-label">
+                        Kode Transaksi
+                    </span>
+
+                    <span class="transaction-code-value">
+                        ${escapeHtml(
+                            transaction.transactionId
+                        )}
+                    </span>
+                </div>
+
+                <button
+                    type="button"
+                    class="transaction-copy-button"
+                    onclick='copyTransactionCode(
+                        ${JSON.stringify(
+                            String(
+                                transaction.transactionId || ""
+                            )
+                        )},
+                        this
+                    )'
+                >
+                    Salin
+                </button>
+            </div>
+
+            ${
+                (
+                    transactionCanBeReceived(
+                        transaction
+                    ) ||
+                    transactionCanBeReported(
+                        transaction
+                    ) ||
+                    (
+                        getComplaintStatus(
+                            transaction
+                        ) &&
+                        getComplaintStatus(
+                            transaction
+                        ) !== "NONE"
+                    )
+                )
+                    ? `
+                        <div class="transaction-feedback-actions">
+
+                            ${
+                                transactionCanBeReceived(
+                                    transaction
+                                )
+                                    ? `
+                                        <button
+                                            type="button"
+                                            class="transaction-feedback-button received"
+                                            onclick='markTransactionReceived(
+                                                ${JSON.stringify(
+                                                    String(
+                                                        transaction.transactionId || ""
+                                                    )
+                                                )},
+                                                this
+                                            )'
+                                        >
+                                            ✓ Sudah Diterima
+                                        </button>
+                                    `
+                                    : ""
+                            }
+
+                            ${
+                                complaintIsLocked(
+                                    transaction
+                                )
+                                    ? `
+                                        <button
+                                            type="button"
+                                            class="transaction-feedback-button not-received complaint-locked"
+                                            disabled
+                                        >
+                                            ${
+                                                getComplaintStatus(
+                                                    transaction
+                                                ) === "OPEN"
+                                                    ? "Laporan Terkirim ✓"
+                                                    : getComplaintStatus(
+                                                        transaction
+                                                    ) === "CHECKING"
+                                                        ? "Dalam Pengecekan"
+                                                        : getComplaintStatus(
+                                                            transaction
+                                                        ) === "HANDLING"
+                                                            ? "Sedang Ditangani"
+                                                            : "Sudah Ditangani ✓"
+                                            }
+                                        </button>
+                                    `
+                                    : (
+                                        transactionCanBeReported(
+                                            transaction
+                                        )
+                                            ? `
+                                                <button
+                                                    type="button"
+                                                    class="transaction-feedback-button not-received"
+                                                    onclick='markTransactionNotReceived(
+                                                        ${JSON.stringify(
+                                                            String(
+                                                                transaction.transactionId || ""
+                                                            )
+                                                        )},
+                                                        this
+                                                    )'
+                                                >
+                                                    ! Belum Diterima
+                                                </button>
+                                            `
+                                            : ""
+                                    )
+                            }
+                            }
+
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${renderComplaintProgress(transaction)}
+
             <div class="meta">
+
+                <span class="transaction-type">
+                    ${escapeHtml(
+                        getHistoryTypeLabel(
+                            normalizeHistoryType(
+                                transaction
+                            )
+                        )
+                    )}
+                </span>
 
                 <span class="status">
                     ${escapeHtml(status)}
@@ -289,8 +1970,167 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 
+setupFeedbackUI();
+setupHistoryTabs();
 loadHistory();
 </script>
+
+
+
+<div
+    id="feedbackModal"
+    class="feedback-modal"
+    aria-hidden="true"
+>
+    <div
+        class="feedback-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="feedbackModalTitle"
+    >
+        <div class="feedback-modal-header">
+            <div>
+                <h2
+                    id="feedbackModalTitle"
+                    class="feedback-modal-title"
+                >
+                    Beri Penilaian
+                </h2>
+
+                <p class="feedback-modal-subtitle">
+                    Bagaimana pengalamanmu dengan transaksi ini?
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="feedback-modal-close"
+                onclick="closeFeedbackModal()"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+        </div>
+
+        <div
+            id="feedbackStars"
+            class="feedback-stars"
+            aria-label="Penilaian"
+        >
+            <button type="button" class="feedback-star" data-rating="1">★</button>
+            <button type="button" class="feedback-star" data-rating="2">★</button>
+            <button type="button" class="feedback-star" data-rating="3">★</button>
+            <button type="button" class="feedback-star" data-rating="4">★</button>
+            <button type="button" class="feedback-star" data-rating="5">★</button>
+        </div>
+
+        <label
+            class="feedback-review-label"
+            for="feedbackReview"
+        >
+            Ulasan (opsional)
+        </label>
+
+        <textarea
+            id="feedbackReview"
+            class="feedback-review"
+            maxlength="1000"
+            placeholder="Ceritakan pengalamanmu..."
+        ></textarea>
+
+        <button
+            type="button"
+            id="feedbackSubmit"
+            class="feedback-submit"
+            onclick="submitTransactionReview()"
+        >
+            Kirim Penilaian
+        </button>
+
+        <div
+            id="feedbackMessage"
+            class="feedback-message"
+        ></div>
+    </div>
+</div>
+
+
+
+<script id="bayora-rating-click-fix">
+(function () {
+
+    function selectFeedbackRating(star) {
+        if (!star) return;
+
+        const value =
+            Number(star.dataset.rating);
+
+        if (
+            !Number.isInteger(value) ||
+            value < 1 ||
+            value > 5
+        ) {
+            return;
+        }
+
+        feedbackRating = value;
+
+        if (
+            typeof updateFeedbackStars ===
+            "function"
+        ) {
+            updateFeedbackStars();
+        }
+
+        const message =
+            document.getElementById(
+                "feedbackMessage"
+            );
+
+        if (message) {
+            message.textContent = "";
+        }
+    }
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            const star =
+                event.target.closest(
+                    ".feedback-star"
+                );
+
+            if (!star) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            selectFeedbackRating(star);
+        }
+    );
+
+    document.addEventListener(
+        "touchend",
+        function (event) {
+
+            const star =
+                event.target.closest(
+                    ".feedback-star"
+                );
+
+            if (!star) return;
+
+            selectFeedbackRating(star);
+        },
+        {
+            passive: true
+        }
+    );
+
+})();
+</script>
+
 
 </body>
 </html>

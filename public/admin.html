@@ -2270,6 +2270,79 @@ body.bayora-view-admins > main > .stats {
 }
 </style>
 
+
+<style id="bayora-native-admin-complaint-style">
+.admin-complaint-workflow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.admin-complaint-status {
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid #d9e4f2;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #13264b;
+    font: inherit;
+    font-size: 12px;
+}
+
+.admin-complaint-status:focus {
+    outline: none;
+    border-color: #9bb7dd;
+}
+</style>
+
+
+<style id="bayora-admin-complaint-contact-style">
+.admin-complaint-contact {
+    margin-top: 12px;
+    padding: 13px;
+    border: 1px solid #e0e9f5;
+    border-radius: 12px;
+    background: #f8fbff;
+}
+
+.admin-complaint-contact-title {
+    margin-bottom: 9px;
+    color: #13264b;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.admin-complaint-contact-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 5px 0;
+    color: #6b7b93;
+    font-size: 11px;
+}
+
+.admin-complaint-contact-row strong {
+    color: #273b60;
+    font-weight: 700;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.admin-complaint-contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.admin-complaint-contact-actions a {
+    text-decoration: none;
+}
+</style>
+
 </head>
 
 
@@ -2342,6 +2415,26 @@ body.bayora-view-admins > main > .stats {
         >
             <span>▤</span>
             <span>Transaksi</span>
+        </button>
+
+        <button
+            type="button"
+            class="bayora-nav-item"
+            id="adminNotificationNav"
+        >
+            <span>♢</span>
+
+            <span class="admin-notification-nav-text">
+                Notifikasi
+
+                <span
+                    id="adminNotificationBadge"
+                    class="admin-notification-badge"
+                    hidden
+                >
+                    0
+                </span>
+            </span>
         </button>
 
 
@@ -2439,6 +2532,98 @@ body.bayora-view-admins > main > .stats {
 </button>
 
 <main>
+
+<section
+    id="adminNotificationPanel"
+    class="admin-notification-panel"
+    hidden
+>
+    <div class="admin-notification-heading">
+        <div>
+            <div class="eyebrow">
+                ADMIN
+            </div>
+
+            <h1>
+                Notifikasi
+            </h1>
+
+            <p>
+                Laporan pelanggan dan penilaian transaksi.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="admin-notification-refresh"
+            id="adminNotificationRefresh"
+        >
+            ↻ Refresh
+        </button>
+    </div>
+
+    <div class="admin-notification-summary">
+        <div class="admin-notification-summary-card">
+            <span>Belum dibaca</span>
+            <strong id="notificationUnreadTotal">0</strong>
+        </div>
+
+        <div class="admin-notification-summary-card">
+            <span>Belum Diterima</span>
+            <strong id="notificationComplaintTotal">0</strong>
+        </div>
+
+        <div class="admin-notification-summary-card">
+            <span>Penilaian</span>
+            <strong id="notificationReviewTotal">0</strong>
+        </div>
+    </div>
+
+    <div class="admin-notification-tabs">
+        <button
+            type="button"
+            class="admin-notification-tab active"
+            data-notification-filter="ALL"
+        >
+            Semua
+        </button>
+
+        <button
+            type="button"
+            class="admin-notification-tab"
+            data-notification-filter="COMPLAINT"
+        >
+            Belum Diterima
+        </button>
+
+        <button
+            type="button"
+            class="admin-notification-tab"
+            data-notification-filter="REVIEW"
+        >
+            Penilaian
+        </button>
+
+        <button
+            type="button"
+            class="admin-notification-tab"
+            data-notification-filter="OTHER"
+        >
+            Lainnya
+        </button>
+    </div>
+
+    <div
+        id="adminNotificationList"
+        class="admin-notification-list"
+    >
+        <div class="admin-notification-empty">
+            Memuat notifikasi...
+        </div>
+    </div>
+</section>
+
+
 
     <div class="eyebrow">
         ADMIN
@@ -13428,6 +13613,1078 @@ document.addEventListener(
 
 </div>
 
+
+<script id="bayora-admin-notifications-script">
+(function () {
+
+    let notificationItems = [];
+    let notificationFilter = "ALL";
+    let notificationViewOpen = false;
+
+    const $notification =
+        id => document.getElementById(id);
+
+    function escapeNotificationHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function notificationDate(value) {
+        if (!value) return "-";
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return String(value);
+        }
+
+        return new Intl.DateTimeFormat(
+            "id-ID",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        ).format(date);
+    }
+
+    function notificationStars(value) {
+        const rating =
+            Math.max(
+                0,
+                Math.min(
+                    5,
+                    Number(value) || 0
+                )
+            );
+
+        return (
+            "★".repeat(rating) +
+            "☆".repeat(5 - rating)
+        );
+    }
+
+    function getNotificationEvents() {
+        const events = [];
+
+        notificationItems.forEach(item => {
+
+            if (
+                item.receiptStatus ===
+                "NOT_RECEIVED"
+            ) {
+                events.push({
+                    id: item.id,
+                    type: "COMPLAINT",
+                    transactionId:
+                        item.transactionId,
+                    transactionType:
+                        item.transactionType,
+                    customerName:
+                        item.customerName,
+                    customerPhone:
+                        item.customerPhone,
+                    customerEmail:
+                        item.customerEmail,
+                    contactName:
+                        item.contactName || "",
+                    contactWhatsapp:
+                        item.contactWhatsapp || "",
+                    contactEmail:
+                        item.contactEmail || "",
+                    date:
+                        item.complaintAt ||
+                        item.updatedAt,
+                    unread:
+                        Number(
+                            item.complaintAdminRead
+                        ) !== 1,
+                    rating: null,
+                    review: "",
+                    complaintStatus:
+                        String(
+                            item.complaintStatus ||
+                            "OPEN"
+                        )
+                        .trim()
+                        .toUpperCase()
+                });
+            }
+
+            if (Number(item.rating) > 0) {
+                events.push({
+                    id: item.id,
+                    type: "REVIEW",
+                    transactionId:
+                        item.transactionId,
+                    transactionType:
+                        item.transactionType,
+                    customerName:
+                        item.customerName,
+                    customerPhone:
+                        item.customerPhone,
+                    customerEmail:
+                        item.customerEmail,
+                    date:
+                        item.reviewedAt ||
+                        item.updatedAt,
+                    unread:
+                        Number(
+                            item.reviewAdminRead
+                        ) !== 1,
+                    rating:
+                        Number(item.rating),
+                    review:
+                        item.review || ""
+                });
+            }
+        });
+
+        events.sort((a, b) => {
+            return (
+                new Date(b.date || 0) -
+                new Date(a.date || 0)
+            );
+        });
+
+        return events;
+    }
+
+    function renderNotificationList() {
+        const container =
+            $notification(
+                "adminNotificationList"
+            );
+
+        if (!container) return;
+
+        let events =
+            getNotificationEvents();
+
+        if (
+            notificationFilter !== "ALL"
+        ) {
+            events = events.filter(
+                item =>
+                    item.type ===
+                    notificationFilter
+            );
+        }
+
+        if (
+            notificationFilter === "OTHER"
+        ) {
+            events = [];
+        }
+
+        if (!events.length) {
+            let text =
+                "Belum ada notifikasi.";
+
+            if (
+                notificationFilter ===
+                "COMPLAINT"
+            ) {
+                text =
+                    "Belum ada laporan Belum Diterima.";
+            }
+
+            if (
+                notificationFilter ===
+                "REVIEW"
+            ) {
+                text =
+                    "Belum ada penilaian pelanggan.";
+            }
+
+            if (
+                notificationFilter ===
+                "OTHER"
+            ) {
+                text =
+                    "Belum ada notifikasi lainnya.";
+            }
+
+            container.innerHTML = `
+                <div class="admin-notification-empty">
+                    ${text}
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML =
+            events.map(item => {
+
+                const complaint =
+                    item.type ===
+                    "COMPLAINT";
+
+                const title =
+                    complaint
+                        ? "Pelanggan belum menerima"
+                        : "Penilaian pelanggan";
+
+                const description =
+                    complaint
+                        ? "Pelanggan melaporkan pembayaran telah dilakukan tetapi layanan atau produk belum diterima."
+                        : "Pelanggan telah mengonfirmasi transaksi diterima dan memberikan penilaian.";
+
+                const customer =
+                    escapeNotificationHtml(
+                        item.customerName ||
+                        "Pelanggan"
+                    );
+
+                const transactionId =
+                    escapeNotificationHtml(
+                        item.transactionId || "-"
+                    );
+
+                const transactionType =
+                    escapeNotificationHtml(
+                        item.transactionType || "-"
+                    );
+
+                const contactName =
+                    escapeNotificationHtml(
+                        item.contactName ||
+                        item.customerName ||
+                        "Pelanggan"
+                    );
+
+                const contactWhatsapp =
+                    escapeNotificationHtml(
+                        item.contactWhatsapp || ""
+                    );
+
+                const contactEmail =
+                    escapeNotificationHtml(
+                        item.contactEmail || ""
+                    );
+
+                const whatsappDigits =
+                    String(
+                        item.contactWhatsapp || ""
+                    ).replace(/\D/g, "");
+
+                const whatsappLink =
+                    whatsappDigits
+                        ? (
+                            whatsappDigits.startsWith("0")
+                                ? "62" +
+                                  whatsappDigits.slice(1)
+                                : whatsappDigits
+                          )
+                        : "";
+
+                return `
+                    <article
+                        class="admin-notification-item ${
+                            item.unread
+                                ? "unread"
+                                : ""
+                        }"
+                    >
+                        <div
+                            class="admin-notification-icon ${
+                                complaint
+                                    ? "complaint"
+                                    : "review"
+                            }"
+                        >
+                            ${
+                                complaint
+                                    ? "!"
+                                    : "★"
+                            }
+                        </div>
+
+                        <div class="admin-notification-content">
+                            <div class="admin-notification-title">
+                                ${title}
+                            </div>
+
+                            <div class="admin-notification-description">
+                                ${description}
+                            </div>
+
+                            <div class="admin-notification-meta">
+                                <span>
+                                    ${customer}
+                                </span>
+
+                                <span>
+                                    ${transactionType}
+                                </span>
+
+                                <span>
+                                    ${notificationDate(
+                                        item.date
+                                    )}
+                                </span>
+                            </div>
+
+                            <div class="admin-notification-code">
+                                ${transactionId}
+                            </div>
+
+                            ${
+                                complaint
+                                    ? `
+                                        <div class="admin-complaint-contact">
+                                            <div class="admin-complaint-contact-title">
+                                                Kontak Pelanggan
+                                            </div>
+
+                                            <div class="admin-complaint-contact-row">
+                                                <span>Nama</span>
+                                                <strong>${contactName}</strong>
+                                            </div>
+
+                                            ${
+                                                contactWhatsapp
+                                                    ? `
+                                                        <div class="admin-complaint-contact-row">
+                                                            <span>WhatsApp</span>
+                                                            <strong>${contactWhatsapp}</strong>
+                                                        </div>
+                                                    `
+                                                    : ""
+                                            }
+
+                                            ${
+                                                contactEmail
+                                                    ? `
+                                                        <div class="admin-complaint-contact-row">
+                                                            <span>Email</span>
+                                                            <strong>${contactEmail}</strong>
+                                                        </div>
+                                                    `
+                                                    : ""
+                                            }
+
+                                            <div class="admin-complaint-contact-actions">
+                                                ${
+                                                    whatsappLink
+                                                        ? `
+                                                            <a
+                                                                class="admin-notification-action primary"
+                                                                href="https://wa.me/${whatsappLink}"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                Hubungi WhatsApp
+                                                            </a>
+                                                        `
+                                                        : ""
+                                                }
+
+                                                ${
+                                                    contactEmail
+                                                        ? `
+                                                            <a
+                                                                class="admin-notification-action"
+                                                                href="mailto:${contactEmail}"
+                                                            >
+                                                                Kirim Email
+                                                            </a>
+                                                        `
+                                                        : ""
+                                                }
+                                            </div>
+                                        </div>
+                                    `
+                                    : `
+                                        <div class="admin-notification-rating">
+                                        <div class="admin-notification-rating">
+                                            ${notificationStars(
+                                                item.rating
+                                            )}
+                                        </div>
+
+                                        ${
+                                            item.review
+                                                ? `
+                                                    <div class="admin-notification-review">
+                                                        ${escapeNotificationHtml(
+                                                            item.review
+                                                        )}
+                                                    </div>
+                                                `
+                                                : ""
+                                        }
+                                    `
+                            }
+                        </div>
+
+                        <div class="admin-notification-actions">
+                            <button
+                                type="button"
+                                class="admin-notification-action"
+                                data-copy-transaction="${transactionId}"
+                            >
+                                Salin Kode
+                            </button>
+
+                            ${
+                                item.unread
+                                    ? `
+                                        <button
+                                            type="button"
+                                            class="admin-notification-action primary"
+                                            data-notification-read="${item.id}"
+                                            data-notification-type="${item.type}"
+                                        >
+                                            Tandai Dibaca
+                                        </button>
+                                    `
+                                    : ""
+                            }
+
+
+                            ${
+                                complaint
+                                    ? `
+                                        <div class="admin-complaint-workflow">
+                                            <select
+                                                class="admin-complaint-status"
+                                                data-complaint-status="${item.id}"
+                                            >
+                                                <option
+                                                    value="OPEN"
+                                                    ${item.complaintStatus === "OPEN" ? "selected" : ""}
+                                                >
+                                                    Laporan Terkirim
+                                                </option>
+
+                                                <option
+                                                    value="CHECKING"
+                                                    ${item.complaintStatus === "CHECKING" ? "selected" : ""}
+                                                >
+                                                    Dalam Pengecekan
+                                                </option>
+
+                                                <option
+                                                    value="HANDLING"
+                                                    ${item.complaintStatus === "HANDLING" ? "selected" : ""}
+                                                >
+                                                    Sedang Ditangani
+                                                </option>
+
+                                                <option
+                                                    value="RESOLVED"
+                                                    ${item.complaintStatus === "RESOLVED" ? "selected" : ""}
+                                                >
+                                                    Sudah Ditangani
+                                                </option>
+                                            </select>
+
+                                            <button
+                                                type="button"
+                                                class="admin-notification-action primary"
+                                                data-complaint-save="${item.id}"
+                                            >
+                                                Simpan Status
+                                            </button>
+                                        </div>
+                                    `
+                                    : ""
+                            }
+</div>
+                    </article>
+                `;
+            }).join("");
+    }
+
+    function updateNotificationCounters(
+        unread
+    ) {
+        const complaints =
+            Number(
+                unread?.complaints || 0
+            );
+
+        const reviews =
+            Number(
+                unread?.reviews || 0
+            );
+
+        const total =
+            Number(
+                unread?.total ||
+                complaints + reviews
+            );
+
+        const badge =
+            $notification(
+                "adminNotificationBadge"
+            );
+
+        if (badge) {
+            badge.textContent =
+                total > 99
+                    ? "99+"
+                    : String(total);
+
+            badge.hidden =
+                total <= 0;
+        }
+
+        const totalElement =
+            $notification(
+                "notificationUnreadTotal"
+            );
+
+        const complaintElement =
+            $notification(
+                "notificationComplaintTotal"
+            );
+
+        const reviewElement =
+            $notification(
+                "notificationReviewTotal"
+            );
+
+        if (totalElement) {
+            totalElement.textContent =
+                String(total);
+        }
+
+        if (complaintElement) {
+            complaintElement.textContent =
+                String(complaints);
+        }
+
+        if (reviewElement) {
+            reviewElement.textContent =
+                String(reviews);
+        }
+    }
+
+    async function loadAdminNotifications(
+        quiet = false
+    ) {
+        const container =
+            $notification(
+                "adminNotificationList"
+            );
+
+        if (
+            container &&
+            !quiet &&
+            notificationViewOpen
+        ) {
+            container.innerHTML = `
+                <div class="admin-notification-empty">
+                    Memuat notifikasi...
+                </div>
+            `;
+        }
+
+        try {
+            const response =
+                await fetch(
+                    "/api/admin/feedback-notifications",
+                    {
+                        credentials:
+                            "include",
+                        cache:
+                            "no-store"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+                throw new Error(
+                    data.error ||
+                    "Gagal memuat notifikasi."
+                );
+            }
+
+            notificationItems =
+                Array.isArray(
+                    data.notifications
+                )
+                    ? data.notifications
+                    : [];
+
+            updateNotificationCounters(
+                data.unread || {}
+            );
+
+            if (notificationViewOpen) {
+                renderNotificationList();
+            }
+
+        } catch (error) {
+            console.error(
+                "[ADMIN NOTIFICATIONS]",
+                error
+            );
+
+            if (
+                container &&
+                notificationViewOpen
+            ) {
+                container.innerHTML = `
+                    <div class="admin-notification-empty">
+                        ${escapeNotificationHtml(
+                            error.message
+                        )}
+                    </div>
+                `;
+            }
+        }
+    }
+
+    async function markNotificationRead(
+        id,
+        type
+    ) {
+        const response =
+            await fetch(
+                "/api/admin/feedback-notifications/read",
+                {
+                    method: "POST",
+                    credentials:
+                        "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body:
+                        JSON.stringify({
+                            id:
+                                Number(id),
+                            type
+                        })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Gagal menandai notifikasi."
+            );
+        }
+
+        await loadAdminNotifications(
+            true
+        );
+    }
+
+    async function copyAdminTransaction(
+        value,
+        button
+    ) {
+        try {
+            if (
+                navigator.clipboard &&
+                window.isSecureContext
+            ) {
+                await navigator.clipboard
+                    .writeText(value);
+            } else {
+                const textarea =
+                    document.createElement(
+                        "textarea"
+                    );
+
+                textarea.value = value;
+                textarea.style.position =
+                    "fixed";
+                textarea.style.opacity =
+                    "0";
+
+                document.body
+                    .appendChild(textarea);
+
+                textarea.select();
+
+                document.execCommand(
+                    "copy"
+                );
+
+                textarea.remove();
+            }
+
+            const old =
+                button.textContent;
+
+            button.textContent =
+                "Tersalin ✓";
+
+            setTimeout(() => {
+                button.textContent = old;
+            }, 1200);
+
+        } catch {
+            window.prompt(
+                "Salin kode transaksi:",
+                value
+            );
+        }
+    }
+
+    function openNotificationView() {
+        notificationViewOpen = true;
+
+        const main =
+            document.querySelector(
+                "body > main"
+            );
+
+        const panel =
+            $notification(
+                "adminNotificationPanel"
+            );
+
+        if (!main || !panel) return;
+
+        Array.from(
+            main.children
+        ).forEach(element => {
+            if (element === panel) {
+                element.hidden = false;
+                element.style.removeProperty(
+                    "display"
+                );
+            } else {
+                element.style.setProperty(
+                    "display",
+                    "none",
+                    "important"
+                );
+            }
+        });
+
+        document
+            .querySelectorAll(
+                ".bayora-nav-item[data-admin-view]"
+            )
+            .forEach(button => {
+                button.classList.remove(
+                    "active"
+                );
+            });
+
+        const nav =
+            $notification(
+                "adminNotificationNav"
+            );
+
+        nav?.classList.add(
+            "active"
+        );
+
+        loadAdminNotifications();
+    }
+
+    function closeNotificationView() {
+        if (!notificationViewOpen) {
+            return;
+        }
+
+        notificationViewOpen = false;
+
+        const panel =
+            $notification(
+                "adminNotificationPanel"
+            );
+
+        if (panel) {
+            panel.hidden = true;
+            panel.style.setProperty(
+                "display",
+                "none",
+                "important"
+            );
+        }
+    }
+
+    function setupAdminNotifications() {
+        const nav =
+            $notification(
+                "adminNotificationNav"
+            );
+
+        nav?.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openNotificationView();
+            }
+        );
+
+        document
+            .querySelectorAll(
+                ".bayora-nav-item[data-admin-view]"
+            )
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        closeNotificationView();
+                    },
+                    true
+                );
+            });
+
+        document
+            .querySelectorAll(
+                ".admin-notification-tab"
+            )
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        notificationFilter =
+                            button.dataset
+                                .notificationFilter ||
+                            "ALL";
+
+                        document
+                            .querySelectorAll(
+                                ".admin-notification-tab"
+                            )
+                            .forEach(item => {
+                                item.classList
+                                    .toggle(
+                                        "active",
+                                        item === button
+                                    );
+                            });
+
+                        renderNotificationList();
+                    }
+                );
+            });
+
+        $notification(
+            "adminNotificationRefresh"
+        )?.addEventListener(
+            "click",
+            () => {
+                loadAdminNotifications();
+            }
+        );
+
+        $notification(
+            "adminNotificationList"
+        )?.addEventListener(
+            "click",
+            async event => {
+
+                const complaintButton =
+                    event.target.closest(
+                        "[data-complaint-save]"
+                    );
+
+                if (complaintButton) {
+                    const id =
+                        Number(
+                            complaintButton.dataset
+                                .complaintSave
+                        );
+
+                    const select =
+                        document.querySelector(
+                            `[data-complaint-status="${id}"]`
+                        );
+
+                    if (!select) {
+                        return;
+                    }
+
+                    const originalText =
+                        complaintButton.textContent;
+
+                    complaintButton.disabled =
+                        true;
+
+                    complaintButton.textContent =
+                        "Menyimpan...";
+
+                    try {
+                        const response =
+                            await fetch(
+                                "/api/admin/complaint-status",
+                                {
+                                    method: "POST",
+                                    credentials:
+                                        "include",
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+                                    body:
+                                        JSON.stringify({
+                                            id,
+                                            status:
+                                                select.value
+                                        })
+                                }
+                            );
+
+                        const data =
+                            await response.json();
+
+                        if (
+                            !response.ok ||
+                            !data.success
+                        ) {
+                            throw new Error(
+                                data.error ||
+                                "Gagal memperbarui status laporan."
+                            );
+                        }
+
+                        const localItem =
+                            notificationItems.find(
+                                item =>
+                                    Number(item.id) ===
+                                    id
+                            );
+
+                        if (localItem) {
+                            localItem.complaintStatus =
+                                data.complaintStatus ||
+                                select.value;
+
+                            localItem.complaintAdminRead =
+                                1;
+
+                            localItem.complaintStatusUpdatedAt =
+                                data.updatedAt ||
+                                new Date().toISOString();
+
+                            if (
+                                localItem.complaintStatus ===
+                                "RESOLVED"
+                            ) {
+                                localItem.complaintResolvedAt =
+                                    data.updatedAt ||
+                                    new Date().toISOString();
+                            } else {
+                                localItem.complaintResolvedAt =
+                                    null;
+                            }
+                        }
+
+                        complaintButton.textContent =
+                            "Tersimpan ✓";
+
+                        await loadAdminNotifications(
+                            true
+                        );
+
+                    } catch (error) {
+                        alert(
+                            error.message ||
+                            "Gagal memperbarui status laporan."
+                        );
+
+                        complaintButton.disabled =
+                            false;
+
+                        complaintButton.textContent =
+                            originalText;
+                    }
+
+                    return;
+                }
+
+                const copyButton =
+                    event.target.closest(
+                        "[data-copy-transaction]"
+                    );
+
+                if (copyButton) {
+                    await copyAdminTransaction(
+                        copyButton.dataset
+                            .copyTransaction,
+                        copyButton
+                    );
+
+                    return;
+                }
+
+                const readButton =
+                    event.target.closest(
+                        "[data-notification-read]"
+                    );
+
+                if (readButton) {
+                    readButton.disabled =
+                        true;
+
+                    try {
+                        await markNotificationRead(
+                            readButton.dataset
+                                .notificationRead,
+                            readButton.dataset
+                                .notificationType
+                        );
+                    } catch (error) {
+                        alert(
+                            error.message
+                        );
+
+                        readButton.disabled =
+                            false;
+                    }
+                }
+            }
+        );
+
+        loadAdminNotifications(
+            true
+        );
+
+        window.setInterval(
+            () => {
+                loadAdminNotifications(
+                    true
+                );
+            },
+            30000
+        );
+    }
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupAdminNotifications
+        );
+    } else {
+        setupAdminNotifications();
+    }
+
+})();
+</script>
+
+
+
 </body>
 </html>
 
@@ -15105,5 +16362,275 @@ document.addEventListener(
     }
 
 }
+
+
+
+/* =========================================================
+   BAYORA ADMIN NOTIFICATIONS
+========================================================= */
+
+.admin-notification-nav-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.admin-notification-badge {
+    min-width: 19px;
+    height: 19px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    padding: 0 6px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 19px;
+    text-align: center;
+}
+
+.admin-notification-panel {
+    width: 100%;
+}
+
+.admin-notification-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.admin-notification-heading h1 {
+    margin: 4px 0 0;
+}
+
+.admin-notification-heading p {
+    margin: 7px 0 0;
+    color: #7b8798;
+    font-size: 13px;
+}
+
+.admin-notification-refresh {
+    border: 0;
+    border-radius: 11px;
+    padding: 10px 15px;
+    background: linear-gradient(
+        135deg,
+        var(--bayora-blue, #1268ff),
+        var(--bayora-cyan, #20b8e8)
+    );
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.admin-notification-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.admin-notification-summary-card {
+    border: 1px solid #e4ebf4;
+    border-radius: 15px;
+    padding: 17px;
+    background: #fff;
+}
+
+.admin-notification-summary-card span {
+    display: block;
+    margin-bottom: 7px;
+    color: #7b8798;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.admin-notification-summary-card strong {
+    color: #172033;
+    font-size: 24px;
+}
+
+.admin-notification-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 15px;
+    padding-bottom: 2px;
+}
+
+.admin-notification-tab {
+    flex: 0 0 auto;
+    border: 1px solid #dce5f0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: #fff;
+    color: #667085;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.admin-notification-tab.active {
+    border-color: #2478e8;
+    background: #2478e8;
+    color: #fff;
+}
+
+.admin-notification-list {
+    display: grid;
+    gap: 11px;
+}
+
+.admin-notification-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: flex-start;
+    gap: 13px;
+    border: 1px solid #e5ebf3;
+    border-radius: 15px;
+    padding: 15px;
+    background: #fff;
+}
+
+.admin-notification-item.unread {
+    border-color: #cbdff8;
+    background: #f8fbff;
+    box-shadow:
+        0 4px 18px rgba(36, 120, 232, .05);
+}
+
+.admin-notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.admin-notification-icon.complaint {
+    background: #fff1f1;
+    color: #c9362b;
+}
+
+.admin-notification-icon.review {
+    background: #fff8e7;
+    color: #d68b00;
+}
+
+.admin-notification-content {
+    min-width: 0;
+}
+
+.admin-notification-title {
+    margin-bottom: 5px;
+    color: #172033;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.admin-notification-description {
+    color: #667085;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.admin-notification-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 12px;
+    margin-top: 9px;
+    color: #98a2b3;
+    font-size: 10px;
+}
+
+.admin-notification-code {
+    margin-top: 9px;
+    color: #475467;
+    font-size: 11px;
+    font-weight: 700;
+    word-break: break-all;
+}
+
+.admin-notification-rating {
+    margin-top: 7px;
+    color: #e8a019;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.admin-notification-review {
+    margin-top: 8px;
+    border-radius: 9px;
+    padding: 9px 10px;
+    background: #f6f8fb;
+    color: #596579;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.admin-notification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-notification-action {
+    white-space: nowrap;
+    border: 1px solid #dce5f0;
+    border-radius: 9px;
+    padding: 7px 10px;
+    background: #fff;
+    color: #2478e8;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.admin-notification-action.primary {
+    border-color: #2478e8;
+    background: #2478e8;
+    color: #fff;
+}
+
+.admin-notification-empty {
+    border: 1px dashed #d8e0eb;
+    border-radius: 15px;
+    padding: 36px 20px;
+    color: #8a96a8;
+    text-align: center;
+    font-size: 12px;
+}
+
+@media (max-width: 800px) {
+    .admin-notification-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-notification-item {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .admin-notification-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        padding-left: 51px;
+    }
+
+    .admin-notification-heading {
+        align-items: center;
+    }
+}
+
 
 </style>

@@ -1489,16 +1489,21 @@ export default {
   }
 
 
+
   // ==========================================================
-  // ACCOUNT TRANSACTION HISTORY
+  // CUSTOMER TRANSACTION FEEDBACK
   // ==========================================================
 
   if (
-    request.method === "GET" &&
-    url.pathname === "/api/auth/history"
+    request.method === "POST" &&
+    url.pathname === "/api/auth/transaction-feedback"
   ) {
     try {
-      const user = await getCurrentUser(request, env.ppobku_db);
+      const user =
+        await getCurrentUser(
+          request,
+          env.ppobku_db
+        );
 
       if (!user) {
         return Response.json({
@@ -1508,42 +1513,1269 @@ export default {
         }, { status: 401 });
       }
 
-      const result = await env.ppobku_db.prepare(`
-        SELECT
-          t.id,
-          t.transaction_id AS transactionId,
-          t.reference,
-          t.service,
-          t.target,
-          t.operator,
-          t.product_id AS productId,
-          t.product_name AS productName,
-          t.price,
-          t.payment_method AS paymentMethod,
-          t.status,
-          t.payment_status AS paymentStatus,
-          t.digiflazz_status AS digiflazzStatus,
-          t.digiflazz_ref AS digiflazzRef,
-          t.digiflazz_message AS digiflazzMessage,
-          t.paid_at AS paidAt,
-          t.processed_at AS processedAt,
-          t.created_at AS createdAt
-        FROM transactions t
-        WHERE t.user_id = ?
-        ORDER BY t.id DESC
-      `).bind(user.id).all();
+      const body = await request.json();
 
-      return Response.json({
-        success: true,
-        count: result.results?.length || 0,
-        transactions: result.results || []
-      });
+      const transactionId =
+        String(
+          body.transactionId || ""
+        ).trim();
+
+      const action =
+        String(
+          body.action || ""
+        )
+        .trim()
+        .toUpperCase();
+
+      const rating =
+        Number(body.rating || 0);
+
+      const review =
+        String(
+          body.review || ""
+        )
+        .trim()
+        .slice(0, 1000);
+
+      const contactName =
+        String(
+          body.contactName || ""
+        )
+        .trim()
+        .slice(0, 100);
+
+      const contactWhatsapp =
+        String(
+          body.contactWhatsapp || ""
+        )
+        .trim()
+        .slice(0, 25);
+
+      const contactEmail =
+        String(
+          body.contactEmail || ""
+        )
+        .trim()
+        .toLowerCase()
+        .slice(0, 150);
+
+      if (!transactionId) {
+        return Response.json({
+          success: false,
+          error: "Kode transaksi tidak valid."
+        }, { status: 400 });
+      }
+
+      if (
+        action !== "RECEIVED" &&
+        action !== "NOT_RECEIVED" &&
+        action !== "REVIEW"
+      ) {
+        return Response.json({
+          success: false,
+          error: "Aksi tidak valid."
+        }, { status: 400 });
+      }
+
+      /*
+       * Pastikan transaksi benar-benar
+       * milik user yang sedang login.
+       */
+
+      let transaction = null;
+      let transactionType = null;
+
+      if (
+        transactionId
+          .toUpperCase()
+          .startsWith("SMM-")
+      ) {
+        const result =
+          await env.ppobku_db.prepare(`
+            SELECT
+              o.order_id AS transactionId,
+              o.status,
+              o.price,
+              o.target,
+              s.name AS productName
+            FROM smm_orders o
+            LEFT JOIN smm_services s
+              ON s.id = o.service_id
+            WHERE
+              o.order_id = ?
+              AND o.user_id = ?
+            LIMIT 1
+          `).bind(
+            transactionId,
+            user.id
+          ).all();
+
+        transaction =
+          result.results?.[0] || null;
+
+        transactionType = "SMM";
+
+      } else {
+
+        const result =
+          await env.ppobku_db.prepare(`
+            SELECT
+              t.transaction_id AS transactionId,
+              t.status,
+              t.payment_status AS paymentStatus,
+              t.delivery_status AS deliveryStatus,
+              t.price,
+              t.target,
+              t.product_name AS productName,
+              p.product_type AS productType
+            FROM transactions t
+            LEFT JOIN products p
+              ON p.id = t.product_id
+            WHERE
+              t.transaction_id = ?
+              AND t.user_id = ?
+            LIMIT 1
+          `).bind(
+            transactionId,
+            user.id
+          ).all();
+
+        transaction =
+          result.results?.[0] || null;
+
+        transactionType =
+          String(
+            transaction?.productType || ""
+          ).toLowerCase() === "digital" ||
+          transactionId
+            .toUpperCase()
+            .startsWith("DIGITAL-")
+            ? "DIGITAL"
+            : "PPOB";
+      }
+
+      if (!transaction) {
+        return Response.json({
+          success: false,
+          error:
+            "Transaksi tidak ditemukan atau bukan milik akun ini."
+        }, { status: 404 });
+      }
+
+      const transactionStatus =
+        String(
+          transaction.status || ""
+        ).toUpperCase();
+
+      const paymentStatus =
+        String(
+          transaction.paymentStatus ||
+          transaction.status ||
+          ""
+        ).toUpperCase();
+
+      const successfulStatuses =
+        new Set([
+          "SUCCESS",
+          "COMPLETED",
+          "SUCCESSFUL",
+          "DELIVERED"
+        ]);
+
+      const paidStatuses =
+        new Set([
+          "PAID",
+          "SUCCESS",
+          "SUCCESSFUL",
+          "PROCESSING",
+          "IN_PROGRESS",
+          "COMPLETED"
+        ]);
+
+      const now =
+        new Date().toISOString();
+
+      const existingResult =
+        await env.ppobku_db.prepare(`
+          SELECT *
+          FROM transaction_feedback
+          WHERE
+            user_id = ?
+            AND transaction_id = ?
+          LIMIT 1
+        `).bind(
+          user.id,
+          transactionId
+        ).all();
+
+      const existing =
+        existingResult.results?.[0] ||
+        null;
+
+      /*
+       * SUDAH DITERIMA
+       */
+      if (action === "RECEIVED") {
+
+        if (
+          !successfulStatuses.has(
+            transactionStatus
+          )
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Transaksi belum berstatus berhasil."
+          }, { status: 400 });
+        }
+
+        if (
+          existing?.receipt_status ===
+          "NOT_RECEIVED"
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Transaksi ini sudah dilaporkan belum diterima."
+          }, { status: 409 });
+        }
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO transaction_feedback (
+            user_id,
+            transaction_id,
+            transaction_type,
+            receipt_status,
+            received_at,
+            created_at,
+            updated_at
+          )
+          VALUES (?, ?, ?, 'RECEIVED', ?, ?, ?)
+
+          ON CONFLICT(
+            user_id,
+            transaction_id
+          )
+          DO UPDATE SET
+            receipt_status = 'RECEIVED',
+            received_at = excluded.received_at,
+            updated_at = excluded.updated_at
+        `).bind(
+          user.id,
+          transactionId,
+          transactionType,
+          now,
+          now,
+          now
+        ).run();
+
+        return Response.json({
+          success: true,
+          action: "RECEIVED",
+          message:
+            "Transaksi dikonfirmasi sudah diterima."
+        });
+      }
+
+      /*
+       * BELUM DITERIMA
+       */
+      if (action === "NOT_RECEIVED") {
+
+        if (!contactName) {
+          return Response.json({
+            success: false,
+            error:
+              "Nama kontak wajib diisi."
+          }, { status: 400 });
+        }
+
+        if (
+          !contactWhatsapp &&
+          !contactEmail
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Isi minimal nomor WhatsApp atau email."
+          }, { status: 400 });
+        }
+
+        if (
+          contactWhatsapp &&
+          !/^[+0-9][0-9\s\-()]{7,24}$/.test(
+            contactWhatsapp
+          )
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Nomor WhatsApp tidak valid."
+          }, { status: 400 });
+        }
+
+        if (
+          contactEmail &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+            contactEmail
+          )
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Email tidak valid."
+          }, { status: 400 });
+        }
+
+        if (
+          existing?.receipt_status ===
+          "RECEIVED"
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Transaksi sudah dikonfirmasi diterima."
+          }, { status: 409 });
+        }
+
+        if (
+          existing?.receipt_status ===
+          "NOT_RECEIVED"
+        ) {
+          const complaintStatus =
+            String(
+              existing.complaint_status ||
+              "OPEN"
+            ).toUpperCase();
+
+          if (
+            complaintStatus !== "RESOLVED"
+          ) {
+            return Response.json({
+              success: false,
+              error:
+                "Laporan transaksi ini masih dalam proses penanganan."
+            }, { status: 409 });
+          }
+
+          const resolvedAt =
+            Date.parse(
+              existing.complaint_resolved_at ||
+              existing.complaint_status_updated_at ||
+              ""
+            );
+
+          const cooldownMs =
+            24 * 60 * 60 * 1000;
+
+          if (
+            !Number.isFinite(resolvedAt) ||
+            Date.now() <
+              resolvedAt + cooldownMs
+          ) {
+            const availableAt =
+              Number.isFinite(resolvedAt)
+                ? new Date(
+                    resolvedAt +
+                    cooldownMs
+                  ).toISOString()
+                : null;
+
+            return Response.json({
+              success: false,
+              error:
+                "Laporan sebelumnya sudah ditangani. Laporan ulang tersedia setelah masa tunggu 24 jam.",
+              cooldownUntil:
+                availableAt
+            }, { status: 429 });
+          }
+
+          await env.ppobku_db.prepare(`
+            UPDATE transaction_feedback
+            SET
+              complaint_status = 'NONE',
+              receipt_status = 'NONE',
+              complaint_resolved_at = NULL,
+              complaint_status_updated_at = NULL,
+              complaint_status_updated_by = NULL,
+              updated_at = ?
+            WHERE
+              user_id = ?
+              AND transaction_id = ?
+          `).bind(
+            now,
+            user.id,
+            transactionId
+          ).run();
+
+          existing.receipt_status = "NONE";
+          existing.complaint_status = "NONE";
+        }
+
+        /*
+         * Pelaporan hanya diperbolehkan
+         * setelah pembayaran/proses
+         * telah berjalan.
+         */
+        if (
+          !paidStatuses.has(
+            paymentStatus
+          ) &&
+          !paidStatuses.has(
+            transactionStatus
+          )
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Pembayaran transaksi belum berhasil."
+          }, { status: 400 });
+        }
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO transaction_feedback (
+            user_id,
+            transaction_id,
+            transaction_type,
+            receipt_status,
+            complaint_status,
+            complaint_at,
+            complaint_admin_read,
+            contact_name,
+            contact_whatsapp,
+            contact_email,
+            created_at,
+            updated_at
+          )
+          VALUES (
+            ?, ?, ?,
+            'NOT_RECEIVED',
+            'OPEN',
+            ?,
+            0,
+            ?, ?, ?,
+            ?,
+            ?
+          )
+
+          ON CONFLICT(
+            user_id,
+            transaction_id
+          )
+          DO UPDATE SET
+            receipt_status = 'NOT_RECEIVED',
+            complaint_status = 'OPEN',
+            complaint_at = excluded.complaint_at,
+            complaint_admin_read = 0,
+            complaint_admin_read_at = NULL,
+            contact_name = excluded.contact_name,
+            contact_whatsapp = excluded.contact_whatsapp,
+            contact_email = excluded.contact_email,
+            updated_at = excluded.updated_at
+        `).bind(
+          user.id,
+          transactionId,
+          transactionType,
+          now,
+          contactName,
+          contactWhatsapp || null,
+          contactEmail || null,
+          now,
+          now
+        ).run();
+
+        return Response.json({
+          success: true,
+          action: "NOT_RECEIVED",
+          message:
+            "Laporan belum diterima berhasil dikirim ke admin."
+        });
+      }
+
+      /*
+       * PENILAIAN
+       */
+      if (action === "REVIEW") {
+
+        if (
+          !existing ||
+          existing.receipt_status !==
+          "RECEIVED"
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Konfirmasi penerimaan terlebih dahulu."
+          }, { status: 400 });
+        }
+
+        if (
+          !Number.isInteger(rating) ||
+          rating < 1 ||
+          rating > 5
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Penilaian harus antara 1 sampai 5 bintang."
+          }, { status: 400 });
+        }
+
+        if (existing.rating) {
+          return Response.json({
+            success: false,
+            error:
+              "Transaksi ini sudah diberi penilaian."
+          }, { status: 409 });
+        }
+
+        await env.ppobku_db.prepare(`
+          UPDATE transaction_feedback
+          SET
+            rating = ?,
+            review = ?,
+            reviewed_at = ?,
+            review_admin_read = 0,
+            review_admin_read_at = NULL,
+            updated_at = ?
+          WHERE
+            user_id = ?
+            AND transaction_id = ?
+        `).bind(
+          rating,
+          review,
+          now,
+          now,
+          user.id,
+          transactionId
+        ).run();
+
+        return Response.json({
+          success: true,
+          action: "REVIEW",
+          message:
+            "Terima kasih atas penilaianmu."
+        });
+      }
+
     } catch (error) {
-      console.error("[AUTH HISTORY]", error);
+      console.error(
+        "[TRANSACTION FEEDBACK]",
+        error
+      );
 
       return Response.json({
         success: false,
-        error: "Gagal mengambil riwayat transaksi."
+        error:
+          "Gagal menyimpan feedback transaksi."
+      }, { status: 500 });
+    }
+  }
+
+
+  // ==========================================================
+  // ADMIN FEEDBACK NOTIFICATIONS
+  // ==========================================================
+
+  if (
+    request.method === "GET" &&
+    url.pathname ===
+      "/api/admin/feedback-notifications"
+  ) {
+    try {
+
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Admin belum login."
+        }, 401);
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const sessionResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            s.id AS session_id,
+            s.expires_at,
+            a.id,
+            a.username,
+            a.name,
+            a.role,
+            a.active
+          FROM admin_sessions s
+          JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `).bind(sessionHash).all();
+
+      const admin =
+        sessionResult.results?.[0];
+
+      if (
+        !admin ||
+        !admin.active ||
+        new Date(
+          admin.expires_at
+        ).getTime() <= Date.now()
+      ) {
+        return json({
+          success: false,
+          authenticated: false,
+          error:
+            "Session admin tidak valid atau sudah expired."
+        }, 401);
+      }
+
+      if (
+        admin.role !== "owner" &&
+        admin.role !== "admin"
+      ) {
+        return json({
+          success: false,
+          error:
+            "Tidak memiliki akses."
+        }, 403);
+      }
+
+      const result =
+        await env.ppobku_db.prepare(`
+          SELECT
+            f.id,
+            f.user_id AS userId,
+            u.name AS customerName,
+            u.phone AS customerPhone,
+            u.email AS customerEmail,
+
+            f.transaction_id AS transactionId,
+            f.transaction_type AS transactionType,
+
+            f.receipt_status AS receiptStatus,
+
+            f.rating,
+            f.review,
+
+            f.complaint_status AS complaintStatus,
+            f.complaint_at AS complaintAt,
+
+            f.contact_name AS contactName,
+            f.contact_whatsapp AS contactWhatsapp,
+            f.contact_email AS contactEmail,
+
+            f.complaint_resolved_at AS complaintResolvedAt,
+            f.complaint_status_updated_at AS complaintStatusUpdatedAt,
+            f.reviewed_at AS reviewedAt,
+
+            f.complaint_admin_read AS complaintAdminRead,
+            f.review_admin_read AS reviewAdminRead,
+
+            f.created_at AS createdAt,
+            f.updated_at AS updatedAt
+
+          FROM transaction_feedback f
+
+          LEFT JOIN users u
+            ON u.id = f.user_id
+
+          WHERE
+            f.receipt_status = 'NOT_RECEIVED'
+            OR f.rating IS NOT NULL
+
+          ORDER BY
+            COALESCE(
+              f.complaint_at,
+              f.reviewed_at,
+              f.updated_at
+            ) DESC
+        `).all();
+
+      const notifications =
+        result.results || [];
+
+      const unreadComplaints =
+        notifications.filter(item =>
+          item.receiptStatus ===
+            "NOT_RECEIVED" &&
+          Number(
+            item.complaintAdminRead
+          ) !== 1
+        ).length;
+
+      const unreadReviews =
+        notifications.filter(item =>
+          Number(item.rating) > 0 &&
+          Number(
+            item.reviewAdminRead
+          ) !== 1
+        ).length;
+
+      return json({
+        success: true,
+        notifications,
+        unread: {
+          complaints:
+            unreadComplaints,
+          reviews:
+            unreadReviews,
+          total:
+            unreadComplaints +
+            unreadReviews
+        }
+      });
+
+    } catch (error) {
+
+      console.error(
+        "[ADMIN FEEDBACK NOTIFICATIONS]",
+        error
+      );
+
+      return json({
+        success: false,
+        error:
+          "Gagal memuat notifikasi."
+      }, 500);
+    }
+  }
+
+
+  // ==========================================================
+  // ADMIN MARK FEEDBACK READ
+  // ==========================================================
+
+  if (
+    request.method === "POST" &&
+    url.pathname ===
+      "/api/admin/feedback-notifications/read"
+  ) {
+    try {
+
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Admin belum login."
+        }, 401);
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const sessionResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            s.id AS session_id,
+            s.expires_at,
+            a.id,
+            a.role,
+            a.active
+          FROM admin_sessions s
+          JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `).bind(sessionHash).all();
+
+      const admin =
+        sessionResult.results?.[0];
+
+      if (
+        !admin ||
+        !admin.active ||
+        new Date(
+          admin.expires_at
+        ).getTime() <= Date.now()
+      ) {
+        return json({
+          success: false,
+          error:
+            "Session admin tidak valid."
+        }, 401);
+      }
+
+      if (
+        admin.role !== "owner" &&
+        admin.role !== "admin"
+      ) {
+        return json({
+          success: false,
+          error:
+            "Tidak memiliki akses."
+        }, 403);
+      }
+
+      const body =
+        await request.json();
+
+      const id =
+        Number(body.id);
+
+      const type =
+        String(
+          body.type || ""
+        )
+        .trim()
+        .toUpperCase();
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        (
+          type !== "COMPLAINT" &&
+          type !== "REVIEW"
+        )
+      ) {
+        return json({
+          success: false,
+          error:
+            "Data notifikasi tidak valid."
+        }, 400);
+      }
+
+      const now =
+        new Date().toISOString();
+
+      if (type === "COMPLAINT") {
+
+        await env.ppobku_db.prepare(`
+          UPDATE transaction_feedback
+          SET
+            complaint_admin_read = 1,
+            complaint_admin_read_at = ?
+          WHERE id = ?
+        `).bind(
+          now,
+          id
+        ).run();
+
+      } else {
+
+        await env.ppobku_db.prepare(`
+          UPDATE transaction_feedback
+          SET
+            review_admin_read = 1,
+            review_admin_read_at = ?
+          WHERE id = ?
+        `).bind(
+          now,
+          id
+        ).run();
+      }
+
+      return json({
+        success: true
+      });
+
+    } catch (error) {
+
+      console.error(
+        "[ADMIN FEEDBACK READ]",
+        error
+      );
+
+      return json({
+        success: false,
+        error:
+          "Gagal memperbarui notifikasi."
+      }, 500);
+    }
+  }
+
+
+  // ==========================================================
+  // ADMIN UPDATE COMPLAINT STATUS
+  // ==========================================================
+
+  if (
+    request.method === "POST" &&
+    url.pathname === "/api/admin/complaint-status"
+  ) {
+    try {
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Admin belum login."
+        }, 401);
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const sessionResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            a.id,
+            a.role,
+            a.active,
+            s.expires_at
+          FROM admin_sessions s
+          JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `).bind(sessionHash).all();
+
+      const admin =
+        sessionResult.results?.[0];
+
+      if (
+        !admin ||
+        !admin.active ||
+        new Date(
+          admin.expires_at
+        ).getTime() <= Date.now()
+      ) {
+        return json({
+          success: false,
+          error: "Session admin tidak valid."
+        }, 401);
+      }
+
+      if (
+        admin.role !== "owner" &&
+        admin.role !== "admin"
+      ) {
+        return json({
+          success: false,
+          error: "Tidak memiliki akses."
+        }, 403);
+      }
+
+      const body =
+        await request.json();
+
+      const id =
+        Number(body.id);
+
+      const status =
+        String(body.status || "")
+          .trim()
+          .toUpperCase();
+
+      const allowed =
+        new Set([
+          "OPEN",
+          "CHECKING",
+          "HANDLING",
+          "RESOLVED"
+        ]);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !allowed.has(status)
+      ) {
+        return json({
+          success: false,
+          error: "Status laporan tidak valid."
+        }, 400);
+      }
+
+      const existingResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            id,
+            receipt_status,
+            complaint_status
+          FROM transaction_feedback
+          WHERE id = ?
+          LIMIT 1
+        `).bind(id).all();
+
+      const feedback =
+        existingResult.results?.[0];
+
+      if (
+        !feedback ||
+        feedback.receipt_status !==
+          "NOT_RECEIVED"
+      ) {
+        return json({
+          success: false,
+          error: "Laporan tidak ditemukan."
+        }, 404);
+      }
+
+      const now =
+        new Date().toISOString();
+
+      await env.ppobku_db.prepare(`
+        UPDATE transaction_feedback
+        SET
+          complaint_status = ?,
+          complaint_status_updated_at = ?,
+          complaint_status_updated_by = ?,
+          complaint_resolved_at =
+            CASE
+              WHEN ? = 'RESOLVED'
+              THEN ?
+              ELSE NULL
+            END,
+          complaint_admin_read = 1,
+          complaint_admin_read_at =
+            COALESCE(
+              complaint_admin_read_at,
+              ?
+            ),
+          updated_at = ?
+        WHERE id = ?
+      `).bind(
+        status,
+        now,
+        admin.id,
+        status,
+        now,
+        now,
+        now,
+        id
+      ).run();
+
+      return json({
+        success: true,
+        status,
+        complaintStatus: status,
+        updatedAt: now,
+        cooldownUntil:
+          status === "RESOLVED"
+            ? new Date(
+                Date.now() +
+                24 * 60 * 60 * 1000
+              ).toISOString()
+            : null
+      });
+
+    } catch (error) {
+      console.error(
+        "[ADMIN COMPLAINT STATUS]",
+        error
+      );
+
+      return json({
+        success: false,
+        error:
+          "Gagal memperbarui status laporan."
+      }, 500);
+    }
+  }
+
+
+  // ==========================================================
+  // ACCOUNT TRANSACTION HISTORY
+  // ==========================================================
+
+  if (
+    request.method === "GET" &&
+    url.pathname === "/api/auth/history"
+  ) {
+    try {
+      const user = await getCurrentUser(
+        request,
+        env.ppobku_db
+      );
+
+      if (!user) {
+        return Response.json({
+          success: false,
+          authenticated: false,
+          error: "Belum login."
+        }, { status: 401 });
+      }
+
+      /*
+       * PPOB + Produk Digital
+       */
+      const transactionResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            t.id,
+            t.transaction_id AS transactionId,
+            t.reference,
+            t.service,
+            t.target,
+            t.operator,
+            t.product_id AS productId,
+            t.product_name AS productName,
+            t.price,
+            t.payment_method AS paymentMethod,
+            t.status,
+            t.payment_status AS paymentStatus,
+            t.digiflazz_status AS digiflazzStatus,
+            t.digiflazz_ref AS digiflazzRef,
+            t.digiflazz_message AS digiflazzMessage,
+            t.paid_at AS paidAt,
+            t.processed_at AS processedAt,
+            t.created_at AS createdAt,
+            CASE
+              WHEN LOWER(
+                COALESCE(p.product_type, '')
+              ) = 'digital'
+                OR UPPER(
+                  COALESCE(t.transaction_id, '')
+                ) LIKE 'DIGITAL-%'
+              THEN 'DIGITAL'
+              ELSE 'PPOB'
+            END AS transactionType,
+            f.receipt_status AS receiptStatus,
+            f.complaint_status AS complaintStatus,
+            f.complaint_at AS complaintAt,
+            f.complaint_resolved_at AS complaintResolvedAt,
+            f.complaint_status_updated_at AS complaintStatusUpdatedAt,
+            f.rating,
+            f.review,
+            f.received_at AS receivedAt,
+            f.reviewed_at AS reviewedAt
+          FROM transactions t
+          LEFT JOIN products p
+            ON p.id = t.product_id
+          LEFT JOIN transaction_feedback f
+            ON f.user_id = t.user_id
+            AND f.transaction_id = t.transaction_id
+          WHERE t.user_id = ?
+          ORDER BY t.id DESC
+        `).bind(user.id).all();
+
+      /*
+       * SMM
+       */
+      const smmResult =
+        await env.ppobku_db.prepare(`
+          SELECT
+            o.id,
+            o.order_id AS transactionId,
+            o.order_id AS reference,
+            s.category AS service,
+            o.target,
+            s.platform AS operator,
+            CAST(o.service_id AS TEXT) AS productId,
+            s.name AS productName,
+            o.price,
+            '' AS paymentMethod,
+            o.status,
+            CASE
+              WHEN UPPER(o.status) IN (
+                'PAID',
+                'PROCESSING',
+                'IN_PROGRESS',
+                'SUCCESS',
+                'COMPLETED'
+              )
+              THEN 'PAID'
+              ELSE UPPER(o.status)
+            END AS paymentStatus,
+            NULL AS digiflazzStatus,
+            CAST(
+              o.provider_order_id AS TEXT
+            ) AS digiflazzRef,
+            NULL AS digiflazzMessage,
+            NULL AS paidAt,
+            o.updated_at AS processedAt,
+            o.created_at AS createdAt,
+            'SMM' AS transactionType,
+            o.quantity AS quantity,
+            s.platform AS platform,
+            s.category AS smmCategory,
+            f.receipt_status AS receiptStatus,
+            f.complaint_status AS complaintStatus,
+            f.complaint_at AS complaintAt,
+            f.complaint_resolved_at AS complaintResolvedAt,
+            f.complaint_status_updated_at AS complaintStatusUpdatedAt,
+            f.rating,
+            f.review,
+            f.received_at AS receivedAt,
+            f.reviewed_at AS reviewedAt
+          FROM smm_orders o
+          LEFT JOIN smm_services s
+            ON s.id = o.service_id
+          LEFT JOIN transaction_feedback f
+            ON f.user_id = o.user_id
+            AND f.transaction_id = o.order_id
+          WHERE o.user_id = ?
+          ORDER BY o.id DESC
+        `).bind(user.id).all();
+
+      const transactions = [
+        ...(transactionResult.results || []),
+        ...(smmResult.results || [])
+      ].sort((a, b) => {
+        const aTime =
+          Date.parse(a.createdAt || "") || 0;
+        const bTime =
+          Date.parse(b.createdAt || "") || 0;
+
+        return bTime - aTime;
+      });
+
+      return Response.json({
+        success: true,
+        count: transactions.length,
+        transactions
+      });
+
+    } catch (error) {
+      console.error(
+        "[AUTH HISTORY]",
+        error
+      );
+
+      return Response.json({
+        success: false,
+        error:
+          "Gagal mengambil riwayat transaksi."
       }, { status: 500 });
     }
   }

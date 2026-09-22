@@ -1441,6 +1441,248 @@ async function syncDjuraganSosmedCatalogWorker(env) {
   }
 }
 
+
+async function syncDjuraganSosmedOrderStatusesWorker(env) {
+  const LIMIT = 20;
+
+  const apiKey =
+    String(
+      env.DJURAGANSOSMED_API_KEY || ""
+    ).trim();
+
+  if (!apiKey) {
+    throw new Error(
+      "DJURAGANSOSMED_API_KEY belum dikonfigurasi."
+    );
+  }
+
+  const result =
+    await env.ppobku_db.prepare(`
+      SELECT
+        o.order_id AS orderId,
+        o.provider_order_id AS providerOrderId
+      FROM smm_orders o
+      INNER JOIN smm_services s
+        ON s.id = o.service_id
+      INNER JOIN smm_providers p
+        ON p.id = s.provider_id
+      WHERE o.legacy = 0
+        AND o.payment_status = 'PAID'
+        AND o.submission_status = 'SUBMITTED'
+        AND o.provider_order_id IS NOT NULL
+        AND UPPER(COALESCE(o.status, '')) IN (
+          'PROCESSING',
+          'PENDING',
+          'IN_PROGRESS'
+        )
+        AND s.provider_id = 2
+        AND LOWER(p.name) = 'djuragansosmed'
+      ORDER BY o.updated_at ASC, o.id ASC
+      LIMIT ?
+    `)
+      .bind(LIMIT)
+      .all();
+
+  const orders =
+    result.results || [];
+
+  let synced = 0;
+  let failed = 0;
+
+  for (const order of orders) {
+    try {
+      const body =
+        new URLSearchParams();
+
+      body.set("key", apiKey);
+      body.set("action", "status");
+      body.set(
+        "order",
+        String(order.providerOrderId)
+      );
+
+      const response =
+        await fetch(
+          "https://djuragansosmed.com/api/v2",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/x-www-form-urlencoded"
+            },
+            body: body.toString()
+          }
+        );
+
+      const raw =
+        await response.text();
+
+      let data = {};
+
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(
+          `Response provider non-JSON untuk ${order.orderId}.`
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          String(
+            data?.error ||
+            data?.message ||
+            `Provider HTTP ${response.status}.`
+          ).slice(0, 1000)
+        );
+      }
+
+      if (
+        data?.error &&
+        !data?.status
+      ) {
+        throw new Error(
+          String(data.error).slice(0, 1000)
+        );
+      }
+
+      const providerStatus =
+        String(data?.status || "")
+          .trim();
+
+      if (!providerStatus) {
+        throw new Error(
+          `Provider tidak memberikan status untuk ${order.orderId}.`
+        );
+      }
+
+      const normalized =
+        providerStatus
+          .toLowerCase()
+          .replace(/[_-]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+      let localStatus =
+        "PROCESSING";
+
+      if (
+        normalized === "completed" ||
+        normalized === "complete"
+      ) {
+        localStatus = "SUCCESS";
+      } else if (
+        normalized === "partial"
+      ) {
+        localStatus = "PARTIAL";
+      } else if (
+        normalized === "canceled" ||
+        normalized === "cancelled"
+      ) {
+        localStatus = "CANCELED";
+      } else if (
+        normalized === "pending" ||
+        normalized === "processing" ||
+        normalized === "in progress" ||
+        normalized === "inprogress"
+      ) {
+        localStatus = "PROCESSING";
+      }
+
+      const startCountRaw =
+        data?.start_count;
+
+      const remainsRaw =
+        data?.remains;
+
+      const startCount =
+        startCountRaw === null ||
+        startCountRaw === undefined ||
+        startCountRaw === ""
+          ? null
+          : Number(startCountRaw);
+
+      const remains =
+        remainsRaw === null ||
+        remainsRaw === undefined ||
+        remainsRaw === ""
+          ? null
+          : Number(remainsRaw);
+
+      const safeStartCount =
+        Number.isFinite(startCount)
+          ? Math.trunc(startCount)
+          : null;
+
+      const safeRemains =
+        Number.isFinite(remains)
+          ? Math.trunc(remains)
+          : null;
+
+      const now =
+        new Date().toISOString();
+
+      const update =
+        await env.ppobku_db.prepare(`
+          UPDATE smm_orders
+          SET
+            status = ?,
+            start_count = ?,
+            remains = ?,
+            provider_message = ?,
+            updated_at = ?
+          WHERE order_id = ?
+            AND legacy = 0
+            AND payment_status = 'PAID'
+            AND submission_status = 'SUBMITTED'
+            AND provider_order_id = ?
+            AND UPPER(COALESCE(status, '')) IN (
+              'PROCESSING',
+              'PENDING',
+              'IN_PROGRESS'
+            )
+        `)
+          .bind(
+            localStatus,
+            safeStartCount,
+            safeRemains,
+            `Provider status: ${providerStatus}`
+              .slice(0, 1000),
+            now,
+            order.orderId,
+            String(order.providerOrderId)
+          )
+          .run();
+
+      if (
+        Number(update?.meta?.changes || 0) === 1
+      ) {
+        synced += 1;
+      }
+    } catch (error) {
+      failed += 1;
+
+      console.error(
+        "[SMM ORDER AUTO SYNC ITEM ERROR]",
+        JSON.stringify({
+          orderId:
+            order.orderId || null,
+          message:
+            error?.message || String(error)
+        })
+      );
+    }
+  }
+
+  return {
+    success: true,
+    selected: orders.length,
+    synced,
+    failed
+  };
+}
+
+
 export default {
   async fetch(request, env) {
 
@@ -13436,16 +13678,31 @@ if (
     ctx.waitUntil(
       (async () => {
         try {
-          const result =
+          const catalogResult =
             await syncDjuraganSosmedCatalogWorker(env);
 
           console.log(
-            "[SMM AUTO SYNC]",
-            JSON.stringify(result)
+            "[SMM CATALOG AUTO SYNC]",
+            JSON.stringify(catalogResult)
           );
         } catch (error) {
           console.error(
-            "[SMM AUTO SYNC ERROR]",
+            "[SMM CATALOG AUTO SYNC ERROR]",
+            error?.message || String(error)
+          );
+        }
+
+        try {
+          const orderResult =
+            await syncDjuraganSosmedOrderStatusesWorker(env);
+
+          console.log(
+            "[SMM ORDER AUTO SYNC]",
+            JSON.stringify(orderResult)
+          );
+        } catch (error) {
+          console.error(
+            "[SMM ORDER AUTO SYNC ERROR]",
             error?.message || String(error)
           );
         }

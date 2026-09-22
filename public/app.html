@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#071F52">
-  <title>Download Aplikasi BAYORA</title>
+  <title>Aplikasi BAYORA</title>
 
   <link rel="icon" href="/favicon-32x32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -321,6 +321,66 @@
       .app-security{gap:12px;font-size:10px}
     }
   </style>
+
+<style id="bayora-app-left-alignment">
+/* Android & iPhone — consistent left alignment */
+
+.platform-card .platform-head {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 15px;
+  text-align: left;
+}
+
+.platform-card .platform-head > div:last-child {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.platform-card .platform-head h2 {
+  margin: 0 0 4px;
+  text-align: left;
+}
+
+.platform-card .platform-head p {
+  margin: 0;
+  text-align: left;
+}
+
+.platform-card .step {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 13px;
+  text-align: left;
+}
+
+.platform-card .step > div:last-child {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.platform-card .step b {
+  display: block;
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.platform-card .step > div:last-child > span {
+  display: block;
+  text-align: left;
+}
+
+@media (max-width: 720px) {
+  .platform-card .platform-head {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+}
+</style>
+
 </head>
 
 <body>

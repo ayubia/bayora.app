@@ -11064,6 +11064,205 @@ export default {
     }
 
     // ========================================
+    // UPLOAD DIGITAL PRODUCT FILE
+    // ========================================
+
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/products/upload-file"
+    ) {
+      try {
+
+        const cookieHeader =
+          request.headers.get("Cookie") || "";
+
+        const match =
+          cookieHeader.match(
+            /(?:^|;\s*)bayora_admin_session=([^;]+)/
+          );
+
+        if (!match) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+          }, 401);
+        }
+
+        let sessionToken;
+
+        try {
+          sessionToken =
+            decodeURIComponent(match[1]);
+        } catch {
+          sessionToken = match[1];
+        }
+
+        const sessionHash =
+          hashSessionToken(sessionToken);
+
+        const sessionResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              s.id AS session_id,
+              s.expires_at,
+              a.id,
+              a.username,
+              a.name,
+              a.role,
+              a.active
+            FROM admin_sessions s
+            JOIN admins a
+              ON a.id = s.admin_id
+            WHERE s.token_hash = ?
+            LIMIT 1
+          `).bind(sessionHash).all();
+
+        const admin =
+          sessionResult.results?.[0];
+
+        if (!admin) {
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin tidak valid."
+          }, 401);
+        }
+
+        if (
+          !admin.active ||
+          new Date(admin.expires_at).getTime() <= Date.now()
+        ) {
+          await env.ppobku_db.prepare(`
+            DELETE FROM admin_sessions
+            WHERE id = ?
+          `).bind(admin.session_id).run();
+
+          return json({
+            success: false,
+            authenticated: false,
+            error: "Session admin sudah expired."
+          }, 401);
+        }
+
+        if (
+          admin.role !== "owner" &&
+          admin.role !== "admin"
+        ) {
+          return json({
+            success: false,
+            error: "Kamu tidak memiliki akses untuk upload file."
+          }, 403);
+        }
+
+        const formData =
+          await request.formData();
+
+        const file =
+          formData.get("file");
+
+        if (
+          !file ||
+          typeof file.stream !== "function"
+        ) {
+          return Response.json(
+            {
+              success: false,
+              error: "File preset belum dipilih."
+            },
+            { status: 400 }
+          );
+        }
+
+        const originalName =
+          String(file.name || "");
+
+        const extension =
+          originalName
+            .split(".")
+            .pop()
+            ?.toLowerCase();
+
+        if (extension !== "zip") {
+          return Response.json(
+            {
+              success: false,
+              error: "File preset harus berupa ZIP."
+            },
+            { status: 400 }
+          );
+        }
+
+        if (file.size > 100 * 1024 * 1024) {
+          return Response.json(
+            {
+              success: false,
+              error: "Ukuran file preset maksimal 100 MB."
+            },
+            { status: 400 }
+          );
+        }
+
+        const filename =
+          generateFilename(
+            "digital",
+            originalName
+          )
+            .replace(/\.[^/.]+$/, "") +
+          ".zip";
+
+        const key =
+          `digital/files/${filename}`;
+
+        await env.ppobku_files.put(
+          key,
+          file.stream(),
+          {
+            httpMetadata: {
+              contentType:
+                file.type ||
+                "application/zip"
+            }
+          }
+        );
+
+        const publicPath =
+          `/uploads/digital/files/${filename}`;
+
+        return Response.json({
+          success: true,
+          file: {
+            originalName,
+            filename,
+            path: publicPath,
+            size: file.size,
+            mimeType:
+              file.type ||
+              "application/zip"
+          }
+        });
+
+      } catch (error) {
+
+        console.error(
+          "[UPLOAD DIGITAL FILE]",
+          error
+        );
+
+        return Response.json(
+          {
+            success: false,
+            error:
+              error?.message ||
+              "Gagal mengupload file preset."
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+
+    // ========================================
     // UPLOAD DIGITAL PRODUCT PDF
     // ========================================
 
@@ -11947,11 +12146,19 @@ export default {
             pdf_ios,
             pdf_android,
             pdf_mac,
-            pdf_windows
+            pdf_windows,
+            original_price,
+            short_description,
+            preset_count,
+            file_format,
+            mobile_compatible,
+            desktop_compatible,
+            badge
           )
           VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?
           )
         `).bind(
           productId,
@@ -11977,7 +12184,14 @@ export default {
           body.pdf_ios || null,
           body.pdf_android || null,
           body.pdf_mac || null,
-          body.pdf_windows || null
+          body.pdf_windows || null,
+          Math.max(0, Number(body.original_price) || 0),
+          body.short_description || "",
+          Math.max(0, Number(body.preset_count) || 0),
+          body.file_format || "",
+          body.mobile_compatible === false ? 0 : 1,
+          body.desktop_compatible === false ? 0 : 1,
+          body.badge || ""
         ).run();
 
         const product =
@@ -12077,7 +12291,14 @@ export default {
             pdf_android,
             pdf_mac,
             pdf_windows,
-            haybi_sku
+            haybi_sku,
+            original_price,
+            short_description,
+            preset_count,
+            file_format,
+            mobile_compatible,
+            desktop_compatible,
+            badge
           )
           SELECT
             ?,
@@ -12103,7 +12324,14 @@ export default {
             pdf_android,
             pdf_mac,
             pdf_windows,
-            haybi_sku
+            haybi_sku,
+            original_price,
+            short_description,
+            preset_count,
+            file_format,
+            mobile_compatible,
+            desktop_compatible,
+            badge
           FROM products
           WHERE id = ?
         `).bind(
@@ -12225,7 +12453,14 @@ export default {
             pdf_ios = ?,
             pdf_android = ?,
             pdf_mac = ?,
-            pdf_windows = ?
+            pdf_windows = ?,
+            original_price = ?,
+            short_description = ?,
+            preset_count = ?,
+            file_format = ?,
+            mobile_compatible = ?,
+            desktop_compatible = ?,
+            badge = ?
           WHERE id = ?
         `).bind(
           targetService,
@@ -12280,6 +12515,27 @@ export default {
           body.pdf_windows === undefined
             ? existing.pdf_windows
             : body.pdf_windows || null,
+          body.original_price === undefined
+            ? existing.original_price
+            : Math.max(0, Number(body.original_price) || 0),
+          body.short_description === undefined
+            ? existing.short_description || ""
+            : body.short_description || "",
+          body.preset_count === undefined
+            ? existing.preset_count
+            : Math.max(0, Number(body.preset_count) || 0),
+          body.file_format === undefined
+            ? existing.file_format || ""
+            : body.file_format || "",
+          body.mobile_compatible === undefined
+            ? existing.mobile_compatible
+            : body.mobile_compatible ? 1 : 0,
+          body.desktop_compatible === undefined
+            ? existing.desktop_compatible
+            : body.desktop_compatible ? 1 : 0,
+          body.badge === undefined
+            ? existing.badge || ""
+            : body.badge || "",
           productId
         ).run();
 
@@ -12394,7 +12650,18 @@ export default {
               digital_file,
               before_image,
               after_image,
-              gallery_images
+              gallery_images,
+              pdf_ios,
+              pdf_android,
+              pdf_mac,
+              pdf_windows,
+              original_price,
+              short_description,
+              preset_count,
+              file_format,
+              mobile_compatible,
+              desktop_compatible,
+              badge
             FROM products
             ORDER BY sort_order ASC, name ASC
           `)

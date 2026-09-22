@@ -3027,6 +3027,74 @@ body.bayora-view-admins > main > .stats {
 
             <div
                 class="catalog-form-group"
+                id="productDigitalDetailsGroup"
+                style="display:none;"
+            >
+                <label>Detail Produk Digital</label>
+
+                <label>Harga Sebelum Diskon</label>
+                <input
+                    type="number"
+                    id="productOriginalPrice"
+                    min="0"
+                    value="0"
+                    placeholder="contoh: 79000"
+                >
+                <small>Opsional. Isi 0 jika tidak menggunakan harga coret.</small>
+
+                <label>Deskripsi Singkat</label>
+                <input
+                    type="text"
+                    id="productShortDescription"
+                    maxlength="160"
+                    placeholder="contoh: Soft & natural tones for timeless moments"
+                >
+
+                <label>Jumlah Preset</label>
+                <input
+                    type="number"
+                    id="productPresetCount"
+                    min="0"
+                    value="0"
+                    placeholder="contoh: 20"
+                >
+
+                <label>Format File</label>
+                <input
+                    type="text"
+                    id="productFileFormat"
+                    placeholder="contoh: XMP + DNG"
+                >
+
+                <label>Badge</label>
+                <select id="productBadge">
+                    <option value="">Tanpa badge</option>
+                    <option value="Best Seller">Best Seller</option>
+                    <option value="Baru">Baru</option>
+                    <option value="Sale">Sale</option>
+                </select>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="productMobileCompatible"
+                        checked
+                    >
+                    Lightroom Mobile
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="productDesktopCompatible"
+                        checked
+                    >
+                    Lightroom Desktop
+                </label>
+            </div>
+
+            <div
+                class="catalog-form-group"
                 id="productPreviewGroup"
                 style="display:none;"
             >
@@ -3043,8 +3111,8 @@ body.bayora-view-admins > main > .stats {
                     id="productPreviewImage"
                 >
 
-                <small>
-                    Path atau URL gambar preview produk.
+                <small id="productPreviewStatus">
+                    Belum ada preview.
                 </small>
             </div>
 
@@ -3160,8 +3228,8 @@ body.bayora-view-admins > main > .stats {
                     id="productDigitalFile"
                 >
 
-                <small>
-                    Path atau URL file preset yang akan dikirim setelah pembayaran.
+                <small id="productDigitalStatus">
+                    Belum ada file preset.
                 </small>
             </div>
 
@@ -10181,6 +10249,9 @@ function updateProductDigitalFields() {
     const previewGroup =
         document.getElementById("productPreviewGroup");
 
+    const digitalDetailsGroup =
+        document.getElementById("productDigitalDetailsGroup");
+
     const digitalFileGroup =
         document.getElementById("productDigitalFileGroup");
 
@@ -10206,6 +10277,11 @@ function updateProductDigitalFields() {
 
     if (previewGroup) {
         previewGroup.style.display =
+            isDigital ? "" : "none";
+    }
+
+    if (digitalDetailsGroup) {
+        digitalDetailsGroup.style.display =
             isDigital ? "" : "none";
     }
 
@@ -10244,6 +10320,8 @@ function updateProductDigitalFields() {
 
 function openProductModal(serviceId = "") {
 
+    window.digitalUploadPromises = [];
+
     document.getElementById(
         "productModalTitle"
     ).textContent =
@@ -10269,17 +10347,43 @@ function openProductModal(serviceId = "") {
         "productPrice"
     ).value = "";
 
+    document.getElementById("productOriginalPrice").value = 0;
+    document.getElementById("productShortDescription").value = "";
+    document.getElementById("productPresetCount").value = 0;
+    document.getElementById("productFileFormat").value = "";
+    document.getElementById("productBadge").value = "";
+    document.getElementById("productMobileCompatible").checked = true;
+    document.getElementById("productDesktopCompatible").checked = true;
+
     document.getElementById(
         "productInfo"
+    ).value = "";
+
+    document.getElementById(
+        "productMood"
     ).value = "";
 
     document.getElementById(
         "productPreviewImage"
     ).value = "";
 
+    const previewStatus =
+        document.getElementById("productPreviewStatus");
+
+    if (previewStatus) {
+        previewStatus.textContent = "Belum ada preview.";
+    }
+
     document.getElementById(
         "productDigitalFile"
     ).value = "";
+
+    const digitalStatus =
+        document.getElementById("productDigitalStatus");
+
+    if (digitalStatus) {
+        digitalStatus.textContent = "Belum ada file preset.";
+    }
 
     document.getElementById(
         "productBeforeImage"
@@ -10343,6 +10447,8 @@ function openProductModal(serviceId = "") {
 
 function editProduct(id) {
 
+    window.digitalUploadPromises = [];
+
     const product =
         catalogData.products.find(
             item => item.id === id
@@ -10380,10 +10486,36 @@ function editProduct(id) {
     ).value =
         product.price;
 
+    document.getElementById("productOriginalPrice").value =
+        Number(product.original_price || 0);
+
+    document.getElementById("productShortDescription").value =
+        product.short_description || "";
+
+    document.getElementById("productPresetCount").value =
+        Number(product.preset_count || 0);
+
+    document.getElementById("productFileFormat").value =
+        product.file_format || "";
+
+    document.getElementById("productBadge").value =
+        product.badge || "";
+
+    document.getElementById("productMobileCompatible").checked =
+        Number(product.mobile_compatible) !== 0;
+
+    document.getElementById("productDesktopCompatible").checked =
+        Number(product.desktop_compatible) !== 0;
+
     document.getElementById(
         "productInfo"
     ).value =
         product.info || "";
+
+    document.getElementById(
+        "productMood"
+    ).value =
+        product.mood || "";
 
     document.getElementById(
         "productPreviewImage"
@@ -10394,6 +10526,26 @@ function editProduct(id) {
         "productDigitalFile"
     ).value =
         product.digital_file || "";
+
+    const previewStatus =
+        document.getElementById("productPreviewStatus");
+
+    if (previewStatus) {
+        previewStatus.textContent =
+            product.preview_image
+                ? "✓ Preview saat ini tersimpan. Pilih file baru hanya jika ingin mengganti."
+                : "Belum ada preview.";
+    }
+
+    const digitalStatus =
+        document.getElementById("productDigitalStatus");
+
+    if (digitalStatus) {
+        digitalStatus.textContent =
+            product.digital_file
+                ? "✓ File preset saat ini tersimpan. Pilih ZIP baru hanya jika ingin mengganti."
+                : "Belum ada file preset.";
+    }
 
     document.getElementById(
         "productPdfIos"
@@ -10481,6 +10633,24 @@ async function saveProduct(event) {
 
     event.preventDefault();
 
+    const form = event.currentTarget;
+
+    const submitButton =
+        form.querySelector('button[type="submit"]');
+
+    if (submitButton?.disabled) {
+        return;
+    }
+
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.dataset.originalText =
+            submitButton.textContent;
+        submitButton.textContent = "Menyimpan...";
+    }
+
+    try {
+
     const originalId =
         document.getElementById(
             "productOriginalId"
@@ -10536,6 +10706,8 @@ async function saveProduct(event) {
 
         }
 
+        window.digitalUploadPromises = [];
+
     }
 
     const payload = {
@@ -10563,6 +10735,41 @@ async function saveProduct(event) {
                     "productPrice"
                 ).value
             ),
+
+        original_price:
+            isDigital
+                ? Number(document.getElementById("productOriginalPrice").value) || 0
+                : 0,
+
+        short_description:
+            isDigital
+                ? document.getElementById("productShortDescription").value.trim()
+                : "",
+
+        preset_count:
+            isDigital
+                ? Number(document.getElementById("productPresetCount").value) || 0
+                : 0,
+
+        file_format:
+            isDigital
+                ? document.getElementById("productFileFormat").value.trim()
+                : "",
+
+        mobile_compatible:
+            isDigital
+                ? document.getElementById("productMobileCompatible").checked
+                : false,
+
+        desktop_compatible:
+            isDigital
+                ? document.getElementById("productDesktopCompatible").checked
+                : false,
+
+        badge:
+            isDigital
+                ? document.getElementById("productBadge").value
+                : "",
 
         mood:
             document.getElementById(
@@ -10656,8 +10863,6 @@ async function saveProduct(event) {
 
     };
 
-    try {
-
         const isEdit =
             Boolean(originalId);
 
@@ -10709,12 +10914,24 @@ async function saveProduct(event) {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "[SAVE PRODUCT]",
+            error
+        );
 
         alert(
-            error.message ||
+            error?.message ||
             "Gagal menyimpan produk."
         );
+
+    } finally {
+
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent =
+                submitButton.dataset.originalText ||
+                "Simpan Produk";
+        }
 
     }
 
@@ -11172,7 +11389,37 @@ function uploadDigitalPreviewField(
         "/api/products/upload-preview",
         hiddenId,
         statusId
-    );
+    ).then(result => {
+
+        const hidden =
+            document.getElementById(hiddenId);
+
+        const imagePath =
+            hidden?.value?.trim() || "";
+
+        if (
+            hiddenId === "productBeforeImage"
+        ) {
+            renderCurrentProductImage(
+                "productBeforeCurrent",
+                imagePath,
+                "Before"
+            );
+        }
+
+        if (
+            hiddenId === "productAfterImage"
+        ) {
+            renderCurrentProductImage(
+                "productAfterCurrent",
+                imagePath,
+                "After"
+            );
+        }
+
+        return result;
+
+    });
 
 }
 

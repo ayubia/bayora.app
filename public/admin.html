@@ -13250,19 +13250,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Panel transaksi adalah section.panel
-         * yang bukan katalog dan bukan admin.
+         * View transaksi terdiri dari:
+         * - Cek Transaksi Pelanggan
+         * - Transaksi terbaru
          */
+
+        const transactionLookup =
+            main.querySelector(
+                "#adminTransactionLookupPanel"
+            );
 
         const transactions =
             panels.find(function (panel) {
 
                 return (
+                    panel !== transactionLookup &&
                     !panel.classList.contains(
                         "catalog-panel"
                     ) &&
                     panel.id !==
-                        "adminManagementPanel"
+                        "adminManagementPanel" &&
+                    panel.id !==
+                        "smmPanel"
                 );
 
             });
@@ -13298,6 +13307,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 "dashboard";
         }
 
+        if (transactionLookup) {
+            transactionLookup.dataset.bayoraView =
+                "transactions";
+        }
+
         if (transactions) {
             transactions.dataset.bayoraView =
                 "transactions";
@@ -13326,6 +13340,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const views = [
             stats,
             dashboardHeading,
+            transactionLookup,
             transactions,
             catalog,
             smm,

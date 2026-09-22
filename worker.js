@@ -1595,6 +1595,7 @@ export default {
             SELECT
               o.order_id AS transactionId,
               o.status,
+              o.payment_status AS paymentStatus,
               o.price,
               o.target,
               s.name AS productName
@@ -1684,12 +1685,14 @@ export default {
 
       const paidStatuses =
         new Set([
-          "PAID",
-          "SUCCESS",
-          "SUCCESSFUL",
-          "PROCESSING",
-          "IN_PROGRESS",
-          "COMPLETED"
+          "PAID"
+        ]);
+
+      const failedStatuses =
+        new Set([
+          "FAILED",
+          "FAIL",
+          "ERROR"
         ]);
 
       const now =
@@ -1920,15 +1923,24 @@ export default {
         if (
           !paidStatuses.has(
             paymentStatus
-          ) &&
-          !paidStatuses.has(
-            transactionStatus
           )
         ) {
           return Response.json({
             success: false,
             error:
               "Pembayaran transaksi belum berhasil."
+          }, { status: 400 });
+        }
+
+        if (
+          !failedStatuses.has(
+            transactionStatus
+          )
+        ) {
+          return Response.json({
+            success: false,
+            error:
+              "Laporan Belum Diterima hanya tersedia untuk transaksi yang gagal setelah pembayaran berhasil."
           }, { status: 400 });
         }
 
@@ -2706,17 +2718,7 @@ export default {
             o.price,
             '' AS paymentMethod,
             o.status,
-            CASE
-              WHEN UPPER(o.status) IN (
-                'PAID',
-                'PROCESSING',
-                'IN_PROGRESS',
-                'SUCCESS',
-                'COMPLETED'
-              )
-              THEN 'PAID'
-              ELSE UPPER(o.status)
-            END AS paymentStatus,
+            UPPER(COALESCE(o.payment_status, 'PENDING')) AS paymentStatus,
             NULL AS digiflazzStatus,
             CAST(
               o.provider_order_id AS TEXT

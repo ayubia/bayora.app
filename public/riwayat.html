@@ -764,19 +764,60 @@ function transactionCanBeReported(transaction) {
         .trim()
         .toUpperCase();
 
-    const paid = [
-        "PAID",
-        "SUCCESS",
-        "SUCCESSFUL",
-        "PROCESSING",
-        "IN_PROGRESS",
-        "COMPLETED"
+    const failedStatuses = [
+        "FAILED",
+        "FAIL",
+        "ERROR"
     ];
 
     return (
-        paid.includes(paymentStatus) ||
-        paid.includes(status)
+        paymentStatus === "PAID" &&
+        failedStatuses.includes(status)
     );
+}
+
+function getTransactionStatusLabel(transaction) {
+    const status =
+        String(transaction?.status || "PENDING")
+        .trim()
+        .toUpperCase();
+
+    if (status === "PENDING") {
+        return "Menunggu Diproses";
+    }
+
+    if (
+        status === "PROCESSING" ||
+        status === "IN_PROGRESS"
+    ) {
+        return "Sedang Diproses";
+    }
+
+    if (
+        status === "SUCCESS" ||
+        status === "SUCCESSFUL" ||
+        status === "COMPLETED" ||
+        status === "DELIVERED"
+    ) {
+        return "Berhasil";
+    }
+
+    if (
+        status === "FAILED" ||
+        status === "FAIL" ||
+        status === "ERROR"
+    ) {
+        return "Gagal";
+    }
+
+    if (
+        status === "CANCELLED" ||
+        status === "CANCELED"
+    ) {
+        return "Dibatalkan";
+    }
+
+    return status;
 }
 
 async function copyTransactionCode(
@@ -1776,7 +1817,9 @@ function renderTransaction(transaction) {
             .toLocaleString("id-ID");
 
     const status =
-        transaction.status || "PENDING";
+        getTransactionStatusLabel(
+            transaction
+        );
 
     return `
         <article class="transaction-card">

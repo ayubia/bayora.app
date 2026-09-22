@@ -3116,66 +3116,6 @@ body.bayora-view-admins > main > .stats {
                 </small>
             </div>
 
-            <div
-                class="catalog-form-group"
-                id="productBeforeGroup"
-                style="display:none;"
-            >
-
-                <label>Foto Before</label>
-
-                <input
-                    type="file"
-                    id="productBeforeUpload"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-
-                <input
-                    type="hidden"
-                    id="productBeforeImage"
-                >
-
-                <div
-                    id="productBeforeCurrent"
-                    class="product-current-image"
-                ></div>
-
-                <small id="productBeforeStatus">
-                    Foto sebelum preset.
-                </small>
-
-            </div>
-
-
-            <div
-                class="catalog-form-group"
-                id="productAfterGroup"
-                style="display:none;"
-            >
-
-                <label>Foto After</label>
-
-                <input
-                    type="file"
-                    id="productAfterUpload"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-
-                <input
-                    type="hidden"
-                    id="productAfterImage"
-                >
-
-                <div
-                    id="productAfterCurrent"
-                    class="product-current-image"
-                ></div>
-
-                <small id="productAfterStatus">
-                    Foto sesudah preset.
-                </small>
-
-            </div>
 
 
             <div
@@ -10257,14 +10197,7 @@ function updateProductDigitalFields() {
 
     const devicePdfGroup =
         document.getElementById("productDevicePdfGroup");
-
-    const beforeGroup =
-        document.getElementById("productBeforeGroup");
-
-    const afterGroup =
-        document.getElementById("productAfterGroup");
-
-    const galleryGroup =
+const galleryGroup =
         document.getElementById("productGalleryGroup");
 
     const moodGroup =
@@ -10384,26 +10317,6 @@ function openProductModal(serviceId = "") {
     if (digitalStatus) {
         digitalStatus.textContent = "Belum ada file preset.";
     }
-
-    document.getElementById(
-        "productBeforeImage"
-    ).value = "";
-
-    document.getElementById(
-        "productAfterImage"
-    ).value = "";
-
-    renderCurrentProductImage(
-        "productBeforeCurrent",
-        "",
-        "Before"
-    );
-
-    renderCurrentProductImage(
-        "productAfterCurrent",
-        "",
-        "After"
-    );
 
     document.getElementById(
         "productGalleryImages"
@@ -10566,28 +10479,6 @@ function editProduct(id) {
         "productPdfWindows"
     ).value =
         product.pdf_windows || "";
-
-    document.getElementById(
-        "productBeforeImage"
-    ).value =
-        product.before_image || "";
-
-    document.getElementById(
-        "productAfterImage"
-    ).value =
-        product.after_image || "";
-
-    renderCurrentProductImage(
-        "productBeforeCurrent",
-        product.before_image || "",
-        "Before"
-    );
-
-    renderCurrentProductImage(
-        "productAfterCurrent",
-        product.after_image || "",
-        "After"
-    );
 
     const galleryImages =
         parseProductGalleryImages(
@@ -10837,20 +10728,6 @@ async function saveProduct(event) {
             isDigital
                 ? document.getElementById(
                     "productPdfWindows"
-                ).value.trim()
-                : null,
-
-        before_image:
-            isDigital
-                ? document.getElementById(
-                    "productBeforeImage"
-                ).value.trim()
-                : null,
-
-        after_image:
-            isDigital
-                ? document.getElementById(
-                    "productAfterImage"
                 ).value.trim()
                 : null,
 
@@ -11397,26 +11274,6 @@ function uploadDigitalPreviewField(
         const imagePath =
             hidden?.value?.trim() || "";
 
-        if (
-            hiddenId === "productBeforeImage"
-        ) {
-            renderCurrentProductImage(
-                "productBeforeCurrent",
-                imagePath,
-                "Before"
-            );
-        }
-
-        if (
-            hiddenId === "productAfterImage"
-        ) {
-            renderCurrentProductImage(
-                "productAfterCurrent",
-                imagePath,
-                "After"
-            );
-        }
-
         return result;
 
     });
@@ -11790,21 +11647,7 @@ function setupDigitalProductUploadListeners() {
         document.getElementById(
             "productPreviewUpload"
         );
-
-
-    const beforeInput =
-        document.getElementById(
-            "productBeforeUpload"
-        );
-
-
-    const afterInput =
-        document.getElementById(
-            "productAfterUpload"
-        );
-
-
-    const galleryInput =
+const galleryInput =
         document.getElementById(
             "productGalleryUpload"
         );
@@ -11927,61 +11770,6 @@ function setupDigitalProductUploadListeners() {
 
     }
 
-
-    if (beforeInput) {
-
-        beforeInput.onchange =
-            () => {
-
-                const promise =
-                    uploadDigitalPreviewField(
-                        beforeInput,
-                        "productBeforeImage",
-                        "productBeforeStatus"
-                    );
-
-                window.digitalUploadPromises.push(
-                    promise
-                );
-
-                /*
-                 * Jangan hapus Promise dari antrean sebelum produk disimpan.
-                 * Promise yang sudah resolved tetap aman untuk Promise.all().
-                 * Antrean akan di-reset saat modal baru dibuka/edit atau
-                 * setelah saveProduct selesai menunggunya.
-                 */
-
-            };
-
-    }
-
-
-    if (afterInput) {
-
-        afterInput.onchange =
-            () => {
-
-                const promise =
-                    uploadDigitalPreviewField(
-                        afterInput,
-                        "productAfterImage",
-                        "productAfterStatus"
-                    );
-
-                window.digitalUploadPromises.push(
-                    promise
-                );
-
-                /*
-                 * Jangan hapus Promise dari antrean sebelum produk disimpan.
-                 * Promise yang sudah resolved tetap aman untuk Promise.all().
-                 * Antrean akan di-reset saat modal baru dibuka/edit atau
-                 * setelah saveProduct selesai menunggunya.
-                 */
-
-            };
-
-    }
 
 
     if (galleryInput) {
@@ -16495,14 +16283,11 @@ a.bayora-brand .bayora-logo-text {
 
 /* ==========================================================
    DIGITAL PRODUCT MEDIA UPLOAD
-   Before / After / Gallery
+   Gallery
    Khusus Product Modal Admin
 ========================================================== */
 
-#productBeforeCurrent,
-#productAfterCurrent {
-    margin-top: 10px;
-}
+
 
 .product-current-image-wrap {
     display: flex;
@@ -16585,8 +16370,6 @@ a.bayora-brand .bayora-logo-text {
 }
 
 
-#productBeforeStatus,
-#productAfterStatus,
 #productGalleryStatus {
     display: block;
     margin-top: 7px;

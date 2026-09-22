@@ -504,8 +504,6 @@ async function loadCustomerCatalog() {
                 operator: product.operator || "",
                 productType: product.product_type || "ppob",
                 previewImage: product.preview_image || "",
-                beforeImage: product.before_image || "",
-                afterImage: product.after_image || "",
                 galleryImages: (() => {
                     if (!product.gallery_images) {
                         return [];
@@ -3778,8 +3776,6 @@ function renderDigitalProducts() {
 
         const preview =
             product.previewImage ||
-            product.afterImage ||
-            product.beforeImage ||
             "";
 
         const badge =
@@ -4119,8 +4115,6 @@ function renderDigitalCart() {
 
                 const image =
                     product.previewImage ||
-                    product.afterImage ||
-                    product.beforeImage ||
                     "";
 
                 return `

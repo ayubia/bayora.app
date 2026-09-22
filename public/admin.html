@@ -8364,85 +8364,672 @@ let digiflazzSyncRunning = false;
 
 function ensureDigiflazzSyncButton() {
 
-    const container = document.getElementById("catalogServices");
+    const container =
+        document.getElementById("catalogServices");
 
     if (!container) return;
 
     const existingBar =
-        document.getElementById("digiflazzAdminSyncBar");
+        document.getElementById(
+            "digiflazzAdminSyncBar"
+        );
 
     if (existingBar) {
 
         existingBar.style.display =
             activeCatalogTab === "ppob"
-                ? "flex"
+                ? "block"
                 : "none";
 
         return;
     }
 
-    const bar = document.createElement("div");
+    const bar =
+        document.createElement("div");
 
     bar.id = "digiflazzAdminSyncBar";
 
     bar.style.cssText = `
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        padding:14px 16px;
+        display:block;
+        padding:18px;
         margin-bottom:16px;
-        border:1px solid #e8e2dc;
-        border-radius:14px;
-        background:#fffaf6;
-        flex-wrap:wrap;
+        border:1px solid #e5eaf2;
+        border-radius:16px;
+        background:#ffffff;
+        box-shadow:
+            0 4px 16px rgba(17,24,39,.04);
     `;
 
     bar.innerHTML = `
-        <div>
-            <strong style="display:block;font-size:14px;">
-                Katalog Digiflazz
-            </strong>
-
-            <span
-                id="digiflazzSyncStatus"
-                style="
-                    display:block;
-                    margin-top:4px;
-                    font-size:12px;
-                    color:#777;
-                "
-            >
-                Sinkronisasi produk dan harga dari Digiflazz.
-            </span>
-        </div>
-
-        <button
-            id="digiflazzSyncButton"
-            type="button"
-            onclick="syncDigiflazzFromAdmin()"
+        <div
             style="
-                border:0;
-                border-radius:10px;
-                padding:10px 16px;
-                cursor:pointer;
-                font-weight:600;
-                background:#332019;
-                color:white;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:12px;
+                flex-wrap:wrap;
             "
         >
-            ↻ Sinkronkan Digiflazz
-        </button>
+            <div>
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                        font-size:14px;
+                        font-weight:700;
+                        color:#17213a;
+                    "
+                >
+                    <span
+                        id="digiflazzProviderStatusDot"
+                        style="
+                            width:10px;
+                            height:10px;
+                            border-radius:50%;
+                            background:#cbd2df;
+                            display:inline-block;
+                        "
+                    ></span>
+
+                    <span>Digiflazz</span>
+                </div>
+
+                <div
+                    id="digiflazzProviderStatus"
+                    style="
+                        margin-top:5px;
+                        color:#7b8497;
+                        font-size:13px;
+                    "
+                >
+                    Memuat status provider...
+                </div>
+            </div>
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    flex-wrap:wrap;
+                "
+            >
+                <button
+                    type="button"
+                    id="digiflazzProviderStatusButton"
+                    style="
+                        border:1px solid #dfe4ec;
+                        border-radius:10px;
+                        padding:10px 14px;
+                        background:#fff;
+                        color:#202938;
+                        cursor:pointer;
+                        font-weight:600;
+                    "
+                >
+                    Memuat Status...
+                </button>
+
+                <button
+                    type="button"
+                    id="digiflazzBalanceButton"
+                    style="
+                        border:1px solid #dfe4ec;
+                        border-radius:10px;
+                        padding:10px 14px;
+                        background:#fff;
+                        color:#202938;
+                        cursor:pointer;
+                        font-weight:600;
+                    "
+                >
+                    Cek Saldo
+                </button>
+            </div>
+        </div>
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:
+                    repeat(3,minmax(0,1fr));
+                gap:12px;
+                margin-top:18px;
+                width:100%;
+            "
+        >
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Saldo Provider
+                </div>
+
+                <strong
+                    id="digiflazzProviderBalance"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    —
+                </strong>
+            </div>
+
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Mata Uang
+                </div>
+
+                <strong
+                    id="digiflazzProviderCurrency"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    IDR
+                </strong>
+            </div>
+
+            <div
+                style="
+                    padding:14px;
+                    border-radius:12px;
+                    background:#f7f9fc;
+                "
+            >
+                <div
+                    style="
+                        font-size:12px;
+                        color:#8a93a5;
+                    "
+                >
+                    Katalog Digiflazz
+                </div>
+
+                <strong
+                    id="digiflazzCatalogCount"
+                    style="
+                        display:block;
+                        margin-top:5px;
+                        font-size:18px;
+                        color:#17213a;
+                    "
+                >
+                    —
+                </strong>
+
+                <div
+                    id="digiflazzCatalogDetail"
+                    style="
+                        margin-top:4px;
+                        font-size:11px;
+                        color:#8a93a5;
+                    "
+                >
+                    Memuat katalog...
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:16px;
+                margin-top:16px;
+                padding-top:16px;
+                border-top:1px solid #edf1f7;
+                width:100%;
+                box-sizing:border-box;
+                flex-wrap:wrap;
+            "
+        >
+            <div
+                id="digiflazzSyncStatus"
+                style="
+                    flex:1 1 300px;
+                    min-width:0;
+                    font-size:13px;
+                    line-height:1.5;
+                    color:#7b8497;
+                "
+            >
+                Sinkronisasi produk dan harga
+                dari Digiflazz.
+            </div>
+
+            <button
+                id="digiflazzSyncButton"
+                type="button"
+                onclick="syncDigiflazzFromAdmin()"
+                style="
+                    border:0;
+                    border-radius:10px;
+                    padding:10px 16px;
+                    cursor:pointer;
+                    font-weight:600;
+                    background:#111827;
+                    color:#fff;
+                "
+            >
+                ↻ Sinkronkan Digiflazz
+            </button>
+        </div>
     `;
 
-    container.parentNode.insertBefore(bar, container);
+    container.parentNode.insertBefore(
+        bar,
+        container
+    );
 
     bar.style.display =
         activeCatalogTab === "ppob"
-            ? "flex"
+            ? "block"
             : "none";
+
+    const statusButton =
+        document.getElementById(
+            "digiflazzProviderStatusButton"
+        );
+
+    const balanceButton =
+        document.getElementById(
+            "digiflazzBalanceButton"
+        );
+
+    if (statusButton) {
+        statusButton.addEventListener(
+            "click",
+            toggleDigiflazzProvider
+        );
+    }
+
+    if (balanceButton) {
+        balanceButton.addEventListener(
+            "click",
+            loadDigiflazzProviderBalance
+        );
+    }
+
+    loadDigiflazzProviderStatus()
+        .catch((error) => {
+            console.error(
+                "[DIGIFLAZZ PROVIDER INIT]",
+                error
+            );
+        });
+
+    loadDigiflazzProviderBalance()
+        .catch((error) => {
+            console.error(
+                "[DIGIFLAZZ BALANCE INIT]",
+                error
+            );
+        });
 }
 
+
+let digiflazzProviderActive = false;
+
+
+function setDigiflazzProviderMessage(
+    text,
+    active = false
+) {
+    const status =
+        document.getElementById(
+            "digiflazzProviderStatus"
+        );
+
+    const dot =
+        document.getElementById(
+            "digiflazzProviderStatusDot"
+        );
+
+    if (status) {
+        status.textContent =
+            String(text || "");
+    }
+
+    if (dot) {
+        dot.style.background =
+            active
+                ? "#22c55e"
+                : "#cbd2df";
+    }
+}
+
+
+function renderDigiflazzProviderStatus(data) {
+
+    const active =
+        Boolean(data?.provider?.active);
+
+    digiflazzProviderActive =
+        active;
+
+    const button =
+        document.getElementById(
+            "digiflazzProviderStatusButton"
+        );
+
+    if (button) {
+        button.disabled = false;
+        button.style.opacity = "1";
+        button.style.cursor = "pointer";
+
+        button.textContent =
+            active
+                ? "Nonaktifkan Provider"
+                : "Aktifkan Provider";
+    }
+
+    setDigiflazzProviderMessage(
+        active
+            ? "Provider Digiflazz aktif."
+            : "Provider Digiflazz nonaktif.",
+        active
+    );
+
+    const count =
+        document.getElementById(
+            "digiflazzCatalogCount"
+        );
+
+    const detail =
+        document.getElementById(
+            "digiflazzCatalogDetail"
+        );
+
+    const total =
+        Number(data?.catalog?.total || 0);
+
+    const available =
+        Number(
+            data?.catalog?.available || 0
+        );
+
+    const linked =
+        Number(data?.catalog?.linked || 0);
+
+    const productActive =
+        Number(data?.catalog?.active || 0);
+
+    if (count) {
+        count.textContent =
+            total.toLocaleString("id-ID");
+    }
+
+    if (detail) {
+        detail.textContent =
+            `${available.toLocaleString("id-ID")} tersedia · ` +
+            `${linked.toLocaleString("id-ID")} terhubung · ` +
+            `${productActive.toLocaleString("id-ID")} aktif`;
+    }
+
+    return active;
+}
+
+
+async function loadDigiflazzProviderStatus() {
+
+    const response =
+        await fetch(
+            "/api/admin/ppob/provider/digiflazz/status",
+            {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store"
+            }
+        );
+
+    const data =
+        await response.json();
+
+    if (
+        !response.ok ||
+        !data.success
+    ) {
+        throw new Error(
+            data.error ||
+            "Gagal memuat status Digiflazz."
+        );
+    }
+
+    renderDigiflazzProviderStatus(data);
+
+    return data;
+}
+
+
+async function toggleDigiflazzProvider() {
+
+    const button =
+        document.getElementById(
+            "digiflazzProviderStatusButton"
+        );
+
+    const nextActive =
+        !digiflazzProviderActive;
+
+    const confirmed =
+        window.confirm(
+            nextActive
+                ? (
+                    "Aktifkan provider Digiflazz?\n\n" +
+                    "Order PPOB baru dapat dikirim ke Digiflazz.\n\n" +
+                    "Status aktif dan harga masing-masing produk tidak diubah."
+                )
+                : (
+                    "Nonaktifkan provider Digiflazz?\n\n" +
+                    "Order PPOB baru tidak akan dikirim ke Digiflazz selama provider nonaktif.\n\n" +
+                    "Transaksi yang sudah dikirim tetap dapat dipantau statusnya. " +
+                    "Status aktif dan harga produk tidak diubah."
+                )
+        );
+
+    if (!confirmed) return;
+
+    if (button) {
+        button.disabled = true;
+        button.style.opacity = "0.6";
+        button.style.cursor = "wait";
+        button.textContent =
+            nextActive
+                ? "Mengaktifkan..."
+                : "Menonaktifkan...";
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin/ppob/provider/digiflazz/status",
+                {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        active: nextActive
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Gagal mengubah status Digiflazz."
+            );
+        }
+
+        digiflazzProviderActive =
+            Boolean(data?.provider?.active);
+
+        await loadDigiflazzProviderStatus();
+
+    } catch (error) {
+
+        console.error(
+            "[DIGIFLAZZ PROVIDER TOGGLE]",
+            error
+        );
+
+        setDigiflazzProviderMessage(
+            error.message ||
+            "Gagal mengubah status Digiflazz.",
+            digiflazzProviderActive
+        );
+
+        try {
+            await loadDigiflazzProviderStatus();
+        } catch {
+            if (button) {
+                button.disabled = false;
+                button.style.opacity = "1";
+                button.style.cursor = "pointer";
+                button.textContent =
+                    "Muat Ulang Status";
+            }
+        }
+    }
+}
+
+
+async function loadDigiflazzProviderBalance() {
+
+    const button =
+        document.getElementById(
+            "digiflazzBalanceButton"
+        );
+
+    const balance =
+        document.getElementById(
+            "digiflazzProviderBalance"
+        );
+
+    const currency =
+        document.getElementById(
+            "digiflazzProviderCurrency"
+        );
+
+    if (button) {
+        button.disabled = true;
+        button.style.opacity = "0.6";
+        button.style.cursor = "wait";
+        button.textContent =
+            "Memuat...";
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin/ppob/provider/digiflazz/balance",
+                {
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+            throw new Error(
+                data.error ||
+                "Gagal mengambil saldo Digiflazz."
+            );
+        }
+
+        const amount =
+            Number(data.balance || 0);
+
+        const code =
+            String(data.currency || "IDR");
+
+        if (balance) {
+            balance.textContent =
+                new Intl.NumberFormat(
+                    "id-ID",
+                    {
+                        style: "currency",
+                        currency: code,
+                        maximumFractionDigits: 0
+                    }
+                ).format(amount);
+        }
+
+        if (currency) {
+            currency.textContent = code;
+        }
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "[DIGIFLAZZ BALANCE]",
+            error
+        );
+
+        if (balance) {
+            balance.textContent =
+                "Gagal dimuat";
+        }
+
+        throw error;
+
+    } finally {
+
+        if (button) {
+            button.disabled = false;
+            button.style.opacity = "1";
+            button.style.cursor = "pointer";
+            button.textContent =
+                "Cek Saldo";
+        }
+    }
+}
 
 async function syncDigiflazzFromAdmin() {
 
@@ -8474,7 +9061,7 @@ async function syncDigiflazzFromAdmin() {
     try {
 
         const response = await fetch(
-            "/api/digiflazz/sync-catalog",
+            "/api/admin/ppob/provider/digiflazz/sync",
             {
                 method: "POST",
                 headers: {

@@ -255,6 +255,184 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && url.pathname === "/digiflazz/balance") {
+    const expectedToken = process.env.DIGIFLAZZ_GATEWAY_TOKEN;
+    const authorization = req.headers.authorization || "";
+
+    if (
+      !expectedToken ||
+      authorization !== "Bearer " + expectedToken
+    ) {
+      return sendJson(res, 401, {
+        success: false,
+        error: "Unauthorized"
+      });
+    }
+
+    const username = process.env.DIGIFLAZZ_USERNAME;
+    const apiKey = process.env.DIGIFLAZZ_API_KEY;
+
+    if (!username || !apiKey) {
+      return sendJson(res, 500, {
+        success: false,
+        error: "Credential Digiflazz belum tersedia"
+      });
+    }
+
+    const sign = crypto
+      .createHash("md5")
+      .update(username + apiKey + "depo")
+      .digest("hex");
+
+    try {
+      const response = await fetch(
+        "https://api.digiflazz.com/v1/cek-saldo",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            cmd: "deposit",
+            username,
+            sign
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      const deposit =
+        result &&
+        result.data &&
+        Number(result.data.deposit);
+
+      if (
+        response.ok &&
+        Number.isFinite(deposit)
+      ) {
+        return sendJson(res, 200, {
+          success: true,
+          balance: deposit,
+          currency: "IDR"
+        });
+      }
+
+      return sendJson(res, 502, {
+        success: false,
+        rc: result?.data?.rc || null,
+        message:
+          result?.data?.message ||
+          "Digiflazz tidak mengembalikan saldo."
+      });
+
+    } catch (error) {
+      return sendJson(res, 502, {
+        success: false,
+        error:
+          error?.message ||
+          "Gagal menghubungi Digiflazz"
+      });
+    }
+  }
+
+
+  if (
+    req.method === "GET" &&
+    url.pathname === "/digiflazz/price-list"
+  ) {
+    const expectedToken =
+      process.env.DIGIFLAZZ_GATEWAY_TOKEN;
+
+    const authorization =
+      req.headers.authorization || "";
+
+    if (
+      !expectedToken ||
+      authorization !==
+        "Bearer " + expectedToken
+    ) {
+      return sendJson(res, 401, {
+        success: false,
+        error: "Unauthorized"
+      });
+    }
+
+    const username =
+      process.env.DIGIFLAZZ_USERNAME;
+
+    const apiKey =
+      process.env.DIGIFLAZZ_API_KEY;
+
+    if (!username || !apiKey) {
+      return sendJson(res, 500, {
+        success: false,
+        error:
+          "Credential Digiflazz belum tersedia"
+      });
+    }
+
+    const sign = crypto
+      .createHash("md5")
+      .update(
+        username +
+        apiKey +
+        "pricelist"
+      )
+      .digest("hex");
+
+    try {
+      const response =
+        await fetch(
+          "https://api.digiflazz.com/v1/price-list",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({
+              cmd: "prepaid",
+              username,
+              sign
+            })
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (
+        response.ok &&
+        Array.isArray(result.data)
+      ) {
+        return sendJson(res, 200, {
+          success: true,
+          products: result.data
+        });
+      }
+
+      return sendJson(res, 502, {
+        success: false,
+        rc:
+          result?.data?.rc ||
+          null,
+        message:
+          result?.data?.message ||
+          "Digiflazz menolak request price list"
+      });
+
+    } catch (error) {
+      return sendJson(res, 502, {
+        success: false,
+        error:
+          error?.message ||
+          "Gagal mengambil price list Digiflazz"
+      });
+    }
+  }
+
+
   if (req.method === "GET" && url.pathname === "/digiflazz/test") {
     const expectedToken = process.env.DIGIFLAZZ_GATEWAY_TOKEN;
     const authorization = req.headers.authorization || "";

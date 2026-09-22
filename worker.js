@@ -300,6 +300,28 @@ async function sendTransactionToDigiflazzWorker(env, transactionId) {
     throw new Error("Produk tidak memiliki digiflazz_sku.");
   }
 
+  /*
+   * Provider switch hanya berlaku untuk order BARU.
+   * Status transaksi yang sudah dikirim tetap boleh disinkronkan.
+   */
+  const digiflazzProvider =
+    await env.ppobku_db.prepare(`
+      SELECT active
+      FROM ppob_provider_settings
+      WHERE provider = 'DIGIFLAZZ'
+      LIMIT 1
+    `).first();
+
+  if (
+    !digiflazzProvider ||
+    Number(digiflazzProvider.active) !== 1
+  ) {
+    return {
+      skipped: true,
+      reason: "DIGIFLAZZ_PROVIDER_INACTIVE"
+    };
+  }
+
   const gatewayUrl = String(
     env.DIGIFLAZZ_GATEWAY_URL || ""
   ).replace(/\/+$/, "");
@@ -11576,6 +11598,620 @@ export default {
 
     const catalogNow = () =>
       new Date().toISOString();
+
+    // ========================================
+    // ADMIN — DIGIFLAZZ PROVIDER STATUS
+    // GET = READ / PUT = ACTIVE TOGGLE ONLY
+    // ========================================
+    if (
+      (
+        request.method === "GET" ||
+        request.method === "PUT"
+      ) &&
+      url.pathname ===
+        "/api/admin/ppob/provider/digiflazz/status"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        let provider =
+          await env.ppobku_db.prepare(`
+            SELECT
+              provider,
+              active,
+              created_at,
+              updated_at
+            FROM ppob_provider_settings
+            WHERE provider = 'DIGIFLAZZ'
+            LIMIT 1
+          `).first();
+
+        if (!provider) {
+          const now = catalogNow();
+
+          await env.ppobku_db.prepare(`
+            INSERT INTO ppob_provider_settings (
+              provider,
+              active,
+              created_at,
+              updated_at
+            )
+            VALUES ('DIGIFLAZZ', 1, ?, ?)
+          `).bind(now, now).run();
+
+          provider =
+            await env.ppobku_db.prepare(`
+              SELECT
+                provider,
+                active,
+                created_at,
+                updated_at
+              FROM ppob_provider_settings
+              WHERE provider = 'DIGIFLAZZ'
+              LIMIT 1
+            `).first();
+        }
+
+        if (request.method === "GET") {
+          const catalogStats =
+            await env.ppobku_db.prepare(`
+              SELECT
+                COUNT(*) AS total,
+                SUM(
+                  CASE
+                    WHEN buyer_product_status = 1
+                     AND seller_product_status = 1
+                    THEN 1
+                    ELSE 0
+                  END
+                ) AS available
+              FROM digiflazz_price_list
+            `).first();
+
+          const productStats =
+            await env.ppobku_db.prepare(`
+              SELECT
+                COUNT(*) AS linked,
+                SUM(
+                  CASE WHEN active = 1
+                  THEN 1 ELSE 0 END
+                ) AS active
+              FROM products
+              WHERE product_type = 'ppob'
+                AND digiflazz_sku IS NOT NULL
+                AND TRIM(digiflazz_sku) <> ''
+            `).first();
+
+          return json({
+            success: true,
+            provider: {
+              name: "Digiflazz",
+              active:
+                Number(provider.active) === 1,
+              updatedAt:
+                provider.updated_at || null
+            },
+            catalog: {
+              total:
+                Number(catalogStats?.total || 0),
+              available:
+                Number(catalogStats?.available || 0),
+              linked:
+                Number(productStats?.linked || 0),
+              active:
+                Number(productStats?.active || 0)
+            }
+          });
+        }
+
+        let body;
+
+        try {
+          body = await request.json();
+        } catch {
+          return json({
+            success: false,
+            error: "Body JSON tidak valid."
+          }, 400);
+        }
+
+        if (typeof body?.active !== "boolean") {
+          return json({
+            success: false,
+            error: "active harus berupa boolean."
+          }, 400);
+        }
+
+        const now = catalogNow();
+
+        await env.ppobku_db.prepare(`
+          UPDATE ppob_provider_settings
+          SET
+            active = ?,
+            updated_at = ?
+          WHERE provider = 'DIGIFLAZZ'
+        `).bind(
+          body.active ? 1 : 0,
+          now
+        ).run();
+
+        return json({
+          success: true,
+          provider: {
+            name: "Digiflazz",
+            active: body.active,
+            updatedAt: now
+          },
+          safety: {
+            productActiveChanged: false,
+            productPriceChanged: false,
+            providerOrder: false
+          }
+        });
+
+      } catch (error) {
+        console.error(
+          "[DIGIFLAZZ PROVIDER STATUS]",
+          error
+        );
+
+        return json({
+          success: false,
+          error:
+            error?.message ||
+            "Gagal memproses status Digiflazz."
+        }, 500);
+      }
+    }
+
+
+    // ========================================
+    // ADMIN — DIGIFLAZZ CATALOG SYNC
+    // PRICE LIST + LINKED PPOB REPRICE
+    // ========================================
+    if (
+      request.method === "POST" &&
+      url.pathname ===
+        "/api/admin/ppob/provider/digiflazz/sync"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const gatewayUrl = String(
+          env.DIGIFLAZZ_GATEWAY_URL || ""
+        ).replace(/\/+$/, "");
+
+        const gatewayToken =
+          env.DIGIFLAZZ_GATEWAY_TOKEN;
+
+        if (!gatewayUrl || !gatewayToken) {
+          return json({
+            success: false,
+            error:
+              "Gateway Digiflazz belum dikonfigurasi."
+          }, 500);
+        }
+
+        const response = await fetch(
+          gatewayUrl + "/digiflazz/price-list",
+          {
+            method: "GET",
+            headers: {
+              "Authorization":
+                "Bearer " + gatewayToken,
+              "Accept": "application/json"
+            }
+          }
+        );
+
+        const data =
+          await response.json().catch(() => ({}));
+
+        if (
+          !response.ok ||
+          data?.success !== true ||
+          !Array.isArray(data.products)
+        ) {
+          return json({
+            success: false,
+            error:
+              data?.message ||
+              data?.error ||
+              `Gateway Digiflazz HTTP ${response.status}`
+          }, 502);
+        }
+
+        const unsafeMargins =
+          await env.ppobku_db.prepare(`
+            SELECT
+              id,
+              name,
+              margin,
+              digiflazz_sku
+            FROM products
+            WHERE product_type = 'ppob'
+              AND digiflazz_sku IS NOT NULL
+              AND TRIM(digiflazz_sku) <> ''
+              AND margin <= 0
+            ORDER BY name
+          `).all();
+
+        const unsafeMarginProducts =
+          unsafeMargins.results || [];
+
+        if (unsafeMarginProducts.length > 0) {
+          return json({
+            success: false,
+            error:
+              "Sinkronisasi dibatalkan: ada produk PPOB Digiflazz dengan margin Rp0 atau negatif.",
+            code:
+              "DIGIFLAZZ_UNSAFE_MARGIN",
+            unsafe_products:
+              unsafeMarginProducts.map((item) => ({
+                id: item.id,
+                name: item.name,
+                margin:
+                  Number(item.margin || 0),
+                sku:
+                  item.digiflazz_sku
+              }))
+          }, 409);
+        }
+
+        const now = catalogNow();
+
+        const sourceProducts =
+          data.products.filter((item) => {
+            return (
+              item &&
+              String(
+                item.buyer_sku_code || ""
+              ).trim()
+            );
+          });
+
+        if (sourceProducts.length === 0) {
+          return json({
+            success: false,
+            error:
+              "Price List Digiflazz kosong."
+          }, 502);
+        }
+
+        const existingResult =
+          await env.ppobku_db.prepare(`
+            SELECT buyer_sku_code
+            FROM digiflazz_price_list
+          `).all();
+
+        const existingSkus =
+          new Set(
+            (existingResult.results || [])
+              .map((row) =>
+                String(
+                  row.buyer_sku_code || ""
+                ).trim()
+              )
+              .filter(Boolean)
+          );
+
+        let inserted = 0;
+        let updated = 0;
+
+        const priceStatements = [];
+
+        for (const item of sourceProducts) {
+          const sku =
+            String(
+              item.buyer_sku_code || ""
+            ).trim();
+
+          if (!sku) continue;
+
+          if (existingSkus.has(sku)) {
+            updated += 1;
+          } else {
+            inserted += 1;
+          }
+
+          const price =
+            Math.max(
+              0,
+              Math.round(
+                Number(item.price) || 0
+              )
+            );
+
+          const buyerStatus =
+            item.buyer_product_status === true ||
+            Number(item.buyer_product_status) === 1
+              ? 1
+              : 0;
+
+          const sellerStatus =
+            item.seller_product_status === true ||
+            Number(item.seller_product_status) === 1
+              ? 1
+              : 0;
+
+          const unlimitedStock =
+            item.unlimited_stock === true ||
+            Number(item.unlimited_stock) === 1
+              ? 1
+              : 0;
+
+          const multi =
+            item.multi === true ||
+            Number(item.multi) === 1
+              ? 1
+              : 0;
+
+          const stock =
+            Math.max(
+              0,
+              Math.round(
+                Number(item.stock) || 0
+              )
+            );
+
+          priceStatements.push(
+            env.ppobku_db.prepare(`
+              INSERT INTO digiflazz_price_list (
+                buyer_sku_code,
+                product_name,
+                category,
+                brand,
+                type,
+                seller_name,
+                price,
+                buyer_product_status,
+                seller_product_status,
+                unlimited_stock,
+                stock,
+                multi,
+                start_cut_off,
+                end_cut_off,
+                description,
+                synced_at
+              )
+              VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?
+              )
+              ON CONFLICT(buyer_sku_code)
+              DO UPDATE SET
+                product_name = excluded.product_name,
+                category = excluded.category,
+                brand = excluded.brand,
+                type = excluded.type,
+                seller_name = excluded.seller_name,
+                price = excluded.price,
+                buyer_product_status =
+                  excluded.buyer_product_status,
+                seller_product_status =
+                  excluded.seller_product_status,
+                unlimited_stock =
+                  excluded.unlimited_stock,
+                stock = excluded.stock,
+                multi = excluded.multi,
+                start_cut_off =
+                  excluded.start_cut_off,
+                end_cut_off =
+                  excluded.end_cut_off,
+                description =
+                  excluded.description,
+                synced_at =
+                  excluded.synced_at
+            `).bind(
+              sku,
+              String(item.product_name || ""),
+              String(item.category || ""),
+              String(item.brand || ""),
+              String(item.type || ""),
+              String(item.seller_name || ""),
+              price,
+              buyerStatus,
+              sellerStatus,
+              unlimitedStock,
+              stock,
+              multi,
+              String(item.start_cut_off || ""),
+              String(item.end_cut_off || ""),
+              String(item.desc || item.description || ""),
+              now
+            )
+          );
+        }
+
+        const chunkSize = 50;
+
+        for (
+          let i = 0;
+          i < priceStatements.length;
+          i += chunkSize
+        ) {
+          await env.ppobku_db.batch(
+            priceStatements.slice(
+              i,
+              i + chunkSize
+            )
+          );
+        }
+
+        const reprice =
+          await env.ppobku_db.prepare(`
+            UPDATE products
+            SET
+              cost_price = (
+                SELECT d.price
+                FROM digiflazz_price_list d
+                WHERE d.buyer_sku_code =
+                  products.digiflazz_sku
+                LIMIT 1
+              ),
+              price = (
+                SELECT d.price
+                FROM digiflazz_price_list d
+                WHERE d.buyer_sku_code =
+                  products.digiflazz_sku
+                LIMIT 1
+              ) + margin
+            WHERE product_type = 'ppob'
+              AND digiflazz_sku IS NOT NULL
+              AND TRIM(digiflazz_sku) <> ''
+              AND EXISTS (
+                SELECT 1
+                FROM digiflazz_price_list d
+                WHERE d.buyer_sku_code =
+                  products.digiflazz_sku
+              )
+          `).run();
+
+        const stats =
+          await env.ppobku_db.prepare(`
+            SELECT
+              COUNT(*) AS total,
+              SUM(
+                CASE
+                  WHEN buyer_product_status = 1
+                   AND seller_product_status = 1
+                  THEN 1
+                  ELSE 0
+                END
+              ) AS available
+            FROM digiflazz_price_list
+          `).first();
+
+        return json({
+          success: true,
+          source_products:
+            sourceProducts.length,
+          inserted,
+          updated,
+          active_products:
+            Number(stats?.available || 0),
+          linked_products_updated:
+            Number(
+              reprice?.meta?.changes || 0
+            ),
+          price_list_refresh: {
+            success: true,
+            count:
+              Number(stats?.total || 0)
+          },
+          safety: {
+            productActiveChanged: false,
+            marginChanged: false,
+            newProductsCreated: false
+          }
+        });
+
+      } catch (error) {
+        console.error(
+          "[DIGIFLAZZ CATALOG SYNC]",
+          error
+        );
+
+        return json({
+          success: false,
+          error:
+            error?.message ||
+            "Sinkronisasi Digiflazz gagal."
+        }, 500);
+      }
+    }
+
+
+    // ========================================
+    // ADMIN — DIGIFLAZZ BALANCE
+    // READ ONLY THROUGH PRIVATE GATEWAY
+    // ========================================
+    if (
+      request.method === "GET" &&
+      url.pathname ===
+        "/api/admin/ppob/provider/digiflazz/balance"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const gatewayUrl = String(
+          env.DIGIFLAZZ_GATEWAY_URL || ""
+        ).replace(/\/+$/, "");
+
+        const gatewayToken =
+          env.DIGIFLAZZ_GATEWAY_TOKEN;
+
+        if (!gatewayUrl || !gatewayToken) {
+          return json({
+            success: false,
+            error:
+              "Gateway Digiflazz belum dikonfigurasi."
+          }, 500);
+        }
+
+        const response = await fetch(
+          gatewayUrl + "/digiflazz/balance",
+          {
+            method: "GET",
+            headers: {
+              "Authorization":
+                "Bearer " + gatewayToken,
+              "Accept": "application/json"
+            }
+          }
+        );
+
+        const data =
+          await response.json().catch(() => ({}));
+
+        if (
+          !response.ok ||
+          data?.success !== true
+        ) {
+          return json({
+            success: false,
+            error:
+              data?.message ||
+              data?.error ||
+              `Gateway Digiflazz HTTP ${response.status}`
+          }, 502);
+        }
+
+        const balance = Number(data.balance);
+
+        if (!Number.isFinite(balance)) {
+          return json({
+            success: false,
+            error:
+              "Saldo Digiflazz tidak valid."
+          }, 502);
+        }
+
+        return json({
+          success: true,
+          balance,
+          currency:
+            String(data.currency || "IDR")
+        });
+
+      } catch (error) {
+        console.error(
+          "[DIGIFLAZZ BALANCE]",
+          error
+        );
+
+        return json({
+          success: false,
+          error:
+            error?.message ||
+            "Gagal mengambil saldo Digiflazz."
+        }, 502);
+      }
+    }
+
 
     // CREATE SERVICE
     if (

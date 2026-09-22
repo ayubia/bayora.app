@@ -11853,6 +11853,25 @@ export default {
               ORDER BY s.sort_order ASC, s.title ASC
             `).all();
 
+          const tierResult =
+            await env.ppobku_db.prepare(`
+              SELECT
+                id,
+                service_id,
+                min_cost,
+                max_cost,
+                margin,
+                active,
+                sort_order
+              FROM ppob_pricing_tiers
+              WHERE provider = 'DIGIFLAZZ'
+              ORDER BY
+                service_id ASC,
+                min_cost ASC,
+                sort_order ASC,
+                id ASC
+            `).all();
+
           return json({
             success: true,
             settings: {
@@ -11883,6 +11902,19 @@ export default {
                     : Number(row.margin),
                 active:
                   Number(row.margin_active) === 1
+              })),
+            tiers:
+              (tierResult.results || []).map((row) => ({
+                id: Number(row.id),
+                service_id: row.service_id,
+                min_cost: Number(row.min_cost || 0),
+                max_cost:
+                  row.max_cost === null
+                    ? null
+                    : Number(row.max_cost),
+                margin: Number(row.margin || 0),
+                active: Number(row.active) === 1,
+                sort_order: Number(row.sort_order || 0)
               }))
           });
         }
@@ -11937,6 +11969,143 @@ export default {
           Array.isArray(body.categories)
             ? body.categories
             : [];
+
+        const tiers =
+          Array.isArray(body.tiers)
+            ? body.tiers
+            : [];
+
+        const normalizedTiers = [];
+
+        for (let index = 0; index < tiers.length; index++) {
+          const item = tiers[index] || {};
+
+          const serviceId =
+            String(item.service_id || "").trim();
+
+          if (!serviceId) {
+            return json({
+              success: false,
+              error:
+                `Tier #${index + 1} tidak memiliki kategori.`
+            }, 400);
+          }
+
+          const minCost =
+            Number(item.min_cost ?? 0);
+
+          const maxCost =
+            item.max_cost === null ||
+            item.max_cost === "" ||
+            item.max_cost === undefined
+              ? null
+              : Number(item.max_cost);
+
+          const margin =
+            Number(item.margin);
+
+          const active =
+            item.active !== false;
+
+          if (
+            !Number.isFinite(minCost) ||
+            minCost < 0
+          ) {
+            return json({
+              success: false,
+              error:
+                `Batas minimum tier ${serviceId} tidak valid.`
+            }, 400);
+          }
+
+          if (
+            maxCost !== null &&
+            (
+              !Number.isFinite(maxCost) ||
+              maxCost < minCost
+            )
+          ) {
+            return json({
+              success: false,
+              error:
+                `Batas maksimum tier ${serviceId} tidak valid.`
+            }, 400);
+          }
+
+          if (
+            !Number.isFinite(margin) ||
+            margin < 0
+          ) {
+            return json({
+              success: false,
+              error:
+                `Margin tier ${serviceId} tidak valid.`
+            }, 400);
+          }
+
+          normalizedTiers.push({
+            service_id: serviceId,
+            min_cost: Math.round(minCost),
+            max_cost:
+              maxCost === null
+                ? null
+                : Math.round(maxCost),
+            margin: Math.round(margin),
+            active,
+            sort_order: index
+          });
+        }
+
+        const tiersByService = new Map();
+
+        for (const tier of normalizedTiers) {
+          if (!tier.active) continue;
+
+          if (!tiersByService.has(tier.service_id)) {
+            tiersByService.set(
+              tier.service_id,
+              []
+            );
+          }
+
+          tiersByService
+            .get(tier.service_id)
+            .push(tier);
+        }
+
+        for (
+          const [serviceId, serviceTiers]
+          of tiersByService.entries()
+        ) {
+          serviceTiers.sort(
+            (a, b) =>
+              a.min_cost - b.min_cost
+          );
+
+          for (
+            let i = 1;
+            i < serviceTiers.length;
+            i++
+          ) {
+            const previous =
+              serviceTiers[i - 1];
+
+            const current =
+              serviceTiers[i];
+
+            if (
+              previous.max_cost === null ||
+              current.min_cost <=
+                previous.max_cost
+            ) {
+              return json({
+                success: false,
+                error:
+                  `Rentang tier ${serviceId} tumpang tindih.`
+              }, 400);
+            }
+          }
+        }
 
         const now = catalogNow();
         const statements = [];
@@ -12019,8 +12188,54 @@ export default {
           );
         }
 
+        statements.push(
+          env.ppobku_db.prepare(`
+            DELETE FROM ppob_pricing_tiers
+            WHERE provider = 'DIGIFLAZZ'
+          `)
+        );
+
+        for (const tier of normalizedTiers) {
+          statements.push(
+            env.ppobku_db.prepare(`
+              INSERT INTO ppob_pricing_tiers (
+                provider,
+                service_id,
+                min_cost,
+                max_cost,
+                margin,
+                active,
+                sort_order,
+                created_at,
+                updated_at
+              )
+              VALUES (
+                'DIGIFLAZZ',
+                ?, ?, ?, ?, ?, ?, ?, ?
+              )
+            `).bind(
+              tier.service_id,
+              tier.min_cost,
+              tier.max_cost,
+              tier.margin,
+              tier.active ? 1 : 0,
+              tier.sort_order,
+              now,
+              now
+            )
+          );
+        }
+
         if (statements.length > 0) {
-          await env.ppobku_db.batch(statements);
+          for (
+            let i = 0;
+            i < statements.length;
+            i += 50
+          ) {
+            await env.ppobku_db.batch(
+              statements.slice(i, i + 50)
+            );
+          }
         }
 
         return json({
@@ -12107,14 +12322,67 @@ export default {
               ON po.provider = 'DIGIFLAZZ'
              AND po.product_id = p.id
             WHERE p.product_type = 'ppob'
+              AND p.active = 1
               AND p.digiflazz_sku IS NOT NULL
               AND TRIM(p.digiflazz_sku) <> ''
               AND p.cost_price > 0
             ORDER BY p.service_id, p.name
           `).all();
 
+        const tierResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              id,
+              service_id,
+              min_cost,
+              max_cost,
+              margin,
+              sort_order
+            FROM ppob_pricing_tiers
+            WHERE provider = 'DIGIFLAZZ'
+              AND active = 1
+            ORDER BY
+              service_id ASC,
+              min_cost ASC,
+              sort_order ASC,
+              id ASC
+          `).all();
+
+        const activeTiersByService =
+          new Map();
+
+        for (
+          const tier of
+          (tierResult.results || [])
+        ) {
+          const serviceId =
+            String(tier.service_id || "");
+
+          if (!activeTiersByService.has(serviceId)) {
+            activeTiersByService.set(
+              serviceId,
+              []
+            );
+          }
+
+          activeTiersByService
+            .get(serviceId)
+            .push({
+              id: Number(tier.id),
+              min_cost:
+                Number(tier.min_cost || 0),
+              max_cost:
+                tier.max_cost === null
+                  ? null
+                  : Number(tier.max_cost),
+              margin:
+                Number(tier.margin || 0)
+            });
+        }
+
         const rows = [];
         const updateStatements = [];
+        const unsafeProducts = [];
 
         for (
           const product of
@@ -12124,6 +12392,33 @@ export default {
           let effectiveMargin =
             Number(product.margin || 0);
 
+          let matchedTier = null;
+
+          const productCost =
+            Number(product.cost_price || 0);
+
+          const serviceTiers =
+            activeTiersByService.get(
+              String(product.service_id || "")
+            ) || [];
+
+          for (const tier of serviceTiers) {
+            const aboveMinimum =
+              productCost >= tier.min_cost;
+
+            const belowMaximum =
+              tier.max_cost === null ||
+              productCost <= tier.max_cost;
+
+            if (
+              aboveMinimum &&
+              belowMaximum
+            ) {
+              matchedTier = tier;
+              break;
+            }
+          }
+
           if (
             Number(product.product_override_active) === 1 &&
             product.product_override_margin !== null
@@ -12131,6 +12426,12 @@ export default {
             source = "product";
             effectiveMargin =
               Number(product.product_override_margin);
+
+          } else if (matchedTier) {
+            source = "tier";
+            effectiveMargin =
+              Number(matchedTier.margin);
+
           } else if (
             Number(product.category_margin_active) === 1 &&
             product.category_margin !== null
@@ -12138,6 +12439,7 @@ export default {
             source = "category";
             effectiveMargin =
               Number(product.category_margin);
+
           } else if (
             settings.default_margin !== null
           ) {
@@ -12147,10 +12449,20 @@ export default {
           }
 
           effectiveMargin =
-            Math.max(
-              0,
-              Math.round(effectiveMargin || 0)
-            );
+            Math.round(effectiveMargin || 0);
+
+          if (
+            !Number.isFinite(effectiveMargin) ||
+            effectiveMargin <= 0
+          ) {
+            unsafeProducts.push({
+              id: product.id,
+              name: product.name,
+              service_id: product.service_id,
+              source,
+              margin: effectiveMargin
+            });
+          }
 
           const oldPrice =
             Number(product.price || 0);
@@ -12164,6 +12476,18 @@ export default {
             service_id: product.service_id,
             name: product.name,
             source,
+            tier_id:
+              matchedTier
+                ? matchedTier.id
+                : null,
+            tier_min_cost:
+              matchedTier
+                ? matchedTier.min_cost
+                : null,
+            tier_max_cost:
+              matchedTier
+                ? matchedTier.max_cost
+                : null,
             cost_price:
               Number(product.cost_price || 0),
             old_margin:
@@ -12192,6 +12516,21 @@ export default {
               )
             );
           }
+        }
+
+        if (
+          isApply &&
+          unsafeProducts.length > 0
+        ) {
+          return json({
+            success: false,
+            error:
+              "Penerapan harga dibatalkan: ada produk aktif dengan margin efektif Rp0 atau tidak valid.",
+            code:
+              "PPOB_UNSAFE_EFFECTIVE_MARGIN",
+            unsafe_products:
+              unsafeProducts
+          }, 409);
         }
 
         if (isApply) {
@@ -12235,6 +12574,9 @@ export default {
             rows.length - changed.length,
           service_fee:
             Number(settings.service_fee || 0),
+          unsafe_products: unsafeProducts,
+          safe_to_apply:
+            unsafeProducts.length === 0,
           products: rows
         });
 
@@ -12532,20 +12874,128 @@ export default {
           await env.ppobku_db.prepare(`
             UPDATE products
             SET
+              margin = CASE
+                WHEN service_id = 'paket-sms-telpon'
+                THEN margin
+
+                WHEN COALESCE((
+                  SELECT s.pricing_enabled
+                  FROM ppob_pricing_settings s
+                  WHERE s.provider = 'DIGIFLAZZ'
+                  LIMIT 1
+                ), 0) <> 1
+                THEN margin
+
+                WHEN EXISTS (
+                  SELECT 1
+                  FROM ppob_product_margin_overrides o
+                  WHERE o.provider = 'DIGIFLAZZ'
+                    AND o.product_id = products.id
+                    AND o.active = 1
+                )
+                THEN (
+                  SELECT o.margin
+                  FROM ppob_product_margin_overrides o
+                  WHERE o.provider = 'DIGIFLAZZ'
+                    AND o.product_id = products.id
+                    AND o.active = 1
+                  LIMIT 1
+                )
+
+                WHEN EXISTS (
+                  SELECT 1
+                  FROM ppob_pricing_tiers t
+                  JOIN digiflazz_price_list d
+                    ON d.buyer_sku_code =
+                      products.digiflazz_sku
+                  WHERE t.provider = 'DIGIFLAZZ'
+                    AND t.service_id =
+                      products.service_id
+                    AND t.active = 1
+                    AND d.price >= t.min_cost
+                    AND (
+                      t.max_cost IS NULL
+                      OR d.price <= t.max_cost
+                    )
+                )
+                THEN (
+                  SELECT t.margin
+                  FROM ppob_pricing_tiers t
+                  JOIN digiflazz_price_list d
+                    ON d.buyer_sku_code =
+                      products.digiflazz_sku
+                  WHERE t.provider = 'DIGIFLAZZ'
+                    AND t.service_id =
+                      products.service_id
+                    AND t.active = 1
+                    AND d.price >= t.min_cost
+                    AND (
+                      t.max_cost IS NULL
+                      OR d.price <= t.max_cost
+                    )
+                  ORDER BY
+                    t.sort_order ASC,
+                    t.min_cost DESC
+                  LIMIT 1
+                )
+
+                WHEN EXISTS (
+                  SELECT 1
+                  FROM ppob_category_margins c
+                  WHERE c.provider = 'DIGIFLAZZ'
+                    AND c.service_id =
+                      products.service_id
+                    AND c.active = 1
+                )
+                THEN (
+                  SELECT c.margin
+                  FROM ppob_category_margins c
+                  WHERE c.provider = 'DIGIFLAZZ'
+                    AND c.service_id =
+                      products.service_id
+                    AND c.active = 1
+                  LIMIT 1
+                )
+
+                WHEN (
+                  SELECT s.default_margin
+                  FROM ppob_pricing_settings s
+                  WHERE s.provider = 'DIGIFLAZZ'
+                  LIMIT 1
+                ) > 0
+                THEN (
+                  SELECT s.default_margin
+                  FROM ppob_pricing_settings s
+                  WHERE s.provider = 'DIGIFLAZZ'
+                  LIMIT 1
+                )
+
+                ELSE margin
+              END,
+
               cost_price = (
                 SELECT d.price
                 FROM digiflazz_price_list d
                 WHERE d.buyer_sku_code =
                   products.digiflazz_sku
                 LIMIT 1
-              ),
-              price = (
-                SELECT d.price
+              )
+
+            WHERE product_type = 'ppob'
+              AND digiflazz_sku IS NOT NULL
+              AND TRIM(digiflazz_sku) <> ''
+              AND EXISTS (
+                SELECT 1
                 FROM digiflazz_price_list d
                 WHERE d.buyer_sku_code =
                   products.digiflazz_sku
-                LIMIT 1
-              ) + margin
+              )
+          `).run();
+
+        const updateSellingPrices =
+          await env.ppobku_db.prepare(`
+            UPDATE products
+            SET price = cost_price + margin
             WHERE product_type = 'ppob'
               AND digiflazz_sku IS NOT NULL
               AND TRIM(digiflazz_sku) <> ''

@@ -8833,7 +8833,87 @@ function ensureDigiflazzSyncButton() {
                 </div>
             </div>
 
+
             <div
+                style="
+                    margin-top:16px;
+                    padding-top:16px;
+                    border-top:1px solid #edf1f7;
+                "
+            >
+                <div
+                    style="
+                        font-size:13px;
+                        font-weight:700;
+                        color:#17213a;
+                    "
+                >
+                    Margin Bertingkat
+                </div>
+
+                <div
+                    style="
+                        margin-top:4px;
+                        color:#8a93a5;
+                        font-size:12px;
+                        line-height:1.5;
+                    "
+                >
+                    Atur margin berdasarkan kategori dan
+                    rentang modal Digiflazz. Tier memiliki
+                    prioritas lebih tinggi daripada margin
+                    kategori dan margin default.
+                </div>
+
+                <div style="margin:0 0 14px;">
+                  <button
+                    type="button"
+                    onclick="fillDigiflazzHematPricing()"
+                    style="
+                      border:0;
+                      border-radius:12px;
+                      padding:10px 14px;
+                      font-weight:700;
+                      cursor:pointer;
+                      background:#eef6ff;
+                      color:#1769ff;
+                    "
+                  >
+                    Isi Otomatis Margin Hemat
+                  </button>
+                  <div
+                    style="
+                      margin-top:7px;
+                      color:#8a93a5;
+                      font-size:12px;
+                      line-height:1.5;
+                    "
+                  >
+                    Mengisi rentang margin semua kategori PPOB.
+                    Tidak menyimpan atau menerapkan harga otomatis.
+                  </div>
+                </div>
+
+                <div
+                    id="digiflazzPricingTiers"
+                    style="
+                        display:grid;
+                        gap:10px;
+                        margin-top:12px;
+                    "
+                >
+                    <div
+                        style="
+                            color:#8a93a5;
+                            font-size:13px;
+                        "
+                    >
+                        Memuat aturan tier...
+                    </div>
+                </div>
+            </div>
+
+<div
                 id="digiflazzPricingMessage"
                 style="
                     display:none;
@@ -9068,6 +9148,7 @@ function ensureDigiflazzSyncButton() {
 
 
 let digiflazzPricingCategories = [];
+let digiflazzPricingTiers = [];
 let digiflazzPricingEnabled = false;
 
 
@@ -9295,6 +9376,830 @@ function renderDigiflazzCategoryMargins(
 }
 
 
+
+function escapeDigiflazzPricingHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function getDigiflazzPricingCategoryTitle(serviceId) {
+    const category =
+        digiflazzPricingCategories.find(
+            (item) =>
+                String(item.service_id || "") ===
+                String(serviceId || "")
+        );
+
+    return String(
+        category?.title ||
+        category?.service_id ||
+        serviceId ||
+        "Kategori"
+    );
+}
+
+
+function syncDigiflazzPricingTierInputs() {
+    document
+        .querySelectorAll(
+            "[data-pricing-tier-index]"
+        )
+        .forEach((row) => {
+            const index =
+                Number(
+                    row.getAttribute(
+                        "data-pricing-tier-index"
+                    )
+                );
+
+            const tier =
+                digiflazzPricingTiers[index];
+
+            if (!tier) return;
+
+            const minInput =
+                row.querySelector(
+                    ".digiflazz-tier-min"
+                );
+
+            const maxInput =
+                row.querySelector(
+                    ".digiflazz-tier-max"
+                );
+
+            const marginInput =
+                row.querySelector(
+                    ".digiflazz-tier-margin"
+                );
+
+            const activeInput =
+                row.querySelector(
+                    ".digiflazz-tier-active"
+                );
+
+            const minRaw =
+                String(
+                    minInput?.value ?? ""
+                ).trim();
+
+            const maxRaw =
+                String(
+                    maxInput?.value ?? ""
+                ).trim();
+
+            const marginRaw =
+                String(
+                    marginInput?.value ?? ""
+                ).trim();
+
+            tier.min_cost =
+                minRaw === ""
+                    ? ""
+                    : Number(minRaw);
+
+            tier.max_cost =
+                maxRaw === ""
+                    ? null
+                    : Number(maxRaw);
+
+            tier.margin =
+                marginRaw === ""
+                    ? ""
+                    : Number(marginRaw);
+
+            tier.active =
+                activeInput?.checked === true;
+        });
+}
+
+
+
+function fillDigiflazzHematPricing() {
+    syncDigiflazzPricingTierInputs();
+
+    const profiles = {
+        pulsa: [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, 100000, 1500],
+            [100001, null, 2000]
+        ],
+
+        data: [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, 100000, 1500],
+            [100001, null, 2000]
+        ],
+
+        "pln-token": [
+            [0, 25000, 750],
+            [25001, 100000, 1000],
+            [100001, 500000, 1500],
+            [500001, 1000000, 2000],
+            [1000001, null, 2500]
+        ],
+
+        ewallet: [
+            [0, 25000, 500],
+            [25001, 50000, 750],
+            [50001, 100000, 1000],
+            [100001, 150000, 1500],
+            [150001, null, 2000]
+        ],
+
+        games: [
+            [0, 5000, 300],
+            [5001, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ],
+
+        "aktivasi-voucher": [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ],
+
+        tv: [
+            [0, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, 100000, 1500],
+            [100001, null, 2000]
+        ],
+
+        "masa-aktif": [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ],
+
+        "aktivasi-perdana": [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ],
+
+        voucher: [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ],
+
+        gas: [
+            [0, 10000, 500],
+            [10001, 25000, 750],
+            [25001, 50000, 1000],
+            [50001, null, 1500]
+        ]
+    };
+
+    const availableServices = new Set(
+        (Array.isArray(digiflazzPricingCategories)
+            ? digiflazzPricingCategories
+            : []
+        ).map((item) => String(item.service_id || ""))
+    );
+
+    const generated = [];
+
+    Object.entries(profiles).forEach(([serviceId, ranges]) => {
+        if (!availableServices.has(serviceId)) return;
+
+        ranges.forEach(([minCost, maxCost, margin], index) => {
+            generated.push({
+                id: null,
+                service_id: serviceId,
+                min_cost: minCost,
+                max_cost: maxCost,
+                margin,
+                active: true,
+                sort_order: index
+            });
+        });
+    });
+
+    if (!generated.length) {
+        throw new Error(
+            "Tidak ada kategori PPOB yang cocok untuk diisi otomatis."
+        );
+    }
+
+    const managedServices = new Set(Object.keys(profiles));
+
+    const excludedServices = new Set([
+        "paket-sms-telpon"
+    ]);
+
+    digiflazzPricingTiers = [
+        ...digiflazzPricingTiers.filter((tier) => {
+            const serviceId =
+                String(tier.service_id || "");
+
+            return (
+                !managedServices.has(serviceId) &&
+                !excludedServices.has(serviceId)
+            );
+        }),
+        ...generated
+    ];
+
+    renderDigiflazzPricingTiers();
+
+    setDigiflazzPricingMessage(
+        "Margin Hemat sudah diisi otomatis. Belum disimpan dan belum diterapkan. Periksa lalu klik Preview Harga.",
+        false
+    );
+
+    document
+        .getElementById("digiflazzPricingTiers")
+        ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+function createDigiflazzTierDraft(serviceId) {
+    syncDigiflazzPricingTierInputs();
+
+    const serviceTiers =
+        digiflazzPricingTiers
+            .filter(
+                (item) =>
+                    String(item.service_id || "") ===
+                    String(serviceId || "")
+            )
+            .sort(
+                (a, b) =>
+                    Number(a.min_cost || 0) -
+                    Number(b.min_cost || 0)
+            );
+
+    let minCost = 0;
+
+    if (serviceTiers.length) {
+        const last =
+            serviceTiers[
+                serviceTiers.length - 1
+            ];
+
+        if (
+            last.max_cost !== null &&
+            last.max_cost !== undefined &&
+            last.max_cost !== ""
+        ) {
+            minCost =
+                Number(last.max_cost) + 1;
+        }
+    }
+
+    digiflazzPricingTiers.push({
+        id: null,
+        service_id: String(serviceId),
+        min_cost: minCost,
+        max_cost: null,
+        margin: "",
+        active: true,
+        sort_order: serviceTiers.length
+    });
+
+    renderDigiflazzPricingTiers();
+}
+
+function removeDigiflazzPricingTier(index) {
+    syncDigiflazzPricingTierInputs();
+
+    if (
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= digiflazzPricingTiers.length
+    ) {
+        return;
+    }
+
+    digiflazzPricingTiers.splice(index, 1);
+    renderDigiflazzPricingTiers();
+}
+
+
+function renderDigiflazzPricingTiers() {
+    const container =
+        document.getElementById(
+            "digiflazzPricingTiers"
+        );
+
+    if (!container) return;
+
+    const categories =
+        Array.isArray(digiflazzPricingCategories)
+            ? digiflazzPricingCategories
+            : [];
+
+    if (!categories.length) {
+        container.innerHTML =
+            '<div style="color:#8a93a5;font-size:13px;">' +
+            'Tidak ada kategori PPOB.' +
+            '</div>';
+        return;
+    }
+
+    container.innerHTML =
+        categories
+            .map((category) => {
+                const serviceId =
+                    String(
+                        category.service_id || ""
+                    );
+
+                const title =
+                    escapeDigiflazzPricingHtml(
+                        category.title ||
+                        serviceId ||
+                        "Kategori"
+                    );
+
+                const indexedTiers =
+                    digiflazzPricingTiers
+                        .map((tier, index) => ({
+                            tier,
+                            index
+                        }))
+                        .filter(
+                            ({ tier }) =>
+                                String(
+                                    tier.service_id || ""
+                                ) === serviceId
+                        )
+                        .sort(
+                            (a, b) =>
+                                Number(
+                                    a.tier.min_cost || 0
+                                ) -
+                                Number(
+                                    b.tier.min_cost || 0
+                                )
+                        );
+
+                const rows =
+                    indexedTiers.length
+                        ? indexedTiers
+                            .map(({ tier, index }) => {
+                                const minCost =
+                                    Number(
+                                        tier.min_cost || 0
+                                    );
+
+                                const maxCost =
+                                    tier.max_cost === null ||
+                                    tier.max_cost === undefined
+                                        ? ""
+                                        : Number(
+                                            tier.max_cost
+                                        );
+
+                                const margin =
+                                    tier.margin === null ||
+                                    tier.margin === undefined
+                                        ? ""
+                                        : tier.margin;
+
+                                const active =
+                                    tier.active !== false;
+
+                                return `
+                                    <div
+                                        data-pricing-tier-index="${index}"
+                                        style="
+                                            display:grid;
+                                            grid-template-columns:
+                                                minmax(105px,1fr)
+                                                minmax(105px,1fr)
+                                                minmax(105px,1fr)
+                                                auto auto;
+                                            gap:8px;
+                                            align-items:end;
+                                            padding:10px;
+                                            border:1px solid #edf1f7;
+                                            border-radius:10px;
+                                            background:#f9fbfd;
+                                        "
+                                    >
+                                        <label style="min-width:0;">
+                                            <small
+                                                style="
+                                                    display:block;
+                                                    margin-bottom:5px;
+                                                    color:#8a93a5;
+                                                "
+                                            >
+                                                Modal Min.
+                                            </small>
+                                            <input
+                                                type="number"
+                                                class="digiflazz-tier-min"
+                                                min="0"
+                                                step="1"
+                                                value="${minCost}"
+                                                style="
+                                                    width:100%;
+                                                    box-sizing:border-box;
+                                                    border:1px solid #dfe4ec;
+                                                    border-radius:8px;
+                                                    padding:8px;
+                                                    background:#fff;
+                                                    font:inherit;
+                                                "
+                                            >
+                                        </label>
+
+                                        <label style="min-width:0;">
+                                            <small
+                                                style="
+                                                    display:block;
+                                                    margin-bottom:5px;
+                                                    color:#8a93a5;
+                                                "
+                                            >
+                                                Modal Maks.
+                                            </small>
+                                            <input
+                                                type="number"
+                                                class="digiflazz-tier-max"
+                                                min="0"
+                                                step="1"
+                                                value="${maxCost}"
+                                                placeholder="∞"
+                                                style="
+                                                    width:100%;
+                                                    box-sizing:border-box;
+                                                    border:1px solid #dfe4ec;
+                                                    border-radius:8px;
+                                                    padding:8px;
+                                                    background:#fff;
+                                                    font:inherit;
+                                                "
+                                            >
+                                        </label>
+
+                                        <label style="min-width:0;">
+                                            <small
+                                                style="
+                                                    display:block;
+                                                    margin-bottom:5px;
+                                                    color:#8a93a5;
+                                                "
+                                            >
+                                                Margin
+                                            </small>
+                                            <input
+                                                type="number"
+                                                class="digiflazz-tier-margin"
+                                                min="1"
+                                                step="1"
+                                                value="${escapeDigiflazzPricingHtml(margin)}"
+                                                placeholder="Rp"
+                                                style="
+                                                    width:100%;
+                                                    box-sizing:border-box;
+                                                    border:1px solid #dfe4ec;
+                                                    border-radius:8px;
+                                                    padding:8px;
+                                                    background:#fff;
+                                                    font:inherit;
+                                                "
+                                            >
+                                        </label>
+
+                                        <label
+                                            style="
+                                                display:flex;
+                                                align-items:center;
+                                                gap:5px;
+                                                min-height:36px;
+                                                font-size:11px;
+                                                color:#64748b;
+                                            "
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                class="digiflazz-tier-active"
+                                                ${active ? "checked" : ""}
+                                            >
+                                            Aktif
+                                        </label>
+
+                                        <button
+                                            type="button"
+                                            onclick="removeDigiflazzPricingTier(${index})"
+                                            style="
+                                                min-height:36px;
+                                                border:1px solid #fecaca;
+                                                border-radius:8px;
+                                                padding:7px 10px;
+                                                background:#fff;
+                                                color:#b42318;
+                                                cursor:pointer;
+                                            "
+                                        >
+                                            Hapus
+                                        </button>
+                                    </div>
+                                `;
+                            })
+                            .join("")
+                        : `
+                            <div
+                                style="
+                                    padding:10px;
+                                    border:1px dashed #dfe4ec;
+                                    border-radius:9px;
+                                    color:#8a93a5;
+                                    font-size:12px;
+                                "
+                            >
+                                Belum ada tier. Jika kosong,
+                                sistem memakai margin kategori,
+                                default, atau margin lama.
+                            </div>
+                        `;
+
+                return `
+                    <div
+                        style="
+                            padding:13px;
+                            border:1px solid #e5eaf2;
+                            border-radius:12px;
+                            background:#fff;
+                        "
+                    >
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                align-items:center;
+                                gap:10px;
+                                margin-bottom:10px;
+                            "
+                        >
+                            <div>
+                                <div
+                                    style="
+                                        font-size:13px;
+                                        font-weight:700;
+                                        color:#17213a;
+                                    "
+                                >
+                                    ${title}
+                                </div>
+
+                                <div
+                                    style="
+                                        margin-top:3px;
+                                        font-size:11px;
+                                        color:#8a93a5;
+                                    "
+                                >
+                                    ${indexedTiers.length}
+                                    rentang harga
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                data-add-pricing-tier="${escapeDigiflazzPricingHtml(serviceId)}"
+                                style="
+                                    border:1px solid #dbe7ff;
+                                    border-radius:8px;
+                                    padding:7px 10px;
+                                    background:#f4f8ff;
+                                    color:#1769ff;
+                                    font-size:11px;
+                                    font-weight:700;
+                                    cursor:pointer;
+                                "
+                            >
+                                + Tambah Rentang
+                            </button>
+                        </div>
+
+                        <div
+                            style="
+                                display:grid;
+                                gap:8px;
+                            "
+                        >
+                            ${rows}
+                        </div>
+                    </div>
+                `;
+            })
+            .join("");
+
+    container
+        .querySelectorAll(
+            "[data-add-pricing-tier]"
+        )
+        .forEach((button) => {
+            button.addEventListener(
+                "click",
+                () => {
+                    try {
+                        createDigiflazzTierDraft(
+                            button.getAttribute(
+                                "data-add-pricing-tier"
+                            )
+                        );
+                    } catch (error) {
+                        setDigiflazzPricingMessage(
+                            error.message,
+                            true
+                        );
+                    }
+                }
+            );
+        });
+}
+
+
+function collectDigiflazzPricingTiers() {
+    syncDigiflazzPricingTierInputs();
+
+    const result = [];
+
+    document
+        .querySelectorAll(
+            "[data-pricing-tier-index]"
+        )
+        .forEach((row) => {
+            const index =
+                Number(
+                    row.getAttribute(
+                        "data-pricing-tier-index"
+                    )
+                );
+
+            const original =
+                digiflazzPricingTiers[index];
+
+            if (!original) return;
+
+            const minRaw =
+                String(
+                    row.querySelector(
+                        ".digiflazz-tier-min"
+                    )?.value ?? ""
+                ).trim();
+
+            const maxRaw =
+                String(
+                    row.querySelector(
+                        ".digiflazz-tier-max"
+                    )?.value ?? ""
+                ).trim();
+
+            const marginRaw =
+                String(
+                    row.querySelector(
+                        ".digiflazz-tier-margin"
+                    )?.value ?? ""
+                ).trim();
+
+            const active =
+                row.querySelector(
+                    ".digiflazz-tier-active"
+                )?.checked === true;
+
+            if (
+                minRaw === "" ||
+                marginRaw === ""
+            ) {
+                throw new Error(
+                    `Tier ${getDigiflazzPricingCategoryTitle(
+                        original.service_id
+                    )} belum lengkap.`
+                );
+            }
+
+            const minCost = Number(minRaw);
+
+            const maxCost =
+                maxRaw === ""
+                    ? null
+                    : Number(maxRaw);
+
+            const margin = Number(marginRaw);
+
+            if (
+                !Number.isFinite(minCost) ||
+                minCost < 0
+            ) {
+                throw new Error(
+                    "Modal minimum tier tidak valid."
+                );
+            }
+
+            if (
+                maxCost !== null &&
+                (
+                    !Number.isFinite(maxCost) ||
+                    maxCost < minCost
+                )
+            ) {
+                throw new Error(
+                    "Modal maksimum tier tidak valid."
+                );
+            }
+
+            if (
+                !Number.isFinite(margin) ||
+                margin <= 0
+            ) {
+                throw new Error(
+                    "Margin tier harus lebih dari Rp0."
+                );
+            }
+
+            result.push({
+                service_id:
+                    String(
+                        original.service_id || ""
+                    ),
+                min_cost:
+                    Math.round(minCost),
+                max_cost:
+                    maxCost === null
+                        ? null
+                        : Math.round(maxCost),
+                margin:
+                    Math.round(margin),
+                active
+            });
+        });
+
+    const groups = new Map();
+
+    for (const tier of result) {
+        if (!tier.active) continue;
+
+        if (!groups.has(tier.service_id)) {
+            groups.set(tier.service_id, []);
+        }
+
+        groups
+            .get(tier.service_id)
+            .push(tier);
+    }
+
+    for (
+        const [serviceId, tiers]
+        of groups.entries()
+    ) {
+        tiers.sort(
+            (a, b) =>
+                a.min_cost - b.min_cost
+        );
+
+        for (
+            let i = 1;
+            i < tiers.length;
+            i++
+        ) {
+            const previous =
+                tiers[i - 1];
+
+            const current =
+                tiers[i];
+
+            if (
+                previous.max_cost === null ||
+                current.min_cost <=
+                    previous.max_cost
+            ) {
+                throw new Error(
+                    `Tier ${getDigiflazzPricingCategoryTitle(
+                        serviceId
+                    )} tumpang tindih.`
+                );
+            }
+        }
+    }
+
+    return result;
+}
+
+
 async function loadDigiflazzPricing() {
     const response =
         await fetch(
@@ -9344,6 +10249,30 @@ async function loadDigiflazzPricing() {
     renderDigiflazzCategoryMargins(
         data.categories || []
     );
+
+    digiflazzPricingTiers =
+        Array.isArray(data.tiers)
+            ? data.tiers.map((item) => ({
+                id: item.id ?? null,
+                service_id:
+                    String(item.service_id || ""),
+                min_cost:
+                    Number(item.min_cost || 0),
+                max_cost:
+                    item.max_cost === null ||
+                    item.max_cost === undefined
+                        ? null
+                        : Number(item.max_cost),
+                margin:
+                    Number(item.margin || 0),
+                active:
+                    item.active !== false,
+                sort_order:
+                    Number(item.sort_order || 0)
+            }))
+            : [];
+
+    renderDigiflazzPricingTiers();
 
     return data;
 }
@@ -9416,7 +10345,8 @@ function collectDigiflazzPricingPayload() {
             feeRaw === ""
                 ? 0
                 : Number(feeRaw),
-        categories
+        categories,
+        tiers: collectDigiflazzPricingTiers()
     };
 }
 

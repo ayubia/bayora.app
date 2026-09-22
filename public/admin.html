@@ -1662,6 +1662,63 @@ body.bayora-view-admins > main > .stats {
 
 }
 
+
+.admin-transaction-lookup-body {
+    padding:20px 22px 22px;
+}
+
+.admin-transaction-lookup-copy {
+    color:#777;
+    font-size:13px;
+    line-height:1.55;
+    margin-bottom:14px;
+}
+
+.admin-transaction-lookup-tools {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:10px;
+    align-items:stretch;
+}
+
+.admin-transaction-lookup-input {
+    width:100%;
+    min-width:0;
+    height:42px;
+    margin:0;
+}
+
+.admin-transaction-lookup-button {
+    min-height:42px;
+    white-space:nowrap;
+    padding-left:18px;
+    padding-right:18px;
+}
+
+.admin-transaction-lookup-message {
+    display:none;
+    margin-top:12px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#fff7f6;
+    font-size:12px;
+    line-height:1.45;
+}
+
+@media (max-width:700px) {
+    .admin-transaction-lookup-body {
+        padding:16px;
+    }
+
+    .admin-transaction-lookup-tools {
+        grid-template-columns:1fr;
+    }
+
+    .admin-transaction-lookup-button {
+        width:100%;
+    }
+}
+
 </style>
 
 
@@ -3277,6 +3334,50 @@ body.bayora-view-admins > main > .stats {
     </div>
 
 </div>
+
+
+<section class="panel" id="adminTransactionLookupPanel">
+
+    <div class="panel-header">
+        Cek Transaksi Pelanggan
+    </div>
+
+    <div class="admin-transaction-lookup-body">
+
+        <div class="admin-transaction-lookup-copy">
+            Masukkan kode transaksi BAYORA untuk melihat detail
+            transaksi dan referensi provider.
+        </div>
+
+        <div class="admin-transaction-lookup-tools">
+
+            <input
+                type="search"
+                id="adminTransactionLookupInput"
+                class="transaction-search admin-transaction-lookup-input"
+                placeholder="Cari kode PPOB, SMM, atau DIGITAL..."
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                class="refresh-button admin-transaction-lookup-button"
+                id="adminTransactionLookupButton"
+                onclick="lookupAdminTransaction()"
+            >
+                Cek Transaksi
+            </button>
+
+        </div>
+
+        <div
+            id="adminTransactionLookupMessage"
+            class="admin-transaction-lookup-message"
+        ></div>
+
+    </div>
+
+</section>
 
 
 <section class="panel">
@@ -7291,8 +7392,8 @@ body.bayora-view-admins > main > .stats {
 
             const url =
                 month
-                    ? `/api/transactions?month=${encodeURIComponent(month)}`
-                    : "/api/transactions";
+                    ? `/api/admin/transactions?month=${encodeURIComponent(month)}`
+                    : "/api/admin/transactions";
 
             const response =
                 await fetch(url);
@@ -7597,6 +7698,351 @@ async function updateStatus(transactionId, status) {
 }
 
 
+
+
+    function escapeAdminTransactionValue(value) {
+        return String(
+            value === null ||
+            value === undefined ||
+            value === ""
+                ? "-"
+                : value
+        )
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    function adminTransactionDetailRow(
+        label,
+        value,
+        options = {}
+    ) {
+        const safeLabel =
+            escapeAdminTransactionValue(label);
+
+        const safeValue =
+            escapeAdminTransactionValue(value);
+
+        const copyButton =
+            options.copy &&
+            value !== null &&
+            value !== undefined &&
+            String(value).trim()
+                ? `
+                    <button
+                        type="button"
+                        onclick='copyAdminProviderValue(${JSON.stringify(String(value))})'
+                        style="
+                            border:1px solid #ddd;
+                            background:white;
+                            border-radius:7px;
+                            padding:4px 7px;
+                            margin-left:7px;
+                            cursor:pointer;
+                            font-size:10px;
+                            font-weight:700;
+                        "
+                    >
+                        Salin
+                    </button>
+                `
+                : "";
+
+        return `
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:20px;
+                padding:13px 0;
+                border-bottom:1px solid #eee;
+            ">
+                <span style="
+                    color:#888;
+                    font-size:13px;
+                    flex:0 0 40%;
+                ">
+                    ${safeLabel}
+                </span>
+
+                <strong style="
+                    text-align:right;
+                    font-size:13px;
+                    word-break:break-word;
+                    flex:1;
+                ">
+                    ${safeValue}
+                    ${copyButton}
+                </strong>
+            </div>
+        `;
+    }
+
+
+    async function copyAdminProviderValue(value) {
+        try {
+            await navigator.clipboard.writeText(
+                String(value || "")
+            );
+        } catch {
+            const textarea =
+                document.createElement("textarea");
+
+            textarea.value =
+                String(value || "");
+
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+        }
+    }
+
+
+    function renderAdminTransactionLookup(item) {
+        const content =
+            document.getElementById(
+                "transactionDetailContent"
+            );
+
+        if (!content) {
+            return;
+        }
+
+        const type =
+            String(
+                item.type ||
+                item.transactionType ||
+                ""
+            ).toUpperCase();
+
+        const commonRows = [
+            ["Kode BAYORA", item.transactionId],
+            ["Jenis", type || "-"],
+            ["Pelanggan", item.customerName],
+            ["Email", item.customerEmail],
+            ["Produk", item.productName],
+            ["Tujuan / Target", item.target],
+            ["Harga", rupiah.format(Number(item.price || 0))],
+            ["Status BAYORA", item.status],
+            ["Status Pembayaran", item.paymentStatus],
+            ["Waktu", item.createdAt]
+        ];
+
+        let providerRows = [];
+        let providerTitle = "";
+
+        if (type === "SMM") {
+            providerTitle =
+                "Informasi Provider SMM";
+
+            providerRows = [
+                ["Provider", item.providerName],
+                [
+                    "ID Order Provider",
+                    item.providerOrderId,
+                    { copy: true }
+                ],
+                ["Platform", item.platform],
+                ["Kategori", item.category],
+                ["Quantity", item.quantity],
+                ["Submission", item.submissionStatus],
+                ["Start Count", item.startCount],
+                ["Remains", item.remains],
+                ["Pesan Provider", item.providerMessage]
+            ];
+        } else if (type === "PPOB") {
+            providerTitle =
+                "Informasi Provider PPOB";
+
+            providerRows = [
+                ["Provider", item.provider || "DIGIFLAZZ"],
+                [
+                    "Ref Digiflazz",
+                    item.digiflazzRef,
+                    { copy: true }
+                ],
+                ["Status Digiflazz", item.digiflazzStatus],
+                ["RC Digiflazz", item.digiflazzRc],
+                ["SN", item.digiflazzSn],
+                ["Pesan Provider", item.digiflazzMessage],
+                ["Reference BAYORA", item.reference],
+                ["Layanan", item.service],
+                ["Operator", item.operator]
+            ];
+        } else {
+            commonRows.splice(
+                commonRows.length - 1,
+                0,
+                ["Reference", item.reference],
+                ["Layanan", item.service],
+                ["Operator", item.operator],
+                ["Pembayaran", item.paymentMethod]
+            );
+        }
+
+        let html =
+            commonRows
+                .map(([label, value, options]) =>
+                    adminTransactionDetailRow(
+                        label,
+                        value,
+                        options
+                    )
+                )
+                .join("");
+
+        if (providerRows.length) {
+            html += `
+                <div style="
+                    margin-top:22px;
+                    padding:11px 13px;
+                    background:#f7f5f0;
+                    border-radius:10px;
+                    font-size:12px;
+                    font-weight:800;
+                    letter-spacing:.02em;
+                ">
+                    ${escapeAdminTransactionValue(
+                        providerTitle
+                    )}
+                </div>
+            `;
+
+            html +=
+                providerRows
+                    .map(([label, value, options]) =>
+                        adminTransactionDetailRow(
+                            label,
+                            value,
+                            options
+                        )
+                    )
+                    .join("");
+        }
+
+        content.innerHTML = html;
+    }
+
+
+    async function lookupAdminTransaction() {
+        const input =
+            document.getElementById(
+                "adminTransactionLookupInput"
+            );
+
+        const button =
+            document.getElementById(
+                "adminTransactionLookupButton"
+            );
+
+        const message =
+            document.getElementById(
+                "adminTransactionLookupMessage"
+            );
+
+        const transactionId =
+            String(input?.value || "").trim();
+
+        if (!transactionId) {
+            if (message) {
+                message.style.display = "block";
+                message.style.color = "#b42318";
+                message.textContent =
+                    "Masukkan kode transaksi BAYORA.";
+            }
+
+            input?.focus();
+            return;
+        }
+
+        if (message) {
+            message.style.display = "none";
+            message.textContent = "";
+        }
+
+        const originalText =
+            button?.textContent || "Cek Transaksi";
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Mencari...";
+        }
+
+        try {
+            const response =
+                await fetch(
+                    `/api/admin/transaction-lookup?id=${encodeURIComponent(transactionId)}`
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error ||
+                    "Transaksi tidak ditemukan."
+                );
+            }
+
+            const item =
+                data.transaction;
+
+            if (!item) {
+                throw new Error(
+                    "Data transaksi tidak ditemukan."
+                );
+            }
+
+            const modal =
+                document.getElementById(
+                    "transactionModal"
+                );
+
+            window.currentTransactionForReceipt =
+                item;
+
+            if (modal) {
+                modal.style.display = "flex";
+            }
+
+            renderAdminTransactionLookup(item);
+
+        } catch (error) {
+            if (message) {
+                message.style.display = "block";
+                message.style.color = "#b42318";
+                message.textContent =
+                    error?.message ||
+                    "Gagal mencari transaksi.";
+            }
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent =
+                    originalText;
+            }
+        }
+    }
+
+
+    document
+        .getElementById(
+            "adminTransactionLookupInput"
+        )
+        ?.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    lookupAdminTransaction();
+                }
+            }
+        );
 
 
     async function showTransactionDetail(transactionId) {

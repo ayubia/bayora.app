@@ -2869,6 +2869,493 @@ export default {
 
 
   // ==========================================================
+  // ADMIN TRANSACTIONS LIST
+  // PPOB + DIGITAL + SMM
+  // ADMIN ONLY / READ ONLY
+  // ==========================================================
+
+  if (
+    request.method === "GET" &&
+    url.pathname === "/api/admin/transactions"
+  ) {
+    try {
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Admin belum login."
+        }, 401);
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const admin =
+        await env.ppobku_db.prepare(`
+          SELECT
+            s.id AS sessionId,
+            s.expires_at AS expiresAt,
+            a.id AS adminId,
+            a.role,
+            a.active
+          FROM admin_sessions s
+          INNER JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `)
+          .bind(sessionHash)
+          .first();
+
+      if (
+        !admin ||
+        Number(admin.active) !== 1 ||
+        !["owner", "admin"].includes(
+          String(admin.role || "").toLowerCase()
+        )
+      ) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Tidak memiliki akses."
+        }, 401);
+      }
+
+      const expiresAt =
+        Date.parse(
+          String(admin.expiresAt || "")
+        );
+
+      if (
+        !Number.isFinite(expiresAt) ||
+        expiresAt <= Date.now()
+      ) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Sesi admin telah berakhir."
+        }, 401);
+      }
+
+      const month =
+        String(
+          url.searchParams.get("month") || ""
+        ).trim();
+
+      let startDate = null;
+      let endDate = null;
+
+      if (month) {
+        const matchMonth =
+          month.match(/^(\d{4})-(\d{2})$/);
+
+        if (!matchMonth) {
+          return json({
+            success: false,
+            error: "Periode transaksi tidak valid."
+          }, 400);
+        }
+
+        const year =
+          Number(matchMonth[1]);
+
+        const monthNumber =
+          Number(matchMonth[2]);
+
+        if (
+          !Number.isInteger(year) ||
+          !Number.isInteger(monthNumber) ||
+          monthNumber < 1 ||
+          monthNumber > 12
+        ) {
+          return json({
+            success: false,
+            error: "Periode transaksi tidak valid."
+          }, 400);
+        }
+
+        startDate =
+          `${String(year).padStart(4, "0")}-${String(monthNumber).padStart(2, "0")}-01`;
+
+        const nextYear =
+          monthNumber === 12
+            ? year + 1
+            : year;
+
+        const nextMonth =
+          monthNumber === 12
+            ? 1
+            : monthNumber + 1;
+
+        endDate =
+          `${String(nextYear).padStart(4, "0")}-${String(nextMonth).padStart(2, "0")}-01`;
+      }
+
+      const transactionSql = `
+        SELECT
+          t.id,
+          t.transaction_id AS transactionId,
+          t.reference,
+          t.service,
+          t.target,
+          t.operator,
+          t.product_id AS productId,
+          t.product_name AS productName,
+          t.price,
+          t.payment_method AS paymentMethod,
+          t.status,
+          t.payment_status AS paymentStatus,
+          t.created_at AS createdAt,
+          CASE
+            WHEN LOWER(
+              COALESCE(p.product_type, '')
+            ) = 'digital'
+              OR UPPER(
+                COALESCE(t.transaction_id, '')
+              ) LIKE 'DIGITAL-%'
+            THEN 'DIGITAL'
+            ELSE 'PPOB'
+          END AS transactionType
+        FROM transactions t
+        LEFT JOIN products p
+          ON p.id = t.product_id
+        ${
+          startDate && endDate
+            ? "WHERE t.created_at >= ? AND t.created_at < ?"
+            : ""
+        }
+        ORDER BY t.id DESC
+      `;
+
+      const transactionStatement =
+        env.ppobku_db.prepare(
+          transactionSql
+        );
+
+      const transactionResult =
+        startDate && endDate
+          ? await transactionStatement
+              .bind(startDate, endDate)
+              .all()
+          : await transactionStatement.all();
+
+      const smmSql = `
+        SELECT
+          o.id,
+          o.order_id AS transactionId,
+          o.order_id AS reference,
+          s.category AS service,
+          o.target,
+          s.platform AS operator,
+          CAST(o.service_id AS TEXT) AS productId,
+          s.name AS productName,
+          o.price,
+          '' AS paymentMethod,
+          o.status,
+          o.payment_status AS paymentStatus,
+          o.created_at AS createdAt,
+          'SMM' AS transactionType,
+          o.quantity,
+          s.platform,
+          s.category AS smmCategory
+        FROM smm_orders o
+        LEFT JOIN smm_services s
+          ON s.id = o.service_id
+        ${
+          startDate && endDate
+            ? "WHERE o.created_at >= ? AND o.created_at < ?"
+            : ""
+        }
+        ORDER BY o.id DESC
+      `;
+
+      const smmStatement =
+        env.ppobku_db.prepare(
+          smmSql
+        );
+
+      const smmResult =
+        startDate && endDate
+          ? await smmStatement
+              .bind(startDate, endDate)
+              .all()
+          : await smmStatement.all();
+
+      const transactions = [
+        ...(transactionResult.results || []),
+        ...(smmResult.results || [])
+      ].sort((a, b) => {
+        const aTime =
+          Date.parse(a.createdAt || "") || 0;
+
+        const bTime =
+          Date.parse(b.createdAt || "") || 0;
+
+        return bTime - aTime;
+      });
+
+      return json({
+        success: true,
+        count: transactions.length,
+        transactions
+      });
+
+    } catch (error) {
+      console.error(
+        "[ADMIN TRANSACTIONS LIST]",
+        error?.message || String(error)
+      );
+
+      return json({
+        success: false,
+        error:
+          "Gagal mengambil transaksi admin."
+      }, 500);
+    }
+  }
+
+
+  // ==========================================================
+  // ADMIN TRANSACTION LOOKUP
+  // BAYORA ID -> INTERNAL PROVIDER REFERENCE
+  // READ ONLY / NEVER CREATES PROVIDER ORDERS
+  // ==========================================================
+
+  if (
+    request.method === "GET" &&
+    url.pathname === "/api/admin/transaction-lookup"
+  ) {
+    try {
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Admin belum login."
+        }, 401);
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const session =
+        await env.ppobku_db.prepare(`
+          SELECT
+            s.id AS sessionId,
+            s.expires_at AS expiresAt,
+            a.id AS adminId,
+            a.active
+          FROM admin_sessions s
+          INNER JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `)
+          .bind(sessionHash)
+          .first();
+
+      if (
+        !session ||
+        Number(session.active) !== 1
+      ) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Sesi admin tidak valid."
+        }, 401);
+      }
+
+      const expiresAt =
+        Date.parse(
+          String(session.expiresAt || "")
+        );
+
+      if (
+        !Number.isFinite(expiresAt) ||
+        expiresAt <= Date.now()
+      ) {
+        return json({
+          success: false,
+          authenticated: false,
+          error: "Sesi admin telah berakhir."
+        }, 401);
+      }
+
+      const transactionId =
+        String(
+          url.searchParams.get("id") || ""
+        ).trim();
+
+      if (
+        !transactionId ||
+        transactionId.length > 160
+      ) {
+        return json({
+          success: false,
+          error:
+            "Kode transaksi BAYORA tidak valid."
+        }, 400);
+      }
+
+      const smmOrder =
+        await env.ppobku_db.prepare(`
+          SELECT
+            o.id,
+            o.order_id AS transactionId,
+            o.user_id AS userId,
+            u.name AS customerName,
+            u.email AS customerEmail,
+            s.platform,
+            s.category,
+            s.name AS productName,
+            o.target,
+            o.quantity,
+            o.price,
+            o.status,
+            o.payment_status AS paymentStatus,
+            o.submission_status AS submissionStatus,
+            o.provider_order_id AS providerOrderId,
+            o.start_count AS startCount,
+            o.remains,
+            o.provider_message AS providerMessage,
+            p.name AS providerName,
+            o.created_at AS createdAt,
+            o.updated_at AS updatedAt
+          FROM smm_orders o
+          INNER JOIN smm_services s
+            ON s.id = o.service_id
+          INNER JOIN smm_providers p
+            ON p.id = s.provider_id
+          LEFT JOIN users u
+            ON u.id = o.user_id
+          WHERE o.order_id = ?
+          LIMIT 1
+        `)
+          .bind(transactionId)
+          .first();
+
+      if (smmOrder) {
+        return json({
+          success: true,
+          transaction: {
+            type: "SMM",
+            ...smmOrder
+          }
+        });
+      }
+
+      const transaction =
+        await env.ppobku_db.prepare(`
+          SELECT
+            t.id,
+            t.transaction_id AS transactionId,
+            t.user_id AS userId,
+            u.name AS customerName,
+            u.email AS customerEmail,
+            t.reference,
+            t.service,
+            t.target,
+            t.operator,
+            t.product_id AS productId,
+            t.product_name AS productName,
+            t.price,
+            t.payment_method AS paymentMethod,
+            t.status,
+            t.payment_status AS paymentStatus,
+            t.provider,
+            t.digiflazz_status AS digiflazzStatus,
+            t.digiflazz_ref AS digiflazzRef,
+            t.digiflazz_rc AS digiflazzRc,
+            t.digiflazz_message AS digiflazzMessage,
+            t.digiflazz_sn AS digiflazzSn,
+            t.created_at AS createdAt,
+            CASE
+              WHEN LOWER(
+                COALESCE(p.product_type, '')
+              ) = 'digital'
+                OR UPPER(
+                  COALESCE(t.transaction_id, '')
+                ) LIKE 'DIGITAL-%'
+              THEN 'DIGITAL'
+              ELSE 'PPOB'
+            END AS transactionType
+          FROM transactions t
+          LEFT JOIN products p
+            ON p.id = t.product_id
+          LEFT JOIN users u
+            ON u.id = t.user_id
+          WHERE t.transaction_id = ?
+          LIMIT 1
+        `)
+          .bind(transactionId)
+          .first();
+
+      if (!transaction) {
+        return json({
+          success: false,
+          error:
+            "Transaksi dengan kode BAYORA tersebut tidak ditemukan."
+        }, 404);
+      }
+
+      return json({
+        success: true,
+        transaction: {
+          type:
+            transaction.transactionType,
+          ...transaction
+        }
+      });
+
+    } catch (error) {
+      console.error(
+        "[ADMIN TRANSACTION LOOKUP]",
+        error?.message || String(error)
+      );
+
+      return json({
+        success: false,
+        error:
+          "Gagal mencari transaksi."
+      }, 500);
+    }
+  }
+
+
+  // ==========================================================
   // ACCOUNT TRANSACTION HISTORY
   // ==========================================================
 

@@ -255,6 +255,17 @@ window.showAllDigitalProducts = false;
 
 let selectedDigitalProducts = [];
 
+/*
+ * Produk yang benar-benar akan dipakai pada checkout.
+ *
+ * null  = checkout menggunakan isi keranjang.
+ * array = checkout sementara, misalnya "Beli Sekarang".
+ *
+ * Keranjang persistent tetap disimpan terpisah
+ * di selectedDigitalProducts + localStorage.
+ */
+let digitalCheckoutProducts = null;
+
 let digitalCustomerEmail = "";
 let digitalCustomerWhatsapp = "";
 let selectedDigitalDevice = "";
@@ -481,6 +492,13 @@ async function loadCustomerCatalog() {
                 id: product.id,
                 name: product.name,
                 price: Number(product.price) || 0,
+                originalPrice: Number(product.original_price) || 0,
+                shortDescription: product.short_description || "",
+                presetCount: Number(product.preset_count) || 0,
+                fileFormat: product.file_format || "",
+                mobileCompatible: Number(product.mobile_compatible) === 1,
+                desktopCompatible: Number(product.desktop_compatible) === 1,
+                badge: product.badge || "",
                 mood: product.mood || "",
                 info: product.info || "",
                 operator: product.operator || "",
@@ -2736,11 +2754,20 @@ currentService = serviceId;
     /*
      * Reset state digital setiap kali layanan dibuka.
      */
-    selectedDigitalProducts = [];
+    /*
+     * Keranjang digital dipertahankan di localStorage.
+     * Data kontak dan device tetap direset untuk checkout baru.
+     */
     digitalCustomerEmail = "";
     digitalCustomerWhatsapp = "";
     selectedDigitalDevice = "";
     window.showAllDigitalProducts = false;
+
+    if (
+        typeof syncDigitalCartFromStorage === "function"
+    ) {
+        syncDigitalCartFromStorage();
+    }
 
     document
         .getElementById("homePage")
@@ -3472,6 +3499,246 @@ function formatDigitalProductPrice(price) {
 }
 
 
+function getDigitalCartStorageKey() {
+    return "bayora_digital_cart";
+}
+
+
+function getDigitalCartDeviceStorageKey() {
+    return "bayora_digital_cart_device";
+}
+
+
+function loadDigitalCartDevice() {
+
+    try {
+
+        return (
+            localStorage.getItem(
+                getDigitalCartDeviceStorageKey()
+            ) || ""
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "[DIGITAL CART] Gagal membaca perangkat:",
+            error
+        );
+
+        return "";
+
+    }
+
+}
+
+
+function saveDigitalCartDevice(device) {
+
+    try {
+
+        if (device) {
+
+            localStorage.setItem(
+                getDigitalCartDeviceStorageKey(),
+                device
+            );
+
+        } else {
+
+            localStorage.removeItem(
+                getDigitalCartDeviceStorageKey()
+            );
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "[DIGITAL CART] Gagal menyimpan perangkat:",
+            error
+        );
+
+    }
+
+}
+
+
+function loadDigitalCart() {
+
+    try {
+
+        const stored =
+            JSON.parse(
+                localStorage.getItem(
+                    getDigitalCartStorageKey()
+                ) || "[]"
+            );
+
+        if (!Array.isArray(stored)) {
+            return [];
+        }
+
+        const available =
+            getDigitalProducts();
+
+        return stored
+            .map(id =>
+                available.find(
+                    product =>
+                        String(product.id) ===
+                        String(id)
+                )
+            )
+            .filter(Boolean);
+
+    } catch (error) {
+
+        console.warn(
+            "[DIGITAL CART] Gagal membaca keranjang:",
+            error
+        );
+
+        return [];
+    }
+
+}
+
+
+function saveDigitalCart() {
+
+    try {
+
+        localStorage.setItem(
+            getDigitalCartStorageKey(),
+            JSON.stringify(
+                selectedDigitalProducts.map(
+                    product => product.id
+                )
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "[DIGITAL CART] Gagal menyimpan keranjang:",
+            error
+        );
+
+    }
+
+}
+
+
+function syncDigitalCartFromStorage() {
+
+    selectedDigitalProducts =
+        loadDigitalCart();
+
+    /*
+     * Saat kembali/membuka katalog,
+     * checkout sementara sebelumnya dibatalkan.
+     */
+    digitalCheckoutProducts = null;
+
+    updateDigitalCartButton();
+
+}
+
+
+function updateDigitalCartButton() {
+
+    const button =
+        document.getElementById(
+            "digitalCartButton"
+        );
+
+    if (!button) {
+        return;
+    }
+
+    const count =
+        selectedDigitalProducts.length;
+
+    button.innerHTML = `
+        <span class="digital-cart-icon">🛒</span>
+        <span>Keranjang</span>
+        <strong>${count}</strong>
+    `;
+
+    button.setAttribute(
+        "aria-label",
+        `Keranjang, ${count} produk`
+    );
+
+}
+
+
+function addDigitalProductToCart(product) {
+
+    const exists =
+        selectedDigitalProducts.some(
+            item =>
+                String(item.id) ===
+                String(product.id)
+        );
+
+    if (!exists) {
+        selectedDigitalProducts.push(product);
+    }
+
+    saveDigitalCart();
+    updateDigitalSelection();
+    updateDigitalCartButton();
+
+}
+
+
+function removeDigitalProductFromCart(productId) {
+
+    selectedDigitalProducts =
+        selectedDigitalProducts.filter(
+            product =>
+                String(product.id) !==
+                String(productId)
+        );
+
+    saveDigitalCart();
+
+    if (!selectedDigitalProducts.length) {
+        saveDigitalCartDevice("");
+    }
+
+    updateDigitalSelection();
+    updateDigitalCartButton();
+    renderDigitalProducts();
+
+}
+
+
+function getDigitalDiscount(product) {
+
+    const original =
+        Number(product.originalPrice) || 0;
+
+    const current =
+        Number(product.price) || 0;
+
+    if (
+        original <= current ||
+        original <= 0 ||
+        current < 0
+    ) {
+        return 0;
+    }
+
+    return Math.round(
+        ((original - current) / original) * 100
+    );
+
+}
+
+
 function renderDigitalProducts() {
 
     const grid =
@@ -3497,633 +3764,562 @@ function renderDigitalProducts() {
         `;
 
         updateDigitalSelection();
-
+        updateDigitalCartButton();
         return;
     }
 
-
-    /*
-     * Semua produk digital ditampilkan.
-     *
-     * CSS mengatur 2 kolom.
-     * Produk ke-7, 8, 9, dan seterusnya
-     * otomatis turun ke baris berikutnya.
-     */
     allDigitalProducts.forEach(product => {
-
-        const selected =
-            selectedDigitalProducts.some(
-                item => item.id === product.id
-            );
-
 
         const card =
             document.createElement("article");
 
-
         card.className =
-            "digital-product-card" +
-            (
-                selected
-                    ? " selected"
-                    : ""
+            "digital-product-card digital-marketplace-card";
+
+        const preview =
+            product.previewImage ||
+            product.afterImage ||
+            product.beforeImage ||
+            "";
+
+        const badge =
+            String(product.badge || "").trim();
+
+        const mood =
+            String(
+                product.mood ||
+                product.shortDescription ||
+                "Lightroom Preset"
+            ).trim();
+
+        const originalPrice =
+            Number(product.originalPrice) || 0;
+
+        const price =
+            Number(product.price) || 0;
+
+        const discount =
+            getDigitalDiscount(product);
+
+        const inCart =
+            selectedDigitalProducts.some(
+                item =>
+                    String(item.id) ===
+                    String(product.id)
             );
-
-
-        /*
-         * FOTO PRODUK
-         *
-         * Prioritas:
-         * 1. Before + After
-         * 2. Preview image
-         * 3. Placeholder
-         */
-
-        const beforeImage =
-            product.beforeImage || "";
-
-        const afterImage =
-            product.afterImage || "";
-
-        const hasBeforeAfter =
-            beforeImage &&
-            afterImage;
-
-
-        const image =
-            hasBeforeAfter
-                ? `
-                    <div
-                        class="digital-product-image digital-before-after"
-                    >
-
-                        <div
-                            class="digital-before-after-track"
-                        >
-
-                            <img
-                                class="
-                                    digital-before-after-image
-                                    digital-before-image
-                                "
-                                src="${beforeImage}"
-                                alt="${product.name} Before"
-                                loading="lazy"
-                            >
-
-                            <img
-                                class="
-                                    digital-before-after-image
-                                    digital-after-image
-                                "
-                                src="${afterImage}"
-                                alt="${product.name} After"
-                                loading="lazy"
-                            >
-
-                        </div>
-
-                        <div
-                            class="digital-before-after-divider"
-                        ></div>
-
-                        <span
-                            class="
-                                digital-before-after-label
-                                digital-before-label
-                            "
-                        >
-                            BEFORE
-                        </span>
-
-                        <span
-                            class="
-                                digital-before-after-label
-                                digital-after-label
-                            "
-                        >
-                            AFTER
-                        </span>
-
-                        <input
-                            class="
-                                digital-before-after-range
-                            "
-                            type="range"
-                            min="0"
-                            max="100"
-                            value="50"
-                            aria-label="Geser Before After"
-                        >
-
-                    </div>
-                `
-                : product.previewImage
-                    ? `
-                        <div class="digital-product-image">
-
-                            <img
-                                src="${product.previewImage}"
-                                alt="${product.name}"
-                                loading="lazy"
-                            >
-
-                        </div>
-                    `
-                    : `
-                        <div
-                            class="
-                                digital-product-image
-                                digital-product-image-empty
-                            "
-                        >
-                            <span>PRESET</span>
-                        </div>
-                    `;
-
-
-        /*
-         * CARD DIGITAL
-         */
 
         card.innerHTML = `
 
-            ${image}
+            <button
+                type="button"
+                class="digital-marketplace-image-button"
+                aria-label="Lihat detail ${product.name}"
+            >
+                <div class="digital-marketplace-image">
 
+                    ${
+                        preview
+                            ? `
+                                <img
+                                    src="${preview}"
+                                    alt="${product.name}"
+                                    loading="lazy"
+                                >
+                            `
+                            : `
+                                <div class="digital-marketplace-placeholder">
+                                    PRESET
+                                </div>
+                            `
+                    }
+
+                    ${
+                        badge
+                            ? `
+                                <span class="digital-marketplace-badge">
+                                    ${badge}
+                                </span>
+                            `
+                            : ""
+                    }
+
+                    ${
+                        inCart
+                            ? `
+                                <span class="digital-marketplace-in-cart">
+                                    ✓ Di keranjang
+                                </span>
+                            `
+                            : ""
+                    }
+
+                </div>
+            </button>
 
             <div class="digital-product-card-body">
 
-
-                <div class="digital-product-card-top">
-
-                    <div>
-
-
-                        <h4>
-                            ${product.name}
-                        </h4>
-
-                    </div>
-
-
-                    <strong>
-                        ${formatDigitalProductPrice(product.price)}
-                    </strong>
-
-                </div>
-
-
-                <p class="digital-product-info">
-                    ${
-                        product.mood ||
-                        "Preset Lightroom"
-                    }
+                <p class="digital-marketplace-mood">
+                    ${mood}
                 </p>
 
+                <h4 class="digital-marketplace-name">
+                    ${product.name}
+                </h4>
 
-                <div class="digital-product-actions">
+                <div class="digital-marketplace-price">
 
-                    <button
-                        type="button"
-                        class="digital-detail-button"
-                    >
-                        Lihat Detail
-                    </button>
+                    <strong>
+                        ${formatDigitalProductPrice(price)}
+                    </strong>
 
+                    ${
+                        originalPrice > price
+                            ? `
+                                <span class="digital-marketplace-original-price">
+                                    ${formatDigitalProductPrice(originalPrice)}
+                                </span>
+                            `
+                            : ""
+                    }
 
-                    <button
-                        type="button"
-                        class="digital-pick-button"
-                    >
-                        ${
-                            selected
-                                ? "✓ Dipilih"
-                                : "Pilih"
-                        }
-                    </button>
+                    ${
+                        discount > 0
+                            ? `
+                                <span class="digital-marketplace-discount">
+                                    ${discount}% OFF
+                                </span>
+                            `
+                            : ""
+                    }
 
                 </div>
 
+                <button
+                    type="button"
+                    class="digital-detail-button digital-marketplace-detail"
+                >
+                    Lihat Detail
+                </button>
 
             </div>
-
         `;
 
-
-        /*
-         * DETAIL
-         */
-
-        const detailButton =
-            card.querySelector(
-                ".digital-detail-button"
-            );
-
-
-        if (detailButton) {
-
-            detailButton.addEventListener(
+        card
+            .querySelector(
+                ".digital-marketplace-image-button"
+            )
+            ?.addEventListener(
                 "click",
-                event => {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    openDigitalProductDetail(product);
-
-                }
+                () =>
+                    openDigitalProductDetail(product)
             );
 
-        }
-
-
-        /*
-         * PILIH PRODUK
-         */
-
-        const pickButton =
-            card.querySelector(
-                ".digital-pick-button"
+        card
+            .querySelector(
+                ".digital-marketplace-detail"
+            )
+            ?.addEventListener(
+                "click",
+                () =>
+                    openDigitalProductDetail(product)
             );
-
-
-        if (pickButton) {
-
-            pickButton.onclick = event => {
-
-                event.stopPropagation();
-
-                toggleDigitalProduct(
-                    product
-                );
-
-            };
-
-        }
-
 
         grid.appendChild(card);
 
     });
 
-
-    /*
-     * Update jumlah + total harga
-     */
-
     updateDigitalSelection();
+    updateDigitalCartButton();
+
+}
+
+function getDigitalActiveCheckoutProducts() {
+
+    return (
+        Array.isArray(digitalCheckoutProducts)
+        && digitalCheckoutProducts.length
+            ? digitalCheckoutProducts
+            : selectedDigitalProducts
+    );
 
 }
 
 
+function renderDigitalPurchaseSummary() {
 
-
-
-function setupDigitalBeforeAfterSliders() {
-
-    const sliders =
-        document.querySelectorAll(
-            ".digital-before-after"
+    const container =
+        document.getElementById(
+            "digitalPurchaseSummary"
         );
 
-    sliders.forEach(slider => {
+    if (!container) {
+        return;
+    }
 
-        const range =
-            slider.querySelector(
-                ".digital-before-after-range"
-            );
+    const list =
+        getDigitalActiveCheckoutProducts();
 
-        const afterImage =
-            slider.querySelector(
-                ".digital-after-image"
-            );
+    const total =
+        list.reduce(
+            (sum, product) =>
+                sum +
+                (Number(product.price) || 0),
+            0
+        );
 
-        const divider =
-            slider.querySelector(
-                ".digital-before-after-divider"
-            );
+    container.innerHTML = `
+        <div>
+            <span>
+                ${list.length} preset
+            </span>
 
-        if (!range || !afterImage) {
-            return;
+            <strong>
+                ${formatDigitalProductPrice(total)}
+            </strong>
+        </div>
+
+        ${
+            selectedDigitalDevice
+                ? `
+                    <small>
+                        Perangkat:
+                        ${selectedDigitalDevice}
+                    </small>
+                `
+                : ""
         }
-
-
-        /*
-         * Hindari listener ganda ketika katalog
-         * dirender ulang.
-         */
-        if (
-            slider.dataset.beforeAfterReady ===
-            "true"
-        ) {
-            return;
-        }
-
-        slider.dataset.beforeAfterReady =
-            "true";
-
-
-        /*
-         * Update foto + posisi divider.
-         *
-         * 0%   = BEFORE penuh
-         * 50%  = BEFORE + AFTER
-         * 100% = AFTER penuh
-         */
-        function updateSlider(value) {
-
-            const percentage =
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        Number(value) || 0
-                    )
-                );
-
-
-            const clipValue =
-                `inset(0 ${100 - percentage}% 0 0)`;
-
-
-            afterImage.style.setProperty(
-                "clip-path",
-                clipValue,
-                "important"
-            );
-
-            afterImage.style.setProperty(
-                "-webkit-clip-path",
-                clipValue,
-                "important"
-            );
-
-
-            if (divider) {
-
-                divider.style.left =
-                    percentage + "%";
-
-            }
-
-
-            slider.style.setProperty(
-                "--before-after-position",
-                percentage + "%"
-            );
-
-
-            range.value =
-                percentage;
-
-        }
-
-
-        function updatePosition(clientX) {
-
-            const rect =
-                slider.getBoundingClientRect();
-
-            if (!rect.width) {
-                return;
-            }
-
-
-            const percentage =
-                (
-                    (clientX - rect.left) /
-                    rect.width
-                ) * 100;
-
-
-            updateSlider(
-                percentage
-            );
-
-        }
-
-
-        /*
-         * Posisi awal.
-         */
-        updateSlider(
-            Number(range.value || 50)
-        );
-
-
-        /*
-         * Tetap mendukung input range.
-         */
-        range.addEventListener(
-            "input",
-            function () {
-
-                updateSlider(
-                    this.value
-                );
-
-            }
-        );
-
-
-        /*
-         * =====================================================
-         * DESKTOP — HOVER LANGSUNG
-         *
-         * Mouse tidak perlu klik.
-         * Posisi slider mengikuti cursor selama
-         * cursor berada di atas gambar.
-         * =====================================================
-         */
-        slider.addEventListener(
-            "pointerenter",
-            event => {
-
-                if (
-                    event.pointerType ===
-                    "mouse"
-                ) {
-
-                    updatePosition(
-                        event.clientX
-                    );
-
-                }
-
-            }
-        );
-
-
-        slider.addEventListener(
-            "pointermove",
-            event => {
-
-                /*
-                 * Mouse:
-                 * langsung mengikuti cursor.
-                 */
-                if (
-                    event.pointerType ===
-                    "mouse"
-                ) {
-
-                    updatePosition(
-                        event.clientX
-                    );
-
-                    return;
-                }
-
-
-                /*
-                 * Touch / stylus:
-                 * tetap menggunakan drag/swipe.
-                 */
-                if (!dragging) {
-                    return;
-                }
-
-
-                updatePosition(
-                    event.clientX
-                );
-
-
-                event.preventDefault();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        /*
-         * =====================================================
-         * MOBILE / TABLET — DRAG / SWIPE
-         * =====================================================
-         */
-        let dragging = false;
-
-
-        slider.addEventListener(
-            "pointerdown",
-            event => {
-
-                /*
-                 * Mouse tidak membutuhkan
-                 * mode dragging karena hover
-                 * sudah aktif.
-                 */
-                if (
-                    event.pointerType ===
-                    "mouse"
-                ) {
-
-                    updatePosition(
-                        event.clientX
-                    );
-
-                    return;
-
-                }
-
-
-                dragging = true;
-
-
-                slider.setPointerCapture?.(
-                    event.pointerId
-                );
-
-
-                updatePosition(
-                    event.clientX
-                );
-
-
-                event.preventDefault();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        function stopDragging(event) {
-
-            if (!dragging) {
-                return;
-            }
-
-
-            dragging = false;
-
-
-            try {
-
-                slider.releasePointerCapture?.(
-                    event.pointerId
-                );
-
-            } catch (error) {
-                /* aman diabaikan */
-            }
-
-        }
-
-
-        slider.addEventListener(
-            "pointerup",
-            stopDragging
-        );
-
-
-        slider.addEventListener(
-            "pointercancel",
-            stopDragging
-        );
-
-
-        slider.addEventListener(
-            "lostpointercapture",
-            () => {
-
-                dragging = false;
-
-            }
-        );
-
-    });
+    `;
 
 }
 
 
-function toggleDigitalProduct(product) {
+function openDigitalPurchaseInfo(options = {}) {
 
-    const index =
-        selectedDigitalProducts.findIndex(
-            item => item.id === product.id
+    const modal =
+        document.getElementById(
+            "digitalPurchaseInfoModal"
         );
 
+    if (!modal) {
+        return;
+    }
 
-    if (index >= 0) {
+    const requireDevice =
+        Boolean(options.requireDevice);
 
-        selectedDigitalProducts.splice(
-            index,
-            1
+    const deviceSection =
+        document.getElementById(
+            "digitalPurchaseDeviceSection"
         );
 
-    } else {
+    if (deviceSection) {
 
-        selectedDigitalProducts.push(
-            product
-        );
+        deviceSection.hidden =
+            !requireDevice;
 
     }
 
+    setupDigitalDeviceOptions();
+    updateDigitalDeviceUI();
+    renderDigitalPurchaseSummary();
 
+    modal.classList.remove(
+        "page-hidden"
+    );
+
+    modal.classList.add(
+        "digital-purchase-open"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+function closeDigitalPurchaseInfo() {
+
+    const modal =
+        document.getElementById(
+            "digitalPurchaseInfoModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove(
+        "digital-purchase-open"
+    );
+
+    modal.classList.add(
+        "page-hidden"
+    );
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+function renderDigitalCart() {
+
+    const body =
+        document.getElementById(
+            "digitalCartBody"
+        );
+
+    const totalElement =
+        document.getElementById(
+            "digitalCartTotal"
+        );
+
+    const checkoutButton =
+        document.getElementById(
+            "digitalCartCheckoutButton"
+        );
+
+    if (!body) {
+        return;
+    }
+
+    if (!selectedDigitalProducts.length) {
+
+        body.innerHTML = `
+            <div class="digital-cart-empty">
+                <div class="digital-cart-empty-icon">
+                    🛒
+                </div>
+
+                <strong>
+                    Keranjang masih kosong
+                </strong>
+
+                <p>
+                    Pilih preset melalui halaman detail produk.
+                </p>
+            </div>
+        `;
+
+        if (totalElement) {
+            totalElement.textContent =
+                formatDigitalProductPrice(0);
+        }
+
+        if (checkoutButton) {
+            checkoutButton.disabled = true;
+        }
+
+        return;
+    }
+
+    body.innerHTML =
+        selectedDigitalProducts
+            .map(product => {
+
+                const image =
+                    product.previewImage ||
+                    product.afterImage ||
+                    product.beforeImage ||
+                    "";
+
+                return `
+                    <article class="digital-cart-item">
+
+                        <div class="digital-cart-item-image">
+
+                            ${
+                                image
+                                    ? `
+                                        <img
+                                            src="${image}"
+                                            alt="${product.name}"
+                                        >
+                                    `
+                                    : `
+                                        <span>PRESET</span>
+                                    `
+                            }
+
+                        </div>
+
+                        <div class="digital-cart-item-info">
+
+                            <span class="digital-cart-item-type">
+                                Lightroom Preset
+                            </span>
+
+                            <strong>
+                                ${product.name}
+                            </strong>
+
+                            <span class="digital-cart-item-price">
+                                ${formatDigitalProductPrice(
+                                    product.price
+                                )}
+                            </span>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="digital-cart-remove"
+                            data-product-id="${product.id}"
+                            aria-label="Hapus ${product.name} dari keranjang"
+                        >
+                            ×
+                        </button>
+
+                    </article>
+                `;
+
+            })
+            .join("");
+
+    body
+        .querySelectorAll(
+            ".digital-cart-remove"
+        )
+        .forEach(button => {
+
+            button.onclick = () => {
+
+                removeDigitalProductFromCart(
+                    button.dataset.productId
+                );
+
+                renderDigitalCart();
+
+            };
+
+        });
+
+    const total =
+        selectedDigitalProducts.reduce(
+            (sum, product) =>
+                sum +
+                (Number(product.price) || 0),
+            0
+        );
+
+    if (totalElement) {
+        totalElement.textContent =
+            formatDigitalProductPrice(total);
+    }
+
+    if (checkoutButton) {
+        checkoutButton.disabled = false;
+    }
+
+}
+
+
+function openDigitalCart() {
+
+    const modal =
+        document.getElementById(
+            "digitalCartModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    renderDigitalCart();
+
+    modal.classList.remove(
+        "page-hidden"
+    );
+
+    modal.classList.add(
+        "digital-cart-open"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+function closeDigitalCart() {
+
+    const modal =
+        document.getElementById(
+            "digitalCartModal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove(
+        "digital-cart-open"
+    );
+
+    modal.classList.add(
+        "page-hidden"
+    );
+
+    document.body.style.overflow = "";
+
+}
+
+
+function continueDigitalCartCheckout() {
+
+    if (!selectedDigitalProducts.length) {
+        return;
+    }
+
+    const cartDevice =
+        loadDigitalCartDevice();
+
+    if (!cartDevice) {
+
+        alert(
+            "Perangkat keranjang tidak ditemukan. " +
+            "Silakan buka detail produk dan pilih perangkat."
+        );
+
+        return;
+
+    }
+
+    digitalCheckoutProducts = [
+        ...selectedDigitalProducts
+    ];
+
+    /*
+     * Perangkat berasal dari pilihan saat
+     * produk dimasukkan ke keranjang.
+     */
+    selectedDigitalDevice =
+        cartDevice;
+
+    closeDigitalCart();
+
+    openDigitalPurchaseInfo({
+        requireDevice: false
+    });
+
+}
+function toggleDigitalProduct(product) {
+
+    const exists =
+        selectedDigitalProducts.some(
+            item =>
+                String(item.id) ===
+                String(product.id)
+        );
+
+    if (exists) {
+        removeDigitalProductFromCart(
+            product.id
+        );
+        return;
+    }
+
+    addDigitalProductToCart(product);
     renderDigitalProducts();
 
 }
@@ -4213,21 +4409,29 @@ function updateDigitalSelection() {
 }
 
 
-function setupDigitalProductFlow() {
+function updateDigitalDeviceUI() {
 
-    const selectAll =
-        document.getElementById(
-            "selectAllDigitalProducts"
-        );
+    document
+        .querySelectorAll(
+            ".digital-device-option"
+        )
+        .forEach(option => {
+
+            const active =
+                option.dataset.device ===
+                selectedDigitalDevice;
+
+            option.classList.toggle(
+                "selected",
+                active
+            );
+
+        });
+
+}
 
 
-    if (selectAll) {
-
-        selectAll.onclick =
-            selectAllDigitalProducts;
-
-    }
-
+function setupDigitalDeviceOptions() {
 
     document
         .querySelectorAll(
@@ -4238,37 +4442,46 @@ function setupDigitalProductFlow() {
             option.onclick = () => {
 
                 selectedDigitalDevice =
-                    option.dataset.device ||
-                    "";
+                    option.dataset.device || "";
 
+                updateDigitalDeviceUI();
 
-                document
-                    .querySelectorAll(
-                        ".digital-device-option"
-                    )
-                    .forEach(item => {
+                const error =
+                    document.getElementById(
+                        "digitalDetailDeviceError"
+                    );
 
-                        item.classList.remove(
-                            "selected"
-                        );
-
-                    });
-
-
-                option.classList.add(
-                    "selected"
-                );
+                if (error) {
+                    error.hidden = true;
+                }
 
             };
 
         });
 
+}
+
+
+function setupDigitalProductFlow() {
+
+    const selectAll =
+        document.getElementById(
+            "selectAllDigitalProducts"
+        );
+
+    if (selectAll) {
+
+        selectAll.onclick =
+            selectAllDigitalProducts;
+
+    }
+
+    setupDigitalDeviceOptions();
 
     const continueButton =
         document.getElementById(
             "digitalContinueButton"
         );
-
 
     if (continueButton) {
 
@@ -4277,15 +4490,7 @@ function setupDigitalProductFlow() {
 
     }
 
-
-    /*
-     * Validasi email + WhatsApp
-     * dilakukan ketika lanjut ke review.
-     */
-
 }
-
-
 function selectProduct(
     button,
     product
@@ -4757,10 +4962,14 @@ function openDigitalProductDetail(product) {
         return;
     }
 
-
     window.currentDigitalDetailProduct =
         product;
 
+    /*
+     * Sinkronkan pilihan perangkat ketika detail dibuka.
+     */
+    setupDigitalDeviceOptions();
+    updateDigitalDeviceUI();
 
     const name =
         document.getElementById(
@@ -4772,22 +4981,60 @@ function openDigitalProductDetail(product) {
             "digitalDetailPrice"
         );
 
+    const originalPrice =
+        document.getElementById(
+            "digitalDetailOriginalPrice"
+        );
+
+    const discount =
+        document.getElementById(
+            "digitalDetailDiscount"
+        );
+
+    const badge =
+        document.getElementById(
+            "digitalDetailBadge"
+        );
+
+    const mood =
+        document.getElementById(
+            "digitalDetailMood"
+        );
+
+    const shortDescription =
+        document.getElementById(
+            "digitalDetailShortDescription"
+        );
+
     const description =
         document.getElementById(
             "digitalDetailDescription"
         );
 
-    const gallery =
+    const presetCount =
         document.getElementById(
-            "digitalDetailGallery"
+            "digitalDetailPresetCount"
         );
 
+    const fileFormat =
+        document.getElementById(
+            "digitalDetailFileFormat"
+        );
+
+    const mobile =
+        document.getElementById(
+            "digitalDetailMobile"
+        );
+
+    const desktop =
+        document.getElementById(
+            "digitalDetailDesktop"
+        );
 
     if (name) {
         name.textContent =
-            product.name;
+            product.name || "Preset";
     }
-
 
     if (price) {
         price.textContent =
@@ -4796,6 +5043,87 @@ function openDigitalProductDetail(product) {
             );
     }
 
+    const original =
+        Number(product.originalPrice) || 0;
+
+    const current =
+        Number(product.price) || 0;
+
+    if (originalPrice) {
+
+        if (original > current) {
+
+            originalPrice.textContent =
+                formatDigitalProductPrice(
+                    original
+                );
+
+            originalPrice.hidden = false;
+
+        } else {
+
+            originalPrice.textContent = "";
+            originalPrice.hidden = true;
+
+        }
+
+    }
+
+    const discountValue =
+        getDigitalDiscount(product);
+
+    if (discount) {
+
+        if (discountValue > 0) {
+
+            discount.textContent =
+                `${discountValue}% OFF`;
+
+            discount.hidden = false;
+
+        } else {
+
+            discount.textContent = "";
+            discount.hidden = true;
+
+        }
+
+    }
+
+    if (badge) {
+
+        const value =
+            String(product.badge || "").trim();
+
+        badge.textContent = value;
+        badge.hidden = !value;
+
+    }
+
+    if (mood) {
+
+        const value =
+            String(product.mood || "").trim();
+
+        mood.textContent =
+            value || "Lightroom Preset";
+
+    }
+
+    if (shortDescription) {
+
+        const value =
+            String(
+                product.shortDescription || ""
+            ).trim();
+
+        shortDescription.textContent =
+            value;
+
+        shortDescription.hidden =
+            !value;
+
+    }
 
     if (description) {
 
@@ -4805,21 +5133,50 @@ function openDigitalProductDetail(product) {
 
     }
 
+    if (presetCount) {
+
+        const value =
+            Number(product.presetCount) || 0;
+
+        presetCount.textContent =
+            value > 0
+                ? `${value} Preset`
+                : "Preset Lightroom";
+
+    }
+
+    if (fileFormat) {
+
+        fileFormat.textContent =
+            product.fileFormat ||
+            "File preset digital";
+
+    }
+
+    if (mobile) {
+
+        mobile.hidden =
+            !product.mobileCompatible;
+
+    }
+
+    if (desktop) {
+
+        desktop.hidden =
+            !product.desktopCompatible;
+
+    }
+
 
     /*
-     * DETAIL GALLERY
-     * Menggunakan galleryImages yang berasal
-     * dari database produk.
+     * Gallery utama.
      */
+
     digitalGalleryImages =
         Array.isArray(product.galleryImages)
             ? product.galleryImages.filter(Boolean)
             : [];
 
-    /*
-     * Fallback ke preview lama jika gallery
-     * belum tersedia.
-     */
     if (!digitalGalleryImages.length) {
 
         digitalGalleryImages =
@@ -4829,66 +5186,139 @@ function openDigitalProductDetail(product) {
 
     digitalGalleryIndex = 0;
 
-    window.currentDigitalDetailProduct =
-        product;
-
     renderDigitalGallery();
 
 
-    const selectButton =
+    /*
+     * Tombol tambah ke keranjang.
+     */
+
+    const cartButton =
         document.getElementById(
-            "digitalDetailSelectButton"
+            "digitalDetailCartButton"
         );
 
+    if (cartButton) {
 
-    if (selectButton) {
-
-        const alreadySelected =
+        const alreadyInCart =
             selectedDigitalProducts.some(
                 item =>
-                    item.id === product.id
+                    String(item.id) ===
+                    String(product.id)
             );
 
+        cartButton.textContent =
+            alreadyInCart
+                ? "✓ Sudah di Keranjang"
+                : "+ Keranjang";
 
-        selectButton.textContent =
-            alreadySelected
-                ? "✓ Preset Dipilih"
-                : "Pilih Preset";
+        cartButton.onclick = () => {
 
+            if (!selectedDigitalDevice) {
 
-        selectButton.onclick = () => {
+                const error =
+                    document.getElementById(
+                        "digitalDetailDeviceError"
+                    );
 
-            const alreadySelected =
-                selectedDigitalProducts.some(
-                    item =>
-                        item.id === product.id
-                );
+                if (error) {
+                    error.hidden = false;
+                }
+
+                return;
+            }
+
+            const cartDevice =
+                loadDigitalCartDevice();
 
             /*
-             * Dari detail, tombol ini hanya digunakan
-             * untuk memilih preset.
-             *
-             * Jika belum dipilih:
-             * pilih preset lalu kembali ke katalog.
+             * Satu transaksi digital hanya memakai
+             * satu perangkat.
              */
-            if (!alreadySelected) {
+            if (
+                selectedDigitalProducts.length &&
+                cartDevice &&
+                cartDevice !== selectedDigitalDevice
+            ) {
 
-                toggleDigitalProduct(
-                    product
+                alert(
+                    `Keranjang menggunakan ${cartDevice}. ` +
+                    `Pilih ${cartDevice} untuk menambahkan preset ini.`
                 );
-
-                closeDigitalProductDetail();
 
                 return;
 
             }
 
-            /*
-             * Jika preset sudah dipilih,
-             * jangan batalkan pilihan dari halaman detail.
-             * Cukup kembali ke katalog.
-             */
+            addDigitalProductToCart(
+                product
+            );
+
+            saveDigitalCartDevice(
+                selectedDigitalDevice
+            );
+
+            renderDigitalProducts();
+
             closeDigitalProductDetail();
+
+            const catalog =
+                document.getElementById(
+                    "digitalProductGrid"
+                );
+
+            if (catalog) {
+
+                catalog.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+        };
+
+    }
+
+
+    /*
+     * Beli sekarang:
+     * checkout hanya produk yang sedang dibuka.
+     * Keranjang persistent tidak dihapus.
+     */
+
+    const buyButton =
+        document.getElementById(
+            "digitalDetailBuyButton"
+        );
+
+    if (buyButton) {
+
+        buyButton.onclick = () => {
+
+            if (!selectedDigitalDevice) {
+
+                const error =
+                    document.getElementById(
+                        "digitalDetailDeviceError"
+                    );
+
+                if (error) {
+                    error.hidden = false;
+                }
+
+                return;
+            }
+
+            digitalCheckoutProducts = [
+                product
+            ];
+
+            closeDigitalProductDetail();
+
+            openDigitalPurchaseInfo({
+                requireDevice: false
+            });
 
         };
 
@@ -4907,8 +5337,6 @@ function openDigitalProductDetail(product) {
         "hidden";
 
 }
-
-
 function closeDigitalProductDetail() {
 
     const modal =
@@ -4950,8 +5378,14 @@ function renderDigitalCheckout() {
         return;
     }
 
+    const checkoutProducts =
+        Array.isArray(digitalCheckoutProducts)
+        && digitalCheckoutProducts.length
+            ? digitalCheckoutProducts
+            : selectedDigitalProducts;
+
     const total =
-        selectedDigitalProducts.reduce(
+        checkoutProducts.reduce(
             (sum, product) =>
                 sum +
                 (
@@ -4961,7 +5395,7 @@ function renderDigitalCheckout() {
         );
 
     const productRows =
-        selectedDigitalProducts
+        checkoutProducts
             .map(product => {
 
                 const image =
@@ -5024,7 +5458,7 @@ function renderDigitalCheckout() {
             </span>
 
             <strong>
-                ${selectedDigitalProducts.length}
+                ${checkoutProducts.length}
                 preset
             </strong>
 
@@ -5155,7 +5589,13 @@ function goToDigitalCheckout() {
     }
 
 
-    if (!selectedDigitalProducts.length) {
+    const checkoutProducts =
+        Array.isArray(digitalCheckoutProducts)
+        && digitalCheckoutProducts.length
+            ? digitalCheckoutProducts
+            : selectedDigitalProducts;
+
+    if (!checkoutProducts.length) {
 
         alert(
             "Silakan pilih minimal satu preset."
@@ -5168,6 +5608,15 @@ function goToDigitalCheckout() {
 
     if (!selectedDigitalDevice) {
 
+        const deviceSection =
+            document.getElementById(
+                "digitalPurchaseDeviceSection"
+            );
+
+        if (deviceSection) {
+            deviceSection.hidden = false;
+        }
+
         alert(
             "Silakan pilih perangkat."
         );
@@ -5176,6 +5625,8 @@ function goToDigitalCheckout() {
 
     }
 
+
+    closeDigitalPurchaseInfo();
 
     renderDigitalCheckout();
 
@@ -5246,7 +5697,12 @@ async function processDigitalPayment() {
                             currentService,
 
                         productIds:
-                            selectedDigitalProducts.map(
+                            (
+                                Array.isArray(digitalCheckoutProducts)
+                                && digitalCheckoutProducts.length
+                                    ? digitalCheckoutProducts
+                                    : selectedDigitalProducts
+                            ).map(
                                 product => product.id
                             ),
 

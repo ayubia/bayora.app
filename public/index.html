@@ -2744,7 +2744,20 @@ footer a{
 
 
                 <div class="digital-catalog-actions">
-</div>
+
+                    <button
+                        type="button"
+                        id="digitalCartButton"
+                        class="digital-cart-button"
+                        onclick="openDigitalCart()"
+                        aria-label="Keranjang, 0 produk"
+                    >
+                        <span class="digital-cart-icon">🛒</span>
+                        <span>Keranjang</span>
+                        <strong>0</strong>
+                    </button>
+
+                </div>
 
             </div>
 
@@ -2758,211 +2771,7 @@ footer a{
 
 
 
-            <div class="digital-device-card">
 
-                <div class="product-heading">
-
-                    <div>
-
-                        <label>
-                            Pilih perangkat
-                        </label>
-
-                        <p class="digital-section-description">
-                            Pilih perangkat utama yang akan digunakan
-                            untuk Lightroom.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="digital-device-grid">
-
-                    <button
-                        type="button"
-                        class="digital-device-option"
-                        data-device="iOS"
-                    >
-
-                        <span class="digital-device-icon">
-                            
-                        </span>
-
-                        <span>
-
-                            <strong>
-                                iPhone / iPad
-                            </strong>
-
-                            <small>
-                                iOS
-                            </small>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="digital-device-option"
-                        data-device="Android"
-                    >
-
-                        <span class="digital-device-icon">
-                            ◉
-                        </span>
-
-                        <span>
-
-                            <strong>
-                                Android
-                            </strong>
-
-                            <small>
-                                Android phone / tablet
-                            </small>
-
-                        </span>
-
-                    </button>
-
-                    <button
-                        type="button"
-                        class="digital-device-option"
-                        data-device="macOS"
-                    >
-
-                        <span class="digital-device-icon">
-                            
-                        </span>
-
-                        <span>
-
-                            <strong>
-                                macOS
-                            </strong>
-
-                            <small>
-                                MacBook / iMac
-                            </small>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="digital-device-option"
-                        data-device="Windows"
-                    >
-
-                        <span class="digital-device-icon">
-                            ⊞
-                        </span>
-
-                        <span>
-
-                            <strong>
-                                Windows
-                            </strong>
-
-                            <small>
-                                PC / Laptop
-                            </small>
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="digital-customer-card">
-
-                <div class="product-heading">
-
-                    <div>
-
-                        <label>
-                            Informasi pembelian
-                        </label>
-
-                        <p class="digital-section-description">
-                            Masukkan kontak untuk menerima informasi
-                            dan akses produk setelah pembayaran.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="input-group">
-
-                    <label for="digitalEmail">
-                        Email
-                    </label>
-
-                    <input
-                        type="email"
-                        id="digitalEmail"
-                        placeholder="nama@email.com"
-                        autocomplete="email"
-                    >
-
-                </div>
-
-
-                <div class="input-group">
-
-                    <label for="digitalWhatsapp">
-                        WhatsApp
-                    </label>
-
-                    <input
-                        type="tel"
-                        id="digitalWhatsapp"
-                        placeholder="08xxxxxxxxxx"
-                        autocomplete="tel"
-                    >
-
-                </div>
-
-
-
-
-
-            <div class="digital-selection-summary">
-
-                <div>
-
-                    <span id="digitalSelectedCount">
-                        Belum ada preset dipilih
-                    </span>
-
-                    <strong id="digitalSelectedTotal">
-                        —
-                    </strong>
-
-                </div>
-
-            </div>
-
-            <button
-                type="button"
-                id="digitalContinueButton"
-                class="submit-button"
-            >
-                Lanjut ke Pembayaran
-            </button>
-
-        </div>
 
 
         </div>
@@ -3359,6 +3168,242 @@ footer a{
 
 
 
+
+<!-- ==================================================
+     LIGHTROOM CART MODAL
+================================================== -->
+
+
+<div
+    id="digitalPurchaseInfoModal"
+    class="digital-purchase-modal page-hidden"
+>
+
+    <div
+        class="digital-purchase-backdrop"
+        onclick="closeDigitalPurchaseInfo()"
+    ></div>
+
+    <div class="digital-purchase-dialog">
+
+        <div class="digital-purchase-header">
+
+            <div>
+                <p class="eyebrow">
+                    CHECKOUT
+                </p>
+
+                <h2>
+                    Informasi Pembelian
+                </h2>
+
+                <p>
+                    Masukkan kontak untuk menerima informasi
+                    dan akses produk setelah pembayaran.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="digital-purchase-close"
+                onclick="closeDigitalPurchaseInfo()"
+                aria-label="Tutup"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="digitalPurchaseDeviceSection"
+            class="digital-purchase-device-section"
+            hidden
+        >
+
+            <strong>
+                Pilih perangkat
+            </strong>
+
+            <p>
+                Pilih perangkat utama yang digunakan untuk Lightroom.
+            </p>
+
+            <div class="digital-device-grid">
+
+                <button
+                    type="button"
+                    class="digital-device-option"
+                    data-device="iOS"
+                >
+                    <span class="digital-device-icon"></span>
+                    <span>
+                        <strong>iPhone / iPad</strong>
+                        <small>iOS</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    class="digital-device-option"
+                    data-device="Android"
+                >
+                    <span class="digital-device-icon">◉</span>
+                    <span>
+                        <strong>Android</strong>
+                        <small>Phone / tablet</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    class="digital-device-option"
+                    data-device="macOS"
+                >
+                    <span class="digital-device-icon"></span>
+                    <span>
+                        <strong>macOS</strong>
+                        <small>MacBook / iMac</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    class="digital-device-option"
+                    data-device="Windows"
+                >
+                    <span class="digital-device-icon">⊞</span>
+                    <span>
+                        <strong>Windows</strong>
+                        <small>PC / Laptop</small>
+                    </span>
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="digital-purchase-form">
+
+            <div class="input-group">
+
+                <label for="digitalEmail">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="digitalEmail"
+                    placeholder="nama@email.com"
+                    autocomplete="email"
+                >
+
+            </div>
+
+            <div class="input-group">
+
+                <label for="digitalWhatsapp">
+                    WhatsApp
+                </label>
+
+                <input
+                    type="tel"
+                    id="digitalWhatsapp"
+                    placeholder="08xxxxxxxxxx"
+                    autocomplete="tel"
+                >
+
+            </div>
+
+        </div>
+
+        <div
+            id="digitalPurchaseSummary"
+            class="digital-purchase-mini-summary"
+        ></div>
+
+        <button
+            type="button"
+            id="digitalContinueButton"
+            class="submit-button digital-purchase-continue"
+        >
+            Lanjut ke Pembayaran
+        </button>
+
+    </div>
+
+</div>
+
+
+<div
+    id="digitalCartModal"
+    class="digital-cart-modal page-hidden"
+>
+
+    <div
+        class="digital-cart-backdrop"
+        onclick="closeDigitalCart()"
+    ></div>
+
+    <div class="digital-cart-dialog">
+
+        <div class="digital-cart-header">
+
+            <div>
+                <p class="eyebrow">
+                    PRODUK DIGITAL
+                </p>
+
+                <h2>
+                    Keranjang
+                </h2>
+            </div>
+
+            <button
+                type="button"
+                class="digital-cart-close"
+                onclick="closeDigitalCart()"
+                aria-label="Tutup keranjang"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="digitalCartBody"
+            class="digital-cart-body"
+        ></div>
+
+        <div class="digital-cart-footer">
+
+            <div class="digital-cart-total">
+
+                <span>
+                    Total
+                </span>
+
+                <strong id="digitalCartTotal">
+                    Rp0
+                </strong>
+
+            </div>
+
+            <button
+                type="button"
+                id="digitalCartCheckoutButton"
+                class="digital-cart-checkout-button"
+                onclick="continueDigitalCartCheckout()"
+            >
+                Lanjut Checkout
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <!-- ==================================================
      LIGHTROOM PRODUCT DETAIL MODAL
 ================================================== -->
@@ -3373,73 +3418,229 @@ footer a{
         onclick="closeDigitalProductDetail()"
     ></div>
 
-
-    <div class="digital-detail-dialog">
+    <div class="digital-detail-dialog digital-marketplace-detail-dialog">
 
         <button
             type="button"
             class="digital-detail-close"
             onclick="closeDigitalProductDetail()"
+            aria-label="Tutup detail produk"
         >
             ×
         </button>
 
+        <div class="digital-detail-media">
 
-        <div
-            id="digitalDetailGallery"
-            class="digital-detail-gallery"
-        >
+            <div
+                id="digitalDetailGallery"
+                class="digital-detail-gallery"
+            ></div>
+
         </div>
 
+        <div class="digital-detail-content digital-marketplace-detail-content">
 
-        <div class="digital-detail-content">
+            <div class="digital-detail-label-row">
 
-            <p class="eyebrow">
-                LIGHTROOM PRESET
-            </p>
+                <span
+                    id="digitalDetailBadge"
+                    class="digital-detail-badge"
+                    hidden
+                ></span>
 
+                <span
+                    id="digitalDetailMood"
+                    class="digital-detail-mood"
+                >
+                    Lightroom Preset
+                </span>
+
+            </div>
 
             <h2 id="digitalDetailName">
                 Preset
             </h2>
 
+            <div class="digital-detail-price-row">
 
-            <strong
-                id="digitalDetailPrice"
-                class="digital-detail-price"
-            >
-                Rp0
-            </strong>
+                <strong
+                    id="digitalDetailPrice"
+                    class="digital-detail-price"
+                >
+                    Rp0
+                </strong>
 
+                <span
+                    id="digitalDetailOriginalPrice"
+                    class="digital-detail-original-price"
+                    hidden
+                ></span>
 
-            <p id="digitalDetailDescription">
-            </p>
+                <span
+                    id="digitalDetailDiscount"
+                    class="digital-detail-discount"
+                    hidden
+                ></span>
 
+            </div>
 
-            <div class="digital-detail-features">
+            <p
+                id="digitalDetailShortDescription"
+                class="digital-detail-short-description"
+                hidden
+            ></p>
 
-                <span>
-                    ✓ File digital
+            <div class="digital-detail-meta">
+
+                <div class="digital-detail-meta-item">
+                    <span>Isi produk</span>
+                    <strong id="digitalDetailPresetCount">
+                        Preset Lightroom
+                    </strong>
+                </div>
+
+                <div class="digital-detail-meta-item">
+                    <span>Format</span>
+                    <strong id="digitalDetailFileFormat">
+                        File preset digital
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="digital-detail-compatibility">
+
+                <span
+                    id="digitalDetailMobile"
+                    class="digital-detail-compatibility-item"
+                >
+                    ✓ Mobile
                 </span>
 
-                <span>
-                    ✓ iOS & Android
+                <span
+                    id="digitalDetailDesktop"
+                    class="digital-detail-compatibility-item"
+                >
+                    ✓ Desktop
                 </span>
 
-                <span>
+                <span class="digital-detail-compatibility-item">
                     ✓ Download setelah pembayaran
                 </span>
 
             </div>
 
+            <div class="digital-detail-description-box">
 
-            <button
-                type="button"
-                id="digitalDetailSelectButton"
-                class="submit-button"
-            >
-                Pilih Preset
-            </button>
+                <strong>
+                    Tentang preset
+                </strong>
+
+                <p id="digitalDetailDescription"></p>
+
+            </div>
+
+
+            <div class="digital-detail-device-section">
+
+                <div class="digital-detail-section-heading">
+
+                    <strong>
+                        Pilih perangkat
+                    </strong>
+
+                    <p>
+                        Pilih perangkat utama yang akan digunakan
+                        untuk Lightroom.
+                    </p>
+
+                </div>
+
+                <div class="digital-device-grid digital-detail-device-grid">
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="iOS"
+                    >
+                        <span class="digital-device-icon"></span>
+
+                        <span>
+                            <strong>iPhone / iPad</strong>
+                            <small>iOS</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="Android"
+                    >
+                        <span class="digital-device-icon">◉</span>
+
+                        <span>
+                            <strong>Android</strong>
+                            <small>Phone / tablet</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="macOS"
+                    >
+                        <span class="digital-device-icon"></span>
+
+                        <span>
+                            <strong>macOS</strong>
+                            <small>MacBook / iMac</small>
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="digital-device-option"
+                        data-device="Windows"
+                    >
+                        <span class="digital-device-icon">⊞</span>
+
+                        <span>
+                            <strong>Windows</strong>
+                            <small>PC / Laptop</small>
+                        </span>
+                    </button>
+
+                </div>
+
+                <p
+                    id="digitalDetailDeviceError"
+                    class="digital-detail-device-error"
+                    hidden
+                >
+                    Pilih perangkat terlebih dahulu.
+                </p>
+
+            </div>
+
+            <div class="digital-detail-actions">
+
+                <button
+                    type="button"
+                    id="digitalDetailCartButton"
+                    class="digital-detail-cart-button"
+                >
+                    + Keranjang
+                </button>
+
+                <button
+                    type="button"
+                    id="digitalDetailBuyButton"
+                    class="digital-detail-buy-button"
+                >
+                    Beli Sekarang
+                </button>
+
+            </div>
 
         </div>
 

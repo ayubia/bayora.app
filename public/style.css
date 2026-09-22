@@ -9223,3 +9223,1741 @@ footer a {
   flex: 0 0 18px !important;
 }
 
+
+
+/* =========================================================
+   BAYORA — LIGHTROOM MARKETPLACE CATALOG
+========================================================= */
+
+.digital-cart-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 9px 13px;
+    border: 1px solid rgba(28, 56, 96, .14);
+    border-radius: 12px;
+    background: #fff;
+    color: #1b2d49;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.digital-cart-button strong {
+    min-width: 21px;
+    height: 21px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #1b2d49;
+    color: #fff;
+    font-size: 11px;
+}
+
+.digital-cart-icon {
+    font-size: 15px;
+}
+
+#digitalFlowWrapper .digital-marketplace-card {
+    overflow: hidden;
+    border-radius: 16px;
+    background: #fff;
+}
+
+.digital-marketplace-image-button {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.digital-marketplace-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f2f5fa;
+}
+
+.digital-marketplace-image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform .25s ease;
+}
+
+.digital-marketplace-card:hover
+.digital-marketplace-image img {
+    transform: scale(1.025);
+}
+
+.digital-marketplace-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    color: #8b98aa;
+}
+
+.digital-marketplace-badge,
+.digital-marketplace-in-cart {
+    position: absolute;
+    top: 10px;
+    z-index: 2;
+    border-radius: 999px;
+    padding: 6px 9px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+.digital-marketplace-badge {
+    left: 10px;
+    background: rgba(255,255,255,.90);
+    color: #243750;
+}
+
+.digital-marketplace-in-cart {
+    right: 10px;
+    background: rgba(27,45,73,.90);
+    color: #fff;
+}
+
+#digitalFlowWrapper
+.digital-marketplace-card
+.digital-product-card-body {
+    padding: 13px !important;
+}
+
+.digital-marketplace-mood {
+    margin: 0 0 5px;
+    color: #7b8798;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.digital-marketplace-name {
+    margin: 0;
+    color: #18263a;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 750;
+}
+
+.digital-marketplace-price {
+    margin-top: 9px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px 7px;
+}
+
+.digital-marketplace-price strong {
+    color: #18263a;
+    font-size: 15px;
+    line-height: 1.2;
+}
+
+.digital-marketplace-original-price {
+    color: #9ba5b2;
+    font-size: 11px;
+    text-decoration: line-through;
+}
+
+.digital-marketplace-discount {
+    padding: 3px 6px;
+    border-radius: 6px;
+    background: #f2f5fa;
+    color: #52657d;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.digital-marketplace-detail {
+    width: 100%;
+    margin-top: 11px;
+}
+
+@media (max-width: 600px) {
+
+    .digital-catalog-header {
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    .digital-cart-button {
+        min-height: 38px;
+        padding: 8px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    #digitalFlowWrapper
+    .digital-marketplace-card
+    .digital-product-card-body {
+        padding: 10px !important;
+    }
+
+    .digital-marketplace-name {
+        font-size: 13px;
+    }
+
+    .digital-marketplace-price strong {
+        font-size: 13px;
+    }
+
+    .digital-marketplace-original-price {
+        font-size: 9px;
+    }
+
+    .digital-marketplace-discount {
+        font-size: 8px;
+    }
+
+    .digital-marketplace-badge,
+    .digital-marketplace-in-cart {
+        top: 7px;
+        padding: 5px 7px;
+        font-size: 8px;
+    }
+
+    .digital-marketplace-badge {
+        left: 7px;
+    }
+
+    .digital-marketplace-in-cart {
+        right: 7px;
+    }
+
+}
+
+
+
+/* =========================================================
+   BAYORA — DIGITAL CART
+========================================================= */
+
+.digital-cart-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10020;
+}
+
+.digital-cart-modal.page-hidden {
+    display: none !important;
+}
+
+.digital-cart-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 28, 45, .46);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.digital-cart-dialog {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(430px, 100%);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    box-shadow: -16px 0 48px rgba(18, 34, 56, .16);
+    transform: translateX(100%);
+    transition: transform .22s ease;
+}
+
+.digital-cart-open .digital-cart-dialog {
+    transform: translateX(0);
+}
+
+.digital-cart-header {
+    padding: 22px 20px 17px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.digital-cart-header h2 {
+    margin: 3px 0 0;
+    font-size: 22px;
+    color: #18263a;
+}
+
+.digital-cart-close {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f5f8;
+    color: #263a54;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.digital-cart-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 20px 20px;
+}
+
+.digital-cart-item {
+    position: relative;
+    padding: 14px 34px 14px 0;
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.digital-cart-item-image {
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f2f5fa;
+    color: #8a97a8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.digital-cart-item-image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.digital-cart-item-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.digital-cart-item-type {
+    color: #8a95a4;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.digital-cart-item-info strong {
+    overflow: hidden;
+    color: #1c2c43;
+    font-size: 14px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.digital-cart-item-price {
+    color: #40546e;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.digital-cart-remove {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #9aa5b2;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.digital-cart-empty {
+    min-height: 300px;
+    padding: 50px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.digital-cart-empty-icon {
+    margin-bottom: 12px;
+    font-size: 34px;
+}
+
+.digital-cart-empty strong {
+    color: #1c2c43;
+    font-size: 16px;
+}
+
+.digital-cart-empty p {
+    max-width: 260px;
+    margin: 7px 0 0;
+    color: #7c8999;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.digital-cart-footer {
+    padding: 17px 20px 20px;
+    border-top: 1px solid #e9edf2;
+    background: #fff;
+}
+
+.digital-cart-total {
+    margin-bottom: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.digital-cart-total span {
+    color: #6f7e90;
+    font-size: 13px;
+}
+
+.digital-cart-total strong {
+    color: #17283f;
+    font-size: 19px;
+}
+
+.digital-cart-checkout-button {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 13px;
+    background: #1b2d49;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.digital-cart-checkout-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+
+    .digital-cart-dialog {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        height: min(82vh, 720px);
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+    }
+
+    .digital-cart-open
+    .digital-cart-dialog {
+        transform: translateY(0);
+    }
+
+    .digital-cart-header {
+        padding: 18px 16px 14px;
+    }
+
+    .digital-cart-body {
+        padding: 6px 16px 16px;
+    }
+
+    .digital-cart-footer {
+        padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+    }
+
+}
+
+
+
+/* =========================================================
+   BAYORA — LIGHTROOM MARKETPLACE PRODUCT DETAIL
+========================================================= */
+
+.digital-marketplace-detail-dialog {
+    width: min(940px, calc(100vw - 32px)) !important;
+    max-width: 940px !important;
+    max-height: min(88vh, 820px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+    overflow: hidden !important;
+    border-radius: 20px !important;
+    background: #fff;
+}
+
+.digital-detail-media {
+    min-width: 0;
+    min-height: 0;
+    background: #f3f5f8;
+}
+
+.digital-marketplace-detail-dialog
+.digital-detail-gallery {
+    height: 100%;
+    min-height: 520px;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.digital-marketplace-detail-dialog
+.digital-detail-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.digital-marketplace-detail-content {
+    min-width: 0;
+    overflow-y: auto;
+    padding: 34px 30px 28px !important;
+}
+
+.digital-detail-label-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.digital-detail-badge,
+.digital-detail-mood {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.digital-detail-badge {
+    background: #1b2d49;
+    color: #fff;
+}
+
+.digital-detail-mood {
+    background: #f1f4f8;
+    color: #65758a;
+}
+
+.digital-marketplace-detail-content h2 {
+    margin: 0 !important;
+    color: #17283f;
+    font-size: 29px !important;
+    line-height: 1.2;
+}
+
+.digital-detail-price-row {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px 9px;
+}
+
+.digital-marketplace-detail-content
+.digital-detail-price {
+    margin: 0 !important;
+    color: #17283f;
+    font-size: 23px !important;
+}
+
+.digital-detail-original-price {
+    color: #9ba5b1;
+    font-size: 13px;
+    text-decoration: line-through;
+}
+
+.digital-detail-discount {
+    padding: 4px 7px;
+    border-radius: 7px;
+    background: #eef2f7;
+    color: #53667f;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.digital-detail-short-description {
+    margin: 13px 0 0 !important;
+    color: #68788c;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.digital-detail-meta {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.digital-detail-meta-item {
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #e8edf3;
+    border-radius: 12px;
+    background: #fafbfd;
+}
+
+.digital-detail-meta-item span {
+    display: block;
+    margin-bottom: 4px;
+    color: #8a96a5;
+    font-size: 10px;
+}
+
+.digital-detail-meta-item strong {
+    display: block;
+    color: #253a55;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.digital-detail-compatibility {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.digital-detail-compatibility-item {
+    padding: 7px 9px;
+    border-radius: 9px;
+    background: #f2f5f8;
+    color: #53667e;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.digital-detail-description-box {
+    margin-top: 19px;
+    padding-top: 17px;
+    border-top: 1px solid #edf0f4;
+}
+
+.digital-detail-description-box > strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #263b55;
+    font-size: 13px;
+}
+
+.digital-detail-description-box p {
+    margin: 0 !important;
+    color: #6c7989;
+    font-size: 12px;
+    line-height: 1.65;
+    white-space: pre-line;
+}
+
+.digital-detail-actions {
+    position: sticky;
+    bottom: -28px;
+    margin: 22px -30px -28px;
+    padding: 14px 30px calc(18px + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    border-top: 1px solid #e8edf2;
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.digital-detail-cart-button,
+.digital-detail-buy-button {
+    min-height: 48px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.digital-detail-cart-button {
+    border: 1px solid #cfd8e4;
+    background: #fff;
+    color: #263b55;
+}
+
+.digital-detail-buy-button {
+    border: 1px solid #1b2d49;
+    background: #1b2d49;
+    color: #fff;
+}
+
+@media (max-width: 700px) {
+
+    .digital-detail-modal.digital-detail-open {
+        background: #fff;
+    }
+
+    .digital-detail-backdrop {
+        display: none !important;
+    }
+
+    .digital-marketplace-detail-dialog {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        display: block !important;
+        overflow-y: auto !important;
+        border-radius: 0 !important;
+    }
+
+    .digital-detail-close {
+        position: fixed !important;
+        top: calc(12px + env(safe-area-inset-top));
+        right: 12px;
+        z-index: 100005 !important;
+        background: rgba(255,255,255,.92) !important;
+        box-shadow: 0 3px 12px rgba(0,0,0,.10);
+    }
+
+    .digital-detail-media {
+        width: 100%;
+    }
+
+    .digital-marketplace-detail-dialog
+    .digital-detail-gallery {
+        width: 100%;
+        height: auto !important;
+        min-height: 0 !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    .digital-marketplace-detail-content {
+        overflow: visible;
+        padding: 20px 16px 110px !important;
+    }
+
+    .digital-marketplace-detail-content h2 {
+        font-size: 24px !important;
+    }
+
+    .digital-detail-actions {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100004;
+        margin: 0;
+        padding: 11px 16px calc(11px + env(safe-area-inset-bottom));
+        background: rgba(255,255,255,.97);
+    }
+
+}
+
+
+
+/* =========================================================
+   BAYORA — DETAIL DEVICE + PURCHASE INFORMATION
+========================================================= */
+
+.digital-detail-device-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #edf0f4;
+}
+
+.digital-detail-section-heading strong {
+    display: block;
+    color: #263b55;
+    font-size: 13px;
+}
+
+.digital-detail-section-heading p {
+    margin: 5px 0 13px;
+    color: #7b8898;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.digital-detail-device-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.digital-detail-device-error {
+    margin: 9px 0 0;
+    color: #b14a4a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.digital-purchase-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.digital-purchase-modal.page-hidden {
+    display: none !important;
+}
+
+.digital-purchase-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(17, 29, 46, .46);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.digital-purchase-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 470px);
+    max-height: min(88vh, 760px);
+    overflow-y: auto;
+    padding: 25px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(18, 35, 58, .20);
+}
+
+.digital-purchase-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.digital-purchase-header h2 {
+    margin: 3px 0 5px;
+    color: #1c304a;
+    font-size: 22px;
+}
+
+.digital-purchase-header p:not(.eyebrow) {
+    margin: 0;
+    color: #778596;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.digital-purchase-close {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border: 1px solid #e3e8ef;
+    border-radius: 50%;
+    background: #fff;
+    color: #3c4d62;
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.digital-purchase-device-section {
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid #e8edf3;
+    border-radius: 14px;
+    background: #fafbfd;
+}
+
+.digital-purchase-device-section > strong {
+    display: block;
+    color: #263b55;
+    font-size: 13px;
+}
+
+.digital-purchase-device-section > p {
+    margin: 5px 0 12px;
+    color: #7b8898;
+    font-size: 11px;
+}
+
+.digital-purchase-form {
+    margin-top: 20px;
+}
+
+.digital-purchase-form .input-group + .input-group {
+    margin-top: 14px;
+}
+
+.digital-purchase-mini-summary {
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #f4f6f9;
+}
+
+.digital-purchase-mini-summary > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.digital-purchase-mini-summary span,
+.digital-purchase-mini-summary small {
+    color: #6f7e90;
+    font-size: 11px;
+}
+
+.digital-purchase-mini-summary strong {
+    color: #1d324d;
+    font-size: 14px;
+}
+
+.digital-purchase-mini-summary small {
+    display: block;
+    margin-top: 5px;
+}
+
+.digital-purchase-continue {
+    width: 100%;
+    margin-top: 16px;
+}
+
+@media (max-width: 700px) {
+
+    .digital-purchase-modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .digital-purchase-dialog {
+        width: 100%;
+        max-height: 92dvh;
+        padding: 22px 16px calc(18px + env(safe-area-inset-bottom));
+        border-radius: 22px 22px 0 0;
+    }
+
+    .digital-detail-device-grid,
+    .digital-purchase-device-section .digital-device-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+
+/* BAYORA DIGITAL UI UNIFIED V1
+   Menyamakan Detail, Device, Cart, dan Purchase.
+   Tidak mengubah flow / JavaScript.
+========================================================= */
+
+.digital-detail-dialog,
+.digital-cart-dialog,
+.digital-purchase-dialog {
+    background: #ffffff;
+    border: 1px solid #e7ebf0;
+    box-shadow: 0 12px 36px rgba(24, 42, 68, 0.10);
+}
+
+/* ---------- CLOSE BUTTON ---------- */
+
+.digital-detail-close,
+.digital-cart-close,
+.digital-purchase-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+
+    border: 1px solid #e6ebf1;
+    border-radius: 10px;
+
+    background: #f7f9fb;
+    color: #526277;
+
+    font-size: 20px;
+    line-height: 1;
+
+    box-shadow: none;
+}
+
+/* ---------- HEADINGS ---------- */
+
+.digital-cart-header .eyebrow,
+.digital-purchase-header .eyebrow {
+    margin: 0 0 5px;
+
+    color: #8a97a8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+.digital-cart-header h2,
+.digital-purchase-header h2 {
+    margin: 0;
+
+    color: #20344f;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+}
+
+.digital-purchase-header p:not(.eyebrow) {
+    margin: 7px 0 0;
+
+    color: #7c8999;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+/* ---------- DETAIL PRODUCT ---------- */
+
+.digital-marketplace-detail-dialog {
+    overflow: hidden;
+}
+
+.digital-marketplace-detail-content {
+    color: #263b55;
+}
+
+.digital-marketplace-detail-content h2 {
+    color: #20344f;
+    letter-spacing: -.025em;
+}
+
+.digital-detail-price {
+    color: #20344f;
+}
+
+.digital-detail-short-description,
+.digital-detail-description-box p {
+    color: #738195;
+    line-height: 1.65;
+}
+
+.digital-detail-meta {
+    gap: 10px;
+}
+
+.digital-detail-meta-item {
+    border: 1px solid #e8edf2;
+    border-radius: 12px;
+    background: #f8fafc;
+    box-shadow: none;
+}
+
+.digital-detail-meta-item span {
+    color: #8a96a6;
+}
+
+.digital-detail-meta-item strong {
+    color: #30445d;
+}
+
+.digital-detail-compatibility {
+    gap: 7px;
+}
+
+.digital-detail-compatibility-item {
+    border: 1px solid #e6ebf0;
+    border-radius: 999px;
+    background: #f7f9fb;
+    color: #52657b;
+    box-shadow: none;
+}
+
+.digital-detail-description-box {
+    border: 1px solid #e8edf2;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+/* ---------- DEVICE ---------- */
+
+.digital-detail-device-section {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #e9edf2;
+}
+
+.digital-detail-section-heading strong {
+    color: #263b55;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.digital-detail-section-heading p {
+    margin: 5px 0 12px;
+
+    color: #8491a1;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.digital-device-grid {
+    gap: 9px;
+}
+
+.digital-device-option {
+    min-height: 62px;
+    padding: 11px 12px;
+
+    border: 1px solid #e4eaf0;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #30445d;
+
+    box-shadow: none;
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        transform .18s ease;
+}
+
+.digital-device-option:hover {
+    border-color: #cfd8e3;
+    background: #fafbfd;
+}
+
+.digital-device-option.selected {
+    border-color: #315b8a;
+    background: #f1f6fb;
+    color: #244b77;
+    box-shadow: 0 0 0 1px rgba(49, 91, 138, .08);
+}
+
+.digital-device-icon {
+    color: inherit;
+}
+
+.digital-device-option strong {
+    color: inherit;
+    font-size: 12px;
+}
+
+.digital-device-option small {
+    color: #8a96a6;
+    font-size: 10px;
+}
+
+.digital-detail-device-error {
+    margin-top: 8px;
+    color: #b04c4c;
+    font-size: 11px;
+}
+
+/* ---------- ACTION BUTTONS ---------- */
+
+.digital-detail-actions {
+    gap: 9px;
+}
+
+.digital-detail-cart-button,
+.digital-detail-buy-button,
+.digital-cart-checkout-button,
+.digital-purchase-continue {
+    min-height: 46px;
+    border-radius: 11px;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.digital-detail-cart-button {
+    border: 1px solid #dfe6ed;
+    background: #f7f9fb;
+    color: #30465f;
+}
+
+.digital-detail-buy-button,
+.digital-cart-checkout-button {
+    border: 1px solid #244d79;
+    background: #244d79;
+    color: #ffffff;
+}
+
+/* ---------- CART ---------- */
+
+.digital-cart-dialog {
+    border-radius: 18px;
+}
+
+.digital-cart-header {
+    border-bottom-color: #edf0f3;
+}
+
+.digital-cart-body {
+    background: #ffffff;
+}
+
+.digital-cart-item {
+    border-color: #e8edf2;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.digital-cart-footer {
+    border-top: 1px solid #edf0f3;
+    background: #ffffff;
+}
+
+.digital-cart-total span {
+    color: #8491a1;
+}
+
+.digital-cart-total strong {
+    color: #20344f;
+}
+
+/* ---------- PURCHASE INFORMATION ---------- */
+
+.digital-purchase-backdrop,
+.digital-cart-backdrop,
+.digital-detail-backdrop {
+    background: rgba(23, 38, 57, .40);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.digital-purchase-dialog {
+    width: min(100%, 440px);
+    max-height: min(88vh, 720px);
+    padding: 22px;
+
+    border-radius: 18px;
+}
+
+.digital-purchase-form {
+    margin-top: 20px;
+}
+
+.digital-purchase-form .input-group {
+    margin: 0;
+}
+
+.digital-purchase-form .input-group + .input-group {
+    margin-top: 14px;
+}
+
+.digital-purchase-form .input-group label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #41546c;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.digital-purchase-form input {
+    width: 100%;
+    min-height: 46px;
+
+    padding: 0 13px;
+
+    border: 1px solid #dfe5ec;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #263b55;
+
+    font: inherit;
+    font-size: 13px;
+
+    outline: none;
+    box-shadow: none;
+}
+
+.digital-purchase-form input::placeholder {
+    color: #a2acb9;
+}
+
+.digital-purchase-form input:focus {
+    border-color: #54779e;
+    box-shadow: 0 0 0 3px rgba(84, 119, 158, .09);
+}
+
+.digital-purchase-mini-summary {
+    margin-top: 17px;
+    padding: 13px 14px;
+
+    border: 1px solid #e7ecf1;
+    border-radius: 11px;
+
+    background: #f8fafc;
+}
+
+.digital-purchase-mini-summary span,
+.digital-purchase-mini-summary small {
+    color: #7f8d9e;
+}
+
+.digital-purchase-mini-summary strong {
+    color: #20344f;
+}
+
+.digital-purchase-continue {
+    margin-top: 14px;
+}
+
+/* ---------- GALLERY ---------- */
+
+.digital-detail-gallery {
+    background: #f4f6f8;
+}
+
+.digital-gallery-nav {
+    width: 36px;
+    height: 36px;
+
+    border: 1px solid rgba(220, 226, 233, .9);
+    background: rgba(255, 255, 255, .94);
+    color: #30445d;
+
+    font-size: 24px;
+    box-shadow: 0 4px 14px rgba(25, 43, 66, .10);
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 700px) {
+
+    .digital-detail-dialog,
+    .digital-cart-dialog,
+    .digital-purchase-dialog {
+        border-left: 0;
+        border-right: 0;
+        box-shadow: 0 -8px 28px rgba(23, 38, 57, .10);
+    }
+
+    .digital-purchase-dialog {
+        width: 100%;
+        padding:
+            20px
+            16px
+            calc(18px + env(safe-area-inset-bottom));
+
+        border-radius: 18px 18px 0 0;
+    }
+
+    .digital-cart-dialog {
+        border-radius: 18px 18px 0 0;
+    }
+
+    .digital-detail-device-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .digital-device-option {
+        min-height: 58px;
+        padding: 10px;
+    }
+
+    .digital-detail-actions {
+        padding-bottom:
+            env(safe-area-inset-bottom);
+    }
+
+}
+
+
+/* BAYORA DIGITAL BRAND MATCH V2
+   Mengikuti warna/design system BAYORA asli.
+   Hanya visual. Tidak mengubah flow.
+========================================================= */
+
+/* ---------- MODAL / PANEL ---------- */
+
+.digital-detail-dialog,
+.digital-cart-dialog,
+.digital-purchase-dialog {
+    background: var(--bayora-card, #ffffff);
+    border: 1px solid #e5edfa;
+
+    box-shadow:
+        0 10px 30px rgba(18, 61, 120, .07);
+}
+
+
+/* ---------- TYPOGRAPHY ---------- */
+
+.digital-marketplace-detail-content,
+.digital-cart-dialog,
+.digital-purchase-dialog {
+    color: var(--bayora-text, #10244d);
+}
+
+.digital-marketplace-detail-content h2,
+.digital-cart-header h2,
+.digital-purchase-header h2,
+.digital-detail-price,
+.digital-cart-total strong,
+.digital-purchase-mini-summary strong {
+    color: var(--bayora-text, #10244d);
+}
+
+.digital-detail-short-description,
+.digital-detail-description-box p,
+.digital-purchase-header p:not(.eyebrow),
+.digital-cart-total span,
+.digital-purchase-mini-summary span,
+.digital-purchase-mini-summary small {
+    color: var(--bayora-muted, #64748b);
+}
+
+
+/* ---------- EYEBROW ---------- */
+
+.digital-cart-header .eyebrow,
+.digital-purchase-header .eyebrow {
+    display: inline-flex;
+
+    padding: 6px 10px;
+    margin: 0 0 9px;
+
+    border: 1px solid rgba(23, 105, 255, .12);
+    border-radius: 999px;
+
+    background: rgba(23, 105, 255, .08);
+    color: var(--bayora-primary, #1769ff);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+}
+
+
+/* ---------- CLOSE ---------- */
+
+.digital-detail-close,
+.digital-cart-close,
+.digital-purchase-close {
+    border: 1px solid #e5edfa;
+
+    background: #f5f9ff;
+    color: var(--bayora-primary, #1769ff);
+
+    box-shadow: none;
+}
+
+
+/* ---------- DETAIL META ---------- */
+
+.digital-detail-meta-item {
+    border: 1px solid #e5edfa;
+
+    background: #f7fbff;
+
+    box-shadow: none;
+}
+
+.digital-detail-meta-item span {
+    color: var(--bayora-muted, #64748b);
+}
+
+.digital-detail-meta-item strong {
+    color: var(--bayora-text, #10244d);
+}
+
+
+/* ---------- COMPATIBILITY ---------- */
+
+.digital-detail-compatibility-item {
+    border: 1px solid rgba(23, 105, 255, .14);
+
+    background: rgba(23, 105, 255, .055);
+
+    color: var(--bayora-primary, #1769ff);
+}
+
+
+/* ---------- TENTANG PRESET ---------- */
+
+.digital-detail-description-box {
+    margin-top: 20px;
+    margin-bottom: 24px;
+
+    padding: 17px 18px;
+
+    border: 1px solid #e5edfa;
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(23, 105, 255, .045),
+            rgba(22, 199, 255, .035)
+        );
+
+    box-shadow: none;
+}
+
+.digital-detail-description-box > strong {
+    display: block;
+
+    margin: 0 0 8px;
+
+    color: var(--bayora-text, #10244d);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.digital-detail-description-box p {
+    margin: 0;
+
+    color: var(--bayora-muted, #64748b);
+
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+
+/* ---------- DEVICE SECTION ---------- */
+
+.digital-detail-device-section {
+    margin-top: 0;
+    padding-top: 0;
+
+    border-top: 0;
+}
+
+.digital-detail-section-heading strong {
+    color: var(--bayora-text, #10244d);
+}
+
+.digital-detail-section-heading p {
+    color: var(--bayora-muted, #64748b);
+}
+
+
+/* ---------- DEVICE BUTTON ---------- */
+
+.digital-device-option {
+    border: 1px solid #e5edfa;
+
+    background: #ffffff;
+
+    color: var(--bayora-text, #10244d);
+
+    box-shadow:
+        0 5px 16px rgba(18, 61, 120, .035);
+}
+
+.digital-device-option:hover {
+    border-color:
+        rgba(23, 105, 255, .28);
+
+    background: #f7fbff;
+}
+
+.digital-device-option.selected {
+    border-color:
+        rgba(23, 105, 255, .48);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(23, 105, 255, .09),
+            rgba(22, 199, 255, .10)
+        );
+
+    color: var(--bayora-primary, #1769ff);
+
+    box-shadow:
+        0 7px 20px rgba(23, 105, 255, .10);
+}
+
+.digital-device-option small {
+    color: var(--bayora-muted, #64748b);
+}
+
+
+/* ---------- SECONDARY BUTTON ---------- */
+
+.digital-detail-cart-button {
+    border:
+        1px solid rgba(23, 105, 255, .18);
+
+    background:
+        rgba(23, 105, 255, .07);
+
+    color:
+        var(--bayora-primary, #1769ff);
+
+    box-shadow: none;
+}
+
+
+/* ---------- PRIMARY BUTTONS ---------- */
+
+.digital-detail-buy-button,
+.digital-cart-checkout-button,
+.digital-purchase-continue {
+    border: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--bayora-primary, #1769ff),
+            var(--bayora-cyan, #16c7ff)
+        );
+
+    color: #ffffff;
+
+    box-shadow:
+        0 10px 25px rgba(23, 105, 255, .22);
+}
+
+.digital-detail-buy-button:hover,
+.digital-cart-checkout-button:hover,
+.digital-purchase-continue:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(23, 105, 255, .28);
+}
+
+
+/* ---------- CART ---------- */
+
+.digital-cart-header {
+    border-bottom-color: #e5edfa;
+}
+
+.digital-cart-item {
+    border: 1px solid #e5edfa;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 6px 20px rgba(18, 61, 120, .045);
+}
+
+.digital-cart-footer {
+    border-top: 1px solid #e5edfa;
+
+    background: #ffffff;
+}
+
+
+/* ---------- PURCHASE INFORMATION ---------- */
+
+.digital-purchase-form .input-group label {
+    color: var(--bayora-text, #10244d);
+}
+
+.digital-purchase-form input {
+    border: 1px solid #dce7f7;
+
+    background: #ffffff;
+
+    color: var(--bayora-text, #10244d);
+}
+
+.digital-purchase-form input:focus {
+    border-color:
+        var(--bayora-primary, #1769ff);
+
+    box-shadow:
+        0 0 0 3px rgba(23, 105, 255, .10);
+}
+
+.digital-purchase-mini-summary {
+    border: 1px solid #e5edfa;
+
+    background: #f7fbff;
+}
+
+
+/* ---------- GALLERY ---------- */
+
+.digital-detail-gallery {
+    background: #f5f9ff;
+}
+
+.digital-gallery-nav {
+    border:
+        1px solid rgba(23, 105, 255, .12);
+
+    background:
+        rgba(255, 255, 255, .95);
+
+    color:
+        var(--bayora-primary, #1769ff);
+
+    box-shadow:
+        0 6px 18px rgba(23, 105, 255, .10);
+}
+
+
+/* ---------- BACKDROP ---------- */
+
+.digital-purchase-backdrop,
+.digital-cart-backdrop,
+.digital-detail-backdrop {
+    background:
+        rgba(6, 26, 69, .42);
+
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 700px) {
+
+    .digital-detail-description-box {
+        margin-top: 18px;
+        margin-bottom: 22px;
+
+        padding: 15px;
+    }
+
+    .digital-detail-device-section {
+        margin-top: 0;
+    }
+
+    .digital-detail-dialog,
+    .digital-cart-dialog,
+    .digital-purchase-dialog {
+        box-shadow:
+            0 -8px 28px rgba(18, 61, 120, .10);
+    }
+
+}

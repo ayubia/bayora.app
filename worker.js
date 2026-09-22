@@ -11767,6 +11767,494 @@ export default {
 
 
     // ========================================
+    // ADMIN — DIGIFLAZZ PPOB PRICING
+    // CONFIG / PREVIEW / APPLY
+    // ========================================
+
+    if (
+      (
+        request.method === "GET" ||
+        request.method === "PUT"
+      ) &&
+      url.pathname ===
+        "/api/admin/ppob/provider/digiflazz/pricing"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        if (request.method === "GET") {
+          let settings =
+            await env.ppobku_db.prepare(`
+              SELECT
+                provider,
+                default_margin,
+                service_fee,
+                pricing_enabled,
+                created_at,
+                updated_at
+              FROM ppob_pricing_settings
+              WHERE provider = 'DIGIFLAZZ'
+              LIMIT 1
+            `).first();
+
+          if (!settings) {
+            const now = catalogNow();
+
+            await env.ppobku_db.prepare(`
+              INSERT INTO ppob_pricing_settings (
+                provider,
+                default_margin,
+                service_fee,
+                pricing_enabled,
+                created_at,
+                updated_at
+              )
+              VALUES ('DIGIFLAZZ', NULL, 0, 0, ?, ?)
+            `).bind(now, now).run();
+
+            settings =
+              await env.ppobku_db.prepare(`
+                SELECT *
+                FROM ppob_pricing_settings
+                WHERE provider = 'DIGIFLAZZ'
+                LIMIT 1
+              `).first();
+          }
+
+          const categoryResult =
+            await env.ppobku_db.prepare(`
+              SELECT
+                s.id AS service_id,
+                s.title,
+                COUNT(p.id) AS product_count,
+                SUM(
+                  CASE
+                    WHEN p.digiflazz_sku IS NOT NULL
+                     AND TRIM(p.digiflazz_sku) <> ''
+                    THEN 1 ELSE 0
+                  END
+                ) AS linked_count,
+                m.margin,
+                COALESCE(m.active, 0) AS margin_active
+              FROM services s
+              JOIN products p
+                ON p.service_id = s.id
+               AND p.product_type = 'ppob'
+              LEFT JOIN ppob_category_margins m
+                ON m.provider = 'DIGIFLAZZ'
+               AND m.service_id = s.id
+              WHERE s.type = 'ppob'
+              GROUP BY
+                s.id,
+                s.title,
+                m.margin,
+                m.active
+              ORDER BY s.sort_order ASC, s.title ASC
+            `).all();
+
+          return json({
+            success: true,
+            settings: {
+              provider: "DIGIFLAZZ",
+              default_margin:
+                settings.default_margin === null
+                  ? null
+                  : Number(settings.default_margin),
+              service_fee:
+                Number(settings.service_fee || 0),
+              pricing_enabled:
+                Number(settings.pricing_enabled) === 1,
+              updated_at:
+                settings.updated_at || null
+            },
+            categories:
+              (categoryResult.results || []).map((row) => ({
+                service_id: row.service_id,
+                title: row.title,
+                product_count:
+                  Number(row.product_count || 0),
+                linked_count:
+                  Number(row.linked_count || 0),
+                margin:
+                  row.margin === null ||
+                  row.margin === undefined
+                    ? null
+                    : Number(row.margin),
+                active:
+                  Number(row.margin_active) === 1
+              }))
+          });
+        }
+
+        let body;
+
+        try {
+          body = await request.json();
+        } catch {
+          return json({
+            success: false,
+            error: "Body JSON tidak valid."
+          }, 400);
+        }
+
+        const defaultMargin =
+          body.default_margin === null ||
+          body.default_margin === "" ||
+          body.default_margin === undefined
+            ? null
+            : Number(body.default_margin);
+
+        const serviceFee =
+          Number(body.service_fee ?? 0);
+
+        if (
+          defaultMargin !== null &&
+          (
+            !Number.isFinite(defaultMargin) ||
+            defaultMargin < 0
+          )
+        ) {
+          return json({
+            success: false,
+            error:
+              "Margin default harus Rp0 atau lebih."
+          }, 400);
+        }
+
+        if (
+          !Number.isFinite(serviceFee) ||
+          serviceFee < 0
+        ) {
+          return json({
+            success: false,
+            error:
+              "Biaya layanan harus Rp0 atau lebih."
+          }, 400);
+        }
+
+        const categories =
+          Array.isArray(body.categories)
+            ? body.categories
+            : [];
+
+        const now = catalogNow();
+        const statements = [];
+
+        statements.push(
+          env.ppobku_db.prepare(`
+            UPDATE ppob_pricing_settings
+            SET
+              default_margin = ?,
+              service_fee = ?,
+              updated_at = ?
+            WHERE provider = 'DIGIFLAZZ'
+          `).bind(
+            defaultMargin === null
+              ? null
+              : Math.round(defaultMargin),
+            Math.round(serviceFee),
+            now
+          )
+        );
+
+        for (const item of categories) {
+          const serviceId =
+            String(item?.service_id || "").trim();
+
+          if (!serviceId) continue;
+
+          const active =
+            item?.active === true;
+
+          if (!active) {
+            statements.push(
+              env.ppobku_db.prepare(`
+                DELETE FROM ppob_category_margins
+                WHERE provider = 'DIGIFLAZZ'
+                  AND service_id = ?
+              `).bind(serviceId)
+            );
+
+            continue;
+          }
+
+          const margin = Number(item?.margin);
+
+          if (
+            !Number.isFinite(margin) ||
+            margin < 0
+          ) {
+            return json({
+              success: false,
+              error:
+                `Margin kategori ${serviceId} tidak valid.`
+            }, 400);
+          }
+
+          statements.push(
+            env.ppobku_db.prepare(`
+              INSERT INTO ppob_category_margins (
+                provider,
+                service_id,
+                margin,
+                active,
+                created_at,
+                updated_at
+              )
+              VALUES (
+                'DIGIFLAZZ', ?, ?, 1, ?, ?
+              )
+              ON CONFLICT(provider, service_id)
+              DO UPDATE SET
+                margin = excluded.margin,
+                active = 1,
+                updated_at = excluded.updated_at
+            `).bind(
+              serviceId,
+              Math.round(margin),
+              now,
+              now
+            )
+          );
+        }
+
+        if (statements.length > 0) {
+          await env.ppobku_db.batch(statements);
+        }
+
+        return json({
+          success: true,
+          message:
+            "Pengaturan harga PPOB tersimpan. Harga produk belum diubah.",
+          safety: {
+            productPriceChanged: false,
+            productMarginChanged: false,
+            pricingEnabledChanged: false
+          }
+        });
+
+      } catch (error) {
+        console.error(
+          "[DIGIFLAZZ PRICING CONFIG]",
+          error
+        );
+
+        return json({
+          success: false,
+          error:
+            error?.message ||
+            "Gagal memproses pengaturan harga PPOB."
+        }, 500);
+      }
+    }
+
+
+    if (
+      request.method === "POST" &&
+      (
+        url.pathname ===
+          "/api/admin/ppob/provider/digiflazz/pricing/preview" ||
+        url.pathname ===
+          "/api/admin/ppob/provider/digiflazz/pricing/apply"
+      )
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const isApply =
+          url.pathname.endsWith("/apply");
+
+        const settings =
+          await env.ppobku_db.prepare(`
+            SELECT
+              default_margin,
+              service_fee,
+              pricing_enabled
+            FROM ppob_pricing_settings
+            WHERE provider = 'DIGIFLAZZ'
+            LIMIT 1
+          `).first();
+
+        if (!settings) {
+          return json({
+            success: false,
+            error:
+              "Pengaturan pricing Digiflazz belum tersedia."
+          }, 409);
+        }
+
+        const productsResult =
+          await env.ppobku_db.prepare(`
+            SELECT
+              p.id,
+              p.service_id,
+              p.name,
+              p.price,
+              p.cost_price,
+              p.margin,
+              p.digiflazz_sku,
+              cm.margin AS category_margin,
+              cm.active AS category_margin_active,
+              po.margin AS product_override_margin,
+              po.active AS product_override_active
+            FROM products p
+            LEFT JOIN ppob_category_margins cm
+              ON cm.provider = 'DIGIFLAZZ'
+             AND cm.service_id = p.service_id
+            LEFT JOIN ppob_product_margin_overrides po
+              ON po.provider = 'DIGIFLAZZ'
+             AND po.product_id = p.id
+            WHERE p.product_type = 'ppob'
+              AND p.digiflazz_sku IS NOT NULL
+              AND TRIM(p.digiflazz_sku) <> ''
+              AND p.cost_price > 0
+            ORDER BY p.service_id, p.name
+          `).all();
+
+        const rows = [];
+        const updateStatements = [];
+
+        for (
+          const product of
+          (productsResult.results || [])
+        ) {
+          let source = "legacy";
+          let effectiveMargin =
+            Number(product.margin || 0);
+
+          if (
+            Number(product.product_override_active) === 1 &&
+            product.product_override_margin !== null
+          ) {
+            source = "product";
+            effectiveMargin =
+              Number(product.product_override_margin);
+          } else if (
+            Number(product.category_margin_active) === 1 &&
+            product.category_margin !== null
+          ) {
+            source = "category";
+            effectiveMargin =
+              Number(product.category_margin);
+          } else if (
+            settings.default_margin !== null
+          ) {
+            source = "default";
+            effectiveMargin =
+              Number(settings.default_margin);
+          }
+
+          effectiveMargin =
+            Math.max(
+              0,
+              Math.round(effectiveMargin || 0)
+            );
+
+          const oldPrice =
+            Number(product.price || 0);
+
+          const newPrice =
+            Number(product.cost_price || 0) +
+            effectiveMargin;
+
+          rows.push({
+            id: product.id,
+            service_id: product.service_id,
+            name: product.name,
+            source,
+            cost_price:
+              Number(product.cost_price || 0),
+            old_margin:
+              Number(product.margin || 0),
+            new_margin:
+              effectiveMargin,
+            old_price: oldPrice,
+            new_price: newPrice,
+            difference:
+              newPrice - oldPrice
+          });
+
+          if (isApply) {
+            updateStatements.push(
+              env.ppobku_db.prepare(`
+                UPDATE products
+                SET
+                  margin = ?,
+                  price = ?
+                WHERE id = ?
+                  AND product_type = 'ppob'
+              `).bind(
+                effectiveMargin,
+                newPrice,
+                product.id
+              )
+            );
+          }
+        }
+
+        if (isApply) {
+          const now = catalogNow();
+
+          for (
+            let i = 0;
+            i < updateStatements.length;
+            i += 50
+          ) {
+            await env.ppobku_db.batch(
+              updateStatements.slice(i, i + 50)
+            );
+          }
+
+          await env.ppobku_db.prepare(`
+            UPDATE ppob_pricing_settings
+            SET
+              pricing_enabled = 1,
+              updated_at = ?
+            WHERE provider = 'DIGIFLAZZ'
+          `).bind(now).run();
+        }
+
+        const changed =
+          rows.filter((row) =>
+            row.old_price !== row.new_price ||
+            row.old_margin !== row.new_margin
+          );
+
+        return json({
+          success: true,
+          mode: isApply ? "apply" : "preview",
+          pricing_enabled:
+            isApply
+              ? true
+              : Number(settings.pricing_enabled) === 1,
+          total_products: rows.length,
+          changed_products: changed.length,
+          unchanged_products:
+            rows.length - changed.length,
+          service_fee:
+            Number(settings.service_fee || 0),
+          products: rows
+        });
+
+      } catch (error) {
+        console.error(
+          "[DIGIFLAZZ PRICING PREVIEW/APPLY]",
+          error
+        );
+
+        return json({
+          success: false,
+          error:
+            error?.message ||
+            "Gagal memproses pricing PPOB."
+        }, 500);
+      }
+    }
+
+
+    // ========================================
     // ADMIN — DIGIFLAZZ CATALOG SYNC
     // PRICE LIST + LINKED PPOB REPRICE
     // ========================================

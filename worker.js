@@ -11276,6 +11276,1082 @@ export default {
     // GET CATALOG
     // ========================================
 
+
+    // ========================================
+    // ADMIN CATALOG CRUD
+    // ========================================
+
+    const requireCatalogAdmin = async () => {
+      const cookieHeader =
+        request.headers.get("Cookie") || "";
+
+      const match =
+        cookieHeader.match(
+          /(?:^|;\s*)bayora_admin_session=([^;]+)/
+        );
+
+      if (!match) {
+        return {
+          response: json({
+            success: false,
+            authenticated: false,
+            error: "Admin belum login."
+          }, 401)
+        };
+      }
+
+      let sessionToken;
+
+      try {
+        sessionToken =
+          decodeURIComponent(match[1]);
+      } catch {
+        sessionToken = match[1];
+      }
+
+      const sessionHash =
+        hashSessionToken(sessionToken);
+
+      const result =
+        await env.ppobku_db.prepare(`
+          SELECT
+            s.id AS session_id,
+            s.expires_at,
+            a.id,
+            a.username,
+            a.name,
+            a.role,
+            a.active
+          FROM admin_sessions s
+          JOIN admins a
+            ON a.id = s.admin_id
+          WHERE s.token_hash = ?
+          LIMIT 1
+        `).bind(sessionHash).all();
+
+      const admin =
+        result.results?.[0];
+
+      if (!admin) {
+        return {
+          response: json({
+            success: false,
+            authenticated: false,
+            error: "Session admin tidak valid."
+          }, 401)
+        };
+      }
+
+      if (
+        !admin.active ||
+        new Date(admin.expires_at).getTime() <= Date.now()
+      ) {
+        await env.ppobku_db.prepare(`
+          DELETE FROM admin_sessions
+          WHERE id = ?
+        `).bind(admin.session_id).run();
+
+        return {
+          response: json({
+            success: false,
+            authenticated: false,
+            error: "Session admin sudah expired."
+          }, 401)
+        };
+      }
+
+      if (
+        admin.role !== "owner" &&
+        admin.role !== "admin"
+      ) {
+        return {
+          response: json({
+            success: false,
+            error: "Kamu tidak memiliki akses untuk mengelola katalog."
+          }, 403)
+        };
+      }
+
+      return { admin };
+    };
+
+    const catalogNow = () =>
+      new Date().toISOString();
+
+    // CREATE SERVICE
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/services"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const body = await request.json();
+
+        const id =
+          String(body.id || "")
+            .trim()
+            .toLowerCase();
+
+        const title =
+          String(body.title || "").trim();
+
+        if (!id || !title) {
+          return json({
+            success: false,
+            error: "ID dan nama layanan wajib diisi."
+          }, 400);
+        }
+
+        const exists =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM services
+            WHERE id = ?
+            LIMIT 1
+          `).bind(id).first();
+
+        if (exists) {
+          return json({
+            success: false,
+            error: "ID layanan sudah digunakan."
+          }, 409);
+        }
+
+        const type =
+          body.type === "digital"
+            ? "digital"
+            : "ppob";
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO services (
+            id,
+            title,
+            icon,
+            description,
+            label,
+            placeholder,
+            active,
+            sort_order,
+            created_at,
+            type
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          id,
+          title,
+          body.icon || "📦",
+          body.description || "",
+          body.label || "Nomor Tujuan",
+          body.placeholder || "",
+          body.active === false ? 0 : 1,
+          Number.isFinite(Number(body.sort_order))
+            ? Number(body.sort_order)
+            : 0,
+          catalogNow(),
+          type
+        ).run();
+
+        const service =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM services
+            WHERE id = ?
+          `).bind(id).first();
+
+        return json({
+          success: true,
+          service
+        }, 201);
+
+      } catch (error) {
+        console.error("[CREATE SERVICE]", error);
+
+        return json({
+          success: false,
+          error: "Gagal menambahkan layanan."
+        }, 500);
+      }
+    }
+
+    const serviceDuplicateMatch =
+      url.pathname.match(
+        /^\/api\/services\/([^/]+)\/duplicate$/
+      );
+
+    // DUPLICATE DIGITAL SERVICE
+    if (
+      request.method === "POST" &&
+      serviceDuplicateMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const sourceId =
+          decodeURIComponent(
+            serviceDuplicateMatch[1]
+          );
+
+        const source =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM services
+            WHERE id = ?
+          `).bind(sourceId).first();
+
+        if (!source) {
+          return json({
+            success: false,
+            error: "Layanan tidak ditemukan."
+          }, 404);
+        }
+
+        if (source.type !== "digital") {
+          return json({
+            success: false,
+            error: "Layanan PPOB tidak dapat diduplikat."
+          }, 400);
+        }
+
+        const baseServiceId =
+          `${source.id}-copy`;
+
+        let newServiceId =
+          baseServiceId;
+
+        let serviceCounter = 2;
+
+        while (
+          await env.ppobku_db.prepare(`
+            SELECT 1
+            FROM services
+            WHERE id = ?
+          `).bind(newServiceId).first()
+        ) {
+          newServiceId =
+            `${baseServiceId}-${serviceCounter++}`;
+        }
+
+        const sourceProductsResult =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE service_id = ?
+              AND product_type = 'digital'
+            ORDER BY sort_order ASC, name ASC
+          `).bind(sourceId).all();
+
+        const sourceProducts =
+          sourceProductsResult.results || [];
+
+        const statements = [];
+
+        statements.push(
+          env.ppobku_db.prepare(`
+            INSERT INTO services (
+              id,
+              title,
+              icon,
+              description,
+              label,
+              placeholder,
+              active,
+              sort_order,
+              type,
+              created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            newServiceId,
+            `${source.title} Copy`,
+            source.icon,
+            source.description,
+            source.label,
+            source.placeholder,
+            source.active,
+            source.sort_order,
+            "digital",
+            catalogNow()
+          )
+        );
+
+        const reservedProductIds =
+          new Set();
+
+        for (const product of sourceProducts) {
+          const baseProductId =
+            `${product.id}-copy`;
+
+          let newProductId =
+            baseProductId;
+
+          let productCounter = 2;
+
+          while (
+            reservedProductIds.has(newProductId) ||
+            await env.ppobku_db.prepare(`
+              SELECT 1
+              FROM products
+              WHERE id = ?
+            `).bind(newProductId).first()
+          ) {
+            newProductId =
+              `${baseProductId}-${productCounter++}`;
+          }
+
+          reservedProductIds.add(newProductId);
+
+          statements.push(
+            env.ppobku_db.prepare(`
+              INSERT INTO products (
+                id,
+                service_id,
+                operator,
+                name,
+                price,
+                info,
+                active,
+                sort_order,
+                created_at,
+                cost_price,
+                margin,
+                digiflazz_sku,
+                product_type,
+                preview_image,
+                digital_file,
+                before_image,
+                after_image,
+                gallery_images,
+                mood,
+                pdf_ios,
+                pdf_android,
+                pdf_mac,
+                pdf_windows,
+                haybi_sku
+              )
+              VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?
+              )
+            `).bind(
+              newProductId,
+              newServiceId,
+              product.operator,
+              product.name,
+              product.price,
+              product.info,
+              product.active,
+              product.sort_order,
+              catalogNow(),
+              product.cost_price,
+              product.margin,
+              product.digiflazz_sku,
+              product.product_type,
+              product.preview_image,
+              product.digital_file,
+              product.before_image,
+              product.after_image,
+              product.gallery_images,
+              product.mood,
+              product.pdf_ios,
+              product.pdf_android,
+              product.pdf_mac,
+              product.pdf_windows,
+              product.haybi_sku
+            )
+          );
+        }
+
+        await env.ppobku_db.batch(
+          statements
+        );
+
+        const service =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM services
+            WHERE id = ?
+          `).bind(newServiceId).first();
+
+        const productsResult =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE service_id = ?
+            ORDER BY sort_order ASC, name ASC
+          `).bind(newServiceId).all();
+
+        return json({
+          success: true,
+          service,
+          products:
+            productsResult.results || []
+        }, 201);
+
+      } catch (error) {
+        console.error(
+          "[DUPLICATE DIGITAL SERVICE]",
+          error
+        );
+
+        return json({
+          success: false,
+          error: "Gagal menduplikat layanan digital."
+        }, 500);
+      }
+    }
+
+    const serviceMatch =
+      url.pathname.match(
+        /^\/api\/services\/([^/]+)$/
+      );
+
+    // UPDATE SERVICE / TOGGLE SERVICE
+    if (
+      request.method === "PUT" &&
+      serviceMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const serviceId =
+          decodeURIComponent(serviceMatch[1]);
+
+        const existing =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM services
+            WHERE id = ?
+          `).bind(serviceId).first();
+
+        if (!existing) {
+          return json({
+            success: false,
+            error: "Layanan tidak ditemukan."
+          }, 404);
+        }
+
+        const body =
+          await request.json();
+
+        const serviceType =
+          body.type === undefined
+            ? existing.type || "ppob"
+            : body.type === "digital"
+              ? "digital"
+              : "ppob";
+
+        await env.ppobku_db.prepare(`
+          UPDATE services
+          SET
+            title = ?,
+            icon = ?,
+            description = ?,
+            label = ?,
+            placeholder = ?,
+            active = ?,
+            sort_order = ?,
+            type = ?
+          WHERE id = ?
+        `).bind(
+          body.title !== undefined
+            ? String(body.title).trim()
+            : existing.title,
+          body.icon !== undefined
+            ? body.icon
+            : existing.icon,
+          body.description !== undefined
+            ? body.description
+            : existing.description,
+          body.label !== undefined
+            ? body.label
+            : existing.label,
+          body.placeholder !== undefined
+            ? body.placeholder
+            : existing.placeholder,
+          body.active === undefined
+            ? existing.active
+            : body.active ? 1 : 0,
+          body.sort_order === undefined
+            ? existing.sort_order
+            : Number(body.sort_order),
+          serviceType,
+          serviceId
+        ).run();
+
+        const service =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM services
+            WHERE id = ?
+          `).bind(serviceId).first();
+
+        return json({
+          success: true,
+          service
+        });
+
+      } catch (error) {
+        console.error("[UPDATE SERVICE]", error);
+
+        return json({
+          success: false,
+          error: "Gagal mengubah layanan."
+        }, 500);
+      }
+    }
+
+    // DELETE SERVICE
+    if (
+      request.method === "DELETE" &&
+      serviceMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const serviceId =
+          decodeURIComponent(serviceMatch[1]);
+
+        const existing =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM services
+            WHERE id = ?
+          `).bind(serviceId).first();
+
+        if (!existing) {
+          return json({
+            success: false,
+            error: "Layanan tidak ditemukan."
+          }, 404);
+        }
+
+        await env.ppobku_db.prepare(`
+          DELETE FROM services
+          WHERE id = ?
+        `).bind(serviceId).run();
+
+        return json({
+          success: true,
+          message: "Layanan berhasil dihapus."
+        });
+
+      } catch (error) {
+        console.error("[DELETE SERVICE]", error);
+
+        return json({
+          success: false,
+          error: "Gagal menghapus layanan."
+        }, 500);
+      }
+    }
+
+    // CREATE PRODUCT
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/products"
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const body =
+          await request.json();
+
+        const productId =
+          String(body.id || "")
+            .trim()
+            .toLowerCase();
+
+        const serviceId =
+          String(body.service_id || "").trim();
+
+        const name =
+          String(body.name || "").trim();
+
+        if (
+          !productId ||
+          !serviceId ||
+          !name
+        ) {
+          return json({
+            success: false,
+            error: "ID, layanan, dan nama produk wajib diisi."
+          }, 400);
+        }
+
+        const service =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM services
+            WHERE id = ?
+          `).bind(serviceId).first();
+
+        if (!service) {
+          return json({
+            success: false,
+            error: "Layanan tidak ditemukan."
+          }, 400);
+        }
+
+        const exists =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM products
+            WHERE id = ?
+          `).bind(productId).first();
+
+        if (exists) {
+          return json({
+            success: false,
+            error: "ID produk sudah digunakan."
+          }, 409);
+        }
+
+        const numericPrice =
+          Number(body.price);
+
+        if (
+          !Number.isFinite(numericPrice) ||
+          numericPrice < 0
+        ) {
+          return json({
+            success: false,
+            error: "Harga produk tidak valid."
+          }, 400);
+        }
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO products (
+            id,
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            mood,
+            active,
+            sort_order,
+            created_at,
+            product_type,
+            preview_image,
+            digital_file,
+            before_image,
+            after_image,
+            gallery_images,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows
+          )
+          VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          )
+        `).bind(
+          productId,
+          serviceId,
+          body.operator || null,
+          name,
+          numericPrice,
+          body.info || "",
+          body.mood || "",
+          body.active === false ? 0 : 1,
+          Number.isFinite(Number(body.sort_order))
+            ? Number(body.sort_order)
+            : 0,
+          catalogNow(),
+          body.product_type === "digital"
+            ? "digital"
+            : "ppob",
+          body.preview_image || null,
+          body.digital_file || null,
+          body.before_image || null,
+          body.after_image || null,
+          body.gallery_images || null,
+          body.pdf_ios || null,
+          body.pdf_android || null,
+          body.pdf_mac || null,
+          body.pdf_windows || null
+        ).run();
+
+        const product =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+          `).bind(productId).first();
+
+        return json({
+          success: true,
+          product
+        }, 201);
+
+      } catch (error) {
+        console.error("[CREATE PRODUCT]", error);
+
+        return json({
+          success: false,
+          error: "Gagal menambahkan produk."
+        }, 500);
+      }
+    }
+
+    const productDuplicateMatch =
+      url.pathname.match(
+        /^\/api\/products\/([^/]+)\/duplicate$/
+      );
+
+    // DUPLICATE PRODUCT
+    if (
+      request.method === "POST" &&
+      productDuplicateMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const sourceId =
+          decodeURIComponent(
+            productDuplicateMatch[1]
+          );
+
+        const source =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+          `).bind(sourceId).first();
+
+        if (!source) {
+          return json({
+            success: false,
+            error: "Produk tidak ditemukan."
+          }, 404);
+        }
+
+        const baseId =
+          `${source.id}-copy`;
+
+        let newId = baseId;
+        let counter = 2;
+
+        while (
+          await env.ppobku_db.prepare(`
+            SELECT 1
+            FROM products
+            WHERE id = ?
+          `).bind(newId).first()
+        ) {
+          newId =
+            `${baseId}-${counter++}`;
+        }
+
+        await env.ppobku_db.prepare(`
+          INSERT INTO products (
+            id,
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            active,
+            sort_order,
+            created_at,
+            cost_price,
+            margin,
+            digiflazz_sku,
+            product_type,
+            preview_image,
+            digital_file,
+            before_image,
+            after_image,
+            gallery_images,
+            mood,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows,
+            haybi_sku
+          )
+          SELECT
+            ?,
+            service_id,
+            operator,
+            name,
+            price,
+            info,
+            active,
+            sort_order,
+            ?,
+            cost_price,
+            margin,
+            digiflazz_sku,
+            product_type,
+            preview_image,
+            digital_file,
+            before_image,
+            after_image,
+            gallery_images,
+            mood,
+            pdf_ios,
+            pdf_android,
+            pdf_mac,
+            pdf_windows,
+            haybi_sku
+          FROM products
+          WHERE id = ?
+        `).bind(
+          newId,
+          catalogNow(),
+          sourceId
+        ).run();
+
+        const product =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+          `).bind(newId).first();
+
+        return json({
+          success: true,
+          message: "Produk berhasil diduplikat.",
+          product
+        }, 201);
+
+      } catch (error) {
+        console.error(
+          "[DUPLICATE PRODUCT]",
+          error
+        );
+
+        return json({
+          success: false,
+          error: "Gagal menduplikat produk."
+        }, 500);
+      }
+    }
+
+    const productMatch =
+      url.pathname.match(
+        /^\/api\/products\/([^/]+)$/
+      );
+
+    // UPDATE PRODUCT
+    if (
+      request.method === "PUT" &&
+      productMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const productId =
+          decodeURIComponent(productMatch[1]);
+
+        const existing =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+          `).bind(productId).first();
+
+        if (!existing) {
+          return json({
+            success: false,
+            error: "Produk tidak ditemukan."
+          }, 404);
+        }
+
+        const body =
+          await request.json();
+
+        const targetService =
+          body.service_id ||
+          existing.service_id;
+
+        const service =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM services
+            WHERE id = ?
+          `).bind(targetService).first();
+
+        if (!service) {
+          return json({
+            success: false,
+            error: "Layanan tidak ditemukan."
+          }, 400);
+        }
+
+        const targetPrice =
+          body.price === undefined
+            ? existing.price
+            : Number(body.price);
+
+        if (
+          !Number.isFinite(targetPrice) ||
+          targetPrice < 0
+        ) {
+          return json({
+            success: false,
+            error: "Harga produk tidak valid."
+          }, 400);
+        }
+
+        await env.ppobku_db.prepare(`
+          UPDATE products
+          SET
+            service_id = ?,
+            operator = ?,
+            name = ?,
+            price = ?,
+            info = ?,
+            mood = ?,
+            active = ?,
+            sort_order = ?,
+            product_type = ?,
+            preview_image = ?,
+            digital_file = ?,
+            before_image = ?,
+            after_image = ?,
+            gallery_images = ?,
+            pdf_ios = ?,
+            pdf_android = ?,
+            pdf_mac = ?,
+            pdf_windows = ?
+          WHERE id = ?
+        `).bind(
+          targetService,
+          body.operator === undefined
+            ? existing.operator
+            : body.operator,
+          body.name === undefined
+            ? existing.name
+            : String(body.name).trim(),
+          targetPrice,
+          body.info === undefined
+            ? existing.info
+            : body.info,
+          body.mood === undefined
+            ? existing.mood || ""
+            : body.mood,
+          body.active === undefined
+            ? existing.active
+            : body.active ? 1 : 0,
+          body.sort_order === undefined
+            ? existing.sort_order
+            : Number(body.sort_order),
+          body.product_type === undefined
+            ? existing.product_type
+            : body.product_type === "digital"
+              ? "digital"
+              : "ppob",
+          body.preview_image === undefined
+            ? existing.preview_image
+            : body.preview_image || null,
+          body.digital_file === undefined
+            ? existing.digital_file
+            : body.digital_file || null,
+          body.before_image === undefined
+            ? existing.before_image
+            : body.before_image || null,
+          body.after_image === undefined
+            ? existing.after_image
+            : body.after_image || null,
+          body.gallery_images === undefined
+            ? existing.gallery_images
+            : body.gallery_images || null,
+          body.pdf_ios === undefined
+            ? existing.pdf_ios
+            : body.pdf_ios || null,
+          body.pdf_android === undefined
+            ? existing.pdf_android
+            : body.pdf_android || null,
+          body.pdf_mac === undefined
+            ? existing.pdf_mac
+            : body.pdf_mac || null,
+          body.pdf_windows === undefined
+            ? existing.pdf_windows
+            : body.pdf_windows || null,
+          productId
+        ).run();
+
+        const product =
+          await env.ppobku_db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+          `).bind(productId).first();
+
+        return json({
+          success: true,
+          product
+        });
+
+      } catch (error) {
+        console.error("[UPDATE PRODUCT]", error);
+
+        return json({
+          success: false,
+          error: "Gagal mengubah produk."
+        }, 500);
+      }
+    }
+
+    // DELETE PRODUCT
+    if (
+      request.method === "DELETE" &&
+      productMatch
+    ) {
+      try {
+        const auth = await requireCatalogAdmin();
+        if (auth.response) return auth.response;
+
+        const productId =
+          decodeURIComponent(productMatch[1]);
+
+        const existing =
+          await env.ppobku_db.prepare(`
+            SELECT id
+            FROM products
+            WHERE id = ?
+          `).bind(productId).first();
+
+        if (!existing) {
+          return json({
+            success: false,
+            error: "Produk tidak ditemukan."
+          }, 404);
+        }
+
+        await env.ppobku_db.prepare(`
+          DELETE FROM products
+          WHERE id = ?
+        `).bind(productId).run();
+
+        return json({
+          success: true,
+          message: "Produk berhasil dihapus."
+        });
+
+      } catch (error) {
+        console.error("[DELETE PRODUCT]", error);
+
+        return json({
+          success: false,
+          error: "Gagal menghapus produk."
+        }, 500);
+      }
+    }
+
+
     if (
       request.method === "GET" &&
       url.pathname === "/api/catalog"

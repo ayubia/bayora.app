@@ -9129,3 +9129,97 @@ footer a {
         font-size: 13px;
     }
 }
+
+/* BAYORA CATEGORY SHARE */
+.customer-service-tab { position: relative; padding-right: 58px; }
+.bayora-category-share {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,.96);
+    color: #171717;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 5px 16px rgba(0,0,0,.06);
+    z-index: 3;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.bayora-category-share:hover {
+    transform: translateY(-50%) scale(1.04);
+    box-shadow: 0 8px 20px rgba(0,0,0,.10);
+}
+.bayora-category-share:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+@media (max-width: 640px) {
+    .customer-service-tab { padding-right: 50px; }
+    .bayora-category-share { width: 32px; height: 32px; right: 10px; }
+}
+
+/* BAYORA — category share icon precision centering */
+.bayora-share-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.bayora-share-btn > * {
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.bayora-share-btn .bayora-share-icon {
+  display: block !important;
+  line-height: 1 !important;
+  transform: translate(1px, -1px);
+}
+
+/* BAYORA — precise category share centering */
+.bayora-category-share {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  font-family: Arial, sans-serif !important;
+  text-indent: 0 !important;
+}
+
+
+/* BAYORA — refine category share arrow */
+.bayora-category-share {
+  font-size: 17px !important;
+  font-weight: 400 !important;
+}
+
+
+/* BAYORA — compact category share SVG */
+.bayora-category-share {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+.bayora-category-share-icon {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+}
+

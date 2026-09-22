@@ -526,6 +526,7 @@ async function loadCustomerCatalog() {
         services = apiServices;
         products = apiProducts;
 renderCustomerServices();
+        applySharedCatalogCategory();
 
         /*
          * BAYORA — OPEN SHARED SERVICE
@@ -757,7 +758,20 @@ async function loadSmmServices() {
                         service.cancel === true,
                     type: "smm"
                 }));
-if (
+const sharedParams = new URLSearchParams(window.location.search);
+        if (sharedParams.get("category") === "smm") {
+            customerServiceCategory = "smm";
+            const platform = sharedParams.get("smmPlatform");
+            const category = sharedParams.get("smmCategory");
+            const serviceId = sharedParams.get("smmService");
+            if (platform) smmNavigation.platform = String(platform).trim().toLowerCase();
+            if (category) smmNavigation.category = String(category).trim().toLowerCase();
+            renderCustomerServices();
+            document.getElementById("customerServiceGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (serviceId) setTimeout(() => openSmmService(serviceId), 0);
+        }
+
+        if (
             typeof customerServiceCategory !==
             "undefined" &&
             customerServiceCategory === "smm"
@@ -788,6 +802,54 @@ if (
 loadCustomerCatalog();
 loadSmmServices();
 
+
+/* =========================================================
+   BAYORA SHARE / DEEP LINK
+   ========================================================= */
+
+function buildBayoraShareUrl(params = {}) {
+    const url = new URL(window.location.origin + window.location.pathname);
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && String(value).trim() !== "") {
+            url.searchParams.set(key, String(value));
+        }
+    });
+    return url.toString();
+}
+
+async function shareBayoraLink(params = {}, title = "Layanan BAYORA") {
+    const url = buildBayoraShareUrl(params);
+    const data = { title, text: `Cek ${title} di BAYORA`, url };
+    try {
+        if (navigator.share) {
+            await navigator.share(data);
+        } else if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(url);
+            alert("Link layanan berhasil disalin.");
+        } else {
+            window.prompt("Salin link layanan ini:", url);
+        }
+    } catch (error) {
+        if (error?.name !== "AbortError") console.warn("[BAYORA SHARE]", error);
+    }
+}
+
+function shareCatalogCategory(event, category, title) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    shareBayoraLink({ category }, title || "Layanan BAYORA");
+}
+
+function applySharedCatalogCategory() {
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    if (["ppob", "digital", "smm"].includes(category)) {
+        setCustomerServiceCategory(category);
+        document.getElementById("customerServiceGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return true;
+    }
+    return false;
+}
 
 let customerServiceCategory = "ppob";
 
@@ -1702,6 +1764,10 @@ function getBayoraServiceIconHTML(id, service) {
                     </small>
                 </span>
 
+                <span class="bayora-category-share" role="button" tabindex="0" aria-label="Bagikan kategori Layanan PPOB" title="Bagikan kategori" onclick="shareCatalogCategory(event, 'ppob', 'Layanan PPOB BAYORA')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ shareCatalogCategory(event, 'ppob', 'Layanan PPOB BAYORA'); }"><svg class="bayora-category-share-icon" viewBox="0 0 20 20" aria-hidden="true">
+<path d="M6.5 13.5L13.5 6.5M8.5 6.5H13.5V11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
+
             </button>
 
 
@@ -1727,6 +1793,10 @@ function getBayoraServiceIconHTML(id, service) {
                     </small>
                 </span>
 
+                <span class="bayora-category-share" role="button" tabindex="0" aria-label="Bagikan kategori Produk Digital" title="Bagikan kategori" onclick="shareCatalogCategory(event, 'digital', 'Produk Digital BAYORA')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ shareCatalogCategory(event, 'digital', 'Produk Digital BAYORA'); }"><svg class="bayora-category-share-icon" viewBox="0 0 20 20" aria-hidden="true">
+<path d="M6.5 13.5L13.5 6.5M8.5 6.5H13.5V11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
+
             </button>
 
 
@@ -1751,6 +1821,10 @@ function getBayoraServiceIconHTML(id, service) {
                         Sosial media & engagement
                     </small>
                 </span>
+
+                <span class="bayora-category-share" role="button" tabindex="0" aria-label="Bagikan kategori SMM" title="Bagikan kategori" onclick="shareCatalogCategory(event, 'smm', 'Layanan SMM BAYORA')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ shareCatalogCategory(event, 'smm', 'Layanan SMM BAYORA'); }"><svg class="bayora-category-share-icon" viewBox="0 0 20 20" aria-hidden="true">
+<path d="M6.5 13.5L13.5 6.5M8.5 6.5H13.5V11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></span>
 
             </button>
 

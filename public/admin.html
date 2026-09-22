@@ -2513,23 +2513,6 @@ body.bayora-view-admins > main > .stats {
         </button>
 
 
-        <div
-            class="bayora-sidebar-label"
-            id="smmSidebarLabel"
-        >
-            SMM PANEL
-        </div>
-
-        <button
-            type="button"
-            class="bayora-nav-item"
-            data-admin-view="smm"
-            id="smmNavButton"
-        >
-            <span>◎</span>
-            <span>SMM Panel</span>
-        </button>
-
 
         <div
             class="bayora-sidebar-label"
@@ -3567,28 +3550,43 @@ body.bayora-view-admins > main > .stats {
             Produk Digital
         </button>
 
-    </div>
-
-    <div class="catalog-search-wrap">
-
-        <input
-            type="search"
-            id="catalogSearch"
-            class="catalog-search"
-            placeholder="Cari produk PPOB..."
-            autocomplete="off"
+        <button
+            type="button"
+            id="catalogTabSmm"
+            class="catalog-tab"
+            onclick="setCatalogTab('smm')"
         >
+            SMM
+        </button>
 
     </div>
 
-    <div
-        id="catalogServices"
-        class="catalog-services"
-    >
-        <div class="catalog-empty">
-            Memuat layanan...
+    <div id="catalogStandardContent">
+
+        <div class="catalog-search-wrap">
+
+            <input
+                type="search"
+                id="catalogSearch"
+                class="catalog-search"
+                placeholder="Cari produk PPOB..."
+                autocomplete="off"
+            >
+
         </div>
+
+        <div
+            id="catalogServices"
+            class="catalog-services"
+        >
+            <div class="catalog-empty">
+                Memuat layanan...
+            </div>
+        </div>
+
     </div>
+
+    <div id="catalogSmmContent"></div>
 
 
 
@@ -3666,18 +3664,7 @@ body.bayora-view-admins > main > .stats {
     id="smmPanel"
 >
 
-    <div class="smm-header">
 
-        <div>
-            <div class="smm-header-title">
-                SMM Panel
-            </div>
-
-            <div class="smm-header-description">
-                Kelola layanan social media marketing BAYORA.
-            </div>
-        </div>
-</div>
 
 
     <!-- ====================================================
@@ -8669,8 +8656,8 @@ let catalogSearchQuery = "";
 function setCatalogTab(type) {
 
     activeCatalogTab =
-        type === "digital"
-            ? "digital"
+        ["ppob", "digital", "smm"].includes(type)
+            ? type
             : "ppob";
 
     catalogSearchQuery = "";
@@ -8709,6 +8696,9 @@ function setCatalogTab(type) {
     const digitalTab =
         document.getElementById("catalogTabDigital");
 
+    const smmTab =
+        document.getElementById("catalogTabSmm");
+
     if (ppobTab) {
 
         ppobTab.classList.toggle(
@@ -8727,6 +8717,71 @@ function setCatalogTab(type) {
 
     }
 
+    if (smmTab) {
+
+        smmTab.classList.toggle(
+            "active",
+            activeCatalogTab === "smm"
+        );
+
+    }
+
+    const standardContent =
+        document.getElementById(
+            "catalogStandardContent"
+        );
+
+    const smmContent =
+        document.getElementById(
+            "catalogSmmContent"
+        );
+
+    const smmPanel =
+        document.getElementById("smmPanel");
+
+    if (
+        smmPanel &&
+        smmContent &&
+        smmPanel.parentElement !== smmContent
+    ) {
+        smmContent.appendChild(smmPanel);
+    }
+
+    if (smmPanel) {
+        smmPanel.classList.remove(
+            "bayora-admin-view-hidden"
+        );
+
+        smmPanel.classList.add(
+            "bayora-admin-view-visible"
+        );
+
+        smmPanel.style.removeProperty(
+            "display"
+        );
+    }
+
+    if (standardContent) {
+        standardContent.style.display =
+            activeCatalogTab === "smm"
+                ? "none"
+                : "";
+    }
+
+    if (smmContent) {
+        smmContent.style.display =
+            activeCatalogTab === "smm"
+                ? ""
+                : "none";
+    }
+
+    if (addServiceButton) {
+        addServiceButton.style.display =
+            activeCatalogTab === "smm"
+                ? "none"
+                : "";
+    }
+
     const digiflazzBar =
         document.getElementById(
             "digiflazzAdminSyncBar"
@@ -8741,7 +8796,9 @@ function setCatalogTab(type) {
 
     }
 
-    renderCatalog();
+    if (activeCatalogTab !== "smm") {
+        renderCatalog();
+    }
 
 }
 

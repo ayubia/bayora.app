@@ -719,6 +719,78 @@ async function checkDigiflazzTransactionStatus(env, transactionId) {
 
 
 
+async function syncPendingDigiflazzTransactionsWorker(env) {
+  const rows = await env.ppobku_db.prepare(`
+    SELECT
+      transaction_id AS transactionId
+    FROM transactions
+    WHERE payment_status = 'PAID'
+      AND provider = 'DIGIFLAZZ'
+      AND digiflazz_ref IS NOT NULL
+      AND digiflazz_status IN ('PENDING', 'PROCESSING')
+    ORDER BY created_at ASC
+    LIMIT 10
+  `).all();
+
+  const transactions = rows?.results || [];
+
+  let checked = 0;
+  let updated = 0;
+  let skipped = 0;
+  let errors = 0;
+
+  for (const transaction of transactions) {
+    const transactionId =
+      String(transaction?.transactionId || "").trim();
+
+    if (!transactionId) {
+      continue;
+    }
+
+    try {
+      const result =
+        await checkDigiflazzTransactionStatus(
+          env,
+          transactionId
+        );
+
+      if (result?.skipped) {
+        skipped += 1;
+      } else {
+        checked += 1;
+
+        if (
+          result?.status === "SUCCESS" ||
+          result?.status === "FAILED"
+        ) {
+          updated += 1;
+        }
+      }
+    } catch (error) {
+      errors += 1;
+
+      console.error(
+        "[PPOB DIGIFLAZZ AUTO SYNC ITEM ERROR]",
+        JSON.stringify({
+          transactionId,
+          error:
+            error?.message || String(error)
+        })
+      );
+    }
+  }
+
+  return {
+    found: transactions.length,
+    checked,
+    updated,
+    skipped,
+    errors
+  };
+}
+
+
+
 
 
 // ========================================
@@ -11887,6 +11959,323 @@ export default {
 
     // ========================================
     
+// ========================================
+// XENDIT PAYMENT SESSION WEBHOOK
+// ========================================
+// Server-to-server only.
+// Verifies Xendit's callback token, then verifies the
+// Payment Session directly to Xendit before fulfillment.
+if (
+  request.method === "POST" &&
+  url.pathname === "/api/webhooks/xendit/payment-session"
+) {
+  try {
+    if (
+      !env.XENDIT_WEBHOOK_TOKEN ||
+      !env.XENDIT_SECRET_KEY
+    ) {
+      console.error(
+        "[XENDIT WEBHOOK] Secret belum tersedia."
+      );
+
+      return json({
+        success: false
+      }, 500);
+    }
+
+    const callbackToken =
+      String(
+        request.headers.get("x-callback-token") || ""
+      );
+
+    if (
+      !callbackToken ||
+      callbackToken !==
+        String(env.XENDIT_WEBHOOK_TOKEN)
+    ) {
+      console.warn(
+        "[XENDIT WEBHOOK] Token tidak valid."
+      );
+
+      return json({
+        success: false
+      }, 401);
+    }
+
+    const payload =
+      await request.json().catch(() => null);
+
+    if (!payload || typeof payload !== "object") {
+      return json({
+        success: false
+      }, 400);
+    }
+
+    const event =
+      String(payload?.event || "").trim();
+
+    if (event !== "payment_session.completed") {
+      return json({
+        success: true,
+        ignored: true
+      });
+    }
+
+    const webhookData =
+      payload?.data &&
+      typeof payload.data === "object"
+        ? payload.data
+        : {};
+
+    const paymentSessionId =
+      String(
+        webhookData?.payment_session_id || ""
+      ).trim();
+
+    if (!paymentSessionId) {
+      console.error(
+        "[XENDIT WEBHOOK] payment_session_id kosong."
+      );
+
+      return json({
+        success: false
+      }, 400);
+    }
+
+    const transaction =
+      await env.ppobku_db.prepare(`
+        SELECT
+          t.transaction_id AS transactionId,
+          t.reference,
+          t.price,
+          t.payment_method AS paymentMethod,
+          t.payment_status AS paymentStatus,
+          t.payment_session_id AS paymentSessionId,
+          t.payment_request_id AS paymentRequestId,
+          p.product_type AS productType
+        FROM transactions t
+        LEFT JOIN products p
+          ON p.id = t.product_id
+        WHERE t.payment_session_id = ?
+        LIMIT 1
+      `).bind(paymentSessionId).first();
+
+    if (!transaction) {
+      console.warn(
+        "[XENDIT WEBHOOK] Session tidak dikenal:",
+        paymentSessionId
+      );
+
+      /*
+       * Acknowledge unknown valid Xendit webhook so it
+       * is not retried indefinitely. No fulfillment occurs.
+       */
+      return json({
+        success: true,
+        ignored: true
+      });
+    }
+
+    if (
+      String(transaction.paymentMethod || "")
+        .toLowerCase() !== "xendit"
+    ) {
+      console.error(
+        "[XENDIT WEBHOOK] Payment method tidak cocok:",
+        transaction.transactionId
+      );
+
+      return json({
+        success: false
+      }, 409);
+    }
+
+    /*
+     * This endpoint currently handles PPOB only.
+     * Digital transactions retain their existing flow.
+     */
+    if (
+      String(transaction.transactionId || "")
+        .startsWith("DIGITAL-") ||
+      transaction.productType === "digital"
+    ) {
+      return json({
+        success: true,
+        ignored: true
+      });
+    }
+
+    /*
+     * Do not trust payment completion from webhook body
+     * alone. Verify the stored session directly to Xendit.
+     */
+    const xenditResponse =
+      await fetch(
+        "https://api.xendit.co/sessions/" +
+        encodeURIComponent(paymentSessionId),
+        {
+          method: "GET",
+          headers: {
+            "Authorization":
+              "Basic " +
+              btoa(env.XENDIT_SECRET_KEY + ":")
+          }
+        }
+      );
+
+    const session =
+      await xenditResponse
+        .json()
+        .catch(() => ({}));
+
+    if (!xenditResponse.ok) {
+      console.error(
+        "[XENDIT WEBHOOK VERIFY ERROR]",
+        JSON.stringify({
+          transactionId:
+            transaction.transactionId,
+          httpStatus:
+            xenditResponse.status
+        })
+      );
+
+      /*
+       * Return non-2xx so Xendit can retry a temporary
+       * verification failure.
+       */
+      return json({
+        success: false
+      }, 502);
+    }
+
+    const verifiedStatus =
+      String(session?.status || "")
+        .toUpperCase();
+
+    const verifiedSessionId =
+      String(
+        session?.payment_session_id || ""
+      ).trim();
+
+    const verifiedReference =
+      String(session?.reference_id || "")
+        .trim();
+
+    const localReference =
+      String(transaction.reference || "")
+        .trim();
+
+    const verifiedCurrency =
+      String(session?.currency || "")
+        .toUpperCase();
+
+    const verifiedAmount =
+      Number(session?.amount);
+
+    const localAmount =
+      Number(transaction.price);
+
+    if (
+      verifiedStatus !== "COMPLETED" ||
+      verifiedSessionId !== paymentSessionId ||
+      verifiedReference !== localReference ||
+      verifiedCurrency !== "IDR" ||
+      !Number.isFinite(verifiedAmount) ||
+      !Number.isFinite(localAmount) ||
+      verifiedAmount !== localAmount
+    ) {
+      console.error(
+        "[XENDIT WEBHOOK VERIFY MISMATCH]",
+        JSON.stringify({
+          transactionId:
+            transaction.transactionId,
+          verifiedStatus,
+          sessionMatches:
+            verifiedSessionId === paymentSessionId,
+          referenceMatches:
+            verifiedReference === localReference,
+          currency:
+            verifiedCurrency,
+          amountMatches:
+            verifiedAmount === localAmount
+        })
+      );
+
+      return json({
+        success: false
+      }, 409);
+    }
+
+    const paymentRequestId =
+      session?.payment_request_id ||
+      webhookData?.payment_request_id ||
+      transaction.paymentRequestId ||
+      null;
+
+    const update =
+      await env.ppobku_db.prepare(`
+        UPDATE transactions
+        SET
+          payment_status = 'PAID',
+          payment_request_id = COALESCE(
+            payment_request_id,
+            ?
+          ),
+          paid_at = COALESCE(
+            paid_at,
+            CURRENT_TIMESTAMP
+          )
+        WHERE transaction_id = ?
+          AND payment_method = 'xendit'
+          AND payment_session_id = ?
+          AND payment_status != 'PAID'
+      `).bind(
+        paymentRequestId,
+        transaction.transactionId,
+        paymentSessionId
+      ).run();
+
+    console.log(
+      "[XENDIT PPOB WEBHOOK VERIFIED]",
+      JSON.stringify({
+        transactionId:
+          transaction.transactionId,
+        paymentSessionId,
+        changed:
+          Number(update.meta?.changes || 0) > 0
+      })
+    );
+
+    /*
+     * Safe on duplicate callbacks:
+     * sendTransactionToDigiflazzWorker has its own
+     * atomic anti-double-submit claim.
+     */
+    const digiflazz =
+      await sendTransactionToDigiflazzWorker(
+        env,
+        transaction.transactionId
+      );
+
+    return json({
+      success: true,
+      paymentStatus: "PAID",
+      digiflazz
+    });
+
+  } catch (error) {
+    console.error(
+      "[XENDIT PPOB WEBHOOK ERROR]",
+      error?.message || String(error)
+    );
+
+    return json({
+      success: false
+    }, 500);
+  }
+}
+
+
 // =========================
 // XENDIT PAYMENT
 // =========================
@@ -14162,37 +14551,76 @@ if (
   },
 
   async scheduled(controller, env, ctx) {
+    const cron =
+      String(controller?.cron || "").trim();
+
     ctx.waitUntil(
       (async () => {
-        try {
-          const catalogResult =
-            await syncDjuraganSosmedCatalogWorker(env);
+        /*
+         * PPOB status reconciliation:
+         * every minute.
+         */
+        if (cron === "* * * * *") {
+          try {
+            const ppobResult =
+              await syncPendingDigiflazzTransactionsWorker(env);
 
-          console.log(
-            "[SMM CATALOG AUTO SYNC]",
-            JSON.stringify(catalogResult)
-          );
-        } catch (error) {
-          console.error(
-            "[SMM CATALOG AUTO SYNC ERROR]",
-            error?.message || String(error)
-          );
+            console.log(
+              "[PPOB DIGIFLAZZ AUTO SYNC]",
+              JSON.stringify(ppobResult)
+            );
+          } catch (error) {
+            console.error(
+              "[PPOB DIGIFLAZZ AUTO SYNC ERROR]",
+              error?.message || String(error)
+            );
+          }
+
+          return;
         }
 
-        try {
-          const orderResult =
-            await syncDjuraganSosmedOrderStatusesWorker(env);
+        /*
+         * Existing SMM jobs:
+         * keep their original hourly schedule.
+         */
+        if (cron === "17 * * * *") {
+          try {
+            const catalogResult =
+              await syncDjuraganSosmedCatalogWorker(env);
 
-          console.log(
-            "[SMM ORDER AUTO SYNC]",
-            JSON.stringify(orderResult)
-          );
-        } catch (error) {
-          console.error(
-            "[SMM ORDER AUTO SYNC ERROR]",
-            error?.message || String(error)
-          );
+            console.log(
+              "[SMM CATALOG AUTO SYNC]",
+              JSON.stringify(catalogResult)
+            );
+          } catch (error) {
+            console.error(
+              "[SMM CATALOG AUTO SYNC ERROR]",
+              error?.message || String(error)
+            );
+          }
+
+          try {
+            const orderResult =
+              await syncDjuraganSosmedOrderStatusesWorker(env);
+
+            console.log(
+              "[SMM ORDER AUTO SYNC]",
+              JSON.stringify(orderResult)
+            );
+          } catch (error) {
+            console.error(
+              "[SMM ORDER AUTO SYNC ERROR]",
+              error?.message || String(error)
+            );
+          }
+
+          return;
         }
+
+        console.warn(
+          "[SCHEDULED] Cron tidak dikenal:",
+          cron
+        );
       })()
     );
   }

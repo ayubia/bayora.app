@@ -214,9 +214,35 @@ const server = http.createServer(async (req, res) => {
 
         const result = await response.json();
 
+        const providerData =
+          result && typeof result === "object"
+            ? result.data
+            : null;
+
+        const rc =
+          providerData && typeof providerData === "object"
+            ? providerData.rc || null
+            : null;
+
+        const message =
+          providerData && typeof providerData === "object"
+            ? providerData.message || null
+            : null;
+
+        if (!response.ok) {
+          console.error("[DIGIFLAZZ TRANSACTION ERROR]", {
+            httpStatus: response.status,
+            ref_id: refId,
+            rc,
+            message
+          });
+        }
+
         return sendJson(res, response.ok ? 200 : 502, {
           success: response.ok,
-          data: result.data || null
+          rc,
+          message,
+          data: providerData || null
         });
       } catch (error) {
         return sendJson(res, 502, {

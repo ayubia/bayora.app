@@ -1,0 +1,1961 @@
+===== ROOT =====
+total 5408
+drwxr-xr-x   33 ayubiapangestu  staff   1.0K Oct  4 17:38 .
+drwxr-x---+  41 ayubiapangestu  staff   1.3K Oct  4 15:53 ..
+-rw-r--r--@   1 ayubiapangestu  staff   1.4K Sep 21 16:08 .env
+drwxr-xr-x@  14 ayubiapangestu  staff   448B Oct  4 17:37 .git
+-rw-r--r--@   1 ayubiapangestu  staff   375B Sep 18 16:58 .gitignore
+drwxr-xr-x@   3 ayubiapangestu  staff    96B Aug 25 17:44 .vscode
+drwxr-xr-x@   4 ayubiapangestu  staff   128B Sep  8 11:44 .wrangler
+drwxr-xr-x@   3 ayubiapangestu  staff    96B Aug 25 17:34 assets
+-rw-r--r--@   1 ayubiapangestu  staff    17B Oct  4 17:38 audit-ppobku.txt
+drwxr-xr-x@ 177 ayubiapangestu  staff   5.5K Sep 22 21:15 backups
+drwxr-xr-x@  11 ayubiapangestu  staff   352B Sep  8 11:36 database
+drwxr-xr-x@   8 ayubiapangestu  staff   256B Sep 22 21:32 digiflazz-gateway
+drwxr-xr-x@   9 ayubiapangestu  staff   288B Sep 23 03:12 migrations
+drwxr-xr-x  127 ayubiapangestu  staff   4.0K Sep  8 13:35 node_modules
+-rw-r--r--@   1 ayubiapangestu  staff    93K Sep 21 22:39 package-lock.json
+-rw-r--r--@   1 ayubiapangestu  staff   475B Sep  8 11:43 package.json
+drwxr-xr-x@  27 ayubiapangestu  staff   864B Sep 22 18:37 public
+drwxr-xr-x@   4 ayubiapangestu  staff   128B Sep 18 17:19 scripts
+drwxr-xr-x@   3 ayubiapangestu  staff    96B Sep 18 16:42 server
+-rwxr-xr-x@   1 ayubiapangestu  staff   1.1K Sep  5 09:47 start-bayora.sh
+drwxr-xr-x@   3 ayubiapangestu  staff    96B Aug 18 15:26 uploads
+-rw-r--r--@   1 ayubiapangestu  staff   413K Sep 23 00:05 worker.js
+-rw-r--r--@   1 ayubiapangestu  staff   287K Sep 21 14:35 worker.js.backup-20260921-143552
+-rw-r--r--@   1 ayubiapangestu  staff   339K Sep 22 14:02 worker.js.backup-cron-split-20260922-140204
+-rw-r--r--@   1 ayubiapangestu  staff   287K Sep 22 11:34 worker.js.backup-feedback-20260922-113422
+-rw-r--r--@   1 ayubiapangestu  staff   287K Sep 22 11:36 worker.js.backup-feedback-api-20260922-113644
+-rw-r--r--@   1 ayubiapangestu  staff   285K Sep 22 11:22 worker.js.backup-history-split-20260922-112214
+-rw-r--r--@   1 ayubiapangestu  staff   330K Sep 22 13:38 worker.js.backup-ppob-auto-20260922-133824
+-rw-r--r--@   1 ayubiapangestu  staff   332K Sep 22 13:51 worker.js.backup-xendit-webhook-20260922-135152
+-rw-r--r--@   1 ayubiapangestu  staff   624B Sep 22 14:02 wrangler.jsonc
+-rw-r--r--@   1 ayubiapangestu  staff   528B Sep 21 15:21 wrangler.jsonc.backup-20260921-152111
+-rw-r--r--@   1 ayubiapangestu  staff   604B Sep 22 14:02 wrangler.jsonc.backup-cron-split-20260922-140204
+-rw-r--r--@   1 ayubiapangestu  staff   605B Sep 22 13:38 wrangler.jsonc.backup-ppob-auto-20260922-133824
+
+===== SEMUA FILE NON MEDIA =====
+./.env
+./.gitignore
+./.vscode/settings.json
+./audit-ppobku.txt
+./backups/_temporary/add-short-description.sh
+./backups/_temporary/appjs-diff.txt
+./backups/_temporary/apply_receipt.py
+./backups/_temporary/fix-bayora-icon-route-order.sh
+./backups/_temporary/fix-bayora-icon-storage.sh
+./backups/_temporary/fix-service-icon-preview.sh
+./backups/_temporary/fix_digital_ui.py
+./backups/_temporary/fix_ppobku.py
+./backups/_temporary/secure-digital-download.sh
+./backups/admin-before-complaint-workflow-20260922-115550.html
+./backups/admin-before-contact-form-20260922-122120.html
+./backups/admin-before-native-workflow-20260922-120912.html
+./backups/admin-before-native-workflow-fix-20260922-121009.html
+./backups/admin-before-transaction-layout-fix-20260922-125520.html
+./backups/admin-before-transaction-lookup-ui-20260922-125032.html
+./backups/admin-view-fix/admin-20260922-143306.html
+./backups/admin.html.backup-feedback-20260922-113422
+./backups/admin.html.backup-notifications-20260922-114357
+./backups/admin/admin.html.backup
+./backups/admin/admin.html.backup-20260815-215932
+./backups/admin/admin.html.backup-FINAL-STABLE-20260815
+./backups/admin/admin.html.backup-before-bayora-admin-20260816-153857
+./backups/admin/admin.html.backup-before-clean-restore
+./backups/admin/admin.html.backup-before-dashboard-fix
+./backups/admin/admin.html.backup-before-device-pdf-20260819-235204
+./backups/admin/admin.html.backup-before-digiflazz-admin-sync
+./backups/admin/admin.html.backup-before-drawer-fix
+./backups/admin/admin.html.backup-before-final-bayora-admin-20260816-154547
+./backups/admin/admin.html.backup-before-final-recovery
+./backups/admin/admin.html.backup-before-layout-reorder
+./backups/admin/admin.html.backup-before-mood
+./backups/admin/admin.html.backup-before-preview-slide
+./backups/admin/admin.html.backup-before-preview-slide-final
+./backups/admin/admin.html.backup-before-restore-normal
+./backups/admin/admin.html.backup-before-rollback-fd74180
+./backups/admin/admin.html.backup-before-script-fix
+./backups/admin/admin.html.backup-before-sidebar
+./backups/admin/admin.html.backup-before-slide-final2
+./backups/admin/admin.html.backup-before-slide-final3
+./backups/admin/admin.html.backup-before-transaction-reorder
+./backups/admin/admin.html.backup-before-transaction-reorder-2
+./backups/admin/admin.html.backup-before-upload-sync
+./backups/admin/admin.html.backup-catalog-split
+./backups/admin/admin.html.backup-current-before-final-restore
+./backups/admin/admin.html.backup-final-20260817-212328
+./backups/admin/admin.html.backup-messy-current
+./backups/admin/admin.html.backup-reset-password
+./backups/admin/admin.html.backup-role-menu
+./backups/admin/admin.html.before-final-structure-fix
+./backups/admin/admin.html.before-fix-catalog-init
+./backups/admin/admin.html.before-fix-service-filter
+./backups/admin/admin.html.before-icon-handler-v2.bak
+./backups/admin/admin.html.before-icon-handler.bak
+./backups/admin/admin.html.before-icon-upload-final.bak
+./backups/admin/admin.html.before-icon-upload-v2.bak
+./backups/admin/admin.html.before-icon-upload.bak
+./backups/admin/admin.html.before-kelola-admin
+./backups/admin/admin.html.before-receipt-fix
+./backups/admin/admin.html.before-remove-catalog-drawer
+./backups/admin/admin.html.before-remove-catalog-drawer-2
+./backups/admin/admin.html.before-remove-transaction-button
+./backups/admin/admin.html.before-share-service-text-fix
+./backups/admin/admin.html.before-short-description-20260821-223837
+./backups/admin/admin.html.before-short-description-20260821-224052
+./backups/admin/admin.html.before-transaction-filter-js
+./backups/admin/admin.html.before-transaction-split
+./backups/admin/admin.html.before-transaction-split-final
+./backups/admin/admin.html.broken-after-1a6a355
+./backups/admin/admin.html.broken-before-script-fix
+./backups/admin/admin.html.broken-current
+./backups/admin/admin.html.broken-current-2
+./backups/admin/admin.html.checkpoint-sidebar-grid
+./backups/app-before-smm-search-20260920-232238.js
+./backups/app/app.js.backup
+./backups/app/app.js.backup-20260820-150933
+./backups/app/app.js.backup-before-bayora-icons
+./backups/app/app.js.backup-before-bayora-icons-20260821-054458
+./backups/app/app.js.backup-before-before-after
+./backups/app/app.js.backup-before-digital-engine-final
+./backups/app/app.js.backup-before-digital-flow
+./backups/app/app.js.backup-before-digital-header
+./backups/app/app.js.backup-before-digital-payment-final
+./backups/app/app.js.backup-before-lightroom-final
+./backups/app/app.js.backup-before-lightroom-flow
+./backups/app/app.js.backup-before-lightroom-openservice-final
+./backups/app/app.js.backup-before-mood
+./backups/app/app.js.backup-before-operator-fix-20260815-153456
+./backups/app/app.js.backup-before-payment-routing
+./backups/app/app.js.backup-before-success-download
+./backups/app/app.js.before-browser-download-style-20260820-152601.bak
+./backups/app/app.js.before-catalog-cleanup
+./backups/app/app.js.before-checkout-thumbnail
+./backups/app/app.js.before-copywriting-cleanup
+./backups/app/app.js.before-detail-button-fix
+./backups/app/app.js.before-digital-checkout-fix
+./backups/app/app.js.before-digital-checkout-icon
+./backups/app/app.js.before-digital-function-restore
+./backups/app/app.js.before-digital-icon-fix
+./backups/app/app.js.before-download-filename-final-20260820-193651.bak
+./backups/app/app.js.before-download-final-20260820-160427.bak
+./backups/app/app.js.before-download-final-20260820-160526.bak
+./backups/app/app.js.before-download-layout-20260820-160155.bak
+./backups/app/app.js.before-download-name-final-20260820-193730.bak
+./backups/app/app.js.before-download-name-final-20260820-193812.bak
+./backups/app/app.js.before-download-name-final-20260820-193855.bak
+./backups/app/app.js.before-email-matched-success-20260820-170126.bak
+./backups/app/app.js.before-filename-order-20260820-194624.bak
+./backups/app/app.js.before-final-digital-card-repair
+./backups/app/app.js.before-fix-double-preset-20260820-195128.bak
+./backups/app/app.js.before-fix-icon-scope
+./backups/app/app.js.before-form-icon-20260821-133507.bak
+./backups/app/app.js.before-form-icon-final
+./backups/app/app.js.before-formicon-final.bak
+./backups/app/app.js.before-formicon-test.bak
+./backups/app/app.js.before-global-icon-export
+./backups/app/app.js.before-global-icon-helper
+./backups/app/app.js.before-guest-digital-final-20260820-171524.bak
+./backups/app/app.js.before-guest-download-final-20260820-184019.bak
+./backups/app/app.js.before-guest-download-final-20260820-184915.bak
+./backups/app/app.js.before-header-icon-20260821-133111.bak
+./backups/app/app.js.before-icon-upload-v2.bak
+./backups/app/app.js.before-missing-digital-functions
+./backups/app/app.js.before-mobile-icon-final
+./backups/app/app.js.before-modal-fix
+./backups/app/app.js.before-open-service-icon-final
+./backups/app/app.js.before-order-summary-fix-20260820-165717.bak
+./backups/app/app.js.before-page-persistence
+./backups/app/app.js.before-product-text-fix
+./backups/app/app.js.before-production-push-20260820-154848.bak
+./backups/app/app.js.before-remove-demo-20260820-195359.bak
+./backups/app/app.js.before-remove-demo-final-20260820-200641.bak
+./backups/app/app.js.before-render-digital-repair
+./backups/app/app.js.before-render-gallery-fix
+./backups/app/app.js.before-responsive-digital-icon
+./backups/app/app.js.before-safe-restore
+./backups/app/app.js.before-secure-digital-20260820-170626.bak
+./backups/app/app.js.before-service-icon-fix
+./backups/app/app.js.before-share-service-catalog
+./backups/app/app.js.before-share-service-corrected
+./backups/app/app.js.before-share-service-final
+./backups/app/app.js.before-short-description-20260821-223837
+./backups/app/app.js.before-short-description-20260821-224052
+./backups/app/app.js.before-success-layout-final-20260820-164239.bak
+./backups/app/app.js.before-ui-fix
+./backups/app/app.js.before-xendit-auto-sync-20260820-181112.bak
+./backups/app/app.js.before-xendit-return-digital-fix-20260820-180050.bak
+./backups/app/app.js.before-xendit-return-restore-fix-20260820-154133.bak
+./backups/app/app.js.broken-catalog
+./backups/bayora-v2-before-20260919-142704/public/admin.html
+./backups/bayora-v2-before-20260919-142704/public/app.js
+./backups/bayora-v2-before-20260919-142704/public/index.html
+./backups/bayora-v2-before-20260919-142704/public/login.html
+./backups/bayora-v2-before-20260919-142704/public/profile.html
+./backups/bayora-v2-before-20260919-142704/public/register.html
+./backups/bayora-v2-before-20260919-142704/public/riwayat.html
+./backups/bayora-v2-before-20260919-142704/public/style.css
+./backups/before-after-cancel-20260922/app.js
+./backups/before-after-cancel-20260922/index.html
+./backups/before-after-cancel-20260922/style.css
+./backups/catalog-crud/worker-20260922-144259.js
+./backups/cleanup-20260918-161039/public/app-before-smm-icon-20260908-175722.js
+./backups/cleanup-20260918-161039/public/index-before-css-final-20260908103044.html
+./backups/cleanup-20260918-161039/public/index-before-home-fix-20260908102810.html
+./backups/cleanup-20260918-161039/public/index-before-remove-new-ui-20260908-173643.html
+./backups/cleanup-20260918-161039/public/style-before-clean-20260908-172153.css
+./backups/cleanup-20260918-161039/public/style-before-css-final-20260908103044.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-final-layout-20260908-174255.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-fix-20260908-173948.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-layout-fix-20260908-174127.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-visual-20260908-174543.css
+./backups/cleanup-20260918-161039/public/style-before-test-20260908-172438.css
+./backups/cleanup-20260918-161039/public/style-old-backup.css
+./backups/cleanup-20260918-161039/public/style-test.css
+./backups/cleanup-20260918-161039/root-backups/.env.backup-20260918-074353
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-icon
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-icon-20260905-121412
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-ui-20260905-080231
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-tab-icon-20260908-194422
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-fix-syntax-20260905-091150
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-smm-icon-20260905-121831
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-20260905-085739
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-import-20260905-090421
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-ui-20260905-085859
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-tab-icon-fix-20260909-104058
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-20260909-160824
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-mobile-20260909-160955
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-smm-category
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-category-20260905-093017
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-loader-20260905-093315
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-navigation-20260905-115306
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-render-20260905-093348
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-tabs-20260905-093132
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260908-194037
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-074147
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-075741
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v3
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v4
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080418.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080643.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-products-20260918-102752.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-route-20260918-102217.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-status-poll-20260918-103914.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-test-20260918-102147.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-transaction-20260918-103630.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-url-fix-20260918-102429.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-password-debug
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091252.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091454.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-xendit-sync-20260918-091619.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete-v2
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-remove-duplicate-url-20260918-102451.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-switch-ppob-to-haybi-20260918-103827.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-tab-icon-20260908-194422
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions-2
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-digital-delivery-working-20260918-081019.js
+./backups/cleanup-css-20260918-161146/bayora-home-fix.css
+./backups/cleanup-css-20260918-161146/style-clean.css
+./backups/cleanup-css-20260918-161146/style-new.css
+./backups/database-snapshot-20260918-163242/ppobku-d1.sql
+./backups/database-snapshot-20260918-163242/ppobku-migration.sql
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-shm
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-wal
+./backups/database-snapshot-20260918-163242/ppobku.db
+./backups/database-snapshot-20260918-163242/ppobku.db-shm
+./backups/database-snapshot-20260918-163242/ppobku.db-wal
+./backups/database/ppobku-before-digiflazz-2026-08-15T08-06-31-195Z.db
+./backups/database/ppobku-before-digiflazz-2026-08-16T00-41-35-538Z.db
+./backups/database/ppobku-before-digiflazz-2026-08-16T01-19-46-201Z.db
+./backups/database/ppobku.backup-before-sku-update-20260816-220908.db
+./backups/database/ppobku.db-shm
+./backups/database/ppobku.db-wal
+./backups/database/ppobku.db.before-local-download-test-20260820-165410.bak
+./backups/digital-atomic-final-cleanup-20260918-231058/before-delete.txt
+./backups/digital-dead-helper-cleanup-20260918-231217/worker.js
+./backups/digital-direct-file-block-20260918-174443/worker.js
+./backups/digital-guest-access-20260918-174939/before.txt
+./backups/digital-guest-atomic-20260918-180946/worker.js
+./backups/digital-guest-session-storage-20260918-181122/app.js
+./backups/digital-guest-test-cleanup-20260918-180826/before-delete.txt
+./backups/digital-guest-token-stage1-20260918-175114/worker.js
+./backups/digital-guest-token-stage2-20260918-175205/app.js
+./backups/digital-guest-token-stage2-20260918-175205/worker.js
+./backups/digital-guest-token-stage3-20260918-175516/app.js
+./backups/digital-guest-token-stage3-20260918-175516/worker.js
+./backups/digital-guest-url-cleanup-20260918-175726/app.js
+./backups/digital-randombytes-runtime-fix-20260918-230847/worker.js
+./backups/digital-randombytes-shadow-fix-20260918-182224/worker.js
+./backups/djuragansosmed-activation-guard-20260919-003705/worker.js
+./backups/djuragansosmed-adapter-20260918-232350/worker.js
+./backups/djuragansosmed-admin-services-20260919-001343/worker.js
+./backups/djuragansosmed-admin-ui-20260919-002128/admin.html
+./backups/djuragansosmed-balance-route-20260918-232456/worker.js
+./backups/djuragansosmed-importer-20260918-235159/worker.js
+./backups/djuragansosmed-loader-20260919-002938/admin.html
+./backups/djuragansosmed-loader-20260919-003023/admin.html
+./backups/djuragansosmed-margin-20260919-000125/worker.js
+./backups/djuragansosmed-pagination-20260919-002424/admin.html
+./backups/djuragansosmed-pagination-20260919-002629/admin.html
+./backups/djuragansosmed-pagination-20260919-002832/admin.html
+./backups/djuragansosmed-pagination-ui-20260919-002904/admin.html
+./backups/djuragansosmed-platform-fix-20260918-234320/worker.js
+./backups/djuragansosmed-provider-20260918-231949/before.txt
+./backups/djuragansosmed-provider-status-20260919-004432/worker.js
+./backups/djuragansosmed-provider-ui-20260919-004819/admin.html
+./backups/djuragansosmed-renderer-20260919-003222/admin.html
+./backups/djuragansosmed-schema-20260918-233822/before.txt
+./backups/djuragansosmed-services-route-20260918-233115/worker.js
+./backups/djuragansosmed-summary-20260918-233442/worker.js
+./backups/djuragansosmed-summary-ui-20260919-003526/admin.html
+./backups/djuragansosmed-sync-preview-20260918-234007/worker.js
+./backups/djuragansosmed-sync-schema-20260918-233911/before.txt
+./backups/djuragansosmed-unicode-platform-20260918-234522/worker.js
+./backups/env-before-baseurl-20260918-165036
+./backups/env/.env.backup-20260820-154700
+./backups/env/.env.backup-before-bayora-domain-20260816-184850
+./backups/env/.env.before-tunnel-20260820-174707.bak
+./backups/favicon/bayora-favicon-logo.zip
+./backups/frontend-log-cleanup-20260918-170552/public/admin.html
+./backups/frontend-log-cleanup-20260918-170552/public/app.js
+./backups/frontend-log-cleanup-20260918-170552/public/index.html
+./backups/get-transaction-ppob-ownership-20260918-174111/worker.js
+./backups/gitignore-20260918-165738/.gitignore
+./backups/gitignore-data-20260918-165832/.gitignore
+./backups/haybi-test-endpoints-20260918-164538/worker.js
+./backups/hero-icons-before-png-20260921-010040/index.html
+./backups/index-before-app-menu-20260921-115332.html
+./backups/index-before-faq-20260920-233402.html
+./backups/index-before-footer-polish-20260921-000419.html
+./backups/index-before-hero-mobile-polish-20260921-002529.html
+./backups/index-before-hero-png-icons-20260921-010343.html
+./backups/index-before-hero-service-icons-20260921-005108.html
+./backups/index-before-hero-v2-20260921-004503.html
+./backups/index-before-mobile-hero-reference-20260921-003956.html
+./backups/index-before-orbit-one-mobile-fix-20260921-003120.html
+./backups/index-before-pwa-20260921-055121.html
+./backups/index/index.html.backup-before-account-clean-final
+./backups/index/index.html.backup-before-account-final
+./backups/index/index.html.backup-before-account-font-fix
+./backups/index/index.html.backup-before-account-hamburger-fix
+./backups/index/index.html.backup-before-account-menu
+./backups/index/index.html.backup-before-account-minimal
+./backups/index/index.html.backup-before-auth-menu-final
+./backups/index/index.html.backup-before-bayora
+./backups/index/index.html.backup-before-bayora-branding
+./backups/index/index.html.backup-before-bayora-design
+./backups/index/index.html.backup-before-bayora-mockup-20260816-153325
+./backups/index/index.html.backup-before-before-after
+./backups/index/index.html.backup-before-desktop-horizontal
+./backups/index/index.html.backup-before-digital-flow
+./backups/index/index.html.backup-before-digital-header
+./backups/index/index.html.backup-before-direct-mobile-actions
+./backups/index/index.html.backup-before-dropdown-final
+./backups/index/index.html.backup-before-dropdown-visible-final
+./backups/index/index.html.backup-before-final-bayora-home-20260816-160432
+./backups/index/index.html.backup-before-final-navbar
+./backups/index/index.html.backup-before-full-bayora-20260816-152541
+./backups/index/index.html.backup-before-js-desktop-service
+./backups/index/index.html.backup-before-lightroom-final
+./backups/index/index.html.backup-before-lightroom-flow
+./backups/index/index.html.backup-before-logout-fix
+./backups/index/index.html.backup-before-mobile-account-fix
+./backups/index/index.html.backup-before-mobile-account-real-fix
+./backups/index/index.html.backup-before-mobile-click-final
+./backups/index/index.html.backup-before-mobile-menu-js-fix
+./backups/index/index.html.backup-before-mobile-menu-links
+./backups/index/index.html.backup-before-mobile-nav-final
+./backups/index/index.html.backup-before-mobile-transaksi-fix
+./backups/index/index.html.backup-before-navbar-account-fix
+./backups/index/index.html.backup-before-new-service-design
+./backups/index/index.html.backup-before-profile-history
+./backups/index/index.html.backup-before-profile-mobile-fix
+./backups/index/index.html.backup-before-real-logout-fix
+./backups/index/index.html.backup-before-restore-home
+./backups/index/index.html.backup-before-service-final
+./backups/index/index.html.backup-before-simple-account
+./backups/index/index.html.before-catalog-cleanup
+./backups/index/index.html.before-copywriting-cleanup
+./backups/index/index.html.before-remove-demo-20260820-162827.bak
+./backups/index/index.html.before-remove-simulation-20260820-162910.bak
+./backups/index/index.html.stable-account
+./backups/invitation/aurelia/index.html.before-v2
+./backups/invitation/aurelia/script.js.before-v2
+./backups/invitation/aurelia/style.css.before-elegant
+./backups/invitation/aurelia/style.css.before-v2
+./backups/legacy-root-frontend-20260918-161240/admin-login.html
+./backups/legacy-root-frontend-20260918-161240/admin.html
+./backups/legacy-root-frontend-20260918-161240/app.js
+./backups/legacy-root-frontend-20260918-161240/index.html
+./backups/legacy-root-frontend-20260918-161240/login.html
+./backups/legacy-root-frontend-20260918-161240/profile.html
+./backups/legacy-root-frontend-20260918-161240/register.html
+./backups/legacy-root-frontend-20260918-161240/riwayat.html
+./backups/legacy-root-frontend-20260918-161240/site.webmanifest
+./backups/legacy-root-frontend-20260918-161240/style.css
+./backups/legacy-runtime-20260918-164235/d1-adapter.js
+./backups/legacy-runtime-20260918-164235/server/server-cloudflare.js
+./backups/legacy-scripts-20260918-163356/seed/seed-railway-catalog.js
+./backups/legacy-scripts-20260918-163356/smm/add-admin-crud.js
+./backups/legacy-scripts-20260918-163356/smm/add-api-read.js
+./backups/legacy-scripts-20260918-163356/smm/add-startup-migration.js
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-icon
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-20260909-160824
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-webhook-20260909-161158
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-smm-icon-20260905-121412
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-catalog-short-description-20260905-093843
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-debug-catalog-20260905-094205
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-icon-20260905-121831
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-transaction-20260905-092457
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-webhook-20260905-092647
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-xendit-20260905-092555
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-sosmedly-import-20260905-090421
+./backups/legacy-worker-tests-20260918-161337/worker-d1-r2-test.js
+./backups/legacy-worker-tests-20260918-161337/worker-icon-preview-test.js
+./backups/legacy-worker-tests-20260918-161337/worker-r2-file-tests-complete.js
+./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-catalog.js
+./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-d1-adapter.js
+./backups/legal-20260921-001207/index.html
+./backups/legal-20260921-001207/privacy.html
+./backups/legal-20260921-001207/terms.html
+./backups/legal-20260921-001207/worker.js
+./backups/legal-pages-20260919-112121/index.html
+./backups/legal-pages-20260919-112121/style.css
+./backups/legal-routes-20260919-112631/worker.js
+./backups/login/login.html.backup-before-auth-connect
+./backups/orphan-assets-20260918-163045/manifest.txt
+./backups/orphan-uploads-20260918-162921/manifest.txt
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787043956842-47736e5cc6399281.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787048755238-89507b5feb068b30.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787049790698-f0972d0154257a97.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787107339330-ab2cc709e7bf9a86.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787107873349-bde3c61b3844895b.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787108336621-5d310bb5829fef76.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787161290797-34be6fc3f02af5bb.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787161742246-a38d77bc694ee892.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162318370-0510ad5400a0c012.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162527487-fe8ecca7478031da.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162815014-1bd48b0a4f823be0.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163238511-fec264b2cd5237c8.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163255355-198cfee30212db9c.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163265302-34299c4fec5879e0.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163276503-3e34e0451fe21438.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163284247-d1b5b09dc63d9e1b.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165349836-7c2db58b3038b85b.zip
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165585444-2eb5b3dc983bf8ea.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165752657-73b3197891fec42b.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165761295-bcdccd59b7cd160f.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165770474-8d4b6b31930dc4e9.pdf
+./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787172528614-8cb7aeee1662e279.zip
+./backups/ppob-payment-ownership-20260918-173609/worker.js
+./backups/ppob-sync-ownership-20260918-173831/worker.js
+./backups/profile/profile.html.backup-before-account-actions
+./backups/profile/profile.html.stable-account
+./backups/public-old/app.html.backup-align-20260922-110915
+./backups/public-old/app.html.backup-before-menu-aplikasi
+./backups/public-old/app.html.backup-layout-20260922-111251
+./backups/public-old/app.js.backup-before-share
+./backups/public-old/app.js.backup-share-icon-20260922-105647
+./backups/public-old/index.html.backup-before-menu-aplikasi
+./backups/public-old/riwayat.html.backup-history-split-20260922-112214
+./backups/public-old/style.css.backup-before-share
+./backups/public-old/style.css.backup-share-center-20260922-105252
+./backups/public-old/style.css.backup-share-center-20260922-105412
+./backups/public-old/style.css.backup-share-icon-20260922-105647
+./backups/register/register.html.backup-before-auth-connect
+./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/index.html
+./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/script.js
+./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/style.css
+./backups/riwayat-before-complaint-workflow-20260922-115550.html
+./backups/riwayat-before-contact-form-20260922-122120.html
+./backups/riwayat-before-native-workflow-20260922-120912.html
+./backups/riwayat-before-pending-status-20260922-123139.html
+./backups/riwayat-before-rating-fix-20260922-114808.html
+./backups/riwayat-before-workflow-fix-20260922-115909.html
+./backups/riwayat.html.backup-feedback-20260922-113422
+./backups/riwayat.html.backup-feedback-ui-20260922-113820
+./backups/riwayat/riwayat.html.backup-fix-brace-20260922-141222
+./backups/riwayat/riwayat.html.stable-account
+./backups/root-database/database.sqlite.before-short-description-20260821-223837
+./backups/root-database/database.sqlite.before-short-description-20260821-224052
+./backups/search-before-20260920-225805/app.js
+./backups/search-before-20260920-225805/index.html
+./backups/search-before-20260920-225805/style.css
+./backups/seed/seed-railway-catalog.js.backup-before-bayora-domain-20260816-184850
+./backups/seed/seed-railway-catalog.js.before-custom-icons
+./backups/seed/seed-railway-catalog.js.before-custom-icons-railway
+./backups/server/database/database.sqlite.before-local-download-test-20260820-165224.bak
+./backups/server/database/ppobku.db.backup-before-cost-price-migration
+./backups/server/empty-database/database.sqlite
+./backups/server/empty-database/ppobku.db
+./backups/server/legacy/sendDigitalProductEmail.before-button.bak
+./backups/server/server.js.backup
+./backups/server/server.js.backup-20260815-215932
+./backups/server/server.js.backup-auto-sync-20260815-150747
+./backups/server/server.js.backup-before-account-api-20260817-030549
+./backups/server/server.js.backup-before-account-final
+./backups/server/server.js.backup-before-admin-auth-20260817-135545.bak
+./backups/server/server.js.backup-before-auth-manual
+./backups/server/server.js.backup-before-bayora-blue-email
+./backups/server/server.js.backup-before-bayora-email
+./backups/server/server.js.backup-before-bayora-palette-clean
+./backups/server/server.js.backup-before-bayora-pricing-20260816-162208
+./backups/server/server.js.backup-before-before-after
+./backups/server/server.js.backup-before-device-pdf-20260819-234537
+./backups/server/server.js.backup-before-digiflazz-ppob-only
+./backups/server/server.js.backup-before-digiflazz-response-fix-20260815-163629
+./backups/server/server.js.backup-before-digital-delivery-20260819-235643
+./backups/server/server.js.backup-before-digital-delivery-20260820-002326
+./backups/server/server.js.backup-before-digital-file-fallback
+./backups/server/server.js.backup-before-digital-fix
+./backups/server/server.js.backup-before-digital-flow
+./backups/server/server.js.backup-before-digital-multi-final
+./backups/server/server.js.backup-before-digital-product
+./backups/server/server.js.backup-before-digital-service
+./backups/server/server.js.backup-before-failed-retry
+./backups/server/server.js.backup-before-final-pricing-20260816-161422
+./backups/server/server.js.backup-before-mood
+./backups/server/server.js.backup-before-payment-session-auth-fix-20260816
+./backups/server/server.js.backup-before-payment-webhook
+./backups/server/server.js.backup-before-pdf-endpoint-20260819-235425
+./backups/server/server.js.backup-before-persistent-upload
+./backups/server/server.js.backup-before-profile-history
+./backups/server/server.js.backup-before-rc83-fix-20260816
+./backups/server/server.js.backup-before-real-logout-fix
+./backups/server/server.js.backup-before-restore-auth
+./backups/server/server.js.backup-before-storage-path-fix
+./backups/server/server.js.backup-before-success-download
+./backups/server/server.js.backup-before-universal-catalog-20260815-154146
+./backups/server/server.js.backup-before-upload-path-fix
+./backups/server/server.js.backup-before-upload-path-fix-v2
+./backups/server/server.js.backup-before-user-transaction-link-20260817-030042
+./backups/server/server.js.backup-before-xendit-digiflazz
+./backups/server/server.js.backup-before-xendit-digiflazz-20260816
+./backups/server/server.js.backup-digiflazz
+./backups/server/server.js.backup-manual-sync-test-20260815-152301
+./backups/server/server.js.backup-price-cache
+./backups/server/server.js.backup-reset-password
+./backups/server/server.js.backup-role-control
+./backups/server/server.js.backup-scheduler-20260815-152132
+./backups/server/server.js.backup-sync-fix-20260815-151942
+./backups/server/server.js.before-cache-fix2
+./backups/server/server.js.before-cache-fix3
+./backups/server/server.js.before-clean-cache
+./backups/server/server.js.before-crypto-fix-20260820-171059.bak
+./backups/server/server.js.before-digital-fix-20260820-151935.bak
+./backups/server/server.js.before-digital-product-type-20260820-161604.bak
+./backups/server/server.js.before-download-filename-20260820-192620.bak
+./backups/server/server.js.before-download-filename-final-20260820-192930.bak
+./backups/server/server.js.before-download-items-20260820-152015.bak
+./backups/server/server.js.before-email-button-20260820-201650.bak
+./backups/server/server.js.before-email-download-20260820-201605.bak
+./backups/server/server.js.before-email-download-links-final.bak
+./backups/server/server.js.before-email-links-20260820-201810.bak
+./backups/server/server.js.before-email-links-final2-20260820-201953.bak
+./backups/server/server.js.before-filename-order-20260820-194624.bak
+./backups/server/server.js.before-guest-checkout-20260820-171745.bak
+./backups/server/server.js.before-guest-digital-final-20260820-171524.bak
+./backups/server/server.js.before-guest-download-final-20260820-184019.bak
+./backups/server/server.js.before-guest-download-final-20260820-184915.bak
+./backups/server/server.js.before-guest-download-token-patch.bak
+./backups/server/server.js.before-icon-route-order
+./backups/server/server.js.before-icon-storage
+./backups/server/server.js.before-icon-sync-fix.bak
+./backups/server/server.js.before-icon-upload-v2.bak
+./backups/server/server.js.before-icon-upload.bak
+./backups/server/server.js.before-secure-digital-20260820-170626.bak
+./backups/server/server.js.before-short-description-20260821-223837
+./backups/server/server.js.before-short-description-20260821-224052
+./backups/server/server.js.before-transaction-split
+./backups/server/server.js.before-user-auth-20260817-005134.bak
+./backups/server/server.js.before-user-auth-20260817-005545.bak
+./backups/server/server.js.before-user-auth-20260817-005623.bak
+./backups/server/server.js.before-xendit-auto-sync-20260820-181112.bak
+./backups/server/server.js.before-xendit-channel-check
+./backups/server/server.js.before-xendit-response-check
+./backups/server/server.js.before-xendit-token-fix-20260820-190246.bak
+./backups/server/server.js.broken-cache
+./backups/server/server.js.stable-account
+./backups/site-before-pwa-20260921-055121.webmanifest
+./backups/smm-7d12a-20260919-023206-before.js
+./backups/smm-7d12c-20260919-070353/worker.js
+./backups/smm-7d12d-20260919-070555/worker.js
+./backups/smm-7d12e-20260919-070818/worker.js
+./backups/smm-7d12f-20260919-071211/app.js
+./backups/smm-7d12g-20260919-071629/worker.js
+./backups/smm-7d12h-20260919-072030/worker.js
+./backups/smm-activate-20260919-072422/provider-2-before.json
+./backups/smm-all-services-20260919-075535/before.json
+./backups/smm-autosync-20260919-080015/worker.js
+./backups/smm-autosync-20260919-080015/wrangler.jsonc
+./backups/smm-autosync-rate-guard-20260919-082037/worker.js
+./backups/smm-autosync-rate-guard-20260919-082037/wrangler.jsonc
+./backups/smm-autosync-state-20260919-080400/before.json
+./backups/smm-back-navigation-20260919-082854/app.js
+./backups/smm-back-position-20260919-083907/style.css
+./backups/smm-back-style-20260919-083224/style.css
+./backups/smm-catalog-integration-20260922/admin.html
+./backups/smm-detail-back-20260919-084152/app.js
+./backups/smm-disable-sosmedly-20260919-073052/before.json
+./backups/smm-nav-cleanup-20260919-084736/style.css
+./backups/smm-payment-migration-20260919-010418-before.sql
+./backups/smm-payment-sync-20260919-013037/worker.js
+./backups/smm-payment-url-20260919-011609-before.sql
+./backups/smm-platform-icons-20260919-085742/admin.html
+./backups/smm-platform-icons-20260919-085742/app.js
+./backups/smm-platform-icons-20260919-085742/worker.js
+./backups/smm-platform-icons-final-20260919-090653/admin.html
+./backups/smm-platform-icons-final-20260919-090653/worker.js
+./backups/smm-prelive-20260919-072310/test-orders-before.json
+./backups/smm-provider-type-safety-20260919-080552/non-default-before.json
+./backups/smm-provider-type-safety/non-default-before.json
+./backups/smm-recovery-20260919-021937-before.js
+./backups/smm-recovery-20260919-022348-before.js
+./backups/smm-return-ui-20260919-013728/app.js
+./backups/smm-session-lock-20260919-012157-before.sql
+./backups/smm-submission-claim-20260919-014722-before.js
+./backups/smm-transactions-20260919-010831/worker.js
+./backups/smm-xendit-20260919-011824/worker.js
+./backups/smm-xendit-lock-20260919-012337/worker.js
+./backups/smm-zero-rate-20260919-082223/before.json
+./backups/style-before-footer-polish-20260921-000504.css
+./backups/style-before-spacing-polish-20260920-235745.css
+./backups/style/style.css.backup-before-account-final
+./backups/style/style.css.backup-before-account-hamburger-fix
+./backups/style/style.css.backup-before-bayora-design
+./backups/style/style.css.backup-before-bayora-mockup-20260816-153325
+./backups/style/style.css.backup-before-clean-service-fix
+./backups/style/style.css.backup-before-digital-header
+./backups/style/style.css.backup-before-final-navbar
+./backups/style/style.css.backup-before-final-service-layout-20260816-181010
+./backups/style/style.css.backup-before-full-bayora-20260816-152541
+./backups/style/style.css.backup-before-horizontal-service-card-20260816-181900
+./backups/style/style.css.backup-before-horizontal-services
+./backups/style/style.css.backup-before-lock-bayora-mobile-20260816-180631
+./backups/style/style.css.backup-before-mobile-account-final
+./backups/style/style.css.backup-before-mobile-compact-20260816-175902
+./backups/style/style.css.backup-before-mobile-nav-final-fix
+./backups/style/style.css.backup-before-mobile-nav-fix-2
+./backups/style/style.css.backup-before-next-fix
+./backups/style/style.css.backup-before-page-hidden-fix-20260816-181429
+./backups/style/style.css.backup-before-product-selected-fix-20260816-183037
+./backups/style/style.css.backup-before-responsive-account-clean
+./backups/style/style.css.backup-before-responsive-final-20260816-182707
+./backups/style/style.css.backup-before-restore-home
+./backups/style/style.css.backup-before-service-card-fix-20260816-182251
+./backups/style/style.css.before-catalog-cleanup
+./backups/style/style.css.before-form-icon-20260821-133507.bak
+./backups/style/style.css.before-form-icon-final
+./backups/style/style.css.before-header-icon-20260821-133112.bak
+./backups/style/style.css.before-mobile-icon-final
+./backups/style/style.css.before-modal-fix
+./backups/style/style.css.before-product-text-fix
+./backups/style/style.css.before-remove-terminal-text
+./backups/style/style.css.before-responsive-digital-icon
+./backups/style/style.css.before-ui-fix
+./backups/style/style.css.current-before-cleanup
+./backups/style/style.css.stable-account
+./backups/ui-professional-20260920-220424/admin.html
+./backups/ui-professional-20260920-220424/app.js
+./backups/ui-professional-20260920-220424/index.html
+./backups/ui-professional-20260920-220424/login.html
+./backups/ui-professional-20260920-220424/profile.html
+./backups/ui-professional-20260920-220424/register.html
+./backups/ui-professional-20260920-220424/riwayat.html
+./backups/ui-professional-20260920-220424/style.css
+./backups/upload-auth-20260918-173034/worker.js
+./backups/worker-before-admin-transaction-lookup-20260922-124929.js
+./backups/worker-before-admin-transactions-list-20260922-125520.js
+./backups/worker-before-app-route-20260921-114849.js
+./backups/worker-before-complaint-workflow-20260922-115550.js
+./backups/worker-before-contact-backend-fix-20260922-122239.js
+./backups/worker-before-contact-form-20260922-122120.js
+./backups/worker-before-history-sql-fix-20260922-123834.js
+./backups/worker-before-pending-status-20260922-123139.js
+./backups/worker-before-smm-order-auto-sync-20260922-124030.js
+./backups/worker-before-smm-order-cron-20260922-124056.js
+./backups/worker-before-smm-payment-status-fix-20260922-123243.js
+./backups/worker-cleanup-20260918-165302/worker.js
+./backups/worker-log-cleanup-20260918-164849/worker.js
+./backups/worker-log-cleanup-20260918-164953/worker.js
+./backups/worker-log-cleanup-20260918-165100/worker.js
+./backups/worker-log-cleanup-20260918-165201/worker.js
+./backups/worker-privacy-cleanup-20260918-170949/worker.js
+./database/.gitkeep
+./database/ppobku-backup-20260908-103230.db
+./database/ppobku-backup-20260908-103230.db-shm
+./database/ppobku-backup-20260908-103230.db-wal
+./database/ppobku-d1.sql
+./database/ppobku-migration.sql
+./database/ppobku.db
+./database/ppobku.db-shm
+./database/ppobku.db-wal
+./digiflazz-gateway/package.json
+./digiflazz-gateway/server.js
+./digiflazz-gateway/server.js.backup-20260921-141507
+./digiflazz-gateway/server.js.backup-diagnostic-20260922-132826
+./digiflazz-gateway/server.js.backup-localhost-20260921-155436
+./digiflazz-gateway/server.js.before-balance
+./migrations/002_transaction_feedback.sql
+./migrations/003_complaint_workflow.sql
+./migrations/004_complaint_contact.sql
+./migrations/005_digital_product_details.sql
+./migrations/006_ppob_provider_settings.sql
+./migrations/007_ppob_pricing_rules.sql
+./migrations/008_ppob_pricing_tiers.sql
+./package-lock.json
+./package.json
+./public/.well-known/assetlinks.json
+./public/admin-login.html
+./public/admin.html
+./public/app.html
+./public/app.js
+./public/downloads/BAYORA.apk
+./public/index.html
+./public/legal.html
+./public/login.html
+./public/privacy.html
+./public/profile.html
+./public/register.html
+./public/riwayat.html
+./public/site.webmanifest
+./public/style.css
+./public/sw.js
+./public/terms.html
+./scripts/migration/migrate-digiflazz.js
+./scripts/smm/migrate.js
+./server/server.js
+./start-bayora.sh
+./uploads/digital/files/1787172817393-cb354c4b1098706a.zip
+./uploads/digital/files/aura-panduan.pdf
+./worker.js
+./worker.js.backup-20260921-143552
+./worker.js.backup-cron-split-20260922-140204
+./worker.js.backup-feedback-20260922-113422
+./worker.js.backup-feedback-api-20260922-113644
+./worker.js.backup-history-split-20260922-112214
+./worker.js.backup-ppob-auto-20260922-133824
+./worker.js.backup-xendit-webhook-20260922-135152
+./wrangler.jsonc
+./wrangler.jsonc.backup-20260921-152111
+./wrangler.jsonc.backup-cron-split-20260922-140204
+./wrangler.jsonc.backup-ppob-auto-20260922-133824
+
+===== FILE KOSONG =====
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-wal
+./backups/database-snapshot-20260918-163242/ppobku.db-wal
+./backups/root-database/database.sqlite.before-short-description-20260821-223837
+./backups/server/database/database.sqlite.before-local-download-test-20260820-165224.bak
+./backups/server/database/ppobku.db.backup-before-cost-price-migration
+./backups/server/empty-database/database.sqlite
+./backups/server/empty-database/ppobku.db
+./database/.gitkeep
+./database/ppobku-backup-20260908-103230.db-wal
+./database/ppobku.db-wal
+
+===== BACKUP / TEMP / OLD =====
+./assets/bayora-icons/ebook-template.png
+./assets/bayora-icons/template-media-sosial.png
+./backups/admin-before-complaint-workflow-20260922-115550.html
+./backups/admin-before-contact-form-20260922-122120.html
+./backups/admin-before-native-workflow-20260922-120912.html
+./backups/admin-before-native-workflow-fix-20260922-121009.html
+./backups/admin-before-transaction-layout-fix-20260922-125520.html
+./backups/admin-before-transaction-lookup-ui-20260922-125032.html
+./backups/admin.html.backup-feedback-20260922-113422
+./backups/admin.html.backup-notifications-20260922-114357
+./backups/admin/admin.html.backup
+./backups/admin/admin.html.backup-20260815-215932
+./backups/admin/admin.html.backup-FINAL-STABLE-20260815
+./backups/admin/admin.html.backup-before-bayora-admin-20260816-153857
+./backups/admin/admin.html.backup-before-clean-restore
+./backups/admin/admin.html.backup-before-dashboard-fix
+./backups/admin/admin.html.backup-before-device-pdf-20260819-235204
+./backups/admin/admin.html.backup-before-digiflazz-admin-sync
+./backups/admin/admin.html.backup-before-drawer-fix
+./backups/admin/admin.html.backup-before-final-bayora-admin-20260816-154547
+./backups/admin/admin.html.backup-before-final-recovery
+./backups/admin/admin.html.backup-before-layout-reorder
+./backups/admin/admin.html.backup-before-mood
+./backups/admin/admin.html.backup-before-preview-slide
+./backups/admin/admin.html.backup-before-preview-slide-final
+./backups/admin/admin.html.backup-before-restore-normal
+./backups/admin/admin.html.backup-before-rollback-fd74180
+./backups/admin/admin.html.backup-before-script-fix
+./backups/admin/admin.html.backup-before-sidebar
+./backups/admin/admin.html.backup-before-slide-final2
+./backups/admin/admin.html.backup-before-slide-final3
+./backups/admin/admin.html.backup-before-transaction-reorder
+./backups/admin/admin.html.backup-before-transaction-reorder-2
+./backups/admin/admin.html.backup-before-upload-sync
+./backups/admin/admin.html.backup-catalog-split
+./backups/admin/admin.html.backup-current-before-final-restore
+./backups/admin/admin.html.backup-final-20260817-212328
+./backups/admin/admin.html.backup-messy-current
+./backups/admin/admin.html.backup-reset-password
+./backups/admin/admin.html.backup-role-menu
+./backups/admin/admin.html.before-final-structure-fix
+./backups/admin/admin.html.before-fix-catalog-init
+./backups/admin/admin.html.before-fix-service-filter
+./backups/admin/admin.html.before-icon-handler-v2.bak
+./backups/admin/admin.html.before-icon-handler.bak
+./backups/admin/admin.html.before-icon-upload-final.bak
+./backups/admin/admin.html.before-icon-upload-v2.bak
+./backups/admin/admin.html.before-icon-upload.bak
+./backups/admin/admin.html.before-kelola-admin
+./backups/admin/admin.html.before-receipt-fix
+./backups/admin/admin.html.before-remove-catalog-drawer
+./backups/admin/admin.html.before-remove-catalog-drawer-2
+./backups/admin/admin.html.before-remove-transaction-button
+./backups/admin/admin.html.before-share-service-text-fix
+./backups/admin/admin.html.before-short-description-20260821-223837
+./backups/admin/admin.html.before-short-description-20260821-224052
+./backups/admin/admin.html.before-transaction-filter-js
+./backups/admin/admin.html.before-transaction-split
+./backups/admin/admin.html.before-transaction-split-final
+./backups/admin/admin.html.broken-before-script-fix
+./backups/app-before-smm-search-20260920-232238.js
+./backups/app/app.js.backup
+./backups/app/app.js.backup-20260820-150933
+./backups/app/app.js.backup-before-bayora-icons
+./backups/app/app.js.backup-before-bayora-icons-20260821-054458
+./backups/app/app.js.backup-before-before-after
+./backups/app/app.js.backup-before-digital-engine-final
+./backups/app/app.js.backup-before-digital-flow
+./backups/app/app.js.backup-before-digital-header
+./backups/app/app.js.backup-before-digital-payment-final
+./backups/app/app.js.backup-before-lightroom-final
+./backups/app/app.js.backup-before-lightroom-flow
+./backups/app/app.js.backup-before-lightroom-openservice-final
+./backups/app/app.js.backup-before-mood
+./backups/app/app.js.backup-before-operator-fix-20260815-153456
+./backups/app/app.js.backup-before-payment-routing
+./backups/app/app.js.backup-before-success-download
+./backups/app/app.js.before-browser-download-style-20260820-152601.bak
+./backups/app/app.js.before-catalog-cleanup
+./backups/app/app.js.before-checkout-thumbnail
+./backups/app/app.js.before-copywriting-cleanup
+./backups/app/app.js.before-detail-button-fix
+./backups/app/app.js.before-digital-checkout-fix
+./backups/app/app.js.before-digital-checkout-icon
+./backups/app/app.js.before-digital-function-restore
+./backups/app/app.js.before-digital-icon-fix
+./backups/app/app.js.before-download-filename-final-20260820-193651.bak
+./backups/app/app.js.before-download-final-20260820-160427.bak
+./backups/app/app.js.before-download-final-20260820-160526.bak
+./backups/app/app.js.before-download-layout-20260820-160155.bak
+./backups/app/app.js.before-download-name-final-20260820-193730.bak
+./backups/app/app.js.before-download-name-final-20260820-193812.bak
+./backups/app/app.js.before-download-name-final-20260820-193855.bak
+./backups/app/app.js.before-email-matched-success-20260820-170126.bak
+./backups/app/app.js.before-filename-order-20260820-194624.bak
+./backups/app/app.js.before-final-digital-card-repair
+./backups/app/app.js.before-fix-double-preset-20260820-195128.bak
+./backups/app/app.js.before-fix-icon-scope
+./backups/app/app.js.before-form-icon-20260821-133507.bak
+./backups/app/app.js.before-form-icon-final
+./backups/app/app.js.before-formicon-final.bak
+./backups/app/app.js.before-formicon-test.bak
+./backups/app/app.js.before-global-icon-export
+./backups/app/app.js.before-global-icon-helper
+./backups/app/app.js.before-guest-digital-final-20260820-171524.bak
+./backups/app/app.js.before-guest-download-final-20260820-184019.bak
+./backups/app/app.js.before-guest-download-final-20260820-184915.bak
+./backups/app/app.js.before-header-icon-20260821-133111.bak
+./backups/app/app.js.before-icon-upload-v2.bak
+./backups/app/app.js.before-missing-digital-functions
+./backups/app/app.js.before-mobile-icon-final
+./backups/app/app.js.before-modal-fix
+./backups/app/app.js.before-open-service-icon-final
+./backups/app/app.js.before-order-summary-fix-20260820-165717.bak
+./backups/app/app.js.before-page-persistence
+./backups/app/app.js.before-product-text-fix
+./backups/app/app.js.before-production-push-20260820-154848.bak
+./backups/app/app.js.before-remove-demo-20260820-195359.bak
+./backups/app/app.js.before-remove-demo-final-20260820-200641.bak
+./backups/app/app.js.before-render-digital-repair
+./backups/app/app.js.before-render-gallery-fix
+./backups/app/app.js.before-responsive-digital-icon
+./backups/app/app.js.before-safe-restore
+./backups/app/app.js.before-secure-digital-20260820-170626.bak
+./backups/app/app.js.before-service-icon-fix
+./backups/app/app.js.before-share-service-catalog
+./backups/app/app.js.before-share-service-corrected
+./backups/app/app.js.before-share-service-final
+./backups/app/app.js.before-short-description-20260821-223837
+./backups/app/app.js.before-short-description-20260821-224052
+./backups/app/app.js.before-success-layout-final-20260820-164239.bak
+./backups/app/app.js.before-ui-fix
+./backups/app/app.js.before-xendit-auto-sync-20260820-181112.bak
+./backups/app/app.js.before-xendit-return-digital-fix-20260820-180050.bak
+./backups/app/app.js.before-xendit-return-restore-fix-20260820-154133.bak
+./backups/assets/bayora-icons.backup-20260821-120633/ebook-template.png
+./backups/assets/bayora-icons.backup-20260821-120633/template-media-sosial.png
+./backups/assets/bayora-icons.backup-20260821-120910/ebook-template.png
+./backups/assets/bayora-icons.backup-20260821-120910/template-media-sosial.png
+./backups/cleanup-20260918-161039/public/app-before-smm-icon-20260908-175722.js
+./backups/cleanup-20260918-161039/public/index-before-css-final-20260908103044.html
+./backups/cleanup-20260918-161039/public/index-before-home-fix-20260908102810.html
+./backups/cleanup-20260918-161039/public/index-before-remove-new-ui-20260908-173643.html
+./backups/cleanup-20260918-161039/public/style-before-clean-20260908-172153.css
+./backups/cleanup-20260918-161039/public/style-before-css-final-20260908103044.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-final-layout-20260908-174255.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-fix-20260908-173948.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-layout-fix-20260908-174127.css
+./backups/cleanup-20260918-161039/public/style-before-tabs-visual-20260908-174543.css
+./backups/cleanup-20260918-161039/public/style-before-test-20260908-172438.css
+./backups/cleanup-20260918-161039/public/style-old-backup.css
+./backups/cleanup-20260918-161039/root-backups/.env.backup-20260918-074353
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-icon
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-icon-20260905-121412
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-ui-20260905-080231
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-tab-icon-20260908-194422
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-fix-syntax-20260905-091150
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-smm-icon-20260905-121831
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-20260905-085739
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-import-20260905-090421
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-ui-20260905-085859
+./backups/cleanup-20260918-161039/root-backups/admin.html.backup-tab-icon-fix-20260909-104058
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-20260909-160824
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-mobile-20260909-160955
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-smm-category
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-category-20260905-093017
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-loader-20260905-093315
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-navigation-20260905-115306
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-render-20260905-093348
+./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-tabs-20260905-093132
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260908-194037
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-074147
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-075741
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v3
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v4
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080418.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080643.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-products-20260918-102752.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-route-20260918-102217.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-status-poll-20260918-103914.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-test-20260918-102147.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-transaction-20260918-103630.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-url-fix-20260918-102429.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-password-debug
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091252.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091454.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-xendit-sync-20260918-091619.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete-v2
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-remove-duplicate-url-20260918-102451.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-switch-ppob-to-haybi-20260918-103827.js
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-tab-icon-20260908-194422
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions-2
+./backups/cleanup-20260918-161039/root-backups/worker.js.backup-digital-delivery-working-20260918-081019.js
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-shm
+./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-wal
+./backups/database/ppobku-before-digiflazz-2026-08-15T08-06-31-195Z.db
+./backups/database/ppobku-before-digiflazz-2026-08-16T00-41-35-538Z.db
+./backups/database/ppobku-before-digiflazz-2026-08-16T01-19-46-201Z.db
+./backups/database/ppobku.backup-before-sku-update-20260816-220908.db
+./backups/database/ppobku.db.before-local-download-test-20260820-165410.bak
+./backups/digital-atomic-final-cleanup-20260918-231058/before-delete.txt
+./backups/digital-guest-access-20260918-174939/before.txt
+./backups/digital-guest-test-cleanup-20260918-180826/before-delete.txt
+./backups/djuragansosmed-provider-20260918-231949/before.txt
+./backups/djuragansosmed-schema-20260918-233822/before.txt
+./backups/djuragansosmed-sync-schema-20260918-233911/before.txt
+./backups/env-before-baseurl-20260918-165036
+./backups/env/.env.backup-20260820-154700
+./backups/env/.env.backup-before-bayora-domain-20260816-184850
+./backups/env/.env.before-tunnel-20260820-174707.bak
+./backups/index-before-app-menu-20260921-115332.html
+./backups/index-before-faq-20260920-233402.html
+./backups/index-before-footer-polish-20260921-000419.html
+./backups/index-before-hero-mobile-polish-20260921-002529.html
+./backups/index-before-hero-png-icons-20260921-010343.html
+./backups/index-before-hero-service-icons-20260921-005108.html
+./backups/index-before-hero-v2-20260921-004503.html
+./backups/index-before-mobile-hero-reference-20260921-003956.html
+./backups/index-before-orbit-one-mobile-fix-20260921-003120.html
+./backups/index-before-pwa-20260921-055121.html
+./backups/index/index.html.backup-before-account-clean-final
+./backups/index/index.html.backup-before-account-final
+./backups/index/index.html.backup-before-account-font-fix
+./backups/index/index.html.backup-before-account-hamburger-fix
+./backups/index/index.html.backup-before-account-menu
+./backups/index/index.html.backup-before-account-minimal
+./backups/index/index.html.backup-before-auth-menu-final
+./backups/index/index.html.backup-before-bayora
+./backups/index/index.html.backup-before-bayora-branding
+./backups/index/index.html.backup-before-bayora-design
+./backups/index/index.html.backup-before-bayora-mockup-20260816-153325
+./backups/index/index.html.backup-before-before-after
+./backups/index/index.html.backup-before-desktop-horizontal
+./backups/index/index.html.backup-before-digital-flow
+./backups/index/index.html.backup-before-digital-header
+./backups/index/index.html.backup-before-direct-mobile-actions
+./backups/index/index.html.backup-before-dropdown-final
+./backups/index/index.html.backup-before-dropdown-visible-final
+./backups/index/index.html.backup-before-final-bayora-home-20260816-160432
+./backups/index/index.html.backup-before-final-navbar
+./backups/index/index.html.backup-before-full-bayora-20260816-152541
+./backups/index/index.html.backup-before-js-desktop-service
+./backups/index/index.html.backup-before-lightroom-final
+./backups/index/index.html.backup-before-lightroom-flow
+./backups/index/index.html.backup-before-logout-fix
+./backups/index/index.html.backup-before-mobile-account-fix
+./backups/index/index.html.backup-before-mobile-account-real-fix
+./backups/index/index.html.backup-before-mobile-click-final
+./backups/index/index.html.backup-before-mobile-menu-js-fix
+./backups/index/index.html.backup-before-mobile-menu-links
+./backups/index/index.html.backup-before-mobile-nav-final
+./backups/index/index.html.backup-before-mobile-transaksi-fix
+./backups/index/index.html.backup-before-navbar-account-fix
+./backups/index/index.html.backup-before-new-service-design
+./backups/index/index.html.backup-before-profile-history
+./backups/index/index.html.backup-before-profile-mobile-fix
+./backups/index/index.html.backup-before-real-logout-fix
+./backups/index/index.html.backup-before-restore-home
+./backups/index/index.html.backup-before-service-final
+./backups/index/index.html.backup-before-simple-account
+./backups/index/index.html.before-catalog-cleanup
+./backups/index/index.html.before-copywriting-cleanup
+./backups/index/index.html.before-remove-demo-20260820-162827.bak
+./backups/index/index.html.before-remove-simulation-20260820-162910.bak
+./backups/invitation/aurelia/index.html.before-v2
+./backups/invitation/aurelia/script.js.before-v2
+./backups/invitation/aurelia/style.css.before-elegant
+./backups/invitation/aurelia/style.css.before-v2
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-icon
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-20260909-160824
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-webhook-20260909-161158
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-smm-icon-20260905-121412
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-catalog-short-description-20260905-093843
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-debug-catalog-20260905-094205
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-icon-20260905-121831
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-transaction-20260905-092457
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-webhook-20260905-092647
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-xendit-20260905-092555
+./backups/legacy-server-backups-20260918-163134/server/server.js.backup-sosmedly-import-20260905-090421
+./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-catalog.js
+./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-d1-adapter.js
+./backups/login/login.html.backup-before-auth-connect
+./backups/profile/profile.html.backup-before-account-actions
+./backups/public-old/app.html.backup-align-20260922-110915
+./backups/public-old/app.html.backup-before-menu-aplikasi
+./backups/public-old/app.html.backup-layout-20260922-111251
+./backups/public-old/app.js.backup-before-share
+./backups/public-old/app.js.backup-share-icon-20260922-105647
+./backups/public-old/index.html.backup-before-menu-aplikasi
+./backups/public-old/riwayat.html.backup-history-split-20260922-112214
+./backups/public-old/style.css.backup-before-share
+./backups/public-old/style.css.backup-share-center-20260922-105252
+./backups/public-old/style.css.backup-share-center-20260922-105412
+./backups/public-old/style.css.backup-share-icon-20260922-105647
+./backups/register/register.html.backup-before-auth-connect
+./backups/riwayat-before-complaint-workflow-20260922-115550.html
+./backups/riwayat-before-contact-form-20260922-122120.html
+./backups/riwayat-before-native-workflow-20260922-120912.html
+./backups/riwayat-before-pending-status-20260922-123139.html
+./backups/riwayat-before-rating-fix-20260922-114808.html
+./backups/riwayat-before-workflow-fix-20260922-115909.html
+./backups/riwayat.html.backup-feedback-20260922-113422
+./backups/riwayat.html.backup-feedback-ui-20260922-113820
+./backups/riwayat/riwayat.html.backup-fix-brace-20260922-141222
+./backups/root-database/database.sqlite.before-short-description-20260821-223837
+./backups/root-database/database.sqlite.before-short-description-20260821-224052
+./backups/seed/seed-railway-catalog.js.backup-before-bayora-domain-20260816-184850
+./backups/seed/seed-railway-catalog.js.before-custom-icons
+./backups/seed/seed-railway-catalog.js.before-custom-icons-railway
+./backups/server/database/database.sqlite.before-local-download-test-20260820-165224.bak
+./backups/server/database/ppobku.db.backup-before-cost-price-migration
+./backups/server/legacy/sendDigitalProductEmail.before-button.bak
+./backups/server/server.js.backup
+./backups/server/server.js.backup-20260815-215932
+./backups/server/server.js.backup-auto-sync-20260815-150747
+./backups/server/server.js.backup-before-account-api-20260817-030549
+./backups/server/server.js.backup-before-account-final
+./backups/server/server.js.backup-before-admin-auth-20260817-135545.bak
+./backups/server/server.js.backup-before-auth-manual
+./backups/server/server.js.backup-before-bayora-blue-email
+./backups/server/server.js.backup-before-bayora-email
+./backups/server/server.js.backup-before-bayora-palette-clean
+./backups/server/server.js.backup-before-bayora-pricing-20260816-162208
+./backups/server/server.js.backup-before-before-after
+./backups/server/server.js.backup-before-device-pdf-20260819-234537
+./backups/server/server.js.backup-before-digiflazz-ppob-only
+./backups/server/server.js.backup-before-digiflazz-response-fix-20260815-163629
+./backups/server/server.js.backup-before-digital-delivery-20260819-235643
+./backups/server/server.js.backup-before-digital-delivery-20260820-002326
+./backups/server/server.js.backup-before-digital-file-fallback
+./backups/server/server.js.backup-before-digital-fix
+./backups/server/server.js.backup-before-digital-flow
+./backups/server/server.js.backup-before-digital-multi-final
+./backups/server/server.js.backup-before-digital-product
+./backups/server/server.js.backup-before-digital-service
+./backups/server/server.js.backup-before-failed-retry
+./backups/server/server.js.backup-before-final-pricing-20260816-161422
+./backups/server/server.js.backup-before-mood
+./backups/server/server.js.backup-before-payment-session-auth-fix-20260816
+./backups/server/server.js.backup-before-payment-webhook
+./backups/server/server.js.backup-before-pdf-endpoint-20260819-235425
+./backups/server/server.js.backup-before-persistent-upload
+./backups/server/server.js.backup-before-profile-history
+./backups/server/server.js.backup-before-rc83-fix-20260816
+./backups/server/server.js.backup-before-real-logout-fix
+./backups/server/server.js.backup-before-restore-auth
+./backups/server/server.js.backup-before-storage-path-fix
+./backups/server/server.js.backup-before-success-download
+./backups/server/server.js.backup-before-universal-catalog-20260815-154146
+./backups/server/server.js.backup-before-upload-path-fix
+./backups/server/server.js.backup-before-upload-path-fix-v2
+./backups/server/server.js.backup-before-user-transaction-link-20260817-030042
+./backups/server/server.js.backup-before-xendit-digiflazz
+./backups/server/server.js.backup-before-xendit-digiflazz-20260816
+./backups/server/server.js.backup-digiflazz
+./backups/server/server.js.backup-manual-sync-test-20260815-152301
+./backups/server/server.js.backup-price-cache
+./backups/server/server.js.backup-reset-password
+./backups/server/server.js.backup-role-control
+./backups/server/server.js.backup-scheduler-20260815-152132
+./backups/server/server.js.backup-sync-fix-20260815-151942
+./backups/server/server.js.before-cache-fix2
+./backups/server/server.js.before-cache-fix3
+./backups/server/server.js.before-clean-cache
+./backups/server/server.js.before-crypto-fix-20260820-171059.bak
+./backups/server/server.js.before-digital-fix-20260820-151935.bak
+./backups/server/server.js.before-digital-product-type-20260820-161604.bak
+./backups/server/server.js.before-download-filename-20260820-192620.bak
+./backups/server/server.js.before-download-filename-final-20260820-192930.bak
+./backups/server/server.js.before-download-items-20260820-152015.bak
+./backups/server/server.js.before-email-button-20260820-201650.bak
+./backups/server/server.js.before-email-download-20260820-201605.bak
+./backups/server/server.js.before-email-download-links-final.bak
+./backups/server/server.js.before-email-links-20260820-201810.bak
+./backups/server/server.js.before-email-links-final2-20260820-201953.bak
+./backups/server/server.js.before-filename-order-20260820-194624.bak
+./backups/server/server.js.before-guest-checkout-20260820-171745.bak
+./backups/server/server.js.before-guest-digital-final-20260820-171524.bak
+./backups/server/server.js.before-guest-download-final-20260820-184019.bak
+./backups/server/server.js.before-guest-download-final-20260820-184915.bak
+./backups/server/server.js.before-guest-download-token-patch.bak
+./backups/server/server.js.before-icon-route-order
+./backups/server/server.js.before-icon-storage
+./backups/server/server.js.before-icon-sync-fix.bak
+./backups/server/server.js.before-icon-upload-v2.bak
+./backups/server/server.js.before-icon-upload.bak
+./backups/server/server.js.before-secure-digital-20260820-170626.bak
+./backups/server/server.js.before-short-description-20260821-223837
+./backups/server/server.js.before-short-description-20260821-224052
+./backups/server/server.js.before-transaction-split
+./backups/server/server.js.before-user-auth-20260817-005134.bak
+./backups/server/server.js.before-user-auth-20260817-005545.bak
+./backups/server/server.js.before-user-auth-20260817-005623.bak
+./backups/server/server.js.before-xendit-auto-sync-20260820-181112.bak
+./backups/server/server.js.before-xendit-channel-check
+./backups/server/server.js.before-xendit-response-check
+./backups/server/server.js.before-xendit-token-fix-20260820-190246.bak
+./backups/site-before-pwa-20260921-055121.webmanifest
+./backups/smm-7d12a-20260919-023206-before.js
+./backups/smm-activate-20260919-072422/provider-2-before.json
+./backups/smm-all-services-20260919-075535/before.json
+./backups/smm-autosync-state-20260919-080400/before.json
+./backups/smm-disable-sosmedly-20260919-073052/before.json
+./backups/smm-payment-migration-20260919-010418-before.sql
+./backups/smm-payment-url-20260919-011609-before.sql
+./backups/smm-prelive-20260919-072310/test-orders-before.json
+./backups/smm-provider-type-safety-20260919-080552/non-default-before.json
+./backups/smm-provider-type-safety/non-default-before.json
+./backups/smm-recovery-20260919-021937-before.js
+./backups/smm-recovery-20260919-022348-before.js
+./backups/smm-session-lock-20260919-012157-before.sql
+./backups/smm-submission-claim-20260919-014722-before.js
+./backups/smm-zero-rate-20260919-082223/before.json
+./backups/style-before-footer-polish-20260921-000504.css
+./backups/style-before-spacing-polish-20260920-235745.css
+./backups/style/style.css.backup-before-account-final
+./backups/style/style.css.backup-before-account-hamburger-fix
+./backups/style/style.css.backup-before-bayora-design
+./backups/style/style.css.backup-before-bayora-mockup-20260816-153325
+./backups/style/style.css.backup-before-clean-service-fix
+./backups/style/style.css.backup-before-digital-header
+./backups/style/style.css.backup-before-final-navbar
+./backups/style/style.css.backup-before-final-service-layout-20260816-181010
+./backups/style/style.css.backup-before-full-bayora-20260816-152541
+./backups/style/style.css.backup-before-horizontal-service-card-20260816-181900
+./backups/style/style.css.backup-before-horizontal-services
+./backups/style/style.css.backup-before-lock-bayora-mobile-20260816-180631
+./backups/style/style.css.backup-before-mobile-account-final
+./backups/style/style.css.backup-before-mobile-compact-20260816-175902
+./backups/style/style.css.backup-before-mobile-nav-final-fix
+./backups/style/style.css.backup-before-mobile-nav-fix-2
+./backups/style/style.css.backup-before-next-fix
+./backups/style/style.css.backup-before-page-hidden-fix-20260816-181429
+./backups/style/style.css.backup-before-product-selected-fix-20260816-183037
+./backups/style/style.css.backup-before-responsive-account-clean
+./backups/style/style.css.backup-before-responsive-final-20260816-182707
+./backups/style/style.css.backup-before-restore-home
+./backups/style/style.css.backup-before-service-card-fix-20260816-182251
+./backups/style/style.css.before-catalog-cleanup
+./backups/style/style.css.before-form-icon-20260821-133507.bak
+./backups/style/style.css.before-form-icon-final
+./backups/style/style.css.before-header-icon-20260821-133112.bak
+./backups/style/style.css.before-mobile-icon-final
+./backups/style/style.css.before-modal-fix
+./backups/style/style.css.before-product-text-fix
+./backups/style/style.css.before-remove-terminal-text
+./backups/style/style.css.before-responsive-digital-icon
+./backups/style/style.css.before-ui-fix
+./backups/style/style.css.current-before-cleanup
+./backups/worker-before-admin-transaction-lookup-20260922-124929.js
+./backups/worker-before-admin-transactions-list-20260922-125520.js
+./backups/worker-before-app-route-20260921-114849.js
+./backups/worker-before-complaint-workflow-20260922-115550.js
+./backups/worker-before-contact-backend-fix-20260922-122239.js
+./backups/worker-before-contact-form-20260922-122120.js
+./backups/worker-before-history-sql-fix-20260922-123834.js
+./backups/worker-before-pending-status-20260922-123139.js
+./backups/worker-before-smm-order-auto-sync-20260922-124030.js
+./backups/worker-before-smm-order-cron-20260922-124056.js
+./backups/worker-before-smm-payment-status-fix-20260922-123243.js
+./database/ppobku-backup-20260908-103230.db
+./database/ppobku-backup-20260908-103230.db-shm
+./database/ppobku-backup-20260908-103230.db-wal
+./digiflazz-gateway/server.js.backup-20260921-141507
+./digiflazz-gateway/server.js.backup-diagnostic-20260922-132826
+./digiflazz-gateway/server.js.backup-localhost-20260921-155436
+./digiflazz-gateway/server.js.before-balance
+./worker.js.backup-20260921-143552
+./worker.js.backup-cron-split-20260922-140204
+./worker.js.backup-feedback-20260922-113422
+./worker.js.backup-feedback-api-20260922-113644
+./worker.js.backup-history-split-20260922-112214
+./worker.js.backup-ppob-auto-20260922-133824
+./worker.js.backup-xendit-webhook-20260922-135152
+./wrangler.jsonc.backup-20260921-152111
+./wrangler.jsonc.backup-cron-split-20260922-140204
+./wrangler.jsonc.backup-ppob-auto-20260922-133824
+
+===== UKURAN FILE TERBESAR =====
+  0B	./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-wal
+  0B	./backups/database-snapshot-20260918-163242/ppobku.db-wal
+  0B	./backups/root-database/database.sqlite.before-short-description-20260821-223837
+  0B	./backups/server/database/database.sqlite.before-local-download-test-20260820-165224.bak
+  0B	./backups/server/database/ppobku.db.backup-before-cost-price-migration
+  0B	./backups/server/empty-database/database.sqlite
+  0B	./backups/server/empty-database/ppobku.db
+  0B	./database/.gitkeep
+  0B	./database/ppobku-backup-20260908-103230.db-wal
+  0B	./database/ppobku.db-wal
+4.0K	./.env
+4.0K	./.gitignore
+4.0K	./.vscode/settings.json
+4.0K	./backups/_temporary/fix-bayora-icon-route-order.sh
+4.0K	./backups/_temporary/fix-bayora-icon-storage.sh
+4.0K	./backups/_temporary/fix-service-icon-preview.sh
+4.0K	./backups/cleanup-20260918-161039/root-backups/.env.backup-20260918-074353
+4.0K	./backups/digital-atomic-final-cleanup-20260918-231058/before-delete.txt
+4.0K	./backups/digital-guest-access-20260918-174939/before.txt
+4.0K	./backups/djuragansosmed-provider-20260918-231949/before.txt
+4.0K	./backups/djuragansosmed-schema-20260918-233822/before.txt
+4.0K	./backups/djuragansosmed-sync-schema-20260918-233911/before.txt
+4.0K	./backups/env-before-baseurl-20260918-165036
+4.0K	./backups/env/.env.backup-20260820-154700
+4.0K	./backups/env/.env.backup-before-bayora-domain-20260816-184850
+4.0K	./backups/env/.env.before-tunnel-20260820-174707.bak
+4.0K	./backups/gitignore-20260918-165738/.gitignore
+4.0K	./backups/gitignore-data-20260918-165832/.gitignore
+4.0K	./backups/invitation/aurelia/script.js.before-v2
+4.0K	./backups/legacy-root-frontend-20260918-161240/site.webmanifest
+4.0K	./backups/legacy-runtime-20260918-164235/d1-adapter.js
+4.0K	./backups/legacy-scripts-20260918-163356/smm/add-api-read.js
+4.0K	./backups/legacy-worker-tests-20260918-161337/worker-d1-r2-test.js
+4.0K	./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-catalog.js
+4.0K	./backups/legacy-worker-tests-20260918-161337/worker-r2-tests-before-d1-adapter.js
+4.0K	./backups/orphan-assets-20260918-163045/manifest.txt
+4.0K	./backups/orphan-uploads-20260918-162921/manifest.txt
+4.0K	./backups/profile/profile.html.backup-before-account-actions
+4.0K	./backups/profile/profile.html.stable-account
+4.0K	./backups/site-before-pwa-20260921-055121.webmanifest
+4.0K	./backups/smm-activate-20260919-072422/provider-2-before.json
+4.0K	./backups/smm-autosync-20260919-080015/wrangler.jsonc
+4.0K	./backups/smm-autosync-rate-guard-20260919-082037/wrangler.jsonc
+4.0K	./backups/smm-autosync-state-20260919-080400/before.json
+4.0K	./backups/smm-disable-sosmedly-20260919-073052/before.json
+4.0K	./backups/smm-prelive-20260919-072310/test-orders-before.json
+4.0K	./backups/smm-provider-type-safety-20260919-080552/non-default-before.json
+4.0K	./backups/smm-zero-rate-20260919-082223/before.json
+4.0K	./digiflazz-gateway/package.json
+4.0K	./digiflazz-gateway/server.js.backup-20260921-141507
+4.0K	./migrations/002_transaction_feedback.sql
+4.0K	./migrations/003_complaint_workflow.sql
+4.0K	./migrations/004_complaint_contact.sql
+4.0K	./migrations/005_digital_product_details.sql
+4.0K	./migrations/006_ppob_provider_settings.sql
+4.0K	./migrations/007_ppob_pricing_rules.sql
+4.0K	./migrations/008_ppob_pricing_tiers.sql
+4.0K	./package.json
+4.0K	./public/.well-known/assetlinks.json
+4.0K	./public/site.webmanifest
+4.0K	./public/sw.js
+4.0K	./scripts/smm/migrate.js
+4.0K	./start-bayora.sh
+4.0K	./wrangler.jsonc
+4.0K	./wrangler.jsonc.backup-20260921-152111
+4.0K	./wrangler.jsonc.backup-cron-split-20260922-140204
+4.0K	./wrangler.jsonc.backup-ppob-auto-20260922-133824
+8.0K	./backups/_temporary/apply_receipt.py
+8.0K	./backups/_temporary/secure-digital-download.sh
+8.0K	./backups/bayora-v2-before-20260919-142704/public/riwayat.html
+8.0K	./backups/cleanup-css-20260918-161146/bayora-home-fix.css
+8.0K	./backups/digital-guest-test-cleanup-20260918-180826/before-delete.txt
+8.0K	./backups/invitation/aurelia/index.html.before-v2
+8.0K	./backups/legacy-root-frontend-20260918-161240/admin-login.html
+8.0K	./backups/legacy-root-frontend-20260918-161240/riwayat.html
+8.0K	./backups/legacy-scripts-20260918-163356/smm/add-startup-migration.js
+8.0K	./backups/public-old/riwayat.html.backup-history-split-20260922-112214
+8.0K	./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/script.js
+8.0K	./backups/riwayat/riwayat.html.stable-account
+8.0K	./backups/ui-professional-20260920-220424/riwayat.html
+8.0K	./digiflazz-gateway/server.js.backup-diagnostic-20260922-132826
+8.0K	./digiflazz-gateway/server.js.backup-localhost-20260921-155436
+8.0K	./digiflazz-gateway/server.js.before-balance
+8.0K	./public/admin-login.html
+ 12K	./backups/_temporary/fix_digital_ui.py
+ 12K	./backups/_temporary/fix_ppobku.py
+ 12K	./backups/bayora-v2-before-20260919-142704/public/login.html
+ 12K	./backups/bayora-v2-before-20260919-142704/public/profile.html
+ 12K	./backups/invitation/aurelia/style.css.before-elegant
+ 12K	./backups/invitation/aurelia/style.css.before-v2
+ 12K	./backups/legacy-root-frontend-20260918-161240/login.html
+ 12K	./backups/legacy-root-frontend-20260918-161240/profile.html
+ 12K	./backups/legacy-scripts-20260918-163356/seed/seed-railway-catalog.js
+ 12K	./backups/legacy-worker-tests-20260918-161337/worker-icon-preview-test.js
+ 12K	./backups/legacy-worker-tests-20260918-161337/worker-r2-file-tests-complete.js
+ 12K	./backups/legal-20260921-001207/privacy.html
+ 12K	./backups/legal-20260921-001207/terms.html
+ 12K	./backups/login/login.html.backup-before-auth-connect
+ 12K	./backups/public-old/app.html.backup-align-20260922-110915
+ 12K	./backups/public-old/app.html.backup-before-menu-aplikasi
+ 12K	./backups/public-old/app.html.backup-layout-20260922-111251
+ 12K	./backups/riwayat.html.backup-feedback-20260922-113422
+ 12K	./backups/riwayat.html.backup-feedback-ui-20260922-113820
+ 12K	./backups/seed/seed-railway-catalog.js.backup-before-bayora-domain-20260816-184850
+ 12K	./backups/seed/seed-railway-catalog.js.before-custom-icons
+ 12K	./backups/seed/seed-railway-catalog.js.before-custom-icons-railway
+ 12K	./backups/style/style.css.backup-before-bayora-design
+ 12K	./backups/ui-professional-20260920-220424/login.html
+ 12K	./backups/ui-professional-20260920-220424/profile.html
+ 12K	./digiflazz-gateway/server.js
+ 12K	./public/app.html
+ 12K	./public/login.html
+ 12K	./public/privacy.html
+ 12K	./public/profile.html
+ 12K	./public/terms.html
+ 12K	./scripts/migration/migrate-digiflazz.js
+ 16K	./backups/_temporary/add-short-description.sh
+ 16K	./backups/bayora-v2-before-20260919-142704/public/register.html
+ 16K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth
+ 16K	./backups/index/index.html.backup-before-bayora
+ 16K	./backups/index/index.html.backup-before-bayora-design
+ 16K	./backups/index/index.html.backup-before-bayora-mockup-20260816-153325
+ 16K	./backups/index/index.html.backup-before-final-bayora-home-20260816-160432
+ 16K	./backups/index/index.html.backup-before-full-bayora-20260816-152541
+ 16K	./backups/legacy-root-frontend-20260918-161240/register.html
+ 16K	./backups/legacy-scripts-20260918-163356/smm/add-admin-crud.js
+ 16K	./backups/register/register.html.backup-before-auth-connect
+ 16K	./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/index.html
+ 16K	./backups/removed-non-bayora-20260918-171724/invitation/templates/aurelia/style.css
+ 16K	./backups/server/legacy/sendDigitalProductEmail.before-button.bak
+ 16K	./backups/style/style.css.backup-before-full-bayora-20260816-152541
+ 16K	./backups/ui-professional-20260920-220424/register.html
+ 16K	./public/register.html
+ 20K	./backups/app/app.js.backup
+ 20K	./public/legal.html
+ 24K	./backups/app/app.js.backup-before-operator-fix-20260815-153456
+ 24K	./backups/cleanup-css-20260918-161146/style-new.css
+ 24K	./backups/index/index.html.backup-before-account-menu
+ 24K	./backups/index/index.html.backup-before-auth-menu-final
+ 24K	./backups/index/index.html.backup-before-bayora-branding
+ 24K	./backups/index/index.html.backup-before-desktop-horizontal
+ 24K	./backups/style/style.css.backup-before-bayora-mockup-20260816-153325
+ 28K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete
+ 28K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-profile-history-delete-v2
+ 28K	./backups/index/index.html.backup-before-account-final
+ 28K	./backups/index/index.html.backup-before-js-desktop-service
+ 28K	./backups/index/index.html.backup-before-restore-home
+ 28K	./backups/index/index.html.backup-before-service-final
+ 28K	./backups/server/server.js.backup-digiflazz
+ 32K	./backups/app/app.js.backup-before-digital-flow
+ 32K	./backups/app/app.js.backup-before-lightroom-final
+ 32K	./backups/app/app.js.backup-before-lightroom-flow
+ 32K	./backups/app/app.js.backup-before-lightroom-openservice-final
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v3
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-auth-route-fix-v4
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-password-debug
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions
+ 32K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-transactions-2
+ 32K	./backups/database-snapshot-20260918-163242/ppobku-original-backup.db-shm
+ 32K	./backups/database-snapshot-20260918-163242/ppobku.db-shm
+ 32K	./backups/database/ppobku.db-shm
+ 32K	./backups/index/index.html.backup-before-account-clean-final
+ 32K	./backups/index/index.html.backup-before-account-font-fix
+ 32K	./backups/index/index.html.backup-before-account-minimal
+ 32K	./backups/index/index.html.backup-before-dropdown-final
+ 32K	./backups/index/index.html.backup-before-new-service-design
+ 32K	./backups/riwayat-before-complaint-workflow-20260922-115550.html
+ 32K	./backups/riwayat-before-rating-fix-20260922-114808.html
+ 32K	./backups/riwayat-before-workflow-fix-20260922-115909.html
+ 32K	./backups/style/style.css.backup-before-lock-bayora-mobile-20260816-180631
+ 32K	./backups/style/style.css.backup-before-mobile-compact-20260816-175902
+ 32K	./database/ppobku-backup-20260908-103230.db-shm
+ 32K	./database/ppobku.db-shm
+ 36K	./backups/app/app.js.backup-before-digital-engine-final
+ 36K	./backups/index/index.html.backup-before-mobile-account-fix
+ 36K	./backups/index/index.html.backup-before-mobile-account-real-fix
+ 36K	./backups/index/index.html.backup-before-mobile-nav-final
+ 36K	./backups/index/index.html.backup-before-navbar-account-fix
+ 36K	./backups/index/index.html.backup-before-profile-history
+ 36K	./backups/index/index.html.backup-before-real-logout-fix
+ 36K	./backups/index/index.html.backup-before-simple-account
+ 36K	./backups/index/index.html.stable-account
+ 36K	./backups/server/server.js.backup-price-cache
+ 36K	./backups/style/style.css.backup-before-final-service-layout-20260816-181010
+ 40K	./backups/_temporary/appjs-diff.txt
+ 40K	./backups/index/index.html.backup-before-account-hamburger-fix
+ 40K	./backups/index/index.html.backup-before-digital-flow
+ 40K	./backups/index/index.html.backup-before-direct-mobile-actions
+ 40K	./backups/index/index.html.backup-before-dropdown-visible-final
+ 40K	./backups/index/index.html.backup-before-lightroom-flow
+ 40K	./backups/index/index.html.backup-before-mobile-click-final
+ 40K	./backups/index/index.html.backup-before-mobile-menu-js-fix
+ 40K	./backups/index/index.html.backup-before-mobile-menu-links
+ 40K	./backups/index/index.html.backup-before-mobile-transaksi-fix
+ 40K	./backups/index/index.html.backup-before-profile-mobile-fix
+ 40K	./backups/riwayat-before-contact-form-20260922-122120.html
+ 40K	./backups/riwayat-before-native-workflow-20260922-120912.html
+ 40K	./backups/server/server.js.backup-auto-sync-20260815-150747
+ 44K	./backups/app/app.js.before-catalog-cleanup
+ 44K	./backups/app/app.js.before-final-digital-card-repair
+ 44K	./backups/app/app.js.before-render-digital-repair
+ 44K	./backups/app/app.js.broken-catalog
+ 44K	./backups/index/index.html.backup-before-final-navbar
+ 44K	./backups/index/index.html.backup-before-logout-fix
+ 44K	./backups/server/server.js.backup-sync-fix-20260815-151942
+ 44K	./backups/server/server.js.before-cache-fix2
+ 44K	./backups/server/server.js.before-cache-fix3
+ 44K	./backups/server/server.js.before-clean-cache
+ 44K	./backups/server/server.js.broken-cache
+ 44K	./backups/style/style.css.backup-before-horizontal-service-card-20260816-181900
+ 44K	./backups/style/style.css.backup-before-page-hidden-fix-20260816-181429
+ 48K	./backups/app/app.js.backup-before-digital-payment-final
+ 48K	./backups/app/app.js.backup-before-payment-routing
+ 48K	./backups/app/app.js.before-digital-function-restore
+ 48K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260908-194037
+ 48K	./backups/index/index.html.backup-before-before-after
+ 48K	./backups/index/index.html.backup-before-lightroom-final
+ 48K	./backups/riwayat-before-pending-status-20260922-123139.html
+ 48K	./backups/server/server.js.backup-scheduler-20260815-152132
+ 48K	./backups/style/style.css.backup-before-service-card-fix-20260816-182251
+ 52K	./backups/app/app.js.before-missing-digital-functions
+ 52K	./backups/database/ppobku-before-digiflazz-2026-08-15T08-06-31-195Z.db
+ 52K	./backups/riwayat/riwayat.html.backup-fix-brace-20260922-141222
+ 52K	./backups/server/server.js.backup-before-universal-catalog-20260815-154146
+ 52K	./backups/server/server.js.backup-manual-sync-test-20260815-152301
+ 52K	./backups/smm-provider-type-safety/non-default-before.json
+ 52K	./public/riwayat.html
+ 56K	./backups/app/app.js.backup-before-before-after
+ 56K	./backups/app/app.js.before-detail-button-fix
+ 56K	./backups/app/app.js.before-modal-fix
+ 56K	./backups/app/app.js.before-render-gallery-fix
+ 56K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-tab-icon-20260908-194422
+ 56K	./backups/server/server.js.backup-20260815-215932
+ 56K	./backups/server/server.js.backup-before-digiflazz-response-fix-20260815-163629
+ 56K	./backups/server/server.js.backup-before-rc83-fix-20260816
+ 56K	./backups/style/style.css.backup-before-responsive-final-20260816-182707
+ 60K	./backups/app/app.js.before-digital-checkout-fix
+ 60K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-074147
+ 60K	./backups/server/server.js.backup-before-payment-webhook
+ 60K	./backups/server/server.js.backup-before-xendit-digiflazz
+ 60K	./backups/server/server.js.backup-before-xendit-digiflazz-20260816
+ 60K	./backups/style/style.css.backup-before-account-final
+ 60K	./backups/style/style.css.backup-before-mobile-account-final
+ 60K	./backups/style/style.css.backup-before-product-selected-fix-20260816-183037
+ 60K	./backups/style/style.css.stable-account
+ 64K	./backups/admin/admin.html.backup-before-digiflazz-admin-sync
+ 64K	./backups/app/app.js.before-page-persistence
+ 64K	./backups/app/app.js.before-product-text-fix
+ 64K	./backups/app/app.js.before-safe-restore
+ 64K	./backups/database/ppobku-before-digiflazz-2026-08-16T00-41-35-538Z.db
+ 64K	./backups/database/ppobku-before-digiflazz-2026-08-16T01-19-46-201Z.db
+ 64K	./backups/database/ppobku.backup-before-sku-update-20260816-220908.db
+ 64K	./backups/index/index.html.backup-before-digital-header
+ 64K	./backups/index/index.html.before-catalog-cleanup
+ 64K	./backups/index/index.html.before-copywriting-cleanup
+ 64K	./backups/index/index.html.before-remove-demo-20260820-162827.bak
+ 64K	./backups/index/index.html.before-remove-simulation-20260820-162910.bak
+ 64K	./backups/style/style.css.backup-before-account-hamburger-fix
+ 64K	./backups/style/style.css.backup-before-horizontal-services
+ 64K	./backups/style/style.css.backup-before-mobile-nav-final-fix
+ 64K	./backups/style/style.css.backup-before-mobile-nav-fix-2
+ 64K	./backups/style/style.css.backup-before-responsive-account-clean
+ 68K	./backups/admin/admin.html.backup-FINAL-STABLE-20260815
+ 68K	./backups/admin/admin.html.backup-before-bayora-admin-20260816-153857
+ 68K	./backups/admin/admin.html.backup-before-clean-restore
+ 68K	./backups/admin/admin.html.backup-before-final-recovery
+ 68K	./backups/admin/admin.html.backup-before-layout-reorder
+ 68K	./backups/admin/admin.html.backup-before-preview-slide
+ 68K	./backups/admin/admin.html.backup-before-preview-slide-final
+ 68K	./backups/admin/admin.html.backup-before-slide-final2
+ 68K	./backups/admin/admin.html.backup-before-slide-final3
+ 68K	./backups/admin/admin.html.backup-messy-current
+ 68K	./backups/admin/admin.html.before-final-structure-fix
+ 68K	./backups/app/app.js.before-ui-fix
+ 68K	./backups/bayora-v2-before-20260919-142704/public/index.html
+ 68K	./backups/cleanup-20260918-161039/public/index-before-css-final-20260908103044.html
+ 68K	./backups/cleanup-20260918-161039/public/index-before-home-fix-20260908102810.html
+ 68K	./backups/cleanup-20260918-161039/public/index-before-remove-new-ui-20260908-173643.html
+ 68K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-20260918-075741
+ 68K	./backups/frontend-log-cleanup-20260918-170552/public/index.html
+ 68K	./backups/index-before-faq-20260920-233402.html
+ 68K	./backups/legacy-root-frontend-20260918-161240/index.html
+ 68K	./backups/legal-pages-20260919-112121/index.html
+ 68K	./backups/search-before-20260920-225805/index.html
+ 68K	./backups/style/style.css.backup-before-final-navbar
+ 68K	./backups/style/style.css.backup-before-next-fix
+ 68K	./backups/ui-professional-20260920-220424/index.html
+ 72K	./backups/admin/admin.html.before-receipt-fix
+ 72K	./backups/app/app.js.backup-before-digital-header
+ 72K	./backups/app/app.js.backup-before-mood
+ 72K	./backups/index-before-footer-polish-20260921-000419.html
+ 72K	./backups/index-before-hero-mobile-polish-20260921-002529.html
+ 72K	./backups/index-before-mobile-hero-reference-20260921-003956.html
+ 72K	./backups/index-before-orbit-one-mobile-fix-20260921-003120.html
+ 72K	./backups/legal-20260921-001207/index.html
+ 72K	./backups/style/style.css.backup-before-clean-service-fix
+ 76K	./audit-ppobku.txt
+ 76K	./backups/admin/admin.html.backup-20260815-215932
+ 76K	./backups/admin/admin.html.backup-before-final-bayora-admin-20260816-154547
+ 76K	./backups/admin/admin.html.backup-before-restore-normal
+ 76K	./backups/admin/admin.html.backup-before-rollback-fd74180
+ 76K	./backups/admin/admin.html.backup-before-transaction-reorder
+ 76K	./backups/admin/admin.html.backup-before-transaction-reorder-2
+ 76K	./backups/admin/admin.html.backup-current-before-final-restore
+ 76K	./backups/admin/admin.html.broken-after-1a6a355
+ 76K	./backups/admin/admin.html.broken-before-script-fix
+ 76K	./backups/admin/admin.html.broken-current
+ 76K	./backups/admin/admin.html.broken-current-2
+ 76K	./backups/app/app.js.backup-before-success-download
+ 76K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080418.js
+ 76K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-digital-delivery-20260918-080643.js
+ 76K	./backups/index-before-hero-v2-20260921-004503.html
+ 76K	./backups/server/server.js.backup-before-bayora-pricing-20260816-162208
+ 76K	./backups/server/server.js.backup-before-final-pricing-20260816-161422
+ 76K	./backups/server/server.js.backup-before-payment-session-auth-fix-20260816
+ 76K	./backups/style/style.css.backup-before-restore-home
+ 80K	./backups/server/server.js.backup-before-auth-manual
+ 84K	./backups/app/app.js.backup-20260820-150933
+ 84K	./backups/app/app.js.before-browser-download-style-20260820-152601.bak
+ 84K	./backups/app/app.js.before-download-final-20260820-160427.bak
+ 84K	./backups/app/app.js.before-download-final-20260820-160526.bak
+ 84K	./backups/app/app.js.before-download-layout-20260820-160155.bak
+ 84K	./backups/app/app.js.before-production-push-20260820-154848.bak
+ 84K	./backups/app/app.js.before-xendit-return-restore-fix-20260820-154133.bak
+ 84K	./backups/hero-icons-before-png-20260921-010040/index.html
+ 84K	./backups/index-before-app-menu-20260921-115332.html
+ 84K	./backups/index-before-hero-png-icons-20260921-010343.html
+ 84K	./backups/index-before-hero-service-icons-20260921-005108.html
+ 84K	./backups/index-before-pwa-20260921-055121.html
+ 84K	./backups/public-old/index.html.backup-before-menu-aplikasi
+ 84K	./backups/server/server.js.before-user-auth-20260817-005134.bak
+ 88K	./backups/app/app.js.before-success-layout-final-20260820-164239.bak
+ 88K	./backups/database-snapshot-20260918-163242/ppobku-d1.sql
+ 88K	./backups/database-snapshot-20260918-163242/ppobku-migration.sql
+ 88K	./backups/server/server.js.backup-before-account-api-20260817-030549
+ 88K	./backups/server/server.js.backup-before-account-final
+ 88K	./backups/server/server.js.backup-before-profile-history
+ 88K	./backups/server/server.js.backup-before-restore-auth
+ 88K	./backups/server/server.js.backup-before-user-transaction-link-20260817-030042
+ 88K	./backups/server/server.js.before-user-auth-20260817-005545.bak
+ 88K	./backups/server/server.js.before-user-auth-20260817-005623.bak
+ 88K	./database/ppobku-d1.sql
+ 88K	./database/ppobku-migration.sql
+ 88K	./public/index.html
+ 92K	./backups/admin/admin.html.backup
+ 92K	./backups/app/app.js.before-order-summary-fix-20260820-165717.bak
+ 92K	./backups/before-after-cancel-20260922/index.html
+ 92K	./backups/server/server.js.backup-before-admin-auth-20260817-135545.bak
+ 92K	./backups/server/server.js.backup-before-real-logout-fix
+ 92K	./backups/server/server.js.stable-account
+ 96K	./backups/admin/admin.html.before-kelola-admin
+ 96K	./backups/app/app.js.before-email-matched-success-20260820-170126.bak
+ 96K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091252.js
+ 96K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-digiflazz-20260918-091454.js
+ 96K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-digital-delivery-working-20260918-081019.js
+ 96K	./package-lock.json
+104K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-ppob-xendit-sync-20260918-091619.js
+108K	./backups/app/app.js.before-guest-digital-final-20260820-171524.bak
+108K	./backups/app/app.js.before-secure-digital-20260820-170626.bak
+108K	./backups/app/app.js.before-xendit-return-digital-fix-20260820-180050.bak
+108K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-test-20260918-102147.js
+108K	./backups/server/server.js.backup-reset-password
+112K	./backups/cleanup-20260918-161039/public/style-test.css
+112K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-products-20260918-102752.js
+112K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-route-20260918-102217.js
+112K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-transaction-20260918-103630.js
+112K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-url-fix-20260918-102429.js
+112K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-remove-duplicate-url-20260918-102451.js
+112K	./backups/cleanup-css-20260918-161146/style-clean.css
+112K	./backups/server/server.js.backup-role-control
+116K	./backups/admin/admin.html.backup-before-sidebar
+116K	./backups/app/app.js.before-guest-download-final-20260820-184019.bak
+116K	./backups/app/app.js.before-guest-download-final-20260820-184915.bak
+116K	./backups/app/app.js.before-xendit-auto-sync-20260820-181112.bak
+116K	./backups/server/server.js.backup
+120K	./backups/app/app.js.before-download-filename-final-20260820-193651.bak
+120K	./backups/app/app.js.before-download-name-final-20260820-193730.bak
+120K	./backups/app/app.js.before-download-name-final-20260820-193812.bak
+120K	./backups/app/app.js.before-download-name-final-20260820-193855.bak
+120K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-haybi-status-poll-20260918-103914.js
+120K	./backups/cleanup-20260918-161039/root-backups/worker.js.backup-before-switch-ppob-to-haybi-20260918-103827.js
+120K	./backups/style/style.css.before-catalog-cleanup
+120K	./backups/style/style.css.before-modal-fix
+120K	./backups/style/style.css.before-product-text-fix
+120K	./backups/style/style.css.before-ui-fix
+120K	./backups/upload-auth-20260918-173034/worker.js
+120K	./backups/worker-cleanup-20260918-165302/worker.js
+120K	./backups/worker-log-cleanup-20260918-164849/worker.js
+120K	./backups/worker-log-cleanup-20260918-164953/worker.js
+120K	./backups/worker-log-cleanup-20260918-165100/worker.js
+120K	./backups/worker-log-cleanup-20260918-165201/worker.js
+120K	./backups/worker-privacy-cleanup-20260918-170949/worker.js
+124K	./backups/app/app.js.before-filename-order-20260820-194624.bak
+124K	./backups/app/app.js.before-fix-double-preset-20260820-195128.bak
+124K	./backups/app/app.js.before-remove-demo-20260820-195359.bak
+124K	./backups/app/app.js.before-remove-demo-final-20260820-200641.bak
+124K	./backups/database/ppobku.db.before-local-download-test-20260820-165410.bak
+124K	./backups/get-transaction-ppob-ownership-20260918-174111/worker.js
+124K	./backups/haybi-test-endpoints-20260918-164538/worker.js
+124K	./backups/ppob-payment-ownership-20260918-173609/worker.js
+124K	./backups/ppob-sync-ownership-20260918-173831/worker.js
+128K	./backups/app/app.js.backup-before-bayora-icons
+128K	./backups/app/app.js.backup-before-bayora-icons-20260821-054458
+128K	./backups/app/app.js.before-share-service-catalog
+128K	./backups/app/app.js.before-share-service-corrected
+128K	./backups/digital-direct-file-block-20260918-174443/worker.js
+128K	./backups/digital-guest-token-stage1-20260918-175114/worker.js
+128K	./backups/digital-guest-token-stage2-20260918-175205/worker.js
+128K	./backups/digital-guest-token-stage3-20260918-175516/worker.js
+132K	./backups/admin/admin.html.backup-before-dashboard-fix
+132K	./backups/admin/admin.html.checkpoint-sidebar-grid
+132K	./backups/app/app.js.before-fix-icon-scope
+132K	./backups/app/app.js.before-form-icon-20260821-133507.bak
+132K	./backups/app/app.js.before-formicon-final.bak
+132K	./backups/app/app.js.before-formicon-test.bak
+132K	./backups/app/app.js.before-global-icon-export
+132K	./backups/app/app.js.before-global-icon-helper
+132K	./backups/app/app.js.before-header-icon-20260821-133111.bak
+132K	./backups/app/app.js.before-icon-upload-v2.bak
+132K	./backups/app/app.js.before-share-service-final
+132K	./backups/digital-dead-helper-cleanup-20260918-231217/worker.js
+132K	./backups/digital-guest-atomic-20260918-180946/worker.js
+132K	./backups/digital-randombytes-runtime-fix-20260918-230847/worker.js
+132K	./backups/digital-randombytes-shadow-fix-20260918-182224/worker.js
+132K	./backups/djuragansosmed-adapter-20260918-232350/worker.js
+132K	./backups/djuragansosmed-balance-route-20260918-232456/worker.js
+132K	./backups/style/style.css.backup-before-digital-header
+132K	./backups/style/style.css.current-before-cleanup
+136K	./backups/admin/admin.html.backup-reset-password
+136K	./backups/app/app.js.before-digital-icon-fix
+136K	./backups/djuragansosmed-services-route-20260918-233115/worker.js
+136K	./backups/server/server.js.backup-before-digital-product
+136K	./backups/style/style.css.before-form-icon-20260821-133507.bak
+136K	./backups/style/style.css.before-form-icon-final
+136K	./backups/style/style.css.before-header-icon-20260821-133112.bak
+136K	./backups/style/style.css.before-mobile-icon-final
+136K	./backups/style/style.css.before-responsive-digital-icon
+140K	./backups/app/app.js.before-checkout-thumbnail
+140K	./backups/app/app.js.before-copywriting-cleanup
+140K	./backups/app/app.js.before-digital-checkout-icon
+140K	./backups/app/app.js.before-form-icon-final
+140K	./backups/app/app.js.before-mobile-icon-final
+140K	./backups/app/app.js.before-open-service-icon-final
+140K	./backups/app/app.js.before-responsive-digital-icon
+140K	./backups/app/app.js.before-service-icon-fix
+140K	./backups/app/app.js.before-short-description-20260821-223837
+140K	./backups/app/app.js.before-short-description-20260821-224052
+140K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-category-20260905-093017
+140K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-loader-20260905-093315
+140K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-tabs-20260905-093132
+140K	./backups/djuragansosmed-summary-20260918-233442/worker.js
+140K	./backups/legacy-root-frontend-20260918-161240/style.css
+140K	./backups/style/style.css.before-remove-terminal-text
+144K	./backups/admin/admin.html.backup-role-menu
+144K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-render-20260905-093348
+144K	./backups/djuragansosmed-sync-preview-20260918-234007/worker.js
+144K	./backups/server/server.js.backup-before-digital-flow
+148K	./backups/server/server.js.backup-before-digital-multi-final
+152K	./backups/cleanup-20260918-161039/public/style-before-clean-20260908-172153.css
+152K	./backups/cleanup-20260918-161039/public/style-before-css-final-20260908103044.css
+152K	./backups/cleanup-20260918-161039/public/style-before-tabs-fix-20260908-173948.css
+152K	./backups/cleanup-20260918-161039/public/style-before-test-20260908-172438.css
+152K	./backups/cleanup-20260918-161039/public/style-old-backup.css
+152K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-smm-navigation-20260905-115306
+152K	./backups/djuragansosmed-importer-20260918-235159/worker.js
+152K	./backups/djuragansosmed-platform-fix-20260918-234320/worker.js
+152K	./backups/djuragansosmed-unicode-platform-20260918-234522/worker.js
+156K	./backups/cleanup-20260918-161039/public/style-before-tabs-final-layout-20260908-174255.css
+156K	./backups/cleanup-20260918-161039/public/style-before-tabs-layout-fix-20260908-174127.css
+156K	./backups/root-database/database.sqlite.before-short-description-20260821-224052
+160K	./backups/admin/admin.html.backup-before-drawer-fix
+160K	./backups/cleanup-20260918-161039/public/style-before-tabs-visual-20260908-174543.css
+164K	./backups/djuragansosmed-margin-20260919-000125/worker.js
+168K	./backups/admin/admin.html.backup-before-script-fix
+168K	./backups/bayora-v2-before-20260919-142704/public/style.css
+168K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-smm-category
+168K	./backups/digital-guest-token-stage2-20260918-175205/app.js
+168K	./backups/digital-guest-token-stage3-20260918-175516/app.js
+168K	./backups/legal-pages-20260919-112121/style.css
+168K	./backups/search-before-20260920-225805/style.css
+168K	./backups/server/server.js.backup-before-before-after
+168K	./backups/server/server.js.backup-before-device-pdf-20260819-234537
+168K	./backups/server/server.js.backup-before-digital-service
+168K	./backups/server/server.js.backup-before-mood
+168K	./backups/smm-back-position-20260919-083907/style.css
+168K	./backups/smm-back-style-20260919-083224/style.css
+168K	./backups/smm-nav-cleanup-20260919-084736/style.css
+168K	./backups/ui-professional-20260920-220424/style.css
+172K	./backups/cleanup-20260918-161039/public/app-before-smm-icon-20260908-175722.js
+172K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-20260909-160824
+172K	./backups/cleanup-20260918-161039/root-backups/app.js.backup-before-mayar-mobile-20260909-160955
+172K	./backups/digital-guest-session-storage-20260918-181122/app.js
+172K	./backups/digital-guest-url-cleanup-20260918-175726/app.js
+172K	./backups/djuragansosmed-admin-services-20260919-001343/worker.js
+172K	./backups/frontend-log-cleanup-20260918-170552/public/app.js
+172K	./backups/legacy-root-frontend-20260918-161240/app.js
+172K	./backups/server/server.js.backup-before-pdf-endpoint-20260819-235425
+172K	./backups/smm-return-ui-20260919-013728/app.js
+172K	./backups/style-before-footer-polish-20260921-000504.css
+176K	./backups/admin/admin.html.backup-final-20260817-212328
+176K	./backups/public-old/style.css.backup-before-share
+176K	./backups/public-old/style.css.backup-share-center-20260922-105252
+176K	./backups/public-old/style.css.backup-share-center-20260922-105412
+176K	./backups/public-old/style.css.backup-share-icon-20260922-105647
+176K	./backups/server/server.js.backup-before-digital-delivery-20260819-235643
+176K	./backups/server/server.js.backup-before-digital-delivery-20260820-002326
+176K	./backups/smm-7d12f-20260919-071211/app.js
+176K	./backups/style-before-spacing-polish-20260920-235745.css
+184K	./backups/admin/admin.html.backup-before-upload-sync
+184K	./backups/djuragansosmed-activation-guard-20260919-003705/worker.js
+184K	./backups/djuragansosmed-provider-status-20260919-004432/worker.js
+184K	./backups/smm-back-navigation-20260919-082854/app.js
+188K	./backups/bayora-v2-before-20260919-142704/public/app.js
+188K	./backups/search-before-20260920-225805/app.js
+188K	./backups/server/server.js.backup-before-digital-fix
+188K	./backups/smm-detail-back-20260919-084152/app.js
+188K	./backups/smm-platform-icons-20260919-085742/app.js
+188K	./backups/ui-professional-20260920-220424/app.js
+192K	./backups/server/server.js.backup-before-bayora-email
+192K	./backups/server/server.js.backup-before-digital-file-fallback
+192K	./backups/server/server.js.backup-before-failed-retry
+192K	./backups/server/server.js.backup-before-persistent-upload
+192K	./backups/server/server.js.backup-before-storage-path-fix
+192K	./backups/server/server.js.backup-before-upload-path-fix
+192K	./backups/server/server.js.backup-before-upload-path-fix-v2
+192K	./backups/smm-transactions-20260919-010831/worker.js
+196K	./backups/app-before-smm-search-20260920-232238.js
+200K	./backups/public-old/app.js.backup-before-share
+200K	./backups/server/server.js.backup-before-bayora-blue-email
+200K	./backups/server/server.js.backup-before-bayora-palette-clean
+200K	./backups/server/server.js.backup-before-success-download
+200K	./backups/smm-xendit-20260919-011824/worker.js
+204K	./backups/admin/admin.html.backup-before-device-pdf-20260819-235204
+204K	./backups/admin/admin.html.backup-before-mood
+204K	./backups/public-old/app.js.backup-share-icon-20260922-105647
+204K	./backups/server/server.js.backup-before-digiflazz-ppob-only
+204K	./backups/server/server.js.before-digital-fix-20260820-151935.bak
+204K	./backups/server/server.js.before-download-items-20260820-152015.bak
+208K	./backups/admin/admin.html.backup-catalog-split
+208K	./backups/server/server.js.before-crypto-fix-20260820-171059.bak
+208K	./backups/server/server.js.before-digital-product-type-20260820-161604.bak
+208K	./backups/server/server.js.before-guest-checkout-20260820-171745.bak
+208K	./backups/server/server.js.before-guest-digital-final-20260820-171524.bak
+208K	./backups/server/server.js.before-secure-digital-20260820-170626.bak
+208K	./backups/server/server.js.before-xendit-auto-sync-20260820-181112.bak
+208K	./public/style.css
+212K	./backups/before-after-cancel-20260922/style.css
+212K	./backups/smm-xendit-lock-20260919-012337/worker.js
+212K	./public/app.js
+216K	./backups/server/server.js.before-guest-download-final-20260820-184019.bak
+216K	./backups/server/server.js.before-guest-download-final-20260820-184915.bak
+216K	./backups/server/server.js.before-guest-download-token-patch.bak
+216K	./backups/server/server.js.before-xendit-token-fix-20260820-190246.bak
+216K	./backups/smm-payment-sync-20260919-013037/worker.js
+220K	./backups/before-after-cancel-20260922/app.js
+220K	./backups/server/server.js.before-download-filename-20260820-192620.bak
+220K	./backups/server/server.js.before-download-filename-final-20260820-192930.bak
+220K	./backups/server/server.js.before-email-download-20260820-201605.bak
+220K	./backups/server/server.js.before-filename-order-20260820-194624.bak
+228K	./backups/database-snapshot-20260918-163242/ppobku-original-backup.db
+228K	./backups/database-snapshot-20260918-163242/ppobku.db
+228K	./backups/server/server.js.before-email-button-20260820-201650.bak
+228K	./backups/server/server.js.before-email-download-links-final.bak
+228K	./backups/server/server.js.before-email-links-20260820-201810.bak
+228K	./backups/server/server.js.before-email-links-final2-20260820-201953.bak
+228K	./backups/smm-submission-claim-20260919-014722-before.js
+228K	./database/ppobku-backup-20260908-103230.db
+232K	./backups/admin/admin.html.before-icon-handler-v2.bak
+232K	./backups/admin/admin.html.before-icon-handler.bak
+232K	./backups/admin/admin.html.before-icon-upload-final.bak
+232K	./backups/admin/admin.html.before-icon-upload-v2.bak
+232K	./backups/admin/admin.html.before-icon-upload.bak
+232K	./backups/admin/admin.html.before-share-service-text-fix
+232K	./backups/smm-recovery-20260919-021937-before.js
+232K	./backups/smm-recovery-20260919-022348-before.js
+240K	./backups/admin/admin.html.before-remove-catalog-drawer
+240K	./backups/admin/admin.html.before-remove-catalog-drawer-2
+240K	./backups/admin/admin.html.before-remove-transaction-button
+240K	./backups/admin/admin.html.before-transaction-filter-js
+240K	./backups/admin/admin.html.before-transaction-split
+240K	./backups/admin/admin.html.before-transaction-split-final
+240K	./backups/smm-7d12a-20260919-023206-before.js
+244K	./backups/admin/admin.html.before-fix-catalog-init
+244K	./backups/admin/admin.html.before-fix-service-filter
+244K	./backups/admin/admin.html.before-short-description-20260821-223837
+244K	./backups/admin/admin.html.before-short-description-20260821-224052
+244K	./backups/server/server.js.before-icon-upload-v2.bak
+244K	./backups/server/server.js.before-icon-upload.bak
+248K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-ui-20260905-080231
+248K	./backups/server/server.js.before-icon-route-order
+248K	./backups/server/server.js.before-icon-storage
+248K	./backups/server/server.js.before-icon-sync-fix.bak
+248K	./backups/server/server.js.before-short-description-20260821-223837
+248K	./backups/server/server.js.before-short-description-20260821-224052
+248K	./backups/server/server.js.before-transaction-split
+248K	./backups/server/server.js.before-xendit-channel-check
+248K	./backups/server/server.js.before-xendit-response-check
+252K	./backups/smm-7d12c-20260919-070353/worker.js
+252K	./backups/smm-7d12d-20260919-070555/worker.js
+256K	./backups/smm-7d12e-20260919-070818/worker.js
+256K	./database/ppobku.db
+264K	./backups/smm-7d12g-20260919-071629/worker.js
+264K	./backups/smm-7d12h-20260919-072030/worker.js
+268K	./backups/smm-autosync-20260919-080015/worker.js
+276K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-sosmedly-import-20260905-090421
+284K	./backups/smm-autosync-rate-guard-20260919-082037/worker.js
+284K	./backups/smm-platform-icons-20260919-085742/worker.js
+288K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-20260905-085739
+288K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-ui-20260905-085859
+288K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-transaction-20260905-092457
+288K	./backups/legal-20260921-001207/worker.js
+288K	./backups/legal-routes-20260919-112631/worker.js
+288K	./backups/smm-platform-icons-final-20260919-090653/worker.js
+288K	./backups/worker-before-app-route-20260921-114849.js
+288K	./worker.js.backup-20260921-143552
+288K	./worker.js.backup-feedback-20260922-113422
+288K	./worker.js.backup-feedback-api-20260922-113644
+288K	./worker.js.backup-history-split-20260922-112214
+296K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-xendit-20260905-092555
+300K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-webhook-20260905-092647
+304K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-icon
+304K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-smm-icon-20260905-121412
+304K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-fix-syntax-20260905-091150
+304K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-smm-icon-20260905-121831
+304K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-sosmedly-import-20260905-090421
+304K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-catalog-short-description-20260905-093843
+304K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-debug-catalog-20260905-094205
+308K	./backups/djuragansosmed-loader-20260919-002938/admin.html
+308K	./backups/djuragansosmed-pagination-20260919-002424/admin.html
+308K	./backups/djuragansosmed-pagination-20260919-002629/admin.html
+308K	./backups/djuragansosmed-pagination-20260919-002832/admin.html
+308K	./backups/djuragansosmed-pagination-ui-20260919-002904/admin.html
+308K	./backups/legacy-runtime-20260918-164235/server/server-cloudflare.js
+308K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-icon
+308K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar
+308K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-20260909-160824
+308K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-smm-icon-20260905-121412
+308K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-smm-icon-20260905-121831
+308K	./backups/worker-before-complaint-workflow-20260922-115550.js
+308K	./server/server.js
+312K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-before-tab-icon-20260908-194422
+312K	./backups/djuragansosmed-admin-ui-20260919-002128/admin.html
+312K	./backups/djuragansosmed-loader-20260919-003023/admin.html
+312K	./backups/djuragansosmed-provider-ui-20260919-004819/admin.html
+312K	./backups/djuragansosmed-renderer-20260919-003222/admin.html
+312K	./backups/djuragansosmed-summary-ui-20260919-003526/admin.html
+312K	./backups/frontend-log-cleanup-20260918-170552/public/admin.html
+312K	./backups/worker-before-contact-backend-fix-20260922-122239.js
+312K	./backups/worker-before-contact-form-20260922-122120.js
+316K	./backups/smm-platform-icons-20260919-085742/admin.html
+316K	./backups/worker-before-history-sql-fix-20260922-123834.js
+316K	./backups/worker-before-pending-status-20260922-123139.js
+316K	./backups/worker-before-smm-order-auto-sync-20260922-124030.js
+316K	./backups/worker-before-smm-payment-status-fix-20260922-123243.js
+320K	./backups/cleanup-20260918-161039/root-backups/admin.html.backup-tab-icon-fix-20260909-104058
+320K	./backups/legacy-root-frontend-20260918-161240/admin.html
+320K	./backups/worker-before-admin-transaction-lookup-20260922-124929.js
+320K	./backups/worker-before-smm-order-cron-20260922-124056.js
+324K	./backups/legacy-server-backups-20260918-163134/server/server.js.backup-before-mayar-webhook-20260909-161158
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163255355-198cfee30212db9c.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163265302-34299c4fec5879e0.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163276503-3e34e0451fe21438.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163284247-d1b5b09dc63d9e1b.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165585444-2eb5b3dc983bf8ea.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165752657-73b3197891fec42b.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165761295-bcdccd59b7cd160f.pdf
+328K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165770474-8d4b6b31930dc4e9.pdf
+328K	./backups/worker-before-admin-transactions-list-20260922-125520.js
+332K	./backups/admin.html.backup-feedback-20260922-113422
+332K	./backups/admin.html.backup-notifications-20260922-114357
+332K	./backups/bayora-v2-before-20260919-142704/public/admin.html
+332K	./backups/smm-platform-icons-final-20260919-090653/admin.html
+332K	./backups/ui-professional-20260920-220424/admin.html
+332K	./worker.js.backup-ppob-auto-20260922-133824
+332K	./worker.js.backup-xendit-webhook-20260922-135152
+340K	./backups/catalog-crud/worker-20260922-144259.js
+340K	./worker.js.backup-cron-split-20260922-140204
+348K	./uploads/digital/files/aura-panduan.pdf
+360K	./backups/admin-before-complaint-workflow-20260922-115550.html
+368K	./backups/admin-before-contact-form-20260922-122120.html
+368K	./backups/admin-before-native-workflow-20260922-120912.html
+368K	./backups/admin-before-native-workflow-fix-20260922-121009.html
+372K	./backups/admin-before-transaction-lookup-ui-20260922-125032.html
+384K	./backups/admin-before-transaction-layout-fix-20260922-125520.html
+384K	./backups/admin-view-fix/admin-20260922-143306.html
+388K	./backups/smm-catalog-integration-20260922/admin.html
+416K	./worker.js
+464K	./public/admin.html
+500K	./backups/favicon/bayora-favicon-logo.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787043956842-47736e5cc6399281.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787048755238-89507b5feb068b30.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787049790698-f0972d0154257a97.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787107339330-ab2cc709e7bf9a86.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787107873349-bde3c61b3844895b.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787108336621-5d310bb5829fef76.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787161290797-34be6fc3f02af5bb.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787161742246-a38d77bc694ee892.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162318370-0510ad5400a0c012.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162527487-fe8ecca7478031da.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787162815014-1bd48b0a4f823be0.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787163238511-fec264b2cd5237c8.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787165349836-7c2db58b3038b85b.zip
+500K	./backups/orphan-uploads-20260918-162921/uploads/digital/files/1787172528614-8cb7aeee1662e279.zip
+500K	./uploads/digital/files/1787172817393-cb354c4b1098706a.zip
+1.5M	./backups/smm-payment-migration-20260919-010418-before.sql
+1.5M	./backups/smm-payment-url-20260919-011609-before.sql
+1.5M	./backups/smm-session-lock-20260919-012157-before.sql
+1.5M	./public/downloads/BAYORA.apk
+1.9M	./backups/smm-all-services-20260919-075535/before.json
+2.0M	./backups/database/ppobku.db-wal
+
+===== GIT STATUS =====
+?? audit-ppobku.txt
